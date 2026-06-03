@@ -10,7 +10,6 @@ class Category extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'old_id',
         'name',
         'slug',
         'parent_id',
@@ -132,4 +131,10 @@ class Category extends Model
             'brand_category'
         );
     }
+
+    public function categoryAttributes()
+    {
+        return $this->hasMany(CategoryAttribute::class);
+    }
+
 }

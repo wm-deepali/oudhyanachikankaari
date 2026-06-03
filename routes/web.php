@@ -49,7 +49,9 @@ use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\SizeGroupController;
 use App\Http\Controllers\Admin\SizeController;
-
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AttributeValueController;
+use App\Http\Controllers\Admin\CategoryAttributeController;
 
 Route::controller(FrontController::class)->group(function () {
 
@@ -311,6 +313,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('size-groups', SizeGroupController::class);
 
         Route::resource('sizes', SizeController::class);
+
+        Route::resource('attributes', AttributeController::class);
+        Route::resource('attribute-values', AttributeValueController::class);
+
+        Route::resource('category-attributes', CategoryAttributeController::class);
 
         Route::resource('announcements', AnnouncementController::class);
 

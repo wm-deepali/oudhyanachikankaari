@@ -15,9 +15,9 @@ return new class extends Migration
         $table->id();
 
         $table->string('name');
+         $table->string('product_code')->nullable();
         $table->string('slug')->nullable();
         $table->string('sub_title')->nullable();
-        $table->text('summary')->nullable();
 
         $table->string('sku')->nullable();
         $table->integer('min_qty')->default(1);
@@ -31,9 +31,6 @@ return new class extends Migration
         $table->string('discount_type')->nullable();
         $table->decimal('price', 10, 2)->nullable();
 
-        $table->boolean('featured')->default(0);
-        $table->boolean('new_arrival')->default(0);
-        $table->boolean('sale')->default(0);
 
         $table->text('details')->nullable();
         $table->text('delivery_returns')->nullable();
@@ -43,9 +40,9 @@ return new class extends Migration
 
         $table->boolean('cart')->default(1);
         $table->boolean('whatsapp')->default(0);
-        $table->boolean('call')->default(0);
 
         $table->boolean('status')->default(1);
+        $table->string('added_by')->nullable();
 
         $table->timestamps();
         $table->softDeletes();

@@ -10,7 +10,7 @@
     @endphp
 
     <title>
-        @yield('meta_title', $seo->meta_title ?? 'B2B Gifts India')
+        @yield('meta_title', $seo->meta_title ?? 'Oudhyana Chikankaari')
     </title>
 
     <meta name="description" content="@yield('meta_description', $seo->meta_description ?? '')">
@@ -1418,7 +1418,7 @@
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-disclaimer mb-20 mt-10">
                                 <p>
-                                    <strong>Disclaimer:</strong> B2B Gifts India provides
+                                    <strong>Disclaimer:</strong> Oudhyana Chikankaari provides
                                     corporate gifting solutions only to businesses,
                                     institutions, and registered entities. All prices are
                                     exclusive of taxes. Product images are for representation
@@ -1438,7 +1438,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-6 text-center text-md-start">
                             <p class="copyright-text">
-                                Â© 2026 <span>B2B Gifts India</span>. All Rights Reserved.
+                                Â© 2026 <span>Oudhyana Chikankaari</span>. All Rights Reserved.
                             </p>
                         </div>
                         <div class="col-md-6 text-center text-md-end">

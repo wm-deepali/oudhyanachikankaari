@@ -100,11 +100,6 @@ class Product extends Model
         );
     }
 
-    // CUSTOMIZATION
-    public function customizations()
-    {
-        return $this->belongsToMany(Customization::class, 'customization_product');
-    }
 
     // INCLUSIONS
     public function inclusions()
@@ -142,10 +137,7 @@ class Product extends Model
         return $this->images()
             ->value('image');
     }
-    public function brand()
-    {
-        return $this->belongsTo(Brand::class);
-    }
+
 
     public function wishlists()
     {

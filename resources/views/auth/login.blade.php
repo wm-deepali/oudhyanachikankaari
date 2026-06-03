@@ -134,7 +134,7 @@
         <img src="{{ asset('images/B2B_logo.png') }}" alt="B2B Gifting Logo">
     </div>
 
-    <h2>B2B Gifts India</h2>
+    <h2>Oudhyana Chikankaari</h2>
     <p>Corporate Gifting Solutions for Every Business</p>
 </div>
 

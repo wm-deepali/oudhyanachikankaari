@@ -4,24 +4,30 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('collections', function (Blueprint $table) {
+        Schema::create('attribute_values', function (Blueprint $table) {
 
             $table->id();
 
-            $table->string('name');
-            $table->string('slug')->unique();
+            $table->foreignId('attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnDelete();
+
+            $table->string('value');
 
             $table->integer('sort_order')->default(0);
 
-            $table->boolean('status')->default(1);
+            $table->boolean('status')->default(true);
 
             $table->timestamps();
+
+            $table->index('attribute_id');
         });
     }
 
@@ -30,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('collections');
+        Schema::dropIfExists('attribute_values');
     }
 };

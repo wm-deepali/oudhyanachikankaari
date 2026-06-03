@@ -55,21 +55,34 @@
 
             <ul>
 
+                <li class="{{ request()->routeIs('admin.attributes.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.attributes.index') }}">
+                        <i class="fa-solid fa-sliders"></i> Attributes
+                    </a>
+                </li>
+
+                <li class="{{ request()->routeIs('admin.attribute-values.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.attribute-values.index') }}">
+                        <i class="fa-solid fa-list"></i> Attribute Values
+                    </a>
+                </li>
+
                 <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.categories.index') }}">
                         <i class="fa-solid fa-folder"></i> Categories
                     </a>
                 </li>
 
-                <li class="{{ request()->routeIs('admin.gifting-occasions.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.gifting-occasions.index') }}">
-                        <i class="fa-solid fa-gift"></i> Gifting Occasions
+                <li class="{{ request()->routeIs('admin.category-attributes.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.category-attributes.index') }}">
+                        <i class="fa fa-link"></i>
+                        Category Attributes
                     </a>
                 </li>
 
-                <li class="{{ request()->routeIs('admin.customizations.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.customizations.index') }}">
-                        <i class="fa-solid fa-sliders"></i> Customizations
+                <li class="{{ request()->routeIs('admin.gifting-occasions.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.gifting-occasions.index') }}">
+                        <i class="fa-solid fa-gift"></i> Gifting Occasions
                     </a>
                 </li>
 
@@ -85,32 +98,7 @@
                     </a>
                 </li>
 
-                <li class="{{ request()->routeIs('admin.fabrics.*') ? 'active' : '' }}">
-    <a href="{{ route('admin.fabrics.index') }}">
-        <i class="fa-solid fa-shirt"></i> Fabrics
-    </a>
-</li>
 
-<li class="{{ request()->routeIs('admin.colors.*') ? 'active' : '' }}">
-    <a href="{{ route('admin.colors.index') }}">
-        <i class="fa fa-palette"></i> Colors
-    </a>
-</li>
-<li class="{{ request()->routeIs('admin.collections.*') ? 'active' : '' }}">
-    <a href="{{ route('admin.collections.index') }}">
-        <i class="fa fa-layer-group"></i> Collections
-    </a>
-</li>
-<li class="{{ request()->routeIs('admin.size-groups.*') ? 'active' : '' }}">
-    <a href="{{ route('admin.size-groups.index') }}">
-        <i class="fa fa-ruler"></i> Size Groups
-    </a>
-</li>
-<li class="{{ request()->routeIs('admin.sizes.*') ? 'active' : '' }}">
-    <a href="{{ route('admin.sizes.index') }}">
-        <i class="fa fa-ruler-combined"></i> Sizes
-    </a>
-</li>
             </ul>
         </li>
 
