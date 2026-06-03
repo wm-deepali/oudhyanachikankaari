@@ -18,7 +18,7 @@
         <div class="aqf-slider-area d-none d-md-block">
             <div class="swiper aqf-slider-active p-relative">
                 <div class="swiper-wrapper">
-                    @foreach($desktopSliders as $slider)
+                    @foreach($sliders as $slider)
                         <div class="swiper-slide">
                             <div class="aqf-slider-item aqf-slider-height d-flex align-items-center"
                                 data-bg-color="#F5F5F5">
@@ -47,7 +47,7 @@
         <div class="aqf-slider-area d-block d-md-none">
             <div class="swiper aqf-slider-active p-relative">
                 <div class="swiper-wrapper">
-                    @foreach($mobileSliders as $slider)
+                    @foreach($sliders as $slider)
                         <div class="swiper-slide">
                             <div class="aqf-slider-item aqf-slider-height d-flex align-items-center"
                                 data-bg-color="#F5F5F5">

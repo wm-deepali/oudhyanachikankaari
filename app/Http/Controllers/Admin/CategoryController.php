@@ -109,7 +109,6 @@ class CategoryController extends Controller
             // FLAGS
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
-            'show_on_website' => $request->show_on_website ?? 1,
 
             // AUTO
             'is_sub_category' => $request->parent_id ? 1 : 0,
@@ -179,7 +178,6 @@ class CategoryController extends Controller
 
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
-            'show_on_website' => $request->show_on_website ?? 1,
 
             'is_sub_category' => $request->parent_id ? 1 : 0,
 
@@ -249,10 +247,8 @@ class CategoryController extends Controller
             'meta_description',
             'is_popular',
             'is_featured',
-            'show_on_website',
             'status',
-            'sort_order',
-            'added_by'
+            'sort_order'
         ];
 
         $sampleRow = [
@@ -265,9 +261,7 @@ class CategoryController extends Controller
             '1',
             '1',
             '1',
-            '1',
-            '1',
-            'admin'
+            '1'
         ];
 
         $response = new StreamedResponse(function () use ($headers, $sampleRow) {

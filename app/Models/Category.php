@@ -25,7 +25,6 @@ class Category extends Model
 
         'added_by',
         'is_featured',
-        'show_on_website',
         'is_sub_category',
     ];
 
@@ -57,8 +56,7 @@ class Category extends Model
     // PRODUCTS (SUBCATEGORY)
     public function subcategoryProducts()
     {
-        return $this->belongsToMany(Product::class, 'product_subcategories', 'subcategory_id', 'product_id')->where('status', 1)
-            ->where('show_on_website', 1);
+        return $this->belongsToMany(Product::class, 'product_subcategories', 'subcategory_id', 'product_id')->where('status', 1);
     }
 
 

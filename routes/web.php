@@ -44,6 +44,12 @@ use App\Http\Controllers\Admin\HomeHeroSlideController;
 use App\Http\Controllers\Admin\HomeHeroBannerController;
 use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\FrontController;
+use App\Http\Controllers\Admin\FabricController;
+use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\CollectionController;
+use App\Http\Controllers\Admin\SizeGroupController;
+use App\Http\Controllers\Admin\SizeController;
+
 
 Route::controller(FrontController::class)->group(function () {
 
@@ -296,6 +302,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/seo', [SeoController::class, 'index'])->name('seo.index');
         Route::put('/seo/{id}', [SeoController::class, 'update'])->name('seo.update');
+
+        Route::resource('fabrics', FabricController::class);
+
+        Route::resource('colors', ColorController::class);
+
+        Route::resource('collections', CollectionController::class);
+        Route::resource('size-groups', SizeGroupController::class);
+
+        Route::resource('sizes', SizeController::class);
+
         Route::resource('announcements', AnnouncementController::class);
 
 

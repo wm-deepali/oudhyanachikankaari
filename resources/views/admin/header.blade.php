@@ -85,6 +85,32 @@
                     </a>
                 </li>
 
+                <li class="{{ request()->routeIs('admin.fabrics.*') ? 'active' : '' }}">
+    <a href="{{ route('admin.fabrics.index') }}">
+        <i class="fa-solid fa-shirt"></i> Fabrics
+    </a>
+</li>
+
+<li class="{{ request()->routeIs('admin.colors.*') ? 'active' : '' }}">
+    <a href="{{ route('admin.colors.index') }}">
+        <i class="fa fa-palette"></i> Colors
+    </a>
+</li>
+<li class="{{ request()->routeIs('admin.collections.*') ? 'active' : '' }}">
+    <a href="{{ route('admin.collections.index') }}">
+        <i class="fa fa-layer-group"></i> Collections
+    </a>
+</li>
+<li class="{{ request()->routeIs('admin.size-groups.*') ? 'active' : '' }}">
+    <a href="{{ route('admin.size-groups.index') }}">
+        <i class="fa fa-ruler"></i> Size Groups
+    </a>
+</li>
+<li class="{{ request()->routeIs('admin.sizes.*') ? 'active' : '' }}">
+    <a href="{{ route('admin.sizes.index') }}">
+        <i class="fa fa-ruler-combined"></i> Sizes
+    </a>
+</li>
             </ul>
         </li>
 

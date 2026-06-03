@@ -13,6 +13,7 @@ class CreateCategoriesTable extends Migration
 
             $table->string('name');
             $table->string('slug')->unique();
+            $table->string('sub_title')->nullable();
 
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
@@ -23,9 +24,13 @@ class CreateCategoriesTable extends Migration
             $table->unsignedBigInteger('parent_id')->nullable();
 
             $table->boolean('is_popular')->default(0);
+            $table->boolean('is_featured')->default(0);
             $table->boolean('status')->default(1);
+            $table->integer('sort_order')->default(0);
+            $table->string('added_by')->default('Admin');
 
             $table->timestamps();
+            $table->softDeletes();
 
             // foreign key (optional but recommended)
             $table->foreign('parent_id')
