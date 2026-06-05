@@ -12,7 +12,9 @@
                 <ol class="breadcrumb bg-transparent mb-0">
 
                     <li class="breadcrumb-item">
-                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}">
+                            Dashboard
+                        </a>
                     </li>
 
                     <li class="breadcrumb-item">
@@ -40,56 +42,103 @@
 
                 <div class="card-body">
 
-                    <form method="POST" action="{{ route('admin.attributes.store') }}" class="save-form">
+                    <form method="POST"
+                          action="{{ route('admin.attributes.store') }}"
+                          class="save-form">
 
                         @csrf
 
-                        <label>Name</label>
-                        <input type="text" name="name" class="form-control" required>
+                        <div class="form-group">
 
-                        <label class="mt-3">Type</label>
+                            <label>Name <span class="text-danger">*</span></label>
 
-                        <select name="type" class="form-control">
+                            <input type="text"
+                                   name="name"
+                                   class="form-control"
+                                   required>
 
-                            @foreach($types as $type)
+                        </div>
 
-                                <option value="{{ $type }}">
-                                    {{ ucfirst($type) }}
+                        <div class="form-group mt-3">
+
+                            <label>Type <span class="text-danger">*</span></label>
+
+                            <select name="type"
+                                    class="form-control"
+                                    required>
+
+                                @foreach($types as $type)
+
+                                    <option value="{{ $type }}">
+                                        {{ ucfirst(str_replace('_', ' ', $type)) }}
+                                    </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group mt-3">
+
+                            <label>Has Values</label>
+
+                            <select name="has_values"
+                                    class="form-control">
+
+                                <option value="1">
+                                    Yes
                                 </option>
 
-                            @endforeach
+                                <option value="0">
+                                    No
+                                </option>
 
-                        </select>
+                            </select>
 
-                        <label class="mt-3">Has Values</label>
+                            <small class="text-muted">
+                                Example:
+                                Color, Size, Material = Yes
+                                <br>
+                                Length, Width, Weight = No
+                            </small>
 
-                        <select name="has_values" class="form-control">
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
+                        </div>
 
-                        <label class="mt-3">Is Variant</label>
+                        <div class="form-group mt-3">
 
-                        <select name="is_variant" class="form-control">
-                            <option value="0">No</option>
-                            <option value="1">Yes</option>
-                        </select>
+                            <label>Status</label>
 
-                        <label class="mt-3">Status</label>
+                            <select name="status"
+                                    class="form-control">
 
-                        <select name="status" class="form-control">
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
+                                <option value="1">
+                                    Active
+                                </option>
+
+                                <option value="0">
+                                    Inactive
+                                </option>
+
+                            </select>
+
+                        </div>
 
                         <div class="mt-4">
 
-                            <button type="submit" class="btn btn-success save-btn">
-                                <i class="fa fa-save"></i> Save
+                            <button type="submit"
+                                    class="btn btn-success save-btn">
+
+                                <i class="fa fa-save"></i>
+                                Save Attribute
+
                             </button>
 
-                            <a href="{{ route('admin.attributes.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.attributes.index') }}"
+                               class="btn btn-secondary">
+
                                 Cancel
+
                             </a>
 
                         </div>
@@ -97,10 +146,15 @@
                     </form>
 
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
+
 <script>
 
     $(document).on('submit', '.save-form', function () {
@@ -116,4 +170,5 @@
     });
 
 </script>
+
 @include('admin.footer')

@@ -30,20 +30,22 @@ class AttributeController extends Controller
 
         return view('admin.attributes.create', compact('types'));
     }
+
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|max:255',
             'type' => 'required',
+            'has_values' => 'required|boolean',
+            'status' => 'required|boolean',
         ]);
 
         Attribute::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'type' => $request->type,
-            'has_values' => $request->has_values ?? 0,
-            'is_variant' => $request->is_variant ?? 0,
-            'status' => $request->status ?? 1,
+            'has_values' => $request->has_values,
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -70,15 +72,16 @@ class AttributeController extends Controller
         $request->validate([
             'name' => 'required|max:255',
             'type' => 'required',
+            'has_values' => 'required|boolean',
+            'status' => 'required|boolean',
         ]);
 
         $attribute->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'type' => $request->type,
-            'has_values' => $request->has_values ?? 0,
-            'is_variant' => $request->is_variant ?? 0,
-            'status' => $request->status ?? 1,
+            'has_values' => $request->has_values,
+            'status' => $request->status,
         ]);
 
         return redirect()

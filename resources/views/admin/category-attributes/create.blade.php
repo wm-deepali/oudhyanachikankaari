@@ -9,6 +9,7 @@
         <div class="breadcrumbs-top d-flex align-items-center bg-light mb-3">
 
             <div class="breadcrumb-wrapper">
+
                 <ol class="breadcrumb bg-transparent mb-0">
 
                     <li class="breadcrumb-item">
@@ -28,6 +29,7 @@
                     </li>
 
                 </ol>
+
             </div>
 
         </div>
@@ -42,15 +44,22 @@
 
                 <div class="card-body">
 
-                    <form method="POST" action="{{ route('admin.category-attributes.store') }}" class="save-form">
+                    <form method="POST"
+                          action="{{ route('admin.category-attributes.store') }}"
+                          class="save-form">
 
                         @csrf
 
                         <div class="form-group">
 
-                            <label>Category</label>
+                            <label>
+                                Category
+                                <span class="text-danger">*</span>
+                            </label>
 
-                            <select name="category_id" class="form-control" required>
+                            <select name="category_id"
+                                    class="form-control"
+                                    required>
 
                                 <option value="">
                                     Select Category
@@ -70,9 +79,14 @@
 
                         <div class="form-group">
 
-                            <label>Attribute</label>
+                            <label>
+                                Attribute
+                                <span class="text-danger">*</span>
+                            </label>
 
-                            <select name="attribute_id" class="form-control" required>
+                            <select name="attribute_id"
+                                    class="form-control"
+                                    required>
 
                                 <option value="">
                                     Select Attribute
@@ -94,7 +108,8 @@
 
                             <label>Required</label>
 
-                            <select name="is_required" class="form-control">
+                            <select name="is_required"
+                                    class="form-control">
 
                                 <option value="1">
                                     Yes
@@ -110,9 +125,81 @@
 
                         <div class="form-group">
 
+                            <label>Used For Variant</label>
+
+                            <select name="used_for_variant"
+                                    class="form-control">
+
+                                <option value="0" selected>
+                                    No
+                                </option>
+
+                                <option value="1">
+                                    Yes
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Example: Color, Size, Storage, RAM
+                            </small>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Show In Filter</label>
+
+                            <select name="show_in_filter"
+                                    class="form-control">
+
+                                <option value="1">
+                                    Yes
+                                </option>
+
+                                <option value="0" selected>
+                                    No
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Customer can filter products using this attribute.
+                            </small>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Show On Listing</label>
+
+                            <select name="show_on_listing"
+                                    class="form-control">
+
+                                <option value="1">
+                                    Yes
+                                </option>
+
+                                <option value="0" selected>
+                                    No
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Show attribute on product cards / category pages.
+                            </small>
+
+                        </div>
+
+                        <div class="form-group">
+
                             <label>Sort Order</label>
 
-                            <input type="number" name="sort_order" class="form-control" value="0">
+                            <input type="number"
+                                   name="sort_order"
+                                   class="form-control"
+                                   value="0">
 
                         </div>
 
@@ -120,7 +207,8 @@
 
                             <label>Status</label>
 
-                            <select name="status" class="form-control">
+                            <select name="status"
+                                    class="form-control">
 
                                 <option value="1">
                                     Active
@@ -134,19 +222,24 @@
 
                         </div>
 
-                        <button type="submit" class="btn btn-success save-btn">
+                        <div class="mt-3">
 
-                            <i class="fa fa-save"></i>
+                            <button type="submit"
+                                    class="btn btn-success save-btn">
 
-                            Save Mapping
+                                <i class="fa fa-save"></i>
+                                Save Mapping
 
-                        </button>
+                            </button>
 
-                        <a href="{{ route('admin.category-attributes.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.category-attributes.index') }}"
+                               class="btn btn-secondary">
 
-                            Cancel
+                                Cancel
 
-                        </a>
+                            </a>
+
+                        </div>
 
                     </form>
 

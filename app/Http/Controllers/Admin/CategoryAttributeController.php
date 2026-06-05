@@ -47,8 +47,16 @@ class CategoryAttributeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category_id'  => 'required|exists:categories,id',
-            'attribute_id' => 'required|exists:attributes,id',
+            'category_id'      => 'required|exists:categories,id',
+            'attribute_id'     => 'required|exists:attributes,id',
+
+            'is_required'      => 'required|boolean',
+            'used_for_variant' => 'required|boolean',
+            'show_in_filter'   => 'required|boolean',
+            'show_on_listing'  => 'required|boolean',
+
+            'sort_order'       => 'nullable|integer',
+            'status'           => 'required|boolean',
         ]);
 
         $exists = CategoryAttribute::where(
@@ -62,17 +70,33 @@ class CategoryAttributeController extends Controller
         ->exists();
 
         if ($exists) {
+
             return back()
                 ->withInput()
-                ->with('error', 'Mapping already exists.');
+                ->with(
+                    'error',
+                    'Mapping already exists.'
+                );
         }
 
         CategoryAttribute::create([
-            'category_id'  => $request->category_id,
-            'attribute_id' => $request->attribute_id,
-            'is_required'  => $request->is_required ?? 0,
-            'sort_order'   => $request->sort_order ?? 0,
-            'status'       => $request->status ?? 1,
+
+            'category_id'      => $request->category_id,
+
+            'attribute_id'     => $request->attribute_id,
+
+            'is_required'      => $request->is_required,
+
+            'used_for_variant' => $request->used_for_variant,
+
+            'show_in_filter'   => $request->show_in_filter,
+
+            'show_on_listing'  => $request->show_on_listing,
+
+            'sort_order'       => $request->sort_order ?? 0,
+
+            'status'           => $request->status,
+
         ]);
 
         return redirect()
@@ -107,17 +131,63 @@ class CategoryAttributeController extends Controller
         Request $request,
         CategoryAttribute $categoryAttribute
     ) {
+
         $request->validate([
-            'category_id'  => 'required|exists:categories,id',
-            'attribute_id' => 'required|exists:attributes,id',
+            'category_id'      => 'required|exists:categories,id',
+            'attribute_id'     => 'required|exists:attributes,id',
+
+            'is_required'      => 'required|boolean',
+            'used_for_variant' => 'required|boolean',
+            'show_in_filter'   => 'required|boolean',
+            'show_on_listing'  => 'required|boolean',
+
+            'sort_order'       => 'nullable|integer',
+            'status'           => 'required|boolean',
         ]);
 
+        $exists = CategoryAttribute::where(
+            'category_id',
+            $request->category_id
+        )
+        ->where(
+            'attribute_id',
+            $request->attribute_id
+        )
+        ->where(
+            'id',
+            '!=',
+            $categoryAttribute->id
+        )
+        ->exists();
+
+        if ($exists) {
+
+            return back()
+                ->withInput()
+                ->with(
+                    'error',
+                    'Mapping already exists.'
+                );
+        }
+
         $categoryAttribute->update([
-            'category_id'  => $request->category_id,
-            'attribute_id' => $request->attribute_id,
-            'is_required'  => $request->is_required ?? 0,
-            'sort_order'   => $request->sort_order ?? 0,
-            'status'       => $request->status ?? 1,
+
+            'category_id'      => $request->category_id,
+
+            'attribute_id'     => $request->attribute_id,
+
+            'is_required'      => $request->is_required,
+
+            'used_for_variant' => $request->used_for_variant,
+
+            'show_in_filter'   => $request->show_in_filter,
+
+            'show_on_listing'  => $request->show_on_listing,
+
+            'sort_order'       => $request->sort_order ?? 0,
+
+            'status'           => $request->status,
+
         ]);
 
         return redirect()

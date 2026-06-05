@@ -110,8 +110,6 @@ class CategoryController extends Controller
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
 
-            // AUTO
-            'is_sub_category' => $request->parent_id ? 1 : 0,
             'added_by' => 'admin',
 
             'status' => $request->status ?? 1,
@@ -178,8 +176,6 @@ class CategoryController extends Controller
 
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
-
-            'is_sub_category' => $request->parent_id ? 1 : 0,
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,

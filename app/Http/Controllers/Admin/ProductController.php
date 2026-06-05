@@ -8,8 +8,8 @@ use App\Models\GiftingOccasion;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Customization;
-use App\Models\ProductInclusion;
+use App\Models\CategoryAttribute;
+use App\Models\ProductSummary;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductImport;
@@ -83,19 +83,44 @@ class ProductController extends Controller
 
     public function create()
     {
-        return view('admin.products.create', [
-            'categories' => Category::whereNull('parent_id')
-                ->where('status', 1)
-                ->get(),
+        $categories = Category::whereNull('parent_id')
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get();
 
-            'occasions' => GiftingOccasion::where('status', 1)->get(),
+        return view('admin.products.create', compact(
+            'categories',
+        ));
 
-            'customizations' => Customization::where('status', 1)->get(),
-
-            'brands' => Brand::where('status', 1)->get(),
-        ]);
     }
 
+    public function subcategories(Category $category)
+    {
+        return response()->json(
+
+            Category::where('parent_id', $category->id)
+                ->where('status', 1)
+                ->orderBy('name')
+                ->get([
+                    'id',
+                    'name'
+                ])
+
+        );
+    }
+
+    public function categoryAttributes(Category $category)
+    {
+        $attributes = CategoryAttribute::with([
+            'attribute.values'
+        ])
+            ->where('category_id', $category->id)
+            ->where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        return response()->json($attributes);
+    }
     public function store(Request $request)
     {
         $request->validate([
@@ -184,7 +209,7 @@ class ProductController extends Controller
         if ($request->inclusions) {
             foreach ($request->inclusions as $inc) {
                 if (!empty($inc)) {
-                    ProductInclusion::create([
+                    ProductSummary::create([
                         'product_id' => $product->id,
                         'title' => $inc
                     ]);
@@ -218,7 +243,6 @@ class ProductController extends Controller
                 ->get(),
 
             'occasions' => GiftingOccasion::where('status', 1)->get(),
-            'customizations' => Customization::where('status', 1)->get(),
             'brands' => Brand::where('status', 1)->get(),
         ]);
     }
@@ -350,7 +374,7 @@ class ProductController extends Controller
         if ($request->inclusions) {
             foreach ($request->inclusions as $inc) {
                 if (!empty($inc)) {
-                    ProductInclusion::create([
+                    ProductSummary::create([
                         'product_id' => $product->id,
                         'title' => $inc
                     ]);
@@ -738,44 +762,6 @@ class ProductController extends Controller
         $response->headers->set(
             'Content-Disposition',
             'attachment; filename=occasions_reference.csv'
-        );
-
-        return $response;
-    }
-
-    public function downloadCustomizationReference()
-    {
-        $customizations = Customization::orderBy('id')
-            ->get(['id', 'name']);
-
-        $response = new StreamedResponse(function () use ($customizations) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, [
-                'id',
-                'name'
-            ]);
-
-            foreach ($customizations as $customization) {
-
-                fputcsv($handle, [
-                    $customization->id,
-                    $customization->name
-                ]);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=customizations_reference.csv'
         );
 
         return $response;

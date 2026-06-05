@@ -10,11 +10,7 @@ class AttributeValue extends Model
         'attribute_id',
         'value',
         'sort_order',
-        'status',
-    ];
-
-    protected $casts = [
-        'status' => 'boolean',
+        'status'
     ];
 
     public function attribute()

@@ -21,8 +21,7 @@
             </div>
 
             <div class="ml-auto mr-2">
-                <a href="{{ route('admin.category-attributes.create') }}"
-                   class="btn btn-primary">
+                <a href="{{ route('admin.category-attributes.create') }}" class="btn btn-primary">
                     <i class="fa fa-plus"></i> Add Mapping
                 </a>
             </div>
@@ -44,6 +43,9 @@
                                     <th>Category</th>
                                     <th>Attribute</th>
                                     <th>Required</th>
+                                    <th>Variant</th>
+                                    <th>Filter</th>
+                                    <th>Listing</th>
                                     <th>Sort Order</th>
                                     <th>Status</th>
                                     <th width="120">Action</th>
@@ -54,55 +56,72 @@
 
                                 @forelse($categoryAttributes as $item)
 
-                                    <tr id="row{{ $item->id }}">
+                                                            <tr id="row{{ $item->id }}">
 
-                                        <td>{{ $item->id }}</td>
+                                                                <td>{{ $item->id }}</td>
 
-                                        <td>
-                                            {{ $item->category->name ?? '-' }}
-                                        </td>
+                                                                <td>
+                                                                    {{ $item->category->name ?? '-' }}
+                                                                </td>
 
-                                        <td>
-                                            {{ $item->attribute->name ?? '-' }}
-                                        </td>
+                                                                <td>
+                                                                    {{ $item->attribute->name ?? '-' }}
+                                                                </td>
 
-                                        <td>
-                                            {!! $item->is_required
-                                                ? '<span class="badge badge-success">Yes</span>'
-                                                : '<span class="badge badge-secondary">No</span>' !!}
-                                        </td>
+                                                                <td>
+                                                                    {!! $item->is_required
+                                    ? '<span class="badge badge-success">Yes</span>'
+                                    : '<span class="badge badge-secondary">No</span>' !!}
+                                                                </td>
 
-                                        <td>
-                                            {{ $item->sort_order }}
-                                        </td>
+                                                                <td>
+                                                                    {!! $item->used_for_variant
+                                    ? '<span class="badge badge-info">Yes</span>'
+                                    : '<span class="badge badge-secondary">No</span>' !!}
+                                                                </td>
 
-                                        <td>
-                                            {!! $item->status
-                                                ? '<span class="badge badge-primary">Active</span>'
-                                                : '<span class="badge badge-danger">Inactive</span>' !!}
-                                        </td>
+                                                                <td>
+                                                                    {!! $item->show_in_filter
+                                    ? '<span class="badge badge-warning">Yes</span>'
+                                    : '<span class="badge badge-secondary">No</span>' !!}
+                                                                </td>
 
-                                        <td>
+                                                                <td>
+                                                                    {!! $item->show_on_listing
+                                    ? '<span class="badge badge-success">Yes</span>'
+                                    : '<span class="badge badge-secondary">No</span>' !!}
+                                                                </td>
 
-                                            <a href="{{ route('admin.category-attributes.edit',$item->id) }}"
-                                               class="btn btn-sm btn-outline-dark">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
+                                                                <td>
+                                                                    {{ $item->sort_order }}
+                                                                </td>
 
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    onclick="deleteMapping({{ $item->id }})">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
+                                                                <td>
+                                                                    {!! $item->status
+                                    ? '<span class="badge badge-primary">Active</span>'
+                                    : '<span class="badge badge-danger">Inactive</span>' !!}
+                                                                </td>
 
-                                        </td>
+                                                                <td>
 
-                                    </tr>
+                                                                    <a href="{{ route('admin.category-attributes.edit', $item->id) }}"
+                                                                        class="btn btn-sm btn-outline-dark">
+                                                                        <i class="fa fa-pencil"></i>
+                                                                    </a>
+
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                        onclick="deleteMapping({{ $item->id }})">
+                                                                        <i class="fa fa-trash"></i>
+                                                                    </button>
+
+                                                                </td>
+
+                                                            </tr>
 
                                 @empty
 
                                     <tr>
-                                        <td colspan="7" class="text-center">
+                                        <td colspan="10" class="text-center">
                                             No Records Found
                                         </td>
                                     </tr>
@@ -132,44 +151,43 @@
 
 <script>
 
-function deleteMapping(id)
-{
-    Swal.fire({
-        title:'Delete Mapping?',
-        icon:'warning',
-        showCancelButton:true,
-        confirmButtonText:'Delete'
-    }).then((result)=>{
+    function deleteMapping(id) {
+        Swal.fire({
+            title: 'Delete Mapping?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete'
+        }).then((result) => {
 
-        if(result.isConfirmed){
+            if (result.isConfirmed) {
 
-            $.ajax({
+                $.ajax({
 
-                url:"{{ url('admin/category-attributes') }}/"+id,
+                    url: "{{ url('admin/category-attributes') }}/" + id,
 
-                type:'DELETE',
+                    type: 'DELETE',
 
-                data:{
-                    _token:"{{ csrf_token() }}"
-                },
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
 
-                success:function(res){
+                    success: function (res) {
 
-                    Swal.fire(
-                        'Deleted!',
-                        res.message,
-                        'success'
-                    );
+                        Swal.fire(
+                            'Deleted!',
+                            res.message,
+                            'success'
+                        );
 
-                    $('#row'+id).remove();
+                        $('#row' + id).remove();
 
-                }
+                    }
 
-            });
+                });
 
-        }
+            }
 
-    });
-}
+        });
+    }
 
 </script>

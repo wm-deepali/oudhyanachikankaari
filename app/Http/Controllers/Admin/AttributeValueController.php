@@ -33,14 +33,16 @@ class AttributeValueController extends Controller
     {
         $request->validate([
             'attribute_id' => 'required|exists:attributes,id',
-            'value'        => 'required|max:255',
+            'value' => 'required|max:255',
+            'sort_order' => 'nullable|integer',
+            'status' => 'required|boolean',
         ]);
 
         AttributeValue::create([
             'attribute_id' => $request->attribute_id,
-            'value'        => $request->value,
-            'sort_order'   => $request->sort_order ?? 0,
-            'status'       => $request->status ?? 1,
+            'value' => trim($request->value),
+            'sort_order' => $request->sort_order ?? 0,
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -65,14 +67,16 @@ class AttributeValueController extends Controller
     {
         $request->validate([
             'attribute_id' => 'required|exists:attributes,id',
-            'value'        => 'required|max:255',
+            'value' => 'required|max:255',
+            'sort_order' => 'nullable|integer',
+            'status' => 'required|boolean',
         ]);
 
         $attributeValue->update([
             'attribute_id' => $request->attribute_id,
-            'value'        => $request->value,
-            'sort_order'   => $request->sort_order ?? 0,
-            'status'       => $request->status ?? 1,
+            'value' => trim($request->value),
+            'sort_order' => $request->sort_order ?? 0,
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -84,8 +88,9 @@ class AttributeValueController extends Controller
     {
         $attributeValue->delete();
 
-        return redirect()
-            ->route('admin.attribute-values.index')
-            ->with('success', 'Attribute value deleted successfully.');
+        return response()->json([
+            'status' => true,
+            'message' => 'Attribute value deleted successfully.',
+        ]);
     }
 }

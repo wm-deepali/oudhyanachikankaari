@@ -46,18 +46,6 @@ class Category extends Model
             ->whereNull('deleted_at'); // ✅ ignore soft deleted
     }
 
-    // PRODUCTS (CATEGORY)
-    public function products()
-    {
-        return $this->belongsToMany(Product::class, 'product_category');
-    }
-
-    // PRODUCTS (SUBCATEGORY)
-    public function subcategoryProducts()
-    {
-        return $this->belongsToMany(Product::class, 'product_subcategories', 'subcategory_id', 'product_id')->where('status', 1);
-    }
-
 
     /*
     |--------------------------------------------------------------------------
@@ -99,38 +87,6 @@ class Category extends Model
         return !is_null($this->parent_id);
     }
 
-    public function getUniqueProductsCountAttribute()
-    {
-        // Only include active children
-        $subcategoryIds = $this->children()
-            ->where('status', 1)
-            ->pluck('id')
-            ->toArray();
-
-        return \App\Models\Product::where(function ($q) use ($subcategoryIds) {
-
-            // ✅ Products linked to ACTIVE category
-            $q->whereHas('categories', function ($q2) {
-                $q2->where('categories.id', $this->id)
-                    ->where('categories.status', 1);
-            })
-
-                // ✅ Products linked to ACTIVE subcategories
-                ->orWhereHas('subcategories', function ($q3) use ($subcategoryIds) {
-                    $q3->whereIn('categories.id', $subcategoryIds)
-                        ->where('categories.status', 1);
-                });
-
-        })->distinct()->count();
-    }
-
-    public function brands()
-    {
-        return $this->belongsToMany(
-            Brand::class,
-            'brand_category'
-        );
-    }
 
     public function categoryAttributes()
     {

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -23,21 +22,19 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_required')
-                ->default(false);
+            $table->boolean('is_required')->default(false);
 
-            $table->integer('sort_order')
-                ->default(0);
+            $table->boolean('used_for_variant')->default(false);
 
-            $table->boolean('status')
-                ->default(true);
+            $table->boolean('show_in_filter')->default(false);
+
+            $table->boolean('show_on_listing')->default(false);
+
+            $table->integer('sort_order')->default(0);
+
+            $table->boolean('status')->default(true);
 
             $table->timestamps();
-
-            $table->unique([
-                'category_id',
-                'attribute_id'
-            ]);
         });
     }
 

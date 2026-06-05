@@ -9,14 +9,16 @@ class CategoryAttribute extends Model
     protected $fillable = [
         'category_id',
         'attribute_id',
-        'is_required',
-        'sort_order',
-        'status',
-    ];
 
-    protected $casts = [
-        'is_required' => 'boolean',
-        'status'      => 'boolean',
+        'is_required',
+
+        'used_for_variant',
+
+        'show_in_filter',
+        'show_on_listing',
+
+        'sort_order',
+        'status'
     ];
 
     public function category()

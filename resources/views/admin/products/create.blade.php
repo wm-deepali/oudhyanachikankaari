@@ -1,735 +1,627 @@
 @include('admin.top-header')
 
-<style>
-    /* GLOBAL */
-    .card {
-        border-radius: 14px;
-        border: none;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-    }
-
-    .card h5 {
-        font-weight: 600;
-        margin-bottom: 15px;
-        color: #111827;
-    }
-
-    /* HEADER */
-    .card-header {
-        background: #fff;
-        font-size: 20px;
-        font-weight: 600;
-        border-bottom: 1px solid #eee;
-    }
-
-    /* FORM */
-    label {
-        font-weight: 500;
-        margin-bottom: 3px;
-        font-size: 14px;
-    }
-
-    .form-control {
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-    }
-
-    .form-control:focus {
-        background: #fff;
-        border-color: #003108;
-        box-shadow: none;
-    }
-
-    /* CHECKBOX */
-    input[type="checkbox"] {
-        margin-right: 6px;
-    }
-
-    /* SECTION SPACING */
-    .card.p-3 {
-        padding: 20px !important;
-    }
-
-    /* CATEGORY SCROLL */
-   .category-scroll {
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px;
-
-    /* Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: #999 transparent;
-}
-
-/* Chrome, Edge, Safari */
-.category-scroll::-webkit-scrollbar {
-    width: 5px;
-}
-
-.category-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.category-scroll::-webkit-scrollbar-thumb {
-    background: #999;
-    border-radius: 10px;
-}
-
-.category-scroll::-webkit-scrollbar-thumb:hover {
-    background: #666;
-}
-    /* SUBCATEGORY */
-    .subcategory-box {
-        padding-left: 20px;
-        margin-top: 5px;
-    }
-
-    /* GRID SPACING */
-    .row>div {
-        margin-bottom: 12px;
-    }
-
-    /* RIGHT SIDEBAR */
-    .right-sticky {
-        position: sticky;
-        top: 20px;
-    }
-
-    /* BUTTON */
-    .btn-success {
-        background: linear-gradient(90deg, #f97316, #fb923c);
-        border: none;
-        border-radius: 10px;
-        padding: 12px 25px;
-        font-weight: 500;
-    }
-
-    .btn-success:hover {
-        opacity: 0.9;
-    }
-
-    /* SMALL BUTTON */
-    .btn-sm {
-        border-radius: 8px;
-    }
-
-    /* CHECKBOX GRID */
-    .checkbox-grid label {
-        display: block;
-        margin-bottom: 6px;
-    }
-
-    /* CUSTOMIZATION BOX */
-    .custom-box {
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px;
-        transition: 0.2s;
-    }
-
-    .custom-box:hover {
-        border-color: #003108;
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    /* TEXTAREA */
-    textarea.form-control {
-        min-height: 90px;
-    }
-
-    .flag-group {
-        background: #f9fafb;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px 12px;
-        /* reduced from 15px */
-    }
-
-    .flag-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: #6b7280;
-        margin-bottom: 6px;
-        /* reduced */
-        text-transform: uppercase;
-    }
-
-    .flag-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 6px;
-        /* reduced */
-        border-radius: 6px;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 13px;
-        margin-bottom: 2px;
-        /* reduce vertical gap */
-    }
-
-    .flag-item:hover {
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    .flag-item input[type="checkbox"] {
-        accent-color: #003108;
-        transform: scale(1);
-    }
-
-  .occasion-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 14px;
-}
-
-    .occasion-box:hover {
-            background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-        border-color: #003108;
-    }
-
-    .occasion-box input[type="checkbox"] {
-        accent-color: #003108;
-        transform: scale(1.1);
-        cursor: pointer;
-    }
-
-    /* Optional: active feel when checked */
-    .occasion-box input[type="checkbox"]:checked+span {
-        font-weight: 500;
-        color: #003108;
-    }
-
-    /* tumhara existing CSS */
-
-    select.form-control {
-        /*height: 45px;*/
-        /*padding: 10px 12px;*/
-        padding: 0px 8px;
-    }
-
-    .flag-item input[type="checkbox"] {
-        accent-color: #003108;
-        cursor: pointer;
-    }
-
-    /* TITLE SPACING */
-    h5 b {
-        font-weight: 600;
-    }
-
-    /* CATEGORY CARD */
-    .category-card {
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px 12px;
-        margin-bottom: 10px;
-        background: #fff;
-        transition: 0.2s;
-    }
-
-    .category-card:hover {
-        border-color: #003108;
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    /* CATEGORY ITEM */
-    .category-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    /* CATEGORY NAME */
-    .cat-name {
-        font-size: 14px;
-    }
-
-    /* SUBCATEGORY BOX */
-    .subcategory-box {
-        margin-top: 8px;
-        padding-left: 20px;
-        display: none;
-    }
-
-    /* SUBCATEGORY ITEM */
-    /*.subcategory-item {*/
-    /*    display: flex;*/
-    /*    align-items: center;*/
-    /*    gap: 6px;*/
-    /*    font-size: 13px;*/
-    /*    margin-bottom: 4px;*/
-    /*    cursor: pointer;*/
-    /*}*/
-    
-    .subcategory-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    border: 1px solid #80808038;
-    /*padding-bottom: 5px;*/
-    background: #ffffff38;
-    padding: 10px 15px;
-    border-radius: 10px;
-}
-
-    /* CHECKBOX COLOR */
-    .category-item input,
-    .subcategory-item input {
-        accent-color: #003108;
-    }
-
-    .thumb-box {
-        position: relative;
-        margin: 5px;
-    }
-
-    .thumb-box img {
-        width: 80px;
-        height: 80px;
-        border-radius: 8px;
-        object-fit: cover;
-        border: 2px solid #eee;
-    }
-
-    .thumb-actions {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-    }
-
-    .remove-btn {
-        background: red;
-        color: #fff;
-        border: none;
-        border-radius: 50%;
-        font-size: 12px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-    
-       .category-checkbox {
-    width: 12px;
-    height: 12px;
-    cursor: pointer;
-}
-
-
-
-.category-checkbox {
-    transform: scale(1.4);
-    cursor: pointer;
-    margin-right: 6px;
-}
-</style>
-
 <div class="main-section">
+
     @include('admin.header')
 
     <div class="app-content content container-fluid">
 
-        <div class="card shadow-sm">
-            <div class="card-header"><b>Add Product</b></div>
+        <div class="breadcrumbs-top d-flex align-items-center bg-light mb-3">
 
-            <div class="card-body">
-                <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
-                    @csrf
+            <div class="breadcrumb-wrapper">
 
-                    <div class="row">
+                <ol class="breadcrumb bg-transparent mb-0">
 
-                        <!-- LEFT -->
-                        <div class="col-md-8">
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
 
-                            {{-- CATEGORY --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Category & Sub Category</b></h5>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.products.index') }}">
+                            Products
+                        </a>
+                    </li>
 
-                                <div class="category-scroll">
+                    <li class="breadcrumb-item active">
+                        Add Product
+                    </li>
 
-                                    @foreach($categories as $cat)
-                                        <div class="category-card">
+                </ol>
 
-                                            <!-- CATEGORY -->
-                                            <label class="category-item">
-                                                <input type="checkbox" class="category-checkbox" data-id="{{ $cat->id }}"
-                                                    name="categories[]" value="{{ $cat->id }}">
+            </div>
 
-                                                <span class="cat-name">{{ $cat->name }}</span>
-                                            </label>
+        </div>
 
-                                            <!-- SUBCATEGORY -->
-                                            <div class="subcategory-box" id="subcat_{{ $cat->id }}">
-                                                @foreach($cat->children as $sub)
-                                                    <label class="subcategory-item">
-                                                        <input type="checkbox" name="sub_categories[]" value="{{ $sub->id }}">
+        <div class="content-wrapper pb-4">
 
-                                                        <span>{{ $sub->name }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
+            <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data"
+                class="save-form">
 
-                                        </div>
-                                    @endforeach
+                @csrf
 
-                                </div>
-                            </div>
+                <div class="card shadow-sm mb-3">
 
+                    <div class="card-header">
+                        <strong>Basic Information</strong>
+                    </div>
 
-                            {{-- BASIC --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Basic Info</b></h5>
+                    <div class="card-body">
 
-                                <label>Name *</label>
-                                <input type="text" name="name" id="name" class="form-control" required>
+                        <div class="row">
 
-                                <label class="mt-2">Slug</label>
-                                <input type="text" name="slug" id="slug" class="form-control">
+                            <div class="col-md-6">
 
+                                <div class="form-group">
 
-                                <label class="mt-2">Sub Title</label>
-                                <textarea name="sub_title" class="form-control"></textarea>
-                            </div>
+                                    <label>Category *</label>
 
-                             {{-- INCLUSIONS --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Summary</b></h5>
+                                    <select name="category_id" id="category_id" class="form-control" required>
 
-                                <div id="incWrap">
-                                    <input type="text" name="summary[]" class="form-control mb-2">
-                                </div>
+                                        <option value="">
+                                            Select Category
+                                        </option>
 
-                                <button type="button" onclick="addInc()" class="btn btn-sm btn-primary">Add
-                                    More</button>
-                            </div>
+                                        @foreach($categories as $category)
 
-                            <div class="card p-3 mb-3">
-                                <h5><b>Media</b></h5>
-                                <label class="mt-2">Upload Images (Max 6)</label>
-                                <input type="file" id="images" name="images[]" multiple accept="image/*"
-                                    class="form-control">
+                                            <option value="{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </option>
 
-                                <small class="text-muted">Max 6 images allowed</small>
+                                        @endforeach
 
-                                <!-- Thumbnails Preview -->
-                                <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
-                                <label class="mt-3">Video URL (YouTube / MP4)</label>
-
-                                <input type="text" name="video_url" class="form-control"
-                                    placeholder="Enter full YouTube URL (https://youtube.com/watch?v=xxxx) OR direct MP4 link">
-
-                                <small class="text-muted">
-                                    👉 Enter full YouTube URL. Example:
-                                    https://www.youtube.com/watch?v=abc123XYZ
-                                </small>
-                            </div>
-
-                            {{-- SKU --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Inventory</b></h5>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>SKU</label>
-                                        <input type="text" name="sku" class="form-control">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label>Min Qty</label>
-                                        <input type="number" name="min_qty" class="form-control" required>
-                                    </div>
-
-                                     <div class="col-md-6">
-                                        <label>Stock</label>
-                                        <input type="number" name="stock" class="form-control" required>
-                                    </div>
-
-
-                                    <div class="col-md-6">
-                                        <label>Product Code</label>
-                                        <input type="text" name="product_code" class="form-control">
-                                    </div>
-
-                                
+                                    </select>
 
                                 </div>
 
-                                <label class="mt-2">Delivery Time</label>
-                                <input type="text" name="delivery_time" class="form-control">
-
-                                <div class="mt-3">
-                                    <div class="row">
-
-                                        <div class="col-md-6 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="quality">
-                                                <span>Quality Assurance</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="col-md-6 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="pan_india">
-                                                <span>PAN India Delivery</span>
-                                            </label>
-                                        </div>
-
-                                    </div>
-                                </div>
                             </div>
 
-                            {{-- PRICING --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Pricing</b></h5>
+                            <div class="col-md-6" id="subcategory-wrapper" style="display:none;">
 
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label>MRP</label>
-                                        <input type="number" name="mrp" id="mrp" class="form-control">
-                                    </div>
+                                <div class="form-group">
 
-                                    <div class="col-md-4">
-                                        <label>Discount Type</label>
-                                        <select name="discount_type" id="discount_type" class="form-control">
-                                            <option value="amount">Amount</option>
-                                            <option value="percentage">%</option>
-                                        </select>
-                                    </div>
+                                    <label>Sub Category</label>
 
-                                    <div class="col-md-4">
-                                        <label>Discount</label>
-                                        <input type="number" name="discount" id="discount" class="form-control">
-                                    </div>
+                                    <select name="subcategory_id" id="subcategory_id" class="form-control">
+
+                                        <option value="">
+                                            Select Sub Category
+                                        </option>
+
+                                    </select>
+
                                 </div>
 
-                                <label class="mt-2">Final Price</label>
-                                <input type="text" name="price" id="price" readonly class="form-control">
-                            </div>
-
-
-                            {{-- CUSTOMIZATION --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Customization</b></h5>
-
-                                <div class="row">
-                                    @foreach($customizations as $c)
-                                        <div class="col-md-6 mb-2">
-                                            <label class="custom-box w-100">
-                                                <input type="checkbox" name="customizations[]" value="{{ $c->id }}">
-                                                {{ $c->name }}
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                           
-
-                            {{-- DETAILS --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Content</b></h5>
-
-                                <label>Details</label>
-                                <textarea name="details" id="details" class="form-control"></textarea>
-
-                                <label class="mt-2">Delivery & Returns</label>
-                                <textarea name="delivery_returns" id="delivery_returns" class="form-control"></textarea>
                             </div>
 
                         </div>
 
-                        <!-- RIGHT -->
-                        <div class="col-md-4 right-sticky">
+                        <div class="form-group">
 
-                            {{-- OCCASIONS --}}
-                            <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
+                            <label>Product Name *</label>
 
-                                <div class="row">
-                                    @foreach($occasions as $o)
-                                        <div class="col-12 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
-                                                <span>{{ $o->title }}</span>
-                                            </label>
-                                        </div>
-                                    @endforeach
+                            <input type="text" name="name" id="product_name" class="form-control" required>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Slug</label>
+
+                            <input type="text" name="slug" id="slug" class="form-control">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>SKU</label>
+
+                            <input type="text" name="sku" class="form-control">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Short Description</label>
+
+                            <textarea name="short_description" class="form-control" rows="3"></textarea>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Description</label>
+
+                            <textarea name="description" class="form-control" rows="6"></textarea>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-4">
+
+                                <div class="form-group">
+
+                                    <label>Base Price</label>
+
+                                    <input type="number" step="0.01" name="base_price" class="form-control" value="0">
+
                                 </div>
+
                             </div>
 
-                    
-                            {{-- SEO --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>SEO</b></h5>
+                            <div class="col-md-4">
 
-                                <label>Meta Title</label>
-                                <input type="text" name="meta_title" class="form-control">
+                                <div class="form-group">
 
-                                <label class="mt-2">Meta Description</label>
-                                <textarea name="meta_description" class="form-control"></textarea>
-                            </div>
+                                    <label>Stock</label>
 
-                            {{-- BUTTONS --}}
-                            <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Marketing Options</b></h5>
+                                    <input type="number" name="stock" class="form-control" value="0">
 
-                                <div class="row">
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="cart" checked>
-                                            <span>Add to Cart</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="whatsapp">
-                                            <span>WhatsApp</span>
-                                        </label>
-                                    </div>
-
-                                   <!-- <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="call">
-                                            <span>Call</span>
-                                        </label>
-                                    </div> -->
                                 </div>
+
                             </div>
 
-                            <div class="card p-3">
-                                <label>Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                </select>
+                            <div class="col-md-4">
+
+                                <div class="form-group">
+
+                                    <label>Sort Order</label>
+
+                                    <input type="number" name="sort_order" class="form-control" value="0">
+
+                                </div>
+
                             </div>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Featured Image</label>
+
+                            <input type="file" name="featured_image" class="form-control">
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Is Featured</label>
+
+                            <select name="is_featured" class="form-control">
+
+                                <option value="0">
+                                    No
+                                </option>
+
+                                <option value="1">
+                                    Yes
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Status</label>
+
+                            <select name="status" class="form-control">
+
+                                <option value="1">
+                                    Active
+                                </option>
+
+                                <option value="0">
+                                    Inactive
+                                </option>
+
+                            </select>
 
                         </div>
 
                     </div>
 
-                    <button class="btn btn-success mt-3">Save Product</button>
+                </div>
 
-                </form>
-            </div>
+                {{-- Attributes will come here later --}}
+                <div id="attribute-container"></div>
+
+                <div class="mb-3" id="variant-btn-wrapper" style="display:none;">
+
+                    <button type="button" id="generate-variants" class="btn btn-primary">
+
+                        <i class="fa fa-cogs"></i>
+                        Generate Variants
+
+                    </button>
+
+                </div>
+
+                {{-- Variants will come here later --}}
+                <div id="variant-container"></div>
+
+                <button type="submit" class="btn btn-success save-btn">
+
+                    <i class="fa fa-save"></i>
+                    Save Product
+
+                </button>
+
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
         </div>
 
     </div>
+
 </div>
 
-@include('admin.footer')
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-
 <script>
-    CKEDITOR.config.versionCheck = false;
-    CKEDITOR.replace('details');
-    CKEDITOR.replace('delivery_returns');
 
-    $('#name').keyup(function () {
-        $('#slug').val($(this).val().toLowerCase().replace(/ /g, '-'));
+    $(document).on('keyup', '#product_name', function () {
+
+        let slug = $(this)
+            .val()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+
+        $('#slug').val(slug);
+
     });
 
-    $('#mrp,#discount,#discount_type').on('keyup change', function () {
-        let m = +$('#mrp').val() || 0;
-        let d = +$('#discount').val() || 0;
-        let t = $('#discount_type').val();
+    $(document).on('submit', '.save-form', function () {
 
-        let p = t == 'percentage' ? m - (m * d / 100) : m - d;
-        if (p < 0) p = 0;
+        let btn = $(this).find('.save-btn');
 
-        $('#price').val(p.toFixed(2));
+        btn.prop('disabled', true);
+
+        btn.html(
+            '<i class="fa fa-spinner fa-spin"></i> Processing...'
+        );
+
     });
 
-    function addInc() {
-        $('#incWrap').append('<input type="text" name="inclusions[]" class="form-control mb-2">');
+    $('#category_id').on('change', function () {
+
+        let categoryId = $(this).val();
+        $('#variant-container').html('');
+        $('#variant-btn-wrapper').hide();
+
+        $('#subcategory_id').html(
+            '<option value="">Loading...</option>'
+        );
+
+        if (!categoryId) {
+
+            $('#subcategory-wrapper').hide();
+
+            return;
+        }
+        loadAttributes(categoryId);
+        $.get(
+            '/admin/products/subcategories/' + categoryId,
+            function (response) {
+
+                if (response.length > 0) {
+
+                    let html =
+                        '<option value="">Select Sub Category</option>';
+
+                    $.each(response, function (i, item) {
+
+                        html += `
+                        <option value="${item.id}">
+                            ${item.name}
+                        </option>
+                    `;
+
+                    });
+
+                    $('#subcategory_id').html(html);
+
+                    $('#subcategory-wrapper').show();
+
+                } else {
+
+                    $('#subcategory-wrapper').hide();
+
+                }
+
+            }
+        );
+
+    });
+
+    function loadAttributes(categoryId) {
+        $('#attribute-container').html('');
+
+        $.get(
+            '/admin/products/category-attributes/' + categoryId,
+            function (response) {
+
+                let html = '';
+
+                if (response.length > 0) {
+
+                    html += `
+                    <div class="card shadow-sm mb-3">
+
+                        <div class="card-header">
+                            <strong>Attributes</strong>
+                        </div>
+
+                        <div class="card-body">
+                `;
+
+                    response.forEach(function (item) {
+
+                        html += `
+                        <div class="form-group">
+
+                            <label>
+                                ${item.attribute.name}
+                            </label>
+                    `;
+
+                        if (item.attribute.has_values) {
+
+                            item.attribute.values.forEach(function (value) {
+
+                                html += `
+                                <div>
+
+                                    <label>
+
+                                     <input
+    type="checkbox"
+    class="attribute-value"
+
+    data-attribute-id="${item.attribute.id}"
+
+    data-attribute-name="${item.attribute.name}"
+
+    data-value-name="${value.value}"
+
+    data-variant="${item.used_for_variant}"
+
+    name="attribute_values[${item.attribute.id}][]"
+
+    value="${value.id}"
+>
+
+                                        ${value.value}
+
+                                    </label>
+
+                                </div>
+                            `;
+
+                            });
+
+                        }
+
+                        html += `</div>`;
+
+                    });
+
+                    html += `
+                        </div>
+                    </div>
+                `;
+
+                    $('#attribute-container').html(html);
+                    $('#variant-btn-wrapper').show();
+
+
+                }
+                else {
+
+                    $('#attribute-container').html('');
+                    $('#variant-btn-wrapper').hide();
+
+                }
+            }
+        );
     }
 
-    $('.category-checkbox').on('change', function () {
-        let id = $(this).data('id');
+    $(document).on('click', '#generate-variants', function () {
 
-        if ($(this).is(':checked')) {
-            $('#subcat_' + id).slideDown();
-        } else {
-            $('#subcat_' + id).slideUp();
-            $('#subcat_' + id).find('input').prop('checked', false);
-        }
-    });
+        let variantAttributes = {};
 
-    let selectedFiles = [];
+        $('.attribute-value:checked').each(function () {
 
-    $('#images').on('change', function (e) {
-        let files = Array.from(e.target.files);
+            if ($(this).data('variant') != 1) {
+                return;
+            }
 
-        if ((selectedFiles.length + files.length) > 6) {
-            alert('Maximum 6 images allowed');
+            let attributeId = $(this).data('attribute-id');
+
+            if (!variantAttributes[attributeId]) {
+                variantAttributes[attributeId] = [];
+            }
+
+            variantAttributes[attributeId].push({
+
+                id: $(this).val(),
+
+                name: $(this).data('value-name')
+
+            });
+
+        });
+
+        let groups = Object.values(variantAttributes);
+
+        if (groups.length === 0) {
+
+            alert(
+    'Please select at least one value from attributes marked as Variant.'
+);
+
             return;
         }
 
-        files.forEach(file => {
-            selectedFiles.push(file);
-        });
+        let combinations = cartesian(groups);
 
-        renderPreview();
+        renderVariants(combinations);
+
     });
 
-    function renderPreview() {
-        $('#previewContainer').html('');
+    function cartesian(arr) {
+        if (arr.length === 1) {
+            return arr[0].map(item => [item]);
+        }
 
-        selectedFiles.forEach((file, index) => {
-            let reader = new FileReader();
+        return arr.reduce(function (a, b) {
 
-            reader.onload = function (e) {
-                let html = `
-                <div class="thumb-box">
-                    <img src="${e.target.result}">
+            return a.flatMap(function (d) {
 
-                    <div class="thumb-actions">
-                        <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
-                    </div>
+                return b.map(function (e) {
 
-                    <div class="text-center mt-1">
-                        <input type="radio" name="default_image" value="${index}" ${index === 0 ? 'checked' : ''}>
-                        <small>Default</small>
-                    </div>
-                </div>
+                    return [].concat(d, e);
+
+                });
+
+            });
+
+        });
+    }
+
+
+    function renderVariants(combinations) {
+        let html = `
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>Variants</strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered">
+
+                    <thead>
+
+                        <tr>
+
+                           <th>Variant</th>
+<th>SKU</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Image</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+    `;
+
+        combinations.forEach(function (combo, index) {
+
+            if (!Array.isArray(combo)) {
+                combo = [combo];
+            }
+
+            let names = combo.map(x => x.name);
+
+            html += `
+
+            <tr>
+
+                <td>
+
+                    ${names.join(' / ')}
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="text"
+                        name="variants[${index}][sku]"
+                        class="form-control">
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="variants[${index}][price]"
+                        class="form-control">
+
+                </td>
+
+                <td>
+
+                    <input
+                        type="number"
+                        name="variants[${index}][stock]"
+                        class="form-control">
+
+                </td>
+
+                <td>
+
+    <input
+        type="file"
+        name="variants[${index}][image]"
+        class="form-control">
+
+</td>
+            </tr>
+
+        `;
+
+            combo.forEach(function (item) {
+
+                html += `
+
+                <input
+                    type="hidden"
+                    name="variants[${index}][values][]"
+                    value="${item.id}">
+
             `;
-                $('#previewContainer').append(html);
-            };
 
-            reader.readAsDataURL(file);
-        });
-    }
+            });
 
-    function removeImage(index) {
-        selectedFiles.splice(index, 1);
-        renderPreview();
-    }
-
-    $('form').on('submit', function () {
-        let dataTransfer = new DataTransfer();
-
-        selectedFiles.forEach(file => {
-            dataTransfer.items.add(file);
         });
 
-        document.getElementById('images').files = dataTransfer.files;
-    });
+        html += `
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+        $('#variant-container').html(html);
+    }
 </script>
+
+
+@include('admin.footer')

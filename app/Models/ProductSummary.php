@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ProductInclusion extends Model
+class ProductSummary extends Model
 {
     protected $fillable = [
         'product_id',
-        'title'
+        'summary'
     ];
 
     public function product()

@@ -46,7 +46,6 @@
                                     <th>Slug</th>
                                     <th>Type</th>
                                     <th>Has Values</th>
-                                    <th>Variant</th>
                                     <th>Status</th>
                                     <th width="120">Action</th>
 
@@ -79,12 +78,6 @@
                                                                 </td>
 
                                                                 <td>
-                                                                    {!! $attribute->is_variant
-                                    ? '<span class="badge badge-primary">Yes</span>'
-                                    : '<span class="badge badge-secondary">No</span>' !!}
-                                                                </td>
-
-                                                                <td>
                                                                     {!! $attribute->status
                                     ? '<span class="badge badge-success">Active</span>'
                                     : '<span class="badge badge-danger">Inactive</span>' !!}
@@ -109,7 +102,7 @@
                                 @empty
 
                                     <tr>
-                                        <td colspan="8" class="text-center">
+                                        <td colspan="7" class="text-center">
                                             No Attributes Found
                                         </td>
                                     </tr>

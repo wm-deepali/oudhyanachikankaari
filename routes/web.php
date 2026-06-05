@@ -138,6 +138,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('gifting-occasions', GiftingOccasionController::class);
 
         // product routes
+        Route::get('products/subcategories/{category}',[ProductController::class, 'subcategories'])->name('products.subcategories');
+        Route::get('products/category-attributes/{category}',[ProductController::class, 'categoryAttributes'])->name('products.category-attributes');
         Route::post('/products/upload-images-zip', [ProductController::class, 'uploadImagesZip'])->name('products.images.upload');
         Route::get('/products/import', [ProductController::class, 'import'])->name('products.import');
         Route::post('/products/import', [ProductController::class, 'importStore'])->name('products.import.store');
@@ -148,14 +150,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('products/reference/occasions', [ProductController::class, 'downloadOccasionReference'])->name('products.reference.occasions');
         Route::get('products/reference/customizations', [ProductController::class, 'downloadCustomizationReference'])->name('products.reference.customizations');
         Route::resource('products', ProductController::class)->names('products');
-
-        // brand routes
-        Route::get('brands/import', [BrandController::class, 'import'])->name('brands.import');
-        Route::post('brands/import', [BrandController::class, 'importStore'])->name('brands.import.store');
-        Route::get('brands/import/sample', [BrandController::class, 'downloadSample'])->name('brands.import.sample');
-        Route::post('brands/upload-images', [BrandController::class, 'uploadImagesZip'])->name('brands.images.upload');
-        Route::get('brands/import/category-reference', [BrandController::class, 'downloadCategoryReference'])->name('brands.category.reference');
-        Route::resource('brands', BrandController::class)->names('brands');
 
         Route::resource('customizations', CustomizationController::class);
 

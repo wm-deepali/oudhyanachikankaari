@@ -11,13 +11,11 @@ class Attribute extends Model
         'slug',
         'type',
         'has_values',
-        'is_variant',
-        'status',
+        'status'
     ];
 
     protected $casts = [
         'has_values' => 'boolean',
-        'is_variant' => 'boolean',
         'status' => 'boolean',
     ];
 
@@ -30,5 +28,4 @@ class Attribute extends Model
     {
         return $this->hasMany(CategoryAttribute::class);
     }
-
 }

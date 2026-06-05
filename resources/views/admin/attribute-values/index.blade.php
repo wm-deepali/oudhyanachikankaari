@@ -46,7 +46,6 @@
                                     <th>ID</th>
                                     <th>Attribute</th>
                                     <th>Value</th>
-                                    <th>Color</th>
                                     <th>Sort Order</th>
                                     <th>Status</th>
                                     <th width="120">Action</th>
@@ -68,27 +67,7 @@
                                         <td>
                                             {{ $value->value }}
                                         </td>
-
-                                        <td>
-
-                                            @if($value->color_code)
-
-                                                <div style="
-                                                    width:30px;
-                                                    height:30px;
-                                                    border-radius:50%;
-                                                    border:1px solid #ddd;
-                                                    background:{{ $value->color_code }};
-                                                "></div>
-
-                                            @else
-
-                                                -
-
-                                            @endif
-
-                                        </td>
-
+                                    
                                         <td>
                                             {{ $value->sort_order }}
                                         </td>

@@ -109,7 +109,6 @@
     'admin.home.*',
     'admin.faqs.*',
     'admin.blogs.*',
-    'admin.brands.*',
     'admin.clients.*',
     'admin.testimonials.*',
     'admin.contact-branches.*',
@@ -161,11 +160,6 @@
                     </a>
                 </li>
 
-                <li class="{{ request()->routeIs('admin.brands.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.brands.index') }}">
-                        <i class="fa-solid fa-tags"></i> Manage Brands
-                    </a>
-                </li>
 
                 <li class="{{ request()->routeIs('admin.clients.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.clients.index') }}">

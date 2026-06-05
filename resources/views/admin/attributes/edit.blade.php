@@ -12,7 +12,9 @@
                 <ol class="breadcrumb bg-transparent mb-0">
 
                     <li class="breadcrumb-item">
-                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}">
+                            Dashboard
+                        </a>
                     </li>
 
                     <li class="breadcrumb-item">
@@ -48,23 +50,20 @@
                         @method('PUT')
 
                         <div class="form-group">
-                            <label>
-                                Name
-                                <span class="text-danger">*</span>
-                            </label>
+
+                            <label>Name <span class="text-danger">*</span></label>
 
                             <input type="text"
                                    name="name"
                                    class="form-control"
                                    value="{{ old('name', $attribute->name) }}"
                                    required>
+
                         </div>
 
-                        <div class="form-group">
-                            <label>
-                                Type
-                                <span class="text-danger">*</span>
-                            </label>
+                        <div class="form-group mt-3">
+
+                            <label>Type <span class="text-danger">*</span></label>
 
                             <select name="type"
                                     class="form-control"
@@ -74,15 +73,17 @@
 
                                     <option value="{{ $type }}"
                                         {{ old('type', $attribute->type) == $type ? 'selected' : '' }}>
-                                        {{ ucfirst($type) }}
+                                        {{ ucfirst(str_replace('_', ' ', $type)) }}
                                     </option>
 
                                 @endforeach
 
                             </select>
+
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group mt-3">
+
                             <label>Has Values</label>
 
                             <select name="has_values"
@@ -99,28 +100,18 @@
                                 </option>
 
                             </select>
+
+                            <small class="text-muted">
+                                Example:
+                                Color, Size, Material = Yes
+                                <br>
+                                Length, Width, Weight = No
+                            </small>
+
                         </div>
 
-                        <div class="form-group">
-                            <label>Is Variant</label>
+                        <div class="form-group mt-3">
 
-                            <select name="is_variant"
-                                    class="form-control">
-
-                                <option value="0"
-                                    {{ !old('is_variant', $attribute->is_variant) ? 'selected' : '' }}>
-                                    No
-                                </option>
-
-                                <option value="1"
-                                    {{ old('is_variant', $attribute->is_variant) ? 'selected' : '' }}>
-                                    Yes
-                                </option>
-
-                            </select>
-                        </div>
-
-                        <div class="form-group">
                             <label>Status</label>
 
                             <select name="status"
@@ -137,11 +128,13 @@
                                 </option>
 
                             </select>
+
                         </div>
 
                         <div class="mt-4">
 
-                           <button type="submit" class="btn btn-success save-btn">
+                            <button type="submit"
+                                    class="btn btn-success save-btn">
 
                                 <i class="fa fa-save"></i>
                                 Update Attribute
@@ -186,9 +179,3 @@
 </script>
 
 @include('admin.footer')
-
-<style>
-    .card {
-        border-radius: 10px;
-    }
-</style>

@@ -11,137 +11,60 @@ class Product extends Model
 
     protected $fillable = [
 
-        // 🔥 IMPORTANT (old system mapping)
-        'old_id',
+        'category_id',
+        'subcategory_id',
 
-        // BASIC
         'name',
         'slug',
-        'image',
-        'video_url',
-        'sub_title',
-        'summary',
+        'sku',
 
-        // OLD DB FIELDS
-        'product_code',
-        'brand_id',
-        'added_by',
+        'short_description',
+        'description',
+
+        'base_price',
+
+        'stock',
+
+        'featured_image',
+
+        'is_featured',
+
         'sort_order',
 
-        // PRICING
-        'mrp',
-        'price',
-        'discount',
-        'discount_type',
-
-        // FLAGS
-        'featured',
-        'new_arrival',
-        'sale',
-        'best_seller',
-
-        'is_premium',
-        'is_engraving',
-        'is_personalized_engraving',
-
-        'show_on_website',
-
-        // ✅ NEW FLAGS
-        'ready_to_ship',
-        'bulk_available',
-        'gift_hamper',
-
-        // OTHER
-        'sku',
-        'min_qty',
-        'delivery_time',
-        'quality',
-        'pan_india',
-
-        'details',
-        'delivery_returns',
-
-        'meta_title',
-        'meta_description',
-
-        'cart',
-        'whatsapp',
-        'call',
-
-        'status'
+        'status',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONS
-    |-------------------------------------------------------------------------- 
-    */
+    protected $casts = [
 
-    // CATEGORY
-    public function categories()
+        'base_price'  => 'decimal:2',
+
+        'is_featured' => 'boolean',
+
+        'status'      => 'boolean',
+    ];
+
+    public function category()
     {
-        return $this->belongsToMany(Category::class, 'product_category');
+        return $this->belongsTo(Category::class);
     }
 
-    // SUBCATEGORY
-    public function subcategories()
+    public function subcategory()
     {
-        return $this->belongsToMany(Category::class, 'product_subcategories', 'product_id', 'subcategory_id');
+        return $this->belongsTo(Category::class, 'subcategory_id');
     }
 
-    // OCCASIONS
-    public function occasions()
+    public function attributeValues()
     {
-        return $this->belongsToMany(
-            GiftingOccasion::class,
-            'occasion_product',
-            'product_id',
-            'occasion_id'
-        );
+        return $this->hasMany(ProductAttributeValue::class);
     }
 
-
-    // INCLUSIONS
-    public function inclusions()
+    public function variants()
     {
-        return $this->hasMany(ProductInclusion::class);
+        return $this->hasMany(ProductVariant::class);
     }
-
 
     public function images()
     {
         return $this->hasMany(ProductImage::class);
     }
-
-
-    public function getCategoryNamesAttribute()
-    {
-        return $this->categories->pluck('name')->implode(', ');
-    }
-
-    public function getSubcategoryNamesAttribute()
-    {
-        return $this->subcategories->pluck('name')->implode(', ');
-    }
-
-    public function getDisplayImageAttribute()
-    {
-        $default = $this->images()
-            ->where('is_default', 1)
-            ->first();
-
-        if ($default) {
-            return $default->image;
-        }
-
-        return $this->images()
-            ->value('image');
-    }
-
-
-    public function wishlists()
-    {
-        return $this->hasMany(Wishlist::class);
-    }
-    
 }
