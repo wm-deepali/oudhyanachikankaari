@@ -9,18 +9,23 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\CategoryAttribute;
-use App\Models\ProductSummary;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ProductImport;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use App\Models\ProductImage;
+use App\Models\ProductAttributeValue;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantValue;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['categories', 'images']);
+        $query = Product::with('images');
 
         // Categories dropdown
         $categories = Category::whereNull('parent_id')
@@ -88,8 +93,11 @@ class ProductController extends Controller
             ->orderBy('name')
             ->get();
 
+        $occasions = GiftingOccasion::where('status', 1)->get();
+
         return view('admin.products.create', compact(
             'categories',
+            'occasions'
         ));
 
     }
@@ -121,269 +129,572 @@ class ProductController extends Controller
 
         return response()->json($attributes);
     }
+
+
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-            'video_url' => 'nullable|string',
-            'min_qty' => 'required|integer|min:1',
-        ]);
+        DB::beginTransaction();
 
-        // CREATE PRODUCT
-        $product = Product::create([
-            'name' => $request->name,
-            'slug' => $request->slug,
-            'brand_id' => $request->brand_id,
+        try {
 
-            'sub_title' => $request->sub_title,
-            'summary' => $request->summary,
+            $product = Product::create([
+                'category_id' => $request->category_id,
+                'subcategory_id' => $request->subcategory_id,
+                'name' => $request->name,
+                'slug' => $request->slug ?: Str::slug($request->name),
+                'short_description' => $request->short_description,
+                'description' => $request->description,
+                'delivery_returns' => $request->delivery_returns,
 
-            'video_url' => $request->video_url,
+                'mrp' => $request->mrp,
+                'discount_type' => $request->discount_type,
+                'discount' => $request->discount,
+                'price' => $request->price,
 
-            'sku' => $request->sku,
-            'min_qty' => $request->min_qty,
-            'delivery_time' => $request->delivery_time,
+                'sku' => $request->sku,
+                'stock' => $request->stock,
+                'min_qty' => $request->min_qty,
+                'product_code' => $request->product_code,
+                'delivery_time' => $request->delivery_time,
 
-            'quality' => $request->quality ? 1 : 0,
-            'pan_india' => $request->pan_india ? 1 : 0,
+                'quality' => $request->has('quality'),
+                'pan_india' => $request->has('pan_india'),
 
-            'mrp' => $request->mrp ?? 0,
-            'discount' => $request->discount ?? 0,
-            'discount_type' => $request->discount_type,
-            'price' => $request->price ?? 0,
+                'meta_title' => $request->meta_title,
+                'meta_description' => $request->meta_description,
 
-            // FLAGS
-            'featured' => $request->featured ? 1 : 0,
-            'new_arrival' => $request->new_arrival ? 1 : 0,
-            'sale' => $request->sale ? 1 : 0,
-            'best_seller' => $request->best_seller ? 1 : 0,
+                'status' => $request->status,
+            ]);
 
-            'ready_to_ship' => $request->ready_to_ship ? 1 : 0,
-            'bulk_available' => $request->bulk_available ? 1 : 0,
-            'gift_hamper' => $request->gift_hamper ? 1 : 0,
+            /*
+            |--------------------------------------------------------------------------
+            | Product Images
+            |--------------------------------------------------------------------------
+            */
 
-            'is_premium' => $request->is_premium ? 1 : 0,
-            'is_engraving' => $request->is_engraving ? 1 : 0,
-            'is_personalized_engraving' => $request->is_personalized_engraving ? 1 : 0,
-            'show_on_website' => $request->show_on_website ? 1 : 0,
+            if ($request->hasFile('images')) {
 
-            'details' => $request->details,
-            'delivery_returns' => $request->delivery_returns,
+                foreach ($request->file('images') as $index => $image) {
 
-            'meta_title' => $request->meta_title,
-            'meta_description' => $request->meta_description,
+                    $path = $image->store(
+                        'products',
+                        'public'
+                    );
 
-            'cart' => $request->cart ? 1 : 0,
-            'whatsapp' => $request->whatsapp ? 1 : 0,
-            'call' => $request->call ? 1 : 0,
-
-            'status' => $request->status ?? 1,
-            'product_code' => $request->product_code,
-            'sort_order' => $request->sort_order ?? 0,
-            'added_by' => $request->added_by,
-        ]);
-
-        // MULTIPLE IMAGES SAVE
-        if ($request->hasFile('images')) {
-
-            foreach ($request->file('images') as $index => $img) {
-
-                $path = $img->store('products', 'public');
-
-                \App\Models\ProductImage::create([
-                    'product_id' => $product->id,
-                    'image' => $path,
-                    'is_default' => ($request->default_image == $index) ? 1 : 0
-                ]);
-            }
-        }
-
-        // RELATIONS
-        $product->categories()->sync($request->categories ?? []);
-        $product->subcategories()->sync($request->sub_categories ?? []);
-        $product->occasions()->sync($request->occasions ?? []);
-        $product->customizations()->sync($request->customizations ?? []);
-
-        // INCLUSIONS
-        if ($request->inclusions) {
-            foreach ($request->inclusions as $inc) {
-                if (!empty($inc)) {
-                    ProductSummary::create([
+                    ProductImage::create([
                         'product_id' => $product->id,
-                        'title' => $inc
+                        'image' => $path,
+                        'is_default' => $request->default_image == $index ? 1 : 0,
                     ]);
                 }
             }
-        }
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product Created Successfully');
-    }
+            /*
+            |--------------------------------------------------------------------------
+            | Product Attributes
+            |--------------------------------------------------------------------------
+            */
 
-    public function edit(Request $request, $id)
-    {
-        $product = Product::with([
-            'categories',
-            'subcategories',
-            'occasions',
-            'customizations',
-            'inclusions',
-            'images'
-        ])->findOrFail($id);
+            if ($request->filled('attribute_values')) {
 
-        $redirect = $request->redirect;
+                foreach ($request->attribute_values as $attributeId => $values) {
 
-        return view('admin.products.edit', [
-            'product' => $product,
-            'redirect' => $redirect,
+                    foreach ($values as $valueId) {
 
-            'categories' => Category::whereNull('parent_id')
-                ->where('status', 1)
-                ->get(),
-
-            'occasions' => GiftingOccasion::where('status', 1)->get(),
-            'brands' => Brand::where('status', 1)->get(),
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-            'video_url' => 'nullable|string',
-            'min_qty' => 'required|integer|min:1',
-        ]);
-
-        $product = Product::findOrFail($id);
-
-        // UPDATE PRODUCT (NO SINGLE IMAGE)
-        $product->update([
-            'name' => $request->name,
-            'slug' => $request->slug,
-            'brand_id' => $request->brand_id,
-
-            'sub_title' => $request->sub_title,
-            'summary' => $request->summary,
-
-            'video_url' => $request->video_url,
-
-            'sku' => $request->sku,
-            'min_qty' => $request->min_qty,
-            'delivery_time' => $request->delivery_time,
-
-            'quality' => $request->quality ? 1 : 0,
-            'pan_india' => $request->pan_india ? 1 : 0,
-
-            'mrp' => $request->mrp ?? 0,
-            'discount' => $request->discount ?? 0,
-            'discount_type' => $request->discount_type,
-            'price' => $request->price ?? 0,
-
-            'featured' => $request->featured ? 1 : 0,
-            'new_arrival' => $request->new_arrival ? 1 : 0,
-            'sale' => $request->sale ? 1 : 0,
-            'best_seller' => $request->best_seller ? 1 : 0,
-
-            'ready_to_ship' => $request->ready_to_ship ? 1 : 0,
-            'bulk_available' => $request->bulk_available ? 1 : 0,
-            'gift_hamper' => $request->gift_hamper ? 1 : 0,
-
-            'is_premium' => $request->is_premium ? 1 : 0,
-            'is_engraving' => $request->is_engraving ? 1 : 0,
-            'is_personalized_engraving' => $request->is_personalized_engraving ? 1 : 0,
-            'show_on_website' => $request->show_on_website ? 1 : 0,
-
-            'details' => $request->details,
-            'delivery_returns' => $request->delivery_returns,
-
-            'meta_title' => $request->meta_title,
-            'meta_description' => $request->meta_description,
-
-            'cart' => $request->cart ? 1 : 0,
-            'whatsapp' => $request->whatsapp ? 1 : 0,
-            'call' => $request->call ? 1 : 0,
-
-            'status' => $request->status ?? 1,
-            'product_code' => $request->product_code,
-            'sort_order' => $request->sort_order ?? 0,
-            'added_by' => $request->added_by,
-        ]);
-
-        // ✅ ADD NEW IMAGES (OLD DELETE NAHI KAR RAHE - SAFE APPROACH)
-        $defaultType = $request->default_type;
-
-        // RESET ALL DEFAULTS
-        $product->images()->update(['is_default' => 0]);
-
-        // ✅ EXISTING DEFAULT
-        if ($defaultType && str_starts_with($defaultType, 'old_')) {
-
-            $id = str_replace('old_', '', $defaultType);
-
-            \App\Models\ProductImage::where('id', $id)
-                ->where('product_id', $product->id)
-                ->update(['is_default' => 1]);
-        }
-
-        // ✅ NEW IMAGES
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $img) {
-
-                $path = $img->store('products', 'public');
-
-                $isDefault = 0;
-
-                if ($defaultType === "new_" . $index) {
-                    $isDefault = 1;
-                }
-
-                \App\Models\ProductImage::create([
-                    'product_id' => $product->id,
-                    'image' => $path,
-                    'is_default' => $isDefault
-                ]);
-            }
-        }
-
-        // DELETE SELECTED IMAGES
-        if ($request->delete_images) {
-            foreach ($request->delete_images as $imgId) {
-
-                $img = \App\Models\ProductImage::find($imgId);
-
-                if ($img) {
-                    if (Storage::disk('public')->exists($img->image)) {
-                        Storage::disk('public')->delete($img->image);
+                        ProductAttributeValue::create([
+                            'product_id' => $product->id,
+                            'attribute_id' => $attributeId,
+                            'attribute_value_id' => $valueId,
+                        ]);
                     }
-                    $img->delete();
                 }
             }
-        }
 
-        // RELATIONS
-        $product->categories()->sync($request->categories ?? []);
-        $product->subcategories()->sync($request->sub_categories ?? []);
-        $product->occasions()->sync($request->occasions ?? []);
-        $product->customizations()->sync($request->customizations ?? []);
+            /*
+            |--------------------------------------------------------------------------
+            | Variants
+            |--------------------------------------------------------------------------
+            */
 
-        // INCLUSIONS
-        $product->inclusions()->delete();
+            if ($request->filled('variants')) {
 
-        if ($request->inclusions) {
-            foreach ($request->inclusions as $inc) {
-                if (!empty($inc)) {
-                    ProductSummary::create([
+                foreach ($request->variants as $variantData) {
+
+                    $variantImage = null;
+
+                    if (
+                        isset($variantData['image']) &&
+                        $variantData['image'] instanceof \Illuminate\Http\UploadedFile
+                    ) {
+
+                        $variantImage = $variantData['image']->store(
+                            'product-variants',
+                            'public'
+                        );
+                    }
+
+                    $variant = ProductVariant::create([
+
                         'product_id' => $product->id,
-                        'title' => $inc
+
+                        'sku' => $variantData['sku'] ?? null,
+
+                        'mrp' => $variantData['mrp'] ?? 0,
+
+                        'discount_type' => $variantData['discount_type'] ?? 'amount',
+
+                        'discount' => $variantData['discount'] ?? 0,
+
+                        'price' => $variantData['price'] ?? 0,
+
+                        'stock' => $variantData['stock'] ?? 0,
+
+                        'image' => $variantImage,
+
+                    ]);
+
+                    if (!empty($variantData['values'])) {
+
+                        foreach ($variantData['values'] as $valueId) {
+
+                            ProductVariantValue::create([
+                                'variant_id' => $variant->id,
+                                'attribute_value_id' => $valueId,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Occasions
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->filled('occasions')) {
+
+                $product->occasions()->sync(
+                    $request->occasions
+                );
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.products.index')
+                ->with(
+                    'success',
+                    'Product created successfully.'
+                );
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            dd(
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            );
+        }
+    }
+
+    public function edit(Product $product)
+    {
+        $product->load([
+
+            'images',
+
+            'attributeValues.attribute',
+            'attributeValues.value',
+
+            'variants.values.attributeValue',
+
+            'occasions',
+
+        ]);
+
+        $categories = Category::whereNull('parent_id')
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        $subcategories = Category::where(
+            'parent_id',
+            $product->category_id
+        )
+            ->where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        $occasions = GiftingOccasion::where('status', 1)->get();
+        $attributes = CategoryAttribute::with([
+            'attribute.values'
+        ])
+            ->where('category_id', $product->category_id)
+            ->where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $selectedAttributeValues = $product
+            ->attributeValues
+            ->pluck('attribute_value_id')
+            ->toArray();
+
+        $selectedOccasions = $product
+            ->occasions
+            ->pluck('id')
+            ->toArray();
+
+
+        $existingVariants = $product->variants
+            ->map(function ($variant) {
+
+                return [
+
+                    'id' => $variant->id,
+
+                    'sku' => $variant->sku,
+
+                    'mrp' => $variant->mrp,
+
+                    'discount_type' => $variant->discount_type,
+
+                    'discount' => $variant->discount,
+
+                    'price' => $variant->price,
+
+                    'stock' => $variant->stock,
+
+                    'image' => $variant->image,
+                    'variant_name' => $variant->values
+                        ->map(function ($v) {
+                            return $v->attributeValue->value;
+                        })
+                        ->implode(' / '),
+
+                ];
+
+            })
+            ->values();
+
+        return view(
+            'admin.products.edit',
+            compact(
+                'product',
+                'categories',
+                'subcategories',
+                'attributes',
+                'selectedAttributeValues',
+                'selectedOccasions',
+                'occasions',
+                'existingVariants'
+            )
+        );
+    }
+
+    public function update(Request $request, Product $product)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $product->update([
+
+                'category_id' => $request->category_id,
+                'subcategory_id' => $request->subcategory_id,
+
+                'name' => $request->name,
+                'slug' => $request->slug ?: Str::slug($request->name),
+
+                'short_description' => $request->short_description,
+                'description' => $request->description,
+                'delivery_returns' => $request->delivery_returns,
+
+                'mrp' => $request->mrp,
+                'discount_type' => $request->discount_type,
+                'discount' => $request->discount,
+                'price' => $request->price,
+
+                'sku' => $request->sku,
+                'stock' => $request->stock,
+                'min_qty' => $request->min_qty,
+                'product_code' => $request->product_code,
+                'delivery_time' => $request->delivery_time,
+
+                'quality' => $request->has('quality'),
+                'pan_india' => $request->has('pan_india'),
+
+                'meta_title' => $request->meta_title,
+                'meta_description' => $request->meta_description,
+
+                'status' => $request->status,
+            ]);
+
+
+            // ✅ ADD NEW IMAGES (OLD DELETE NAHI KAR RAHE - SAFE APPROACH)
+            $defaultType = $request->default_type;
+
+            // RESET ALL DEFAULTS
+            $product->images()->update(['is_default' => 0]);
+
+            // ✅ EXISTING DEFAULT
+            if ($defaultType && str_starts_with($defaultType, 'old_')) {
+
+                $id = str_replace('old_', '', $defaultType);
+
+                ProductImage::where('id', $id)
+                    ->where('product_id', $product->id)
+                    ->update(['is_default' => 1]);
+            }
+
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $img) {
+
+                    $path = $img->store('products', 'public');
+
+                    $isDefault = 0;
+
+                    if ($defaultType === "new_" . $index) {
+                        $isDefault = 1;
+                    }
+
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'image' => $path,
+                        'is_default' => $isDefault
                     ]);
                 }
             }
+
+            // DELETE SELECTED IMAGES
+            if ($request->delete_images) {
+                foreach ($request->delete_images as $imgId) {
+
+                    $img = ProductImage::find($imgId);
+
+                    if ($img) {
+                        if (Storage::disk('public')->exists($img->image)) {
+                            Storage::disk('public')->delete($img->image);
+                        }
+                        $img->delete();
+                    }
+                }
+            }
+
+
+            /*
+|--------------------------------------------------------------------------
+| Product Attributes (SYNC)
+|--------------------------------------------------------------------------
+*/
+
+            $currentAttributes = ProductAttributeValue::where(
+                'product_id',
+                $product->id
+            )->get();
+
+            $currentKeys = $currentAttributes
+                ->map(function ($row) {
+                    return $row->attribute_id . '-' . $row->attribute_value_id;
+                })
+                ->toArray();
+
+            $newKeys = [];
+
+            foreach ($request->attribute_values ?? [] as $attributeId => $values) {
+
+                foreach ($values as $valueId) {
+
+                    $newKeys[] = $attributeId . '-' . $valueId;
+
+                    ProductAttributeValue::firstOrCreate([
+                        'product_id' => $product->id,
+                        'attribute_id' => $attributeId,
+                        'attribute_value_id' => $valueId,
+                    ]);
+                }
+            }
+
+            foreach ($currentAttributes as $row) {
+
+                $key = $row->attribute_id . '-' . $row->attribute_value_id;
+
+                if (!in_array($key, $newKeys)) {
+
+                    $row->delete();
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Variants
+            |--------------------------------------------------------------------------
+            */
+
+            $existingVariantIds = [];
+
+            if ($request->filled('variants')) {
+
+                foreach ($request->variants as $variantData) {
+
+                    if (!empty($variantData['id'])) {
+
+                        $variant = ProductVariant::where(
+                            'product_id',
+                            $product->id
+                        )->where(
+                                'id',
+                                $variantData['id']
+                            )->first();
+
+                        if (!$variant) {
+                            continue;
+                        }
+
+                        $existingVariantIds[] = $variant->id;
+
+                    } else {
+
+                        $variant = new ProductVariant();
+
+                        $variant->product_id = $product->id;
+                    }
+
+                    $variantImage = $variant->image;
+
+                    if (
+                        isset($variantData['image']) &&
+                        $variantData['image'] instanceof \Illuminate\Http\UploadedFile
+                    ) {
+
+                        if ($variant->image) {
+
+                            Storage::disk('public')->delete(
+                                $variant->image
+                            );
+                        }
+
+                        $variantImage = $variantData['image']->store(
+                            'product-variants',
+                            'public'
+                        );
+                    }
+
+                    $variant->fill([
+
+                        'sku' => $variantData['sku'] ?? null,
+
+                        'mrp' => $variantData['mrp'] ?? 0,
+
+                        'discount_type' => $variantData['discount_type'] ?? 'amount',
+
+                        'discount' => $variantData['discount'] ?? 0,
+
+                        'price' => $variantData['price'] ?? 0,
+
+                        'stock' => $variantData['stock'] ?? 0,
+
+                        'image' => $variantImage,
+
+                    ]);
+
+                    $variant->save();
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | New Variant Only
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        empty($variantData['id']) &&
+                        !empty($variantData['values'])
+                    ) {
+
+                        foreach ($variantData['values'] as $valueId) {
+
+                            ProductVariantValue::create([
+
+                                'variant_id' => $variant->id,
+
+                                'attribute_value_id' => $valueId,
+
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete Removed Variants
+            |--------------------------------------------------------------------------
+            */
+
+            $variantsToDelete = ProductVariant::where(
+                'product_id',
+                $product->id
+            );
+
+            if (!empty($existingVariantIds)) {
+
+                $variantsToDelete->whereNotIn(
+                    'id',
+                    $existingVariantIds
+                );
+            }
+
+            $variantsToDelete = $variantsToDelete->get();
+
+            foreach ($variantsToDelete as $variant) {
+
+                if ($variant->image) {
+
+                    Storage::disk('public')->delete(
+                        $variant->image
+                    );
+                }
+
+                ProductVariantValue::where(
+                    'variant_id',
+                    $variant->id
+                )->delete();
+
+                $variant->delete();
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Occasions
+            |--------------------------------------------------------------------------
+            */
+
+            $product->occasions()->sync(
+                $request->occasions ?? []
+            );
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.products.index')
+                ->with(
+                    'success',
+                    'Product updated successfully.'
+                );
+
+        } catch (\Exception $e) {
+
+
+            DB::rollBack();
+
+            dd(
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            );
         }
-        return redirect(
-            $request->redirect ?? route('admin.products.index')
-        )->with('success', 'Product Updated Successfully');
     }
 
     public function destroy($id)

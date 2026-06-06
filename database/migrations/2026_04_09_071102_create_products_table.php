@@ -29,25 +29,44 @@ return new class extends Migration {
 
             $table->string('sku')->nullable();
 
+            $table->string('product_code')->nullable();
+
             $table->text('short_description')->nullable();
 
             $table->longText('description')->nullable();
 
-            $table->decimal('base_price', 12, 2)->default(0);
+            $table->longText('delivery_returns')->nullable();
+
+            $table->decimal('mrp', 12, 2)->default(0);
+
+            $table->enum('discount_type', [
+                'amount',
+                'percentage'
+            ])->default('amount');
+
+            $table->decimal('discount', 12, 2)->default(0);
+
+            $table->decimal('price', 12, 2)->default(0);
 
             $table->integer('stock')->default(0);
 
-            $table->string('featured_image')->nullable();
+            $table->integer('min_qty')->default(1);
 
-            $table->boolean('is_featured')->default(false);
+            $table->string('delivery_time')->nullable();
 
-            $table->integer('sort_order')->default(0);
+            $table->boolean('quality')->default(false);
+
+            $table->boolean('pan_india')->default(false);
+
+            $table->string('meta_title')->nullable();
+
+            $table->text('meta_description')->nullable();
 
             $table->boolean('status')->default(true);
 
             $table->timestamps();
-
             $table->softDeletes();
+
         });
     }
 

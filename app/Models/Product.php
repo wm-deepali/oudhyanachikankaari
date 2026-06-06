@@ -16,31 +16,40 @@ class Product extends Model
 
         'name',
         'slug',
+
         'sku',
+        'product_code',
 
         'short_description',
         'description',
+        'delivery_returns',
 
-        'base_price',
+        'mrp',
+        'discount_type',
+        'discount',
+        'price',
 
         'stock',
+        'min_qty',
 
-        'featured_image',
+        'delivery_time',
 
-        'is_featured',
+        'quality',
+        'pan_india',
 
-        'sort_order',
+        'meta_title',
+        'meta_description',
 
         'status',
+
     ];
 
     protected $casts = [
 
-        'base_price'  => 'decimal:2',
+        'status' => 'boolean',
+        'quality' => 'boolean',
+        'pan_india' => 'boolean',
 
-        'is_featured' => 'boolean',
-
-        'status'      => 'boolean',
     ];
 
     public function category()
@@ -51,6 +60,23 @@ class Product extends Model
     public function subcategory()
     {
         return $this->belongsTo(Category::class, 'subcategory_id');
+    }
+
+    public function getDisplayImageAttribute()
+    {
+        $default = $this->images()
+            ->where('is_default', 1)
+            ->first();
+
+        if ($default) {
+            return asset('storage/' . $default->image);
+        }
+
+        $image = $this->images()->first();
+
+        return $image
+            ? asset('storage/' . $image->image)
+            : null;
     }
 
     public function attributeValues()
@@ -66,5 +92,16 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    // OCCASIONS
+    public function occasions()
+    {
+        return $this->belongsToMany(
+            GiftingOccasion::class,
+            'occasion_product',
+            'product_id',
+            'occasion_id'
+        );
     }
 }

@@ -20,7 +20,16 @@ return new class extends Migration {
 
             $table->string('sku')->nullable();
 
-            $table->decimal('price', 12, 2);
+            $table->decimal('mrp', 12, 2)->default(0);
+
+            $table->enum('discount_type', [
+                'amount',
+                'percentage'
+            ])->default('amount');
+
+            $table->decimal('discount', 12, 2)->default(0);
+
+            $table->decimal('price', 12, 2)->default(0);
 
             $table->integer('stock')->default(0);
 
@@ -29,6 +38,7 @@ return new class extends Migration {
             $table->boolean('status')->default(true);
 
             $table->timestamps();
+
         });
     }
 

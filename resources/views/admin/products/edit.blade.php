@@ -52,39 +52,7 @@
         padding: 20px !important;
     }
 
-    /* CATEGORY SCROLL */
-   .category-scroll {
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px;
 
-    /* Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: #999 transparent;
-}
-
-/* Chrome, Edge, Safari */
-.category-scroll::-webkit-scrollbar {
-    width: 5px;
-}
-
-.category-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.category-scroll::-webkit-scrollbar-thumb {
-    background: #999;
-    border-radius: 10px;
-}
-
-.category-scroll::-webkit-scrollbar-thumb:hover {
-    background: #666;
-}
-    /* SUBCATEGORY */
-    .subcategory-box {
-        padding-left: 20px;
-        margin-top: 5px;
-    }
 
     /* GRID SPACING */
     .row>div {
@@ -179,21 +147,21 @@
         transform: scale(1);
     }
 
-  .occasion-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    background: #ffffff;
-    cursor: pointer;
-    transition: 0.2s;
-    font-size: 14px;
-}
+    .occasion-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 14px;
+    }
 
     .occasion-box:hover {
-            background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
+        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
         border-color: #003108;
     }
 
@@ -227,71 +195,7 @@
         font-weight: 600;
     }
 
-    /* CATEGORY CARD */
-    .category-card {
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px 12px;
-        margin-bottom: 10px;
-        background: #fff;
-        transition: 0.2s;
-    }
 
-    .category-card:hover {
-        border-color: #003108;
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    /* CATEGORY ITEM */
-    .category-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    /* CATEGORY NAME */
-    .cat-name {
-        font-size: 14px;
-    }
-
-    /* SUBCATEGORY BOX */
-    .subcategory-box {
-        margin-top: 8px;
-        padding-left: 20px;
-        display: none;
-    }
-
-    /* SUBCATEGORY ITEM */
-    /*.subcategory-item {*/
-    /*    display: flex;*/
-    /*    align-items: center;*/
-    /*    gap: 6px;*/
-    /*    font-size: 13px;*/
-    /*    margin-bottom: 4px;*/
-    /*    cursor: pointer;*/
-    /*}*/
-    
-    .subcategory-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    margin-bottom: 5px;
-    cursor: pointer;
-    border: 1px solid #80808038;
-    /*padding-bottom: 5px;*/
-    background: #ffffff38;
-    padding: 10px 15px;
-    border-radius: 10px;
-}
-
-    /* CHECKBOX COLOR */
-    .category-item input,
-    .subcategory-item input {
-        accent-color: #003108;
-    }
 
     .thumb-box {
         position: relative;
@@ -322,521 +226,443 @@
         height: 20px;
         cursor: pointer;
     }
-    
-       .category-checkbox {
-    width: 12px;
-    height: 12px;
-    cursor: pointer;
-}
-
-
-
-.category-checkbox {
-    transform: scale(1.4);
-    cursor: pointer;
-    margin-right: 6px;
-}
 </style>
-
 <div class="main-section">
+
     @include('admin.header')
 
     <div class="app-content content container-fluid">
 
-        <div class="card shadow-sm">
-            <div class="card-header"><b>Edit Product</b></div>
+        <div class="breadcrumbs-top d-flex align-items-center bg-light mb-3">
 
-            <div class="card-body">
-                <form method="POST" action="{{ route('admin.products.update', $product->id) }}"
-                    enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
+            <div class="breadcrumb-wrapper">
 
-                    <div class="row">
+                <ol class="breadcrumb bg-transparent mb-0">
 
-                        <!-- LEFT -->
-                        <div class="col-md-8">
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.dashboard') }}">
+                            Dashboard
+                        </a>
+                    </li>
 
-                             <div class="card p-3 mb-3">
-                                <h5><b>Category & Sub Category</b></h5>
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('admin.products.index') }}">
+                            Products
+                        </a>
+                    </li>
 
-                                <div class="category-scroll">
-                                    @foreach($categories as $cat)
-                                        <div class="category-card">
+                    <li class="breadcrumb-item active">
+                        Edit Product
+                    </li>
 
-                                            <label class="category-item">
-                                                <input type="checkbox" class="category-checkbox" data-id="{{ $cat->id }}"
-                                                    name="categories[]" value="{{ $cat->id }}" {{ in_array($cat->id, $product->categories->pluck('id')->toArray()) ? 'checked' : '' }}>
-                                                <strong>{{ $cat->name }}</strong>
-                                            </label>
+                </ol>
 
-                                            @php
-                                                $selectedSubIds = $product->subcategories->pluck('id')->toArray();
+            </div>
 
-                                                $hasSelectedChild = collect($cat->children)
-                                                    ->pluck('id')
-                                                    ->intersect($selectedSubIds)
-                                                    ->isNotEmpty();
+        </div>
 
-                                                // ✅ NEW: also check if product linked directly to subcategory
-                                                $showSubcategory = $hasSelectedChild;
-                                                $selectedOccasions = $product->occasions->pluck('id')->toArray();
-                                            @endphp
-                                            <div class="subcategory-box" id="subcat_{{ $cat->id }}"
-                                                style="{{ $showSubcategory ? 'display:block;' : 'display:none;' }}">
-                                                @foreach($cat->children as $sub)
-                                                    <label class="subcategory-item">
-                                                        <input type="checkbox" name="sub_categories[]" value="{{ $sub->id }}" {{ in_array($sub->id, $product->subcategories->pluck('id')->toArray()) ? 'checked' : '' }}>
-                                                        {{ $sub->name }}
-                                                    </label>
-                                                @endforeach
+        <div class="content-wrapper pb-4">
+
+            <form method="POST" action="{{ route('admin.products.update', $product->id) }}"
+                enctype="multipart/form-data" class="save-form">
+
+                @csrf
+                @method('PUT')
+
+                <div class="row">
+
+                    <!-- LEFT -->
+                    <div class="col-md-6">
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Basic Info</b></h5>
+
+                            <div class="form-group">
+
+                                <label>Category *</label>
+
+                                <select name="category_id" id="category_id" class="form-control" required>
+
+                                    <option value="">
+                                        Select Category
+                                    </option>
+
+                                    @foreach($categories as $category)
+
+                                        <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
+
+
+                            <div class="form-group" id="subcategory-wrapper"
+                                style="{{ $product->category_id ? 'display:block;' : 'display:none;' }}">
+
+                                <label>Sub Category</label>
+
+                                <select name="subcategory_id" id="subcategory_id" class="form-control">
+
+                                    <option value="">
+                                        Select Sub Category
+                                    </option>
+
+                                    @foreach($subcategories as $subcategory)
+
+                                        <option value="{{ $subcategory->id }}" {{ $product->subcategory_id == $subcategory->id ? 'selected' : '' }}>
+
+                                            {{ $subcategory->name }}
+
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label>Product Name *</label>
+
+                                <input type="text" name="name" id="product_name" class="form-control"
+                                    value="{{ old('name', $product->name) }}" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label>Slug</label>
+
+                                <input type="text" name="slug" id="slug" class="form-control"
+                                    value="{{ old('slug', $product->slug) }}">
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+                                <label>Short Description</label>
+
+                                <textarea name="short_description" class="form-control"
+                                    rows="3">{{ old('short_description', $product->short_description) }}</textarea>
+
+                            </div>
+
+                        </div>
+
+
+
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Content</b></h5>
+
+                            <label>Details</label>
+                            <textarea name="description" id="description"
+                                class="form-control">{{ old('description', $product->description) }}</textarea>
+
+                            <label class="mt-2">Delivery & Returns</label>
+                            <textarea name="delivery_returns" id="delivery_returns"
+                                class="form-control">{{ old('delivery_returns', $product->delivery_returns) }}</textarea>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Media</b></h5>
+
+                            <!-- Upload New Images -->
+                            <label>Upload New Images (Max 6)</label>
+                            <input type="file" id="images" name="images[]" multiple accept="image/*"
+                                class="form-control">
+
+                            <!-- Existing Images -->
+                            <div class="mt-3">
+                                <label>Existing Images</label>
+
+                                <div class="d-flex flex-wrap">
+
+                                    @foreach($product->images as $img)
+                                        <div class="thumb-box" id="img_{{ $img->id }}">
+
+                                            <img src="{{ asset('storage/' . $img->image) }}">
+
+                                            <!-- REMOVE BUTTON -->
+                                            <div class="thumb-actions">
+                                                <button type="button" class="remove-btn"
+                                                    onclick="removeExistingImage({{ $img->id }})">×</button>
+                                            </div>
+
+                                            <!-- DEFAULT -->
+                                            <div class="text-center mt-1">
+                                                <input type="radio" name="default_type" value="old_{{ $img->id }}" {{ $img->is_default ? 'checked' : '' }}>
+                                                <small>Default</small>
                                             </div>
 
                                         </div>
                                     @endforeach
-                                </div>
-                            </div>
-
-                            {{-- BASIC --}}
-                           <div class="card p-3 mb-3">
-                                <h5><b>Basic Info</b></h5>
-
-                                <label>Name</label>
-                                <input type="text" name="name" value="{{ $product->name }}" class="form-control" required>
-
-                                <label class="mt-2">Slug</label>
-                                <input type="text" name="slug" value="{{ $product->slug }}" class="form-control">
-
-                                <label class="mt-2">Brand</label>
-                                <select name="brand_id" class="form-control">
-                                    <option value="">Select Brand</option>
-                                    @foreach($brands as $brand)
-                                        <option value="{{ $brand->id }}" {{ $product->brand_id == $brand->id ? 'selected' : '' }}>{{ $brand->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-
-                                <label class="mt-2">Sub Title</label>
-                                <textarea name="sub_title" class="form-control">{{ $product->sub_title }}</textarea>
-
-                                
-                                
-                            </div>
-                            
-                            {{-- INCLUSIONS --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Summary</b></h5>
-
-                                <div id="incWrap">
-                                    @foreach($product->inclusions as $inc)
-                                        <input type="text" name="inclusions[]" value="{{ $inc->title }}"
-                                            class="form-control mb-2">
-                                    @endforeach
-                                </div>
-
-                                <button type="button" onclick="addInc()" class="btn btn-sm btn-primary">Add
-                                    More</button>
-                            </div>
-
-                               <div class="card p-3 mb-3">
-    <h5><b>Media</b></h5>
-
-    <!-- Upload New Images -->
-    <label>Upload New Images (Max 6)</label>
-    <input type="file" id="images" name="images[]" multiple accept="image/*" class="form-control">
-
-    <!-- Existing Images -->
-    <div class="mt-3">
-        <label>Existing Images</label>
-
-        <div class="d-flex flex-wrap">
-
-            @foreach($product->images as $img)
-                <div class="thumb-box" id="img_{{ $img->id }}">
-
-                    <img src="{{ asset('storage/' . $img->image) }}">
-
-                    <!-- REMOVE BUTTON -->
-                    <div class="thumb-actions">
-                        <button type="button" class="remove-btn" onclick="removeExistingImage({{ $img->id }})">×</button>
-                    </div>
-
-                    <!-- DEFAULT -->
-                    <div class="text-center mt-1">
-                        <input type="radio" name="default_type" value="old_{{ $img->id }}"
-    {{ $img->is_default ? 'checked' : '' }}>
-                        <small>Default</small>
-                    </div>
-
-                </div>
-            @endforeach
-
-        </div>
-    </div>
-
-    <!-- NEW PREVIEW -->
-    <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
-
-    <!-- VIDEO -->
-     <label class="mt-3">Video URL (YouTube / MP4)</label>
-    <input type="text" name="video_url" value="{{ $product->video_url }}" class="form-control">
-     <small class="text-muted">
-                                    👉 Enter full YouTube URL. Example:
-                                    https://www.youtube.com/watch?v=abc123XYZ
-                                </small>
-</div>
-
-                            {{-- INVENTORY --}}
-                             <div class="card p-3 mb-3">
-                                <h5><b>Inventory</b></h5>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label>SKU</label>
-                                        <input type="text" name="sku" value="{{ $product->sku }}"
-                                            class="form-control mb-2" placeholder="SKU">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label>Min Qty</label>
-                                        <input type="number" name="min_qty" value="{{ $product->min_qty }}"
-                                            class="form-control mb-2" placeholder="Min Qty" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Product Code</label>
-                                        <input type="text" name="product_code" value="{{ $product->product_code }}"
-                                            class="form-control">
-
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="mt-2">Sort Order</label>
-                                        <input type="number" name="sort_order" value="{{ $product->sort_order }}"
-                                            class="form-control">
-
-                                    </div>
 
                                 </div>
-
-                                <label class="mt-2">Delivery Time</label>
-                                <input type="text" name="delivery_time" value="{{ $product->delivery_time }}"
-                                    class="form-control" placeholder="Delivery Time">
-
-                                <div class="mt-3">
-                                    <div class="row">
-
-                                        <div class="col-md-6 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="quality" {{ $product->quality ? 'checked' : '' }}>
-                                                <span>Quality Assurance</span>
-                                            </label>
-                                        </div>
-
-                                        <div class="col-md-6 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="pan_india" {{ $product->quality ? 'checked' : '' }}>
-                                                <span>PAN India Delivery</span>
-                                            </label>
-                                        </div>
-
-                                    </div>
-                                </div>
-
                             </div>
 
-                            {{-- PRICING --}}
-                           <div class="card p-3 mb-3">
-                                <h5><b>Pricing</b></h5>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <label>MRP</label>
-                                        <input type="number" name="mrp" id="mrp" value="{{ $product->mrp }}"
-                                            class="form-control" placeholder="MRP">
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label>Discount Type</label>
-                                        <select name="discount_type" id="discount_type" class="form-control">
-                                            <option value="amount" {{ $product->discount_type == 'amount' ? 'selected' : '' }}>Amount</option>
-                                            <option value="percentage" {{ $product->discount_type == 'percentage' ? 'selected' : '' }}>%</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label>Discount</label>
-                                        <input type="number" name="discount" id="discount"
-                                            value="{{ $product->discount }}" class="form-control"
-                                            placeholder="Discount">
-                                    </div>
-                                </div>
-
-                                <label class="mt-2">Final Price</label>
-                                <input type="text" name="price" id="price" value="{{ $product->price }}"
-                                    class="form-control mt-2" readonly>
-
-                            </div>
-
-                            {{-- CUSTOMIZATION --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Customization</b></h5>
-
-                                <div class="row">
-                                    @foreach($customizations as $c)
-                                        <div class="col-md-6">
-                                            <label>
-                                                <input type="checkbox" name="customizations[]" value="{{ $c->id }}" {{ in_array($c->id, $product->customizations->pluck('id')->toArray()) ? 'checked' : '' }}>
-                                                {{ $c->name }}
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                            </div>
-
-                           
-
-                            {{-- DETAILS --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>Content</b></h5>
-
-                                <label>Details</label>
-                                <textarea name="details" id="details"
-                                    class="form-control">{{ $product->details }}</textarea>
-
-                                <label class="mt-2">Branding Specs</label>
-                                <textarea name="delivery_returns" id="delivery_returns"
-                                    class="form-control">{{ $product->delivery_returns }}</textarea>
-                            </div>
-
+                            <!-- NEW PREVIEW -->
+                            <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
                         </div>
 
-                        <!-- RIGHT -->
-                        <div class="col-md-4">
 
-                            <div class="card p-3 mb-3">
-                                <h5>Occasions (Suitable for)</h5>
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Pricing</b></h5>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>MRP</label>
+                                    <input type="number" name="mrp" id="mrp" class="form-control"
+                                        value="{{ old('mrp', $product->mrp) }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>Discount Type</label>
+                                    <select name="discount_type" id="discount_type" class="form-control">
+                                        <option value="amount" {{ old('discount_type', $product->discount_type) == 'amount' ? 'selected' : '' }}>Amount</option>
+                                        <option value="percentage" {{ old('discount_type', $product->discount_type) == 'percentage' ? 'selected' : '' }}>%</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>Discount</label>
+                                    <input type="number" name="discount" id="discount" class="form-control"
+                                        value="{{ old('discount', $product->discount) }}">
+                                </div>
+                            </div>
+
+                            <label class="mt-2">Final Price</label>
+                            <input type="text" name="price" id="price" readonly class="form-control"
+                                value="{{ old('price', $product->price) }}">
+                        </div>
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Inventory</b></h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>SKU</label>
+                                    <input type="text" name="sku" class="form-control"
+                                        value="{{ old('sku', $product->sku) }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Min Qty</label>
+                                    <input type="number" name="min_qty" class="form-control"
+                                        value="{{ old('min_qty', $product->min_qty) }}" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Stock</label>
+                                    <input type="number" name="stock" class="form-control"
+                                        value="{{ old('stock', $product->stock) }}" required>
+                                </div>
+
+
+                                <div class="col-md-6">
+                                    <label>Product Code</label>
+                                    <input type="text" name="product_code" class="form-control"
+                                        value="{{ old('product_code', $product->product_code) }}">
+                                </div>
+
+                            </div>
+
+                            <label class="mt-2">Delivery Time</label>
+                            <input type="text" name="delivery_time" class="form-control"
+                                value="{{ old('delivery_time', $product->delivery_time) }}">
+
+                            <div class="mt-3">
+                                <div class="row">
+
+                                    <div class="col-md-6 mb-2">
+                                        <label class="occasion-box">
+                                            <input type="checkbox" name="quality" {{ old('quality', $product->quality) ? 'checked' : '' }}>
+                                            <span>Quality Assurance</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-6 mb-2">
+                                        <label class="occasion-box">
+                                            <input type="checkbox" name="pan_india" {{ old('pan_india', $product->pan_india) ? 'checked' : '' }}>
+                                            <span>PAN India Delivery</span>
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- OCCASIONS --}}
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
+
+                            <div class="row">
                                 @foreach($occasions as $o)
                                     <div class="col-12 mb-2">
                                         <label class="occasion-box">
-                                            <input type="checkbox" name="occasions[]" value="{{ $o->id }}" {{ in_array($o->id, $selectedOccasions) ? 'checked' : '' }}><span>{{ $o->title }}</span>
+                                            <input type="checkbox" name="occasions[]" value="{{ $o->id }}" {{ in_array($o->id, old('occasions', $selectedOccasions)) ? 'checked' : '' }}>
+                                            <span>{{ $o->title }}</span>
                                         </label>
                                     </div>
                                 @endforeach
                             </div>
+                        </div>
 
-                              <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Marketing Options</b></h5>
+                        <div class="card p-3 mb-3">
+                            <h5><b>SEO</b></h5>
 
-                                <div class="row">
+                            <label>Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control"
+                                value="{{ old('meta_title', $product->meta_title) }}">
 
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="featured" {{ $product->featured ? 'checked' : '' }}>
-                                            <span>Featured Products</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="new_arrival" {{ $product->new_arrival ? 'checked' : '' }}>
-                                            <span>New Arrivals</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="sale" {{ $product->sale ? 'checked' : '' }}>
-                                            <span>Exclusive on Sale</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="best_seller" {{ $product->best_seller ? 'checked' : '' }}>
-                                            <span>Best Sellers</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                            <label class="mt-2">Meta Description</label>
+                            <textarea name="meta_description"
+                                class="form-control">{{ old('meta_description', $product->meta_description) }}</textarea>
+                        </div>
 
 
-                            <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Availability</b></h5>
-
-                                <div class="row">
-                            
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="ready_to_ship" {{ $product->ready_to_ship ? 'checked' : '' }}>
-                                            <span>Ready to Ship</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="bulk_available" {{ $product->bulk_available ? 'checked' : '' }}>
-                                            <span>For Bulk Orders</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="gift_hamper" {{ $product->gift_hamper ? 'checked' : '' }}>
-                                            <span>Gift Hampers</span>
-                                        </label>
-                                    </div>
-
-                                </div>
-                            </div>
-
-
-                            <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Sell by Collections</b></h5>
-
-                                <div class="row">
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="is_premium" {{ $product->is_premium ? 'checked' : '' }}>
-                                            <span>Premium Products</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="is_engraving" {{ $product->is_engraving ? 'checked' : '' }}>
-                                            <span>Engravings</span>
-                                        </label>
-                                    </div>
-
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="is_personalized_engraving" {{ $product->is_personalized_engraving ? 'checked' : '' }}>
-                                            <span>Personalized Engraving</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="show_on_website"  {{ $product->show_on_website ? 'checked' : '' }}>
-                                            <span>Show on Website</span>
-                                        </label>
-                                    </div>
-
-                                </div>
-                            </div>
-
-
-                            <div class="card p-3 mb-3">
-                                <h5><b>Added By</b></h5>
-                                <input type="text" name="added_by" value="{{ $product->added_by }}"
-                                    class="form-control">
-                            </div>
-
-                            {{-- SEO --}}
-                            <div class="card p-3 mb-3">
-                                <h5><b>SEO</b></h5>
-
-                                <label>Meta Title</label>
-                                <input type="text" name="meta_title" value="{{ $product->meta_title }}"
-                                    class="form-control">
-
-                                <label class="mt-2">Meta Description</label>
-                                <textarea name="meta_description"
-                                    class="form-control">{{ $product->meta_description }}</textarea>
-                            </div>
-
-                           <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Actions</b></h5>
-
-                                <div class="row">
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="cart" {{ $product->cart ? 'checked' : '' }}>
-                                            <span>Add to Cart</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="whatsapp" {{ $product->whatsapp ? 'checked' : '' }}>
-                                            <span>WhatsApp</span>
-                                        </label>
-                                    </div>
-
-                                 <!--   <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="call" {{ $product->call ? 'checked' : '' }}>
-                                            <span>Call</span>
-                                        </label>
-                                    </div> -->
-                                </div>
-                            </div>
-
-                            <div class="card p-3">
-                                <label>Status</label>
-                                <select name="status" class="form-control">
-                                    <option value="1" {{ $product->status ? 'selected' : '' }}>Active</option>
-                                    <option value="0" {{ !$product->status ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                            </div>
-
+                        <div class="card p-3">
+                            <label>Status</label>
+                            <select name="status" class="form-control">
+                                <option value="1" {{ old('status', $product->status) == 1 ? 'selected' : '' }}>Active
+                                </option>
+                                <option value="0" {{ old('status', $product->status) == 0 ? 'selected' : '' }}>Inactive
+                                </option>
+                            </select>
                         </div>
 
                     </div>
 
-                    <input type="hidden"
-       name="redirect"
-       value="{{ $redirect ?? url()->previous() }}">
-       
-                    <button class="btn btn-success mt-3">Update Product</button>
+                    <div class="col-md-12">
+                        {{-- Attributes will come here later --}}
+                        <div id="attribute-container"></div>
 
-                </form>
-            </div>
+                        <div class="mb-3" id="variant-btn-wrapper" style="display:none;">
+
+                            <button type="button" id="generate-variants" class="btn btn-primary">
+
+                                <i class="fa fa-cogs"></i>
+                                Generate Variants
+
+                            </button>
+
+                        </div>
+
+                        {{-- Variants will come here later --}}
+                        <div id="variant-container"></div>
+                    </div>
+
+
+                </div>
+
+                <button type="submit" class="btn btn-success save-btn">
+
+                    <i class="fa fa-save"></i>
+                    Save Product
+
+                </button>
+
+                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
         </div>
 
     </div>
-</div>
 
-@include('admin.footer')
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
 <script>
+
+    let selectedAttributeValues = @json($selectedAttributeValues);
+    let existingVariants = @json($existingVariants);
+
+    console.log(existingVariants);
+
     CKEDITOR.config.versionCheck = false;
-    CKEDITOR.replace('details');
+    CKEDITOR.replace('description');
     CKEDITOR.replace('delivery_returns');
+
+    $(document).ready(function () {
+
+        let categoryId = $('#category_id').val();
+
+        if (categoryId) {
+
+            loadAttributes(categoryId);
+            if (existingVariants.length > 0) {
+
+                renderExistingVariants();
+
+            }
+
+        }
+
+    });
+
+    $(document).on('keyup', '#product_name', function () {
+
+        let slug = $(this)
+            .val()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+
+        $('#slug').val(slug);
+
+    });
 
     $('#mrp,#discount,#discount_type').on('keyup change', function () {
         let m = +$('#mrp').val() || 0;
         let d = +$('#discount').val() || 0;
         let t = $('#discount_type').val();
+
         let p = t == 'percentage' ? m - (m * d / 100) : m - d;
         if (p < 0) p = 0;
+
         $('#price').val(p.toFixed(2));
     });
 
-    function addInc() {
-        $('#incWrap').append('<input type="text" name="inclusions[]" class="form-control mb-2">');
-    }
+    $(document).on('submit', '.save-form', function () {
 
-    $('.category-checkbox').on('change', function () {
-        let id = $(this).data('id');
+        let btn = $(this).find('.save-btn');
 
-        if ($(this).is(':checked')) {
-            $('#subcat_' + id).slideDown();
-        } else {
-            $('#subcat_' + id).slideUp();
-            $('#subcat_' + id).find('input').prop('checked', false);
-        }
+        btn.prop('disabled', true);
+
+        btn.html(
+            '<i class="fa fa-spinner fa-spin"></i> Processing...'
+        );
+
     });
 
     let selectedFiles = [];
 
+   
 $('#images').on('change', function (e) {
     let files = Array.from(e.target.files);
 
@@ -892,15 +718,576 @@ function removeExistingImage(id) {
         }).appendTo('form');
     }
 }
+    // SUBMIT FIX
+    $('form').on('submit', function () {
+        let dataTransfer = new DataTransfer();
 
-// SUBMIT FIX
-$('form').on('submit', function () {
-    let dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
 
-    selectedFiles.forEach(file => {
-        dataTransfer.items.add(file);
+        document.getElementById('images').files = dataTransfer.files;
     });
 
-    document.getElementById('images').files = dataTransfer.files;
-});
+    $('#category_id').on('change', function () {
+
+        let categoryId = $(this).val();
+        $('#variant-container').html('');
+        $('#variant-btn-wrapper').hide();
+
+        $('#subcategory_id').html(
+            '<option value="">Loading...</option>'
+        );
+
+        if (!categoryId) {
+
+            $('#subcategory-wrapper').hide();
+
+            return;
+        }
+        loadAttributes(categoryId);
+        $.get(
+            '/admin/products/subcategories/' + categoryId,
+            function (response) {
+
+                if (response.length > 0) {
+
+                    let html =
+                        '<option value="">Select Sub Category</option>';
+
+                    $.each(response, function (i, item) {
+
+                        html += `
+                        <option value="${item.id}">
+                            ${item.name}
+                        </option>
+                    `;
+
+                    });
+
+                    $('#subcategory_id').html(html);
+
+                    $('#subcategory-wrapper').show();
+
+                } else {
+
+                    $('#subcategory-wrapper').hide();
+
+                }
+
+            }
+        );
+
+    });
+
+    function loadAttributes(categoryId) {
+        $('#attribute-container').html('');
+
+        $.get(
+            '/admin/products/category-attributes/' + categoryId,
+            function (response) {
+
+                let html = '';
+
+                if (response.length > 0) {
+
+                    html += `
+                    <div class="card shadow-sm mb-3">
+
+                        <div class="card-header">
+                            <strong>Attributes</strong>
+                        </div>
+
+                        <div class="card-body">
+                `;
+
+                    response.forEach(function (item) {
+
+                        html += `
+                        <div class="form-group">
+
+                            <label>
+                                ${item.attribute.name}
+                            </label>
+                    `;
+
+                        if (item.attribute.has_values) {
+
+                            item.attribute.values.forEach(function (value) {
+
+                                let checked = selectedAttributeValues.includes(value.id)
+                                    ? 'checked'
+                                    : '';
+
+                                html += `
+<div>
+
+    <label>
+
+        <input
+            type="checkbox"
+            class="attribute-value"
+
+            data-attribute-id="${item.attribute.id}"
+
+            data-attribute-name="${item.attribute.name}"
+
+            data-value-name="${value.value}"
+
+            data-variant="${item.used_for_variant}"
+
+            name="attribute_values[${item.attribute.id}][]"
+
+            value="${value.id}"
+
+            ${checked}
+        >
+
+        ${value.value}
+
+    </label>
+
+</div>
+`;
+
+                            });
+
+                        }
+
+                        html += `</div>`;
+
+                    });
+
+                    html += `
+                        </div>
+                    </div>
+                `;
+
+                    $('#attribute-container').html(html);
+                    $('#variant-btn-wrapper').show();
+
+
+                }
+                else {
+
+                    $('#attribute-container').html('');
+                    $('#variant-btn-wrapper').hide();
+
+                }
+            }
+        );
+    }
+
+    $(document).on('click', '#generate-variants', function () {
+
+        let variantAttributes = {};
+
+        $('.attribute-value:checked').each(function () {
+
+            if ($(this).data('variant') != 1) {
+                return;
+            }
+
+            let attributeId = $(this).data('attribute-id');
+
+            if (!variantAttributes[attributeId]) {
+                variantAttributes[attributeId] = [];
+            }
+
+            variantAttributes[attributeId].push({
+
+                id: $(this).val(),
+
+                name: $(this).data('value-name')
+
+            });
+
+        });
+
+        let groups = Object.values(variantAttributes);
+
+        if (groups.length === 0) {
+
+            alert(
+                'Please select at least one value from attributes marked as Variant.'
+            );
+
+            return;
+        }
+
+        let combinations = cartesian(groups);
+
+        renderVariants(combinations);
+
+    });
+
+    function cartesian(arr) {
+        if (arr.length === 1) {
+            return arr[0].map(item => [item]);
+        }
+
+        return arr.reduce(function (a, b) {
+
+            return a.flatMap(function (d) {
+
+                return b.map(function (e) {
+
+                    return [].concat(d, e);
+
+                });
+
+            });
+
+        });
+    }
+
+
+    function renderVariants(combinations) {
+        let html = `
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>Variants</strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered">
+
+                    <thead>
+
+                        <tr>
+
+                          <th>Variant</th>
+<th>SKU</th>
+<th>MRP</th>
+<th>Discount Type</th>
+<th>Discount</th>
+<th>Final Price</th>
+<th>Stock</th>
+<th>Image</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+    `;
+
+        combinations.forEach(function (combo, index) {
+
+            if (!Array.isArray(combo)) {
+                combo = [combo];
+            }
+
+            let names = combo.map(x => x.name);
+
+            html += `
+
+            <tr>
+
+                <td>
+
+                    ${names.join(' / ')}
+
+                </td>
+
+                <td>
+    <input type="text"
+           name="variants[${index}][sku]"
+           class="form-control">
+</td>
+
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][mrp]"
+           class="form-control">
+</td>
+
+<td>
+    <select
+        name="variants[${index}][discount_type]"
+        class="form-control">
+
+        <option value="amount">Amount</option>
+        <option value="percentage">%</option>
+
+    </select>
+</td>
+
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][discount]"
+           class="form-control">
+</td>
+
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][price]"
+           class="form-control"
+           readonly>
+</td>
+
+<td>
+    <input type="number"
+           name="variants[${index}][stock]"
+           class="form-control">
+</td>
+
+<td>
+    <input type="file"
+           name="variants[${index}][image]"
+           class="form-control">
+</td>
+            </tr>
+
+        `;
+
+            combo.forEach(function (item) {
+
+                html += `
+
+                <input
+                    type="hidden"
+                    name="variants[${index}][values][]"
+                    value="${item.id}">
+
+            `;
+
+            });
+
+        });
+
+        html += `
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    `;
+
+        $('#variant-container').html(html);
+    }
+
+    function renderExistingVariants() {
+
+        let html = `
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <strong>Variants</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered">
+
+                    <thead>
+                        <tr>
+                            <th>Variant</th>
+                            <th>SKU</th>
+                            <th>MRP</th>
+                            <th>Discount Type</th>
+                            <th>Discount</th>
+                            <th>Final Price</th>
+                            <th>Stock</th>
+                            <th>Image</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+    `;
+
+        existingVariants.forEach(function (variant, index) {
+
+            html += `
+
+        <tr>
+
+           <td>
+
+    ${variant.variant_name}
+
+    <input
+        type="hidden"
+        name="variants[${index}][id]"
+        value="${variant.id}">
+
+</td>
+
+            <td>
+                <input
+                    type="text"
+                    name="variants[${index}][sku]"
+                    class="form-control"
+                    value="${variant.sku ?? ''}">
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="variants[${index}][mrp]"
+                    class="form-control"
+                    value="${variant.mrp}">
+            </td>
+
+            <td>
+                <select
+                    name="variants[${index}][discount_type]"
+                    class="form-control">
+
+                    <option value="amount"
+                        ${variant.discount_type == 'amount' ? 'selected' : ''}>
+                        Amount
+                    </option>
+
+                    <option value="percentage"
+                        ${variant.discount_type == 'percentage' ? 'selected' : ''}>
+                        %
+                    </option>
+
+                </select>
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="variants[${index}][discount]"
+                    class="form-control"
+                    value="${variant.discount}">
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    step="0.01"
+                    name="variants[${index}][price]"
+                    class="form-control"
+                    value="${variant.price}"
+                    readonly>
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    name="variants[${index}][stock]"
+                    class="form-control"
+                    value="${variant.stock}">
+            </td>
+
+           <td>
+
+    ${variant.image
+        ? `
+            <div class="mb-2">
+
+                <img
+                    src="/storage/${variant.image}"
+                    style="
+                        width:60px;
+                        height:60px;
+                        object-fit:cover;
+                        border-radius:8px;
+                        border:1px solid #ddd;
+                    ">
+
+            </div>
+        `
+        : ''
+    }
+
+    <input
+        type="file"
+        name="variants[${index}][image]"
+        class="form-control">
+
+    <input
+        type="hidden"
+        name="variants[${index}][old_image]"
+        value="${variant.image ?? ''}">
+
+</td>
+
+        </tr>
+        `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+    `;
+
+        $('#variant-container').html(html);
+    }
+
+    $(document).on(
+        'keyup change',
+        'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
+        function () {
+
+            let row = $(this).closest('tr');
+
+            let mrp = parseFloat(
+                row.find('input[name$="[mrp]"]').val()
+            ) || 0;
+
+            let discount = parseFloat(
+                row.find('input[name$="[discount]"]').val()
+            ) || 0;
+
+            let discountType = row
+                .find('select[name$="[discount_type]"]')
+                .val();
+
+            let finalPrice = 0;
+
+            if (discountType === 'percentage') {
+
+                finalPrice =
+                    mrp - (mrp * discount / 100);
+
+            } else {
+
+                finalPrice =
+                    mrp - discount;
+
+            }
+
+            if (finalPrice < 0) {
+                finalPrice = 0;
+            }
+
+            row.find('input[name$="[price]"]')
+                .val(finalPrice.toFixed(2));
+
+        }
+    );
 </script>
+
+
+@include('admin.footer')

@@ -9,7 +9,14 @@ class ProductImage extends Model
     protected $fillable = [
         'product_id',
         'image',
+        'is_default',
         'sort_order',
+    ];
+
+    protected $casts = [
+
+        'is_default' => 'boolean',
+
     ];
 
     public function product()

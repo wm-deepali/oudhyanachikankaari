@@ -1,5 +1,232 @@
 @include('admin.top-header')
 
+<style>
+    /* GLOBAL */
+    .card {
+        border-radius: 14px;
+        border: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .card h5 {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #111827;
+    }
+
+    /* HEADER */
+    .card-header {
+        background: #fff;
+        font-size: 20px;
+        font-weight: 600;
+        border-bottom: 1px solid #eee;
+    }
+
+    /* FORM */
+    label {
+        font-weight: 500;
+        margin-bottom: 3px;
+        font-size: 14px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+    }
+
+    .form-control:focus {
+        background: #fff;
+        border-color: #003108;
+        box-shadow: none;
+    }
+
+    /* CHECKBOX */
+    input[type="checkbox"] {
+        margin-right: 6px;
+    }
+
+    /* SECTION SPACING */
+    .card.p-3 {
+        padding: 20px !important;
+    }
+
+
+
+    /* GRID SPACING */
+    .row>div {
+        margin-bottom: 12px;
+    }
+
+    /* RIGHT SIDEBAR */
+    .right-sticky {
+        position: sticky;
+        top: 20px;
+    }
+
+    /* BUTTON */
+    .btn-success {
+        background: linear-gradient(90deg, #f97316, #fb923c);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 25px;
+        font-weight: 500;
+    }
+
+    .btn-success:hover {
+        opacity: 0.9;
+    }
+
+    /* SMALL BUTTON */
+    .btn-sm {
+        border-radius: 8px;
+    }
+
+    /* CHECKBOX GRID */
+    .checkbox-grid label {
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    /* CUSTOMIZATION BOX */
+    .custom-box {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 10px;
+        transition: 0.2s;
+    }
+
+    .custom-box:hover {
+        border-color: #003108;
+        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
+    }
+
+    /* TEXTAREA */
+    textarea.form-control {
+        min-height: 90px;
+    }
+
+    .flag-group {
+        background: #f9fafb;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 10px 12px;
+        /* reduced from 15px */
+    }
+
+    .flag-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 6px;
+        /* reduced */
+        text-transform: uppercase;
+    }
+
+    .flag-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 6px;
+        /* reduced */
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 13px;
+        margin-bottom: 2px;
+        /* reduce vertical gap */
+    }
+
+    .flag-item:hover {
+        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
+    }
+
+    .flag-item input[type="checkbox"] {
+        accent-color: #003108;
+        transform: scale(1);
+    }
+
+    .occasion-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 14px;
+    }
+
+    .occasion-box:hover {
+        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
+        border-color: #003108;
+    }
+
+    .occasion-box input[type="checkbox"] {
+        accent-color: #003108;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    /* Optional: active feel when checked */
+    .occasion-box input[type="checkbox"]:checked+span {
+        font-weight: 500;
+        color: #003108;
+    }
+
+    /* tumhara existing CSS */
+
+    select.form-control {
+        /*height: 45px;*/
+        /*padding: 10px 12px;*/
+        padding: 0px 8px;
+    }
+
+    .flag-item input[type="checkbox"] {
+        accent-color: #003108;
+        cursor: pointer;
+    }
+
+    /* TITLE SPACING */
+    h5 b {
+        font-weight: 600;
+    }
+
+
+
+    .thumb-box {
+        position: relative;
+        margin: 5px;
+    }
+
+    .thumb-box img {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid #eee;
+    }
+
+    .thumb-actions {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+    }
+
+    .remove-btn {
+        background: red;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        font-size: 12px;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+</style>
 <div class="main-section">
 
     @include('admin.header')
@@ -41,206 +268,252 @@
 
                 @csrf
 
-                <div class="card shadow-sm mb-3">
+                <div class="row">
 
-                    <div class="card-header">
-                        <strong>Basic Information</strong>
+                    <!-- LEFT -->
+                    <div class="col-md-6">
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Basic Info</b></h5>
+
+                            <div class="form-group">
+
+                                <label>Category *</label>
+
+                                <select name="category_id" id="category_id" class="form-control" required>
+
+                                    <option value="">
+                                        Select Category
+                                    </option>
+
+                                    @foreach($categories as $category)
+
+                                        <option value="{{ $category->id }}">
+                                            {{ $category->name }}
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
+
+
+                            <div class="form-group" id="subcategory-wrapper" style="display:none;">
+
+                                <label>Sub Category</label>
+
+                                <select name="subcategory_id" id="subcategory_id" class="form-control">
+
+                                    <option value="">
+                                        Select Sub Category
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label>Product Name *</label>
+
+                                <input type="text" name="name" id="product_name" class="form-control" required>
+
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label>Slug</label>
+
+                                <input type="text" name="slug" id="slug" class="form-control">
+
+                            </div>
+
+
+
+                            <div class="form-group">
+
+                                <label>Short Description</label>
+
+                                <textarea name="short_description" class="form-control" rows="3"></textarea>
+
+                            </div>
+
+                        </div>
+
+
+
+
+                        <div class="card p-3 mb-3">
+                            <h5><b>Content</b></h5>
+
+                            <label>Details</label>
+                            <textarea name="description" id="description" class="form-control"></textarea>
+
+                            <label class="mt-2">Delivery & Returns</label>
+                            <textarea name="delivery_returns" id="delivery_returns" class="form-control"></textarea>
+                        </div>
+
+
+
+
                     </div>
 
-                    <div class="card-body">
+                    <div class="col-md-6">
 
-                        <div class="row">
+                        <div class="card p-3 mb-3">
+                            <h5><b>Media</b></h5>
+                            <label class="mt-2">Upload Images (Max 6)</label>
+                            <input type="file" id="images" name="images[]" multiple accept="image/*"
+                                class="form-control">
 
-                            <div class="col-md-6">
+                            <small class="text-muted">Max 6 images allowed</small>
 
-                                <div class="form-group">
+                            <!-- Thumbnails Preview -->
+                            <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
+                        </div>
 
-                                    <label>Category *</label>
 
-                                    <select name="category_id" id="category_id" class="form-control" required>
 
-                                        <option value="">
-                                            Select Category
-                                        </option>
+                        <div class="card p-3 mb-3">
+                            <h5><b>Pricing</b></h5>
 
-                                        @foreach($categories as $category)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>MRP</label>
+                                    <input type="number" name="mrp" id="mrp" class="form-control">
+                                </div>
 
-                                            <option value="{{ $category->id }}">
-                                                {{ $category->name }}
-                                            </option>
-
-                                        @endforeach
-
+                                <div class="col-md-4">
+                                    <label>Discount Type</label>
+                                    <select name="discount_type" id="discount_type" class="form-control">
+                                        <option value="amount">Amount</option>
+                                        <option value="percentage">%</option>
                                     </select>
-
                                 </div>
 
+                                <div class="col-md-4">
+                                    <label>Discount</label>
+                                    <input type="number" name="discount" id="discount" class="form-control">
+                                </div>
                             </div>
 
-                            <div class="col-md-6" id="subcategory-wrapper" style="display:none;">
+                            <label class="mt-2">Final Price</label>
+                            <input type="text" name="price" id="price" readonly class="form-control">
+                        </div>
 
-                                <div class="form-group">
+                        <div class="card p-3 mb-3">
+                            <h5><b>Inventory</b></h5>
 
-                                    <label>Sub Category</label>
-
-                                    <select name="subcategory_id" id="subcategory_id" class="form-control">
-
-                                        <option value="">
-                                            Select Sub Category
-                                        </option>
-
-                                    </select>
-
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>SKU</label>
+                                    <input type="text" name="sku" class="form-control">
                                 </div>
 
-                            </div>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Product Name *</label>
-
-                            <input type="text" name="name" id="product_name" class="form-control" required>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Slug</label>
-
-                            <input type="text" name="slug" id="slug" class="form-control">
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>SKU</label>
-
-                            <input type="text" name="sku" class="form-control">
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Short Description</label>
-
-                            <textarea name="short_description" class="form-control" rows="3"></textarea>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Description</label>
-
-                            <textarea name="description" class="form-control" rows="6"></textarea>
-
-                        </div>
-
-                        <div class="row">
-
-                            <div class="col-md-4">
-
-                                <div class="form-group">
-
-                                    <label>Base Price</label>
-
-                                    <input type="number" step="0.01" name="base_price" class="form-control" value="0">
-
+                                <div class="col-md-6">
+                                    <label>Min Qty</label>
+                                    <input type="number" name="min_qty" class="form-control" required>
                                 </div>
 
-                            </div>
-
-                            <div class="col-md-4">
-
-                                <div class="form-group">
-
+                                <div class="col-md-6">
                                     <label>Stock</label>
+                                    <input type="number" name="stock" class="form-control" required>
+                                </div>
 
-                                    <input type="number" name="stock" class="form-control" value="0">
 
+                                <div class="col-md-6">
+                                    <label>Product Code</label>
+                                    <input type="text" name="product_code" class="form-control">
                                 </div>
 
                             </div>
 
-                            <div class="col-md-4">
+                            <label class="mt-2">Delivery Time</label>
+                            <input type="text" name="delivery_time" class="form-control">
 
-                                <div class="form-group">
+                            <div class="mt-3">
+                                <div class="row">
 
-                                    <label>Sort Order</label>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="occasion-box">
+                                            <input type="checkbox" name="quality">
+                                            <span>Quality Assurance</span>
+                                        </label>
+                                    </div>
 
-                                    <input type="number" name="sort_order" class="form-control" value="0">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="occasion-box">
+                                            <input type="checkbox" name="pan_india">
+                                            <span>PAN India Delivery</span>
+                                        </label>
+                                    </div>
 
                                 </div>
-
                             </div>
-
                         </div>
 
-                        <div class="form-group">
+                         {{-- OCCASIONS --}}
+                            <div class="card p-3 mb-3">
+                                <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
 
-                            <label>Featured Image</label>
+                                <div class="row">
+                                    @foreach($occasions as $o)
+                                        <div class="col-12 mb-2">
+                                            <label class="occasion-box">
+                                                <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
+                                                <span>{{ $o->title }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                        <div class="card p-3 mb-3">
+                            <h5><b>SEO</b></h5>
 
-                            <input type="file" name="featured_image" class="form-control">
+                            <label>Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control">
 
+                            <label class="mt-2">Meta Description</label>
+                            <textarea name="meta_description" class="form-control"></textarea>
                         </div>
 
-                        <div class="form-group">
 
-                            <label>Is Featured</label>
-
-                            <select name="is_featured" class="form-control">
-
-                                <option value="0">
-                                    No
-                                </option>
-
-                                <option value="1">
-                                    Yes
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="form-group">
-
+                        <div class="card p-3">
                             <label>Status</label>
-
                             <select name="status" class="form-control">
-
-                                <option value="1">
-                                    Active
-                                </option>
-
-                                <option value="0">
-                                    Inactive
-                                </option>
-
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
                             </select>
-
                         </div>
 
                     </div>
 
+                    <div class="col-md-12">
+                        {{-- Attributes will come here later --}}
+                        <div id="attribute-container"></div>
+
+                        <div class="mb-3" id="variant-btn-wrapper" style="display:none;">
+
+                            <button type="button" id="generate-variants" class="btn btn-primary">
+
+                                <i class="fa fa-cogs"></i>
+                                Generate Variants
+
+                            </button>
+
+                        </div>
+
+                        {{-- Variants will come here later --}}
+                        <div id="variant-container"></div>
+                    </div>
+
+
                 </div>
-
-                {{-- Attributes will come here later --}}
-                <div id="attribute-container"></div>
-
-                <div class="mb-3" id="variant-btn-wrapper" style="display:none;">
-
-                    <button type="button" id="generate-variants" class="btn btn-primary">
-
-                        <i class="fa fa-cogs"></i>
-                        Generate Variants
-
-                    </button>
-
-                </div>
-
-                {{-- Variants will come here later --}}
-                <div id="variant-container"></div>
 
                 <button type="submit" class="btn btn-success save-btn">
 
@@ -264,7 +537,14 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
 <script>
+
+    CKEDITOR.config.versionCheck = false;
+    CKEDITOR.replace('description');
+    CKEDITOR.replace('delivery_returns');
+
 
     $(document).on('keyup', '#product_name', function () {
 
@@ -278,6 +558,17 @@
 
     });
 
+     $('#mrp,#discount,#discount_type').on('keyup change', function () {
+        let m = +$('#mrp').val() || 0;
+        let d = +$('#discount').val() || 0;
+        let t = $('#discount_type').val();
+
+        let p = t == 'percentage' ? m - (m * d / 100) : m - d;
+        if (p < 0) p = 0;
+
+        $('#price').val(p.toFixed(2));
+    });
+
     $(document).on('submit', '.save-form', function () {
 
         let btn = $(this).find('.save-btn');
@@ -288,6 +579,66 @@
             '<i class="fa fa-spinner fa-spin"></i> Processing...'
         );
 
+    });
+
+    let selectedFiles = [];
+
+    $('#images').on('change', function (e) {
+        let files = Array.from(e.target.files);
+
+        if ((selectedFiles.length + files.length) > 6) {
+            alert('Maximum 6 images allowed');
+            return;
+        }
+
+        files.forEach(file => {
+            selectedFiles.push(file);
+        });
+
+        renderPreview();
+    });
+
+    function renderPreview() {
+        $('#previewContainer').html('');
+
+        selectedFiles.forEach((file, index) => {
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+                let html = `
+                <div class="thumb-box">
+                    <img src="${e.target.result}">
+
+                    <div class="thumb-actions">
+                        <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
+                    </div>
+
+                    <div class="text-center mt-1">
+                        <input type="radio" name="default_image" value="${index}" ${index === 0 ? 'checked' : ''}>
+                        <small>Default</small>
+                    </div>
+                </div>
+            `;
+                $('#previewContainer').append(html);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        renderPreview();
+    }
+
+    $('form').on('submit', function () {
+        let dataTransfer = new DataTransfer();
+
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        document.getElementById('images').files = dataTransfer.files;
     });
 
     $('#category_id').on('change', function () {
@@ -464,8 +815,8 @@
         if (groups.length === 0) {
 
             alert(
-    'Please select at least one value from attributes marked as Variant.'
-);
+                'Please select at least one value from attributes marked as Variant.'
+            );
 
             return;
         }
@@ -518,9 +869,12 @@
 
                         <tr>
 
-                           <th>Variant</th>
+                          <th>Variant</th>
 <th>SKU</th>
-<th>Price</th>
+<th>MRP</th>
+<th>Discount Type</th>
+<th>Discount</th>
+<th>Final Price</th>
 <th>Stock</th>
 <th>Image</th>
 
@@ -551,40 +905,54 @@
                 </td>
 
                 <td>
+    <input type="text"
+           name="variants[${index}][sku]"
+           class="form-control">
+</td>
 
-                    <input
-                        type="text"
-                        name="variants[${index}][sku]"
-                        class="form-control">
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][mrp]"
+           class="form-control">
+</td>
 
-                </td>
-
-                <td>
-
-                    <input
-                        type="number"
-                        step="0.01"
-                        name="variants[${index}][price]"
-                        class="form-control">
-
-                </td>
-
-                <td>
-
-                    <input
-                        type="number"
-                        name="variants[${index}][stock]"
-                        class="form-control">
-
-                </td>
-
-                <td>
-
-    <input
-        type="file"
-        name="variants[${index}][image]"
+<td>
+    <select
+        name="variants[${index}][discount_type]"
         class="form-control">
 
+        <option value="amount">Amount</option>
+        <option value="percentage">%</option>
+
+    </select>
+</td>
+
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][discount]"
+           class="form-control">
+</td>
+
+<td>
+    <input type="number"
+           step="0.01"
+           name="variants[${index}][price]"
+           class="form-control"
+           readonly>
+</td>
+
+<td>
+    <input type="number"
+           name="variants[${index}][stock]"
+           class="form-control">
+</td>
+
+<td>
+    <input type="file"
+           name="variants[${index}][image]"
+           class="form-control">
 </td>
             </tr>
 
@@ -621,6 +989,50 @@
 
         $('#variant-container').html(html);
     }
+
+    $(document).on(
+    'keyup change',
+    'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
+    function () {
+
+        let row = $(this).closest('tr');
+
+        let mrp = parseFloat(
+            row.find('input[name$="[mrp]"]').val()
+        ) || 0;
+
+        let discount = parseFloat(
+            row.find('input[name$="[discount]"]').val()
+        ) || 0;
+
+        let discountType = row
+            .find('select[name$="[discount_type]"]')
+            .val();
+
+        let finalPrice = 0;
+
+        if (discountType === 'percentage') {
+
+            finalPrice =
+                mrp - (mrp * discount / 100);
+
+        } else {
+
+            finalPrice =
+                mrp - discount;
+
+        }
+
+        if (finalPrice < 0) {
+            finalPrice = 0;
+        }
+
+        row.find('input[name$="[price]"]')
+            .val(finalPrice.toFixed(2));
+
+    }
+);
+
 </script>
 
 

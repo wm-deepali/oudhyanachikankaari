@@ -189,7 +189,7 @@
                                                                     <td>
 
                                                                         @if($item->display_image)
-                                                                            <img src="{{ asset('storage/' . $item->display_image) }}" width="60" height="60"
+                                                                            <img src="{{  $item->display_image }}" width="60" height="60"
                                                                                 style="object-fit:cover;">
                                                                         @else
                                                                             <span class="text-muted">No Image</span>
@@ -203,9 +203,9 @@
 
                                                                     <td>
                                                                         <small>
-                                                                            {{ $item->category_names ?? '-' }} <br>
+                                                                            {{ $item->category->name ?? '-' }} <br>
                                                                             <span class="text-muted">
-                                                                                {{ $item->subcategory_names ?? '' }}
+                                                                                {{ $item->subcategory->name ?? '' }}
                                                                             </span>
                                                                         </small>
                                                                     </td>
