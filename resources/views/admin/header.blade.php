@@ -86,6 +86,13 @@
                     </a>
                 </li>
 
+                <li class="{{ request()->routeIs('admin.collections.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.collections.index') }}">
+                        <i class="fa-solid fa-layer-group"></i> Collections
+                    </a>
+                </li>
+
+
                 <li class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.products.index') }}">
                         <i class="fa-solid fa-box"></i> Manage Products

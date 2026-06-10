@@ -8,7 +8,6 @@ use App\Models\Brand;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Category;
-use App\Models\Client;
 use App\Models\ContactBranch;
 use App\Models\ContactEnquiry;
 use App\Models\Faq;
@@ -23,9 +22,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\Enquiry;
 use App\Models\EnquiryItem;
 use App\Models\State;
-use App\Models\DynamicPage;
 use App\Models\Testimonial;
-use Illuminate\Support\Str;
 use App\Models\Team;
 use App\Models\PackageEnquiry;
 use App\Models\GeneralEnquiry;
@@ -33,7 +30,6 @@ use App\Models\VendorType;
 use App\Models\VendorEnquiry;
 use App\Models\SupplierEnquiry;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use App\Models\Wishlist;
 use App\Models\HomeBrandSection;
 use Carbon\Carbon;
@@ -41,13 +37,174 @@ use App\Models\GalleryImage;
 use App\Models\HomeDealBanner;
 use App\Models\HomeHeroSlide;
 use App\Models\HomeHeroBanner;
+use App\Models\HomeWhy;
+use App\Models\HomeWhyCard;
+use App\Models\HomeFeatureCard;
+
 
 class FrontController extends Controller
 {
     public function home(Request $request)
     {
-      
-        return view('front-pages.home');
+
+        $sliders = HomeSlider::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $textSliders = HomeTextSlider::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $featureCards = HomeFeatureCard::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $popularCategories = Category::withCount('children')
+            ->whereNull('parent_id')
+            ->where('is_popular', 1)
+            ->where('status', 1)
+            ->take(10)
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        $occasions = GiftingOccasion::where('status', 1)
+            ->latest()
+            ->get();
+
+        $saleProducts = Product::with(['images'])
+            ->where('status', 1)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $newArrivalProducts = Product::whereHas('collections', function ($query) {
+            $query->where('code', 'new_arrival');
+        })
+            ->where('status', 1)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $bestSellers = Product::whereHas('collections', function ($q) {
+            $q->where('code', 'best_seller');
+        })
+            ->where('status', 1)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $premiumCollections = Product::whereHas('collections', function ($q) {
+            $q->where('code', 'premium_collection');
+        })
+            ->where('status', 1)
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $exclusiveCollections = Product::whereHas('collections', function ($q) {
+            $q->where('code', 'exclusive_collection');
+        })
+            ->where('status', 1)
+            ->latest()
+            ->take(8)
+            ->get();
+
+
+        $featuredCategories = Category::with([
+            'products.images'
+        ])
+            ->where('status', 1)
+            ->where('is_featured', 1) // or your featured flag
+            ->take(5)
+            ->get()
+            ->map(function ($category) {
+
+                $prices = $category->products->pluck('price')->filter();
+
+                $category->min_price = $prices->min();
+                $category->max_price = $prices->max();
+
+                return $category;
+            });
+
+        $galleryColumn1 = GalleryImage::where('status', 1)
+            ->where('column_no', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $galleryColumn2 = GalleryImage::where('status', 1)
+            ->where('column_no', 2)
+            ->orderBy('sort_order')
+            ->get();
+
+        $galleryColumn3 = GalleryImage::where('status', 1)
+            ->where('column_no', 3)
+            ->orderBy('sort_order')
+            ->get();
+
+        $brandSection = HomeBrandSection::with([
+            'images' => function ($q) {
+                $q->where('status', 1)
+                    ->orderBy('sort_order');
+            }
+        ])
+            ->where('status', 1)
+            ->first();
+
+        $dealBanners = HomeDealBanner::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $heroSlides = HomeHeroSlide::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $heroBanners = HomeHeroBanner::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
+        $reels = Testimonial::where('status', 1)
+            ->where(function ($q) {
+                $q->whereNotNull('reel_file')
+                    ->orWhereNotNull('reel_url');
+            })
+            ->latest()
+            ->get();
+
+        $testimonials = Testimonial::where('status', 1)
+            ->where('type', 'Text')
+            ->latest()
+            ->get();
+
+        $why = HomeWhy::first();
+
+        $whyCards = HomeWhyCard::orderBy('id')->get();
+
+
+        return view('front-pages.home', compact(
+            'sliders',
+            'textSliders',
+            'featureCards',
+            'popularCategories',
+            'occasions',
+            'galleryColumn1',
+            'galleryColumn2',
+            'galleryColumn3',
+            'brandSection',
+            'heroSlides',
+            'heroBanners',
+            'reels',
+            'testimonials',
+            'dealBanners',
+            'saleProducts',
+            'newArrivalProducts',
+            'bestSellers',
+            'premiumCollections',
+            'featuredCategories',
+            'exclusiveCollections',
+            'why',
+            'whyCards'
+        ));
     }
 
     public function searchSuggestions(Request $request)
@@ -60,7 +217,6 @@ class FrontController extends Controller
 
         $products = Product::with('images')
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->where('name', 'LIKE', "%{$query}%")
             ->take(5)
             ->get([
@@ -80,7 +236,6 @@ class FrontController extends Controller
         // Parent Categories
         $categories = Category::whereNull('parent_id')
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->where('name', 'LIKE', "%{$query}%")
             ->take(5)
             ->get([
@@ -94,7 +249,6 @@ class FrontController extends Controller
         $subCategories = Category::with('parent')
             ->whereNotNull('parent_id')
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->where('name', 'LIKE', "%{$query}%")
             ->take(5)
             ->get()
@@ -131,45 +285,13 @@ class FrontController extends Controller
     {
         $categories = Category::with([
             'children' => function ($q) {
-                $q->where('status', 1)
-                    ->where('show_on_website', 1);
+                $q->where('status', 1);
             }
         ])
-            ->withCount([
-                'products as direct_products_count' => function ($q) {
-                    $q->where('status', 1)
-                        ->where('show_on_website', 1);
-                }
-            ])
             ->whereNull('parent_id')
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->orderBy('sort_order', 'asc')
-            ->paginate(15);
-
-        foreach ($categories as $category) {
-
-            $subcategoryIds = $category->children->pluck('id');
-
-            $subcategoryProductsCount = DB::table('product_subcategories')
-                ->join('products', 'products.id', '=', 'product_subcategories.product_id')
-                ->whereIn('product_subcategories.subcategory_id', $subcategoryIds)
-                ->where('products.status', 1)
-                ->where('products.show_on_website', 1)
-                ->distinct()
-                ->count('product_subcategories.product_id');
-
-            $category->products_count =
-                $category->direct_products_count + $subcategoryProductsCount;
-        }
-
-        // AJAX Load More
-        if ($request->ajax()) {
-            return view(
-                'front-pages.partials.category-items',
-                compact('categories')
-            )->render();
-        }
+            ->get();
 
         return view('front-pages.categories', compact('categories'));
     }
@@ -182,7 +304,6 @@ class FrontController extends Controller
         ])
             ->where('slug', $slug)
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->firstOrFail();
 
         $products = Product::with(['images', 'categories', 'subcategories'])
@@ -201,7 +322,6 @@ class FrontController extends Controller
             })
 
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->paginate(12);
 
         $subcategories = $category->children()
@@ -241,7 +361,6 @@ class FrontController extends Controller
     {
         $category = Category::where('slug', $slug)
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->firstOrFail();
 
         $products = Product::with([
@@ -252,7 +371,6 @@ class FrontController extends Controller
             'occasions'
         ])
             ->where('status', 1)
-            ->where('show_on_website', 1)
 
             ->where(function ($q) use ($category) {
 
@@ -482,8 +600,7 @@ class FrontController extends Controller
     public function products(Request $request)
     {
         $query = Product::with(['images', 'categories', 'subcategories'])
-            ->where('status', 1)
-            ->where('show_on_website', 1);
+            ->where('status', 1);
 
         $title = 'Products Collection';
 
@@ -603,69 +720,68 @@ class FrontController extends Controller
 
     public function productDetail($slug)
     {
-        $product = Product::with([
-            'brand',
-            'images',
-            'categories',
-            'subcategories',
-            'occasions',
-            'customizations',
-            'inclusions'
-        ])
-            ->where('slug', $slug)
-            ->where('status', 1)
-            ->firstOrFail();
+        // $product = Product::with([
+        //     'brand',
+        //     'images',
+        //     'categories',
+        //     'subcategories',
+        //     'occasions',
+        //     'customizations',
+        //     'inclusions'
+        // ])
+        //     ->where('slug', $slug)
+        //     ->where('status', 1)
+        //     ->firstOrFail();
 
-        $subcategoryIds = $product->subcategories->pluck('id');
-        $categoryIds = $product->categories->pluck('id');
+        // $subcategoryIds = $product->subcategories->pluck('id');
+        // $categoryIds = $product->categories->pluck('id');
 
-        $relatedProducts = Product::with(['brand', 'images'])
-            ->where('id', '!=', $product->id)
-            ->where(function ($query) use ($subcategoryIds, $categoryIds) {
+        // $relatedProducts = Product::with(['brand', 'images'])
+        //     ->where('id', '!=', $product->id)
+        //     ->where(function ($query) use ($subcategoryIds, $categoryIds) {
 
-                if ($subcategoryIds->count()) {
+        //         if ($subcategoryIds->count()) {
 
-                    $query->whereHas('subcategories', function ($q) use ($subcategoryIds) {
-                        $q->whereIn('categories.id', $subcategoryIds);
-                    });
+        //             $query->whereHas('subcategories', function ($q) use ($subcategoryIds) {
+        //                 $q->whereIn('categories.id', $subcategoryIds);
+        //             });
 
-                } elseif ($categoryIds->count()) {
+        //         } elseif ($categoryIds->count()) {
 
-                    $query->whereHas('categories', function ($q) use ($categoryIds) {
-                        $q->whereIn('categories.id', $categoryIds);
-                    });
+        //             $query->whereHas('categories', function ($q) use ($categoryIds) {
+        //                 $q->whereIn('categories.id', $categoryIds);
+        //             });
 
-                }
+        //         }
 
-            })
-            ->latest()
-            ->take(4)
-            ->get();
+        //     })
+        //     ->latest()
+        //     ->take(4)
+        //     ->get();
 
-        $newArrivals = Product::with(['brand', 'images'])
-            ->where('new_arrival', 1)
-            ->where('status', 1)
-            ->where('id', '!=', $product->id)
-            ->latest()
-            ->take(4)
-            ->get();
+        // $newArrivals = Product::with(['brand', 'images'])
+        //     ->where('new_arrival', 1)
+        //     ->where('status', 1)
+        //     ->where('id', '!=', $product->id)
+        //     ->latest()
+        //     ->take(4)
+        //     ->get();
 
-        $faqs = Faq::where('status', 1)
-            ->get();
+        // $faqs = Faq::where('status', 1)
+        //     ->get();
 
-        $otherCategories = Category::where('status', 1)
-            ->whereNull('parent_id')
-            ->where('show_on_website', 1)
-            ->whereNotIn(
-                'id',
-                $product->categories->pluck('id')
-            )
-            ->take(8)
-            ->get();
+        // $otherCategories = Category::where('status', 1)
+        //     ->whereNull('parent_id')
+        //     ->whereNotIn(
+        //         'id',
+        //         $product->categories->pluck('id')
+        //     )
+        //     ->take(8)
+        //     ->get();
 
         return view(
             'front-pages.product-detail',
-            compact('product', 'relatedProducts', 'faqs', 'newArrivals', 'otherCategories')
+            // compact('product', 'relatedProducts', 'faqs', 'newArrivals', 'otherCategories')
         );
     }
 
@@ -803,14 +919,17 @@ class FrontController extends Controller
 
     public function thankYou($id)
     {
-        $enquiry = Enquiry::with([
-            'state',
-            'city',
-            'items.product',
-            'items.customization'
-        ])->findOrFail($id);
+        // $enquiry = Enquiry::with([
+        //     'state',
+        //     'city',
+        //     'items.product',
+        //     'items.customization'
+        // ])->findOrFail($id);
 
-        return view('front-pages.thank-you', compact('enquiry'));
+        return view(
+            'front-pages.thank-you',
+            // compact('enquiry')
+        );
     }
 
     public function faqs(Request $request)
@@ -831,41 +950,41 @@ class FrontController extends Controller
 
     public function blogDetails(Request $request, $slug)
     {
-        $blog = Blog::where('slug', $slug)
-            ->where('status', 1)
-            ->firstOrFail();
+        // $blog = Blog::where('slug', $slug)
+        //     ->where('status', 1)
+        //     ->firstOrFail();
 
-        $latestBlogs = Blog::where('status', 1)
-            ->where('id', '!=', $blog->id)
-            ->latest()
-            ->take(3)
-            ->get();
+        // $latestBlogs = Blog::where('status', 1)
+        //     ->where('id', '!=', $blog->id)
+        //     ->latest()
+        //     ->take(3)
+        //     ->get();
 
-        $searchResults = collect();
+        // $searchResults = collect();
 
-        if ($request->filled('search')) {
+        // if ($request->filled('search')) {
 
-            $searchResults = Blog::where('status', 1)
-                ->where(function ($q) use ($request) {
+        //     $searchResults = Blog::where('status', 1)
+        //         ->where(function ($q) use ($request) {
 
-                    $q->where('title', 'like', '%' . $request->search . '%')
-                        ->orWhere('short_description', 'like', '%' . $request->search . '%')
-                        ->orWhere('content', 'like', '%' . $request->search . '%');
+        //             $q->where('title', 'like', '%' . $request->search . '%')
+        //                 ->orWhere('short_description', 'like', '%' . $request->search . '%')
+        //                 ->orWhere('content', 'like', '%' . $request->search . '%');
 
-                })
-                ->latest()
-                ->take(10)
-                ->get();
+        //         })
+        //         ->latest()
+        //         ->take(10)
+        //         ->get();
 
-        }
+        // }
 
         return view(
             'front-pages.blog-details',
-            compact(
-                'blog',
-                'latestBlogs',
-                'searchResults'
-            )
+            // compact(
+            //     'blog',
+            //     'latestBlogs',
+            //     'searchResults'
+            // )
         );
     }
 
@@ -887,17 +1006,20 @@ class FrontController extends Controller
     public function dynamicPage($slug)
     {
         // match slug with page_name
-        $page = DynamicPage::where('status', 1)
-            ->get()
-            ->first(function ($p) use ($slug) {
-                return Str::slug($p->page_name) === $slug;
-            });
+        // $page = DynamicPage::where('status', 1)
+        //     ->get()
+        //     ->first(function ($p) use ($slug) {
+        //         return Str::slug($p->page_name) === $slug;
+        //     });
 
-        if (!$page) {
-            abort(404);
-        }
+        // if (!$page) {
+        //     abort(404);
+        // }
 
-        return view('front-pages.dynamic-page', compact('page'));
+        return view(
+            'front-pages.dynamic-page'
+            // , compact('page')
+        );
     }
 
     public function whyUs(Request $request)
@@ -935,11 +1057,11 @@ class FrontController extends Controller
         return view('front-pages.careers');
     }
 
-    public function bulkOrder(Request $request)
+    public function bulkEnquiry(Request $request)
     {
-        $categories = Category::where('status', 1)->where('show_on_website', 1)->whereNull('parent_id')->get();
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
 
-        return view('front-pages.bulk-order', compact('categories'));
+        return view('front-pages.bulk-enquiry', compact('categories'));
     }
 
     public function aboutUs(Request $request)
@@ -948,7 +1070,7 @@ class FrontController extends Controller
             ->latest()
             ->get();
 
-        return view('front-pages.about-us', compact('teams'));
+        return view('front-pages.about', compact('teams'));
     }
 
     public function awards(Request $request)
@@ -964,7 +1086,6 @@ class FrontController extends Controller
     {
         $products = Product::where('is_personalized_engraving', 1)
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->latest()
             ->take(6)
             ->get();
@@ -982,7 +1103,6 @@ class FrontController extends Controller
     {
         $products = Product::where('is_engraving', 1)
             ->where('status', 1)
-            ->where('show_on_website', 1)
             ->latest()
             ->take(6)
             ->get();
@@ -1410,16 +1530,8 @@ class FrontController extends Controller
     public function occasions(Request $request)
     {
         $occasions = GiftingOccasion::where('status', 1)
-            ->orderBy('title')
-            ->paginate(8);
-
-        // AJAX request
-        if ($request->ajax()) {
-            return view(
-                'front-pages.partials.occasion-items',
-                compact('occasions')
-            )->render();
-        }
+            ->latest()
+            ->get();
 
         return view('front-pages.occasions', compact('occasions'));
     }

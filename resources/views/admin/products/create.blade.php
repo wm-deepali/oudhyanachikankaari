@@ -345,8 +345,6 @@
                         </div>
 
 
-
-
                         <div class="card p-3 mb-3">
                             <h5><b>Content</b></h5>
 
@@ -357,12 +355,6 @@
                             <textarea name="delivery_returns" id="delivery_returns" class="form-control"></textarea>
                         </div>
 
-
-
-
-                    </div>
-
-                    <div class="col-md-6">
 
                         <div class="card p-3 mb-3">
                             <h5><b>Media</b></h5>
@@ -376,8 +368,9 @@
                             <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
                         </div>
 
+                    </div>
 
-
+                    <div class="col-md-6">
                         <div class="card p-3 mb-3">
                             <h5><b>Pricing</b></h5>
 
@@ -456,22 +449,47 @@
                             </div>
                         </div>
 
-                         {{-- OCCASIONS --}}
-                            <div class="card p-3 mb-3">
-                                <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
+                        {{-- OCCASIONS --}}
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
 
-                                <div class="row">
-                                    @foreach($occasions as $o)
-                                        <div class="col-12 mb-2">
-                                            <label class="occasion-box">
-                                                <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
-                                                <span>{{ $o->title }}</span>
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
+                            <div class="row">
+                                @foreach($occasions as $o)
+                                    <div class="col-12 mb-2">
+                                        <label class="occasion-box">
+                                            <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
+                                            <span>{{ $o->title }}</span>
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
-                            
+                        </div>
+
+                        {{-- COLLECTIONS --}}
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3"><b>Collections</b></h5>
+
+                            <div class="row">
+
+                                @foreach($collections as $collection)
+
+                                    <div class="col-12 mb-2">
+
+                                        <label class="occasion-box">
+
+                                            <input type="checkbox" name="collections[]" value="{{ $collection->id }}">
+
+                                            <span>{{ $collection->name }}</span>
+
+                                        </label>
+
+                                    </div>
+
+                                @endforeach
+
+                            </div>
+                        </div>
+
                         <div class="card p-3 mb-3">
                             <h5><b>SEO</b></h5>
 
@@ -558,7 +576,7 @@
 
     });
 
-     $('#mrp,#discount,#discount_type').on('keyup change', function () {
+    $('#mrp,#discount,#discount_type').on('keyup change', function () {
         let m = +$('#mrp').val() || 0;
         let d = +$('#discount').val() || 0;
         let t = $('#discount_type').val();
@@ -991,47 +1009,47 @@
     }
 
     $(document).on(
-    'keyup change',
-    'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
-    function () {
+        'keyup change',
+        'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
+        function () {
 
-        let row = $(this).closest('tr');
+            let row = $(this).closest('tr');
 
-        let mrp = parseFloat(
-            row.find('input[name$="[mrp]"]').val()
-        ) || 0;
+            let mrp = parseFloat(
+                row.find('input[name$="[mrp]"]').val()
+            ) || 0;
 
-        let discount = parseFloat(
-            row.find('input[name$="[discount]"]').val()
-        ) || 0;
+            let discount = parseFloat(
+                row.find('input[name$="[discount]"]').val()
+            ) || 0;
 
-        let discountType = row
-            .find('select[name$="[discount_type]"]')
-            .val();
+            let discountType = row
+                .find('select[name$="[discount_type]"]')
+                .val();
 
-        let finalPrice = 0;
+            let finalPrice = 0;
 
-        if (discountType === 'percentage') {
+            if (discountType === 'percentage') {
 
-            finalPrice =
-                mrp - (mrp * discount / 100);
+                finalPrice =
+                    mrp - (mrp * discount / 100);
 
-        } else {
+            } else {
 
-            finalPrice =
-                mrp - discount;
+                finalPrice =
+                    mrp - discount;
+
+            }
+
+            if (finalPrice < 0) {
+                finalPrice = 0;
+            }
+
+            row.find('input[name$="[price]"]')
+                .val(finalPrice.toFixed(2));
 
         }
-
-        if (finalPrice < 0) {
-            finalPrice = 0;
-        }
-
-        row.find('input[name$="[price]"]')
-            .val(finalPrice.toFixed(2));
-
-    }
-);
+    );
 
 </script>
 

@@ -17,13 +17,14 @@ class CollectionController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->status !== null && $request->status !== '') {
-            $query->where('status', $request->status);
-        }
+        $collections = $query
+            ->orderBy('sort_order')
+            ->paginate(10);
 
-        $collections = $query->latest()->paginate(20);
-
-        return view('admin.collections.index', compact('collections'));
+        return view(
+            'admin.collections.index',
+            compact('collections')
+        );
     }
 
     public function create()
@@ -34,52 +35,79 @@ class CollectionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|max:255|unique:collections,name',
-            'sort_order' => 'nullable|integer',
+            'name' => 'required|max:255',
         ]);
 
         Collection::create([
             'name' => $request->name,
-            'slug' => $request->slug ?: Str::slug($request->name),
-            'sort_order' => $request->sort_order ?? 0,
+            'slug' => $request->slug
+                ? Str::slug($request->slug)
+                : Str::slug($request->name),
+
+            'code' => $request->slug
+                ? Str::slug($request->slug)
+                : Str::slug($request->name),
+
             'status' => $request->status ?? 1,
+            'sort_order' => $request->sort_order ?? 0,
         ]);
 
         return redirect()
             ->route('admin.collections.index')
-            ->with('success', 'Collection created successfully.');
+            ->with(
+                'success',
+                'Collection created successfully.'
+            );
     }
 
-    public function edit(Collection $collection)
+    public function edit($id)
     {
-        return view('admin.collections.edit', compact('collection'));
+        $collection = Collection::findOrFail($id);
+
+        return view(
+            'admin.collections.edit',
+            compact('collection')
+        );
     }
 
-    public function update(Request $request, Collection $collection)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|max:255|unique:collections,name,' . $collection->id,
-            'sort_order' => 'nullable|integer',
+            'name' => 'required|max:255',
         ]);
+
+        $collection = Collection::findOrFail($id);
 
         $collection->update([
             'name' => $request->name,
-            'slug' => $request->slug ?: Str::slug($request->name),
-            'sort_order' => $request->sort_order ?? 0,
+
+            'slug' => $request->slug
+                ? Str::slug($request->slug)
+                : Str::slug($request->name),
+
+            'code' => $request->slug
+                ? Str::slug($request->slug)
+                : Str::slug($request->name),
+
             'status' => $request->status ?? 1,
+            'sort_order' => $request->sort_order ?? 0,
         ]);
 
         return redirect()
             ->route('admin.collections.index')
-            ->with('success', 'Collection updated successfully.');
+            ->with(
+                'success',
+                'Collection updated successfully.'
+            );
     }
 
-    public function destroy(Collection $collection)
+    public function destroy($id)
     {
+        $collection = Collection::findOrFail($id);
+
         $collection->delete();
 
         return response()->json([
-            'status' => true,
             'message' => 'Collection deleted successfully.'
         ]);
     }

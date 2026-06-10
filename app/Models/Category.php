@@ -24,6 +24,7 @@ class Category extends Model
 
         'added_by',
         'is_featured',
+        'show_in_navbar',
         'is_sub_category',
     ];
 
@@ -93,4 +94,15 @@ class Category extends Model
         return $this->hasMany(CategoryAttribute::class);
     }
 
+    // Products directly under category
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id');
+    }
+
+    // Products where this category is selected as subcategory
+    public function subCategoryProducts()
+    {
+        return $this->hasMany(Product::class, 'subcategory_id');
+    }
 }

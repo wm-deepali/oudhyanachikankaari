@@ -7,7 +7,10 @@ use App\Models\Cart;
 use Illuminate\Support\Facades\View;
 use App\Models\DynamicPage;
 use App\Models\Announcement;
-
+use App\Models\Collection;
+use App\Models\GiftingOccasion;
+use App\Models\Category;
+use App\Models\Attribute;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,10 +40,58 @@ class AppServiceProvider extends ServiceProvider
 
             $count = $cart ? $cart->items->count() : 0;
 
-            $view->with([
-                'globalCartCount' => $count,
-                'miniCart' => $cart,
-            ]);
+            $announcements = Announcement::where('status', 1)
+                ->latest()
+                ->get();
+
+            $collections = Collection::where('status', 1)
+                ->orderBy('sort_order')
+                ->get();
+
+            $headerOccasions = GiftingOccasion::where('status', 1)
+                ->get();
+
+            $menuCategories = Category::whereNull('parent_id')
+                ->where('status', 1)
+                ->orderBy('sort_order')
+                ->get();
+
+            $fabricAttribute = Attribute::with('values')
+                ->where('name', 'Fabric')
+                ->first();
+
+            $headerFabrics = $fabricAttribute
+                ? $fabricAttribute->values
+                : collect();
+
+            $navbarCategories = Category::with([
+                'children' => function ($q) {
+                    $q->where('status', 1)
+                        ->where('show_in_navbar', 1)
+                        ->orderBy('sort_order');
+                }
+            ])
+                ->whereNull('parent_id')
+                ->where('status', 1)
+                ->where('show_in_navbar', 1)
+                ->orderBy('sort_order')
+                ->get();
+
+            $footerSetting = \App\Models\FooterSetting::first();
+
+            $view->with(
+                [
+                    'globalCartCount' => $count,
+                    'miniCart' => $cart,
+                    'announcements' => $announcements,
+                    'headerCollections' => $collections,
+                    'headerOccasions' => $headerOccasions,
+                    'menuCategories' => $menuCategories,
+                    'headerFabrics' => $headerFabrics,
+                    'navbarCategories' => $navbarCategories,
+                    'footerSetting' => $footerSetting
+                ]
+            );
         });
 
 
@@ -52,58 +103,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
 
+
         View::composer('*', function ($view) {
 
-            $announcements = Announcement::where('status', 1)
-                ->latest()
-                ->get();
-
-            $view->with(
-                'announcements',
-                $announcements
-            );
-        });
-
-         View::composer('*', function ($view) {
-
             $wishlistCount = \App\Models\Wishlist::where(
-    'session_id',
-    session()->getId()
-)->count();
+                'session_id',
+                session()->getId()
+            )->count();
             $view->with(
                 'wishlistCount',
                 $wishlistCount
             );
         });
-
-
-        View::composer('*', function ($view) {
-
-              $footerCategories = \App\Models\Category::where('status', 1)
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
-            ->take(10)
-            ->get();
-
-            $view->with(
-                'footerCategories',
-                $footerCategories
-            );
-
-        });
-
-            View::composer('*', function ($view) {
-    
-                $footerSetting = \App\Models\FooterSetting::first();
-    
-                $view->with(
-                    'footerSetting',
-                    $footerSetting
-                );
-    
-            });
-
-            
 
 
     }

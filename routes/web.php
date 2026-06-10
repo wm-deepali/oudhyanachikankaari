@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\AwardController;
 use App\Http\Controllers\Admin\BlogController;
-use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\ContactBranchController;
@@ -13,10 +12,7 @@ use App\Http\Controllers\Admin\DynamicPageController;
 use App\Http\Controllers\Admin\EnquiryController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\GiftingOccasionController;
-use App\Http\Controllers\Admin\HomeBannerController;
 use App\Http\Controllers\Admin\HomeEnquiryController;
-use App\Http\Controllers\Admin\HomeFeatureController;
-use App\Http\Controllers\Admin\HomeHeroController;
 use App\Http\Controllers\Admin\HomePageController;
 use App\Http\Controllers\Admin\HomeSliderController;
 use App\Http\Controllers\Admin\HomeTextSliderController;
@@ -44,51 +40,55 @@ use App\Http\Controllers\Admin\HomeHeroSlideController;
 use App\Http\Controllers\Admin\HomeHeroBannerController;
 use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\FrontController;
-use App\Http\Controllers\Admin\FabricController;
-use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CollectionController;
-use App\Http\Controllers\Admin\SizeGroupController;
-use App\Http\Controllers\Admin\SizeController;
+use App\Http\Controllers\Admin\HomeFeatureCardController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\CategoryAttributeController;
+use App\Http\Controllers\Frontend\Auth\CustomerAuthController;
 
 Route::controller(FrontController::class)->group(function () {
 
     Route::get('/', 'home')->name('home');
-    Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
+    Route::get('/about-us', 'aboutUs')->name('about-us');
+    Route::get('/blogs', 'blogs')->name('blogs');
+    Route::get('/blog/{slug}', 'blogDetails')->name('blog.details');
+    Route::get('/bulk-enquiry', 'bulkEnquiry')->name('bulk-enquiry');
+    Route::get('/cart', 'shoppingCart')->name('cart');
     Route::get('/categories', 'categories')->name('categories');
+    Route::view('/checkout', 'front-pages.checkout')->name('checkout');
+    Route::get('/contact-us', 'contactUs')->name('contact-us');
+    Route::get('/faqs', 'faqs')->name('faqs');
+    Route::get('/occasions', 'occasions')->name('occasions');
+    Route::view('/partners', 'front-pages.partners')->name('partners');
+    Route::view('/products', 'front-pages.products')->name('products');
+    Route::get('/product/{slug}', 'productDetail')->name('product.details');
+    Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
+    Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
+    Route::get('/why-us', 'whyUs')->name('why-us');
+    Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
+
+
     Route::get('/category/{slug}', 'categoryListing')->name('category.products');
     Route::get('/category/{slug}/filter', 'filterProducts')->name('category.filter.products');
-    Route::get('/products', 'products')->name('products');
-    Route::get('/product/{slug}', 'productDetail')->name('product.details');
-    Route::get('/occasions', 'occasions')->name('occasions');
 
     // cart routes
     Route::post('/cart/add', 'addToCart')->name('cart.add');
-    Route::get('/shopping-cart', 'shoppingCart')->name('shopping-cart');
     Route::post('/cart/remove', 'removeFromCart')->name('cart.remove');
     Route::post('/cart/update-quantity', 'updateQuantity')->name('cart.update.quantity');
-    Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
 
     // wishlist routes
     Route::post('/wishlist/add', 'addToWishlist')->name('wishlist.add');
-    Route::get('/wishlist', 'wishlist')->name('wishlist');
     Route::delete('/wishlist/{id}', 'removeWishlist')->name('wishlist.remove');
 
-    Route::get('/faqs', 'faqs')->name('faqs');
-    Route::get('/blogs', 'blogs')->name('blogs');
-    Route::get('/blog/{slug}', 'blogDetails')->name('blog.details');
-    Route::get('/contact-us', 'contactUs')->name('contact-us');
-    Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
-    Route::get('/why-us', 'whyUs')->name('why-us');
+
     Route::get('/vendors', 'vendors')->name('vendors');
     Route::get('/membership', 'membership')->name('membership');
     Route::get('/job-openings', 'jobOpenings')->name('job-openings');
     Route::get('/gallery', 'gallery')->name('gallery');
     Route::get('/careers', 'careers')->name('careers');
-    Route::get('/bulk-order', 'bulkOrder')->name('bulk-order');
-    Route::get('/about-us', 'aboutUs')->name('about-us');
+
+
     Route::get('/awards', 'awards')->name('awards');
     Route::get('/personalised-engraving', 'personalisedEngraving')->name('personalised-engraving');
     Route::get('/recycling-pledge', 'recyclingPledge')->name('recycling-pledge');
@@ -105,6 +105,31 @@ Route::controller(FrontController::class)->group(function () {
 
 });
 
+Route::get('/auth/google', [CustomerAuthController::class, 'redirectToGoogle'])
+    ->name('google.login');
+
+Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleGoogleCallback']);
+
+Route::prefix('user')->name('user.')->group(function () {
+
+    Route::get('/register', [CustomerAuthController::class, 'registerForm'])->name('register');
+    Route::post('/register', [CustomerAuthController::class, 'register'])->name('register.store');
+    Route::get('/login', [CustomerAuthController::class, 'loginForm'])->name('login');
+    Route::post('/login', [CustomerAuthController::class, 'login'])->name('login.store');
+
+    Route::middleware('customer')->group(function () {
+
+        Route::view('/dashboard', 'front-pages.dashboard')->name('dashboard');
+        Route::view('/account-details', 'front-pages.account-details')->name('account.details');
+        Route::view('/address', 'front-pages.address')->name('address');
+        Route::view('/orders', 'front-pages.orders')->name('orders');
+        Route::view('/wishlist', 'front-pages.wishlist')->name('wishlist');
+        Route::view('/notifications', 'front-pages.notifications')->name('notifications');
+        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+
+    });
+
+});
 
 
 Route::get('/get-cities/{state}', function ($id) {
@@ -138,8 +163,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('gifting-occasions', GiftingOccasionController::class);
 
         // product routes
-        Route::get('products/subcategories/{category}',[ProductController::class, 'subcategories'])->name('products.subcategories');
-        Route::get('products/category-attributes/{category}',[ProductController::class, 'categoryAttributes'])->name('products.category-attributes');
+        Route::get('products/subcategories/{category}', [ProductController::class, 'subcategories'])->name('products.subcategories');
+        Route::get('products/category-attributes/{category}', [ProductController::class, 'categoryAttributes'])->name('products.category-attributes');
         Route::post('/products/upload-images-zip', [ProductController::class, 'uploadImagesZip'])->name('products.images.upload');
         Route::get('/products/import', [ProductController::class, 'import'])->name('products.import');
         Route::post('/products/import', [ProductController::class, 'importStore'])->name('products.import.store');
@@ -237,12 +262,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('home-hero-slides', HomeHeroSlideController::class)->names('home-hero-slides');
         Route::resource('home-hero-banners', HomeHeroBannerController::class)->names('home-hero-banners');
 
-        // ================= HERO =================
-        Route::get('/home-hero', [HomeHeroController::class, 'edit'])
-            ->name('home.hero.edit');
 
-        Route::post('/home-hero', [HomeHeroController::class, 'update'])
-            ->name('home.hero.update');
 
 
         // ================= WHY SECTION =================
@@ -264,31 +284,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/home-why/card/{id}', [HomeWhyController::class, 'deleteCard'])
             ->name('home.why.card.delete');
 
+        Route::resource('home-feature-cards', HomeFeatureCardController::class);
 
-        // ================= BANNERS =================
-        Route::get('/home-banners', [HomeBannerController::class, 'index'])
-            ->name('home.banners.index');
-
-        Route::post('/home-banners', [HomeBannerController::class, 'store'])
-            ->name('home.banners.store');
-
-        Route::put('/home-banners/{id}', [HomeBannerController::class, 'update'])
-            ->name('home.banners.update');
-
-        Route::delete('/home-banners/{id}', [HomeBannerController::class, 'delete'])
-            ->name('home.banners.delete');
-
-        Route::get('/home-features', [HomeFeatureController::class, 'index'])
-            ->name('home.features.index');
-
-        Route::post('/home-features', [HomeFeatureController::class, 'store'])
-            ->name('home.features.store');
-
-        Route::put('/home-features/{id}', [HomeFeatureController::class, 'update'])
-            ->name('home.features.update');
-
-        Route::delete('/home-features/{id}', [HomeFeatureController::class, 'delete'])
-            ->name('home.features.delete');
 
         Route::get('/footer-settings', [FooterSettingController::class, 'index'])
             ->name('footer-settings.index');
@@ -299,14 +296,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/seo', [SeoController::class, 'index'])->name('seo.index');
         Route::put('/seo/{id}', [SeoController::class, 'update'])->name('seo.update');
 
-        Route::resource('fabrics', FabricController::class);
-
-        Route::resource('colors', ColorController::class);
-
         Route::resource('collections', CollectionController::class);
-        Route::resource('size-groups', SizeGroupController::class);
-
-        Route::resource('sizes', SizeController::class);
 
         Route::resource('attributes', AttributeController::class);
         Route::resource('attribute-values', AttributeValueController::class);

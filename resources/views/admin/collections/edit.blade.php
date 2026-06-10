@@ -120,3 +120,29 @@
 </div>
 
 @include('admin.footer')
+
+<script>
+    let manualSlug = false;
+
+    $('#slug').on('keyup', function () {
+        manualSlug = true;
+    });
+
+    $('#name').on('keyup', function () {
+        if (!manualSlug) {
+            let slug = $(this).val()
+                .toLowerCase()
+                .replace(/ /g, '-')
+                .replace(/[^\w-]+/g, '');
+
+            $('#slug').val(slug);
+        }
+    });
+
+    // Disable button on submit
+    document.querySelector('form').addEventListener('submit', function () {
+        let btn = document.getElementById('updateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+    });
+</script>

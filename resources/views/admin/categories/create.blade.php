@@ -84,6 +84,7 @@
                         </div>
 
                         {{-- SETTINGS --}}
+                        {{-- SETTINGS --}}
                         <div class="card p-3 mb-3">
                             <h5><b>Settings</b></h5>
 
@@ -95,6 +96,12 @@
 
                             <label class="mt-2">Featured</label>
                             <select name="is_featured" class="form-control">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+
+                            <label class="mt-2">Show In Navbar</label>
+                            <select name="show_in_navbar" class="form-control">
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </select>

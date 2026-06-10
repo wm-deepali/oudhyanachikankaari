@@ -375,13 +375,7 @@
                         </div>
 
 
-
-
-                    </div>
-
-                    <div class="col-md-6">
-
-                        <div class="card p-3 mb-3">
+  <div class="card p-3 mb-3">
                             <h5><b>Media</b></h5>
 
                             <!-- Upload New Images -->
@@ -423,7 +417,11 @@
                         </div>
 
 
+                    </div>
 
+                    <div class="col-md-6">
+
+                
                         <div class="card p-3 mb-3">
                             <h5><b>Pricing</b></h5>
 
@@ -523,6 +521,34 @@
                                         </label>
                                     </div>
                                 @endforeach
+                            </div>
+                        </div>
+
+                        {{-- COLLECTIONS --}}
+                        <div class="card p-3 mb-3">
+                            <h5 class="mb-3"><b>Collections</b></h5>
+
+                            <div class="row">
+
+                                @foreach($collections as $collection)
+
+                                    <div class="col-12 mb-2">
+
+                                        <label class="occasion-box">
+
+                                           <input type="checkbox"
+       name="collections[]"
+       value="{{ $collection->id }}"
+       {{ $product->collections->contains($collection->id) ? 'checked' : '' }}>
+
+                                            <span>{{ $collection->name }}</span>
+
+                                        </label>
+
+                                    </div>
+
+                                @endforeach
+
                             </div>
                         </div>
 

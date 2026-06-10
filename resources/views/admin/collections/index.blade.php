@@ -20,8 +20,7 @@
             </div>
 
             <div class="ml-auto mr-2">
-                <a href="{{ route('admin.collections.create') }}"
-                   class="btn btn-primary">
+                <a href="{{ route('admin.collections.create') }}" class="btn btn-primary">
                     <i class="fa fa-plus"></i> Add Collection
                 </a>
             </div>
@@ -39,11 +38,8 @@
 
                             <div class="col-md-4">
                                 <label>Search</label>
-                                <input type="text"
-                                       name="search"
-                                       value="{{ request('search') }}"
-                                       class="form-control"
-                                       placeholder="Search Collection">
+                                <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                                    placeholder="Search Collection">
                             </div>
 
                             <div class="col-md-3">
@@ -52,13 +48,11 @@
                                 <select name="status" class="form-control">
                                     <option value="">All</option>
 
-                                    <option value="1"
-                                        {{ request('status') == '1' ? 'selected' : '' }}>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>
                                         Active
                                     </option>
 
-                                    <option value="0"
-                                        {{ request('status') == '0' ? 'selected' : '' }}>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>
                                         Inactive
                                     </option>
 
@@ -67,13 +61,11 @@
 
                             <div class="col-md-5 d-flex align-items-end">
 
-                                <button type="submit"
-                                        class="btn btn-primary">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-search"></i> Search
                                 </button>
 
-                                <a href="{{ route('admin.collections.index') }}"
-                                   class="btn btn-secondary ml-2">
+                                <a href="{{ route('admin.collections.index') }}" class="btn btn-secondary ml-2">
                                     Reset
                                 </a>
 
@@ -123,15 +115,24 @@
 
                                         <td>
 
-                                            <a href="{{ route('admin.collections.edit',$collection->id) }}"
-                                               class="btn btn-sm btn-outline-dark">
+                                            <a href="{{ route('admin.collections.edit', $collection->id) }}"
+                                                class="btn btn-sm btn-outline-dark">
                                                 <i class="fa fa-pencil"></i>
                                             </a>
 
-                                            <button class="btn btn-sm btn-outline-danger"
+                                            @if(
+                                                    !in_array($collection->code, [
+                                                        'new_arrival',
+                                                        'best_seller',
+                                                        'premium_collection',
+                                                        'exclusive_collection'
+                                                    ])
+                                                )
+                                                <button class="btn btn-sm btn-outline-danger"
                                                     onclick="deleteCollection({{ $collection->id }})">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            @endif
 
                                         </td>
 
@@ -170,38 +171,37 @@
 
 <script>
 
-function deleteCollection(id)
-{
-    Swal.fire({
-        title: 'Delete Collection?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Delete'
-    }).then((result) => {
+    function deleteCollection(id) {
+        Swal.fire({
+            title: 'Delete Collection?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete'
+        }).then((result) => {
 
-        if(result.isConfirmed){
+            if (result.isConfirmed) {
 
-            $.ajax({
-                url: "{{ url('admin/collections') }}/"+id,
-                type: "DELETE",
-                data:{
-                    _token:"{{ csrf_token() }}"
-                },
-                success:function(res){
+                $.ajax({
+                    url: "{{ url('admin/collections') }}/" + id,
+                    type: "DELETE",
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function (res) {
 
-                    Swal.fire(
-                        'Deleted!',
-                        res.message,
-                        'success'
-                    );
+                        Swal.fire(
+                            'Deleted!',
+                            res.message,
+                            'success'
+                        );
 
-                    $("#row"+id).remove();
-                }
-            });
+                        $("#row" + id).remove();
+                    }
+                });
 
-        }
+            }
 
-    });
-}
+        });
+    }
 
 </script>

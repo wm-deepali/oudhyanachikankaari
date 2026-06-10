@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class HomeFeatureCard extends Model
 {
     protected $fillable = [
+        'icon',
         'title',
-        'sub_title',
-        'image',
-        'button_text',
-        'link'
+        'content',
+        'card_class',
+        'sort_order',
+        'status'
     ];
 }

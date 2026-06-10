@@ -20,6 +20,7 @@ use App\Models\ProductImage;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
+use App\Models\Collection;
 
 class ProductController extends Controller
 {
@@ -95,9 +96,14 @@ class ProductController extends Controller
 
         $occasions = GiftingOccasion::where('status', 1)->get();
 
+        $collections = Collection::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
         return view('admin.products.create', compact(
             'categories',
-            'occasions'
+            'occasions',
+            'collections'
         ));
 
     }
@@ -279,6 +285,14 @@ class ProductController extends Controller
                 );
             }
 
+            if ($request->filled('collections')) {
+
+                $product->collections()->sync(
+                    $request->collections
+                );
+
+            }
+
             DB::commit();
 
             return redirect()
@@ -379,6 +393,10 @@ class ProductController extends Controller
             })
             ->values();
 
+        $collections = Collection::where('status', 1)
+            ->orderBy('sort_order')
+            ->get();
+
         return view(
             'admin.products.edit',
             compact(
@@ -389,7 +407,8 @@ class ProductController extends Controller
                 'selectedAttributeValues',
                 'selectedOccasions',
                 'occasions',
-                'existingVariants'
+                'existingVariants',
+                'collections'
             )
         );
     }
@@ -673,6 +692,10 @@ class ProductController extends Controller
 
             $product->occasions()->sync(
                 $request->occasions ?? []
+            );
+
+            $product->collections()->sync(
+                $request->collections ?? []
             );
 
             DB::commit();

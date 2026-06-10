@@ -38,15 +38,13 @@ class HomeWhyController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'icon' => 'required|image|max:1024',
+            'icon' => 'required',
         ]);
-
-        $path = $request->file('icon')->store('home', 'public');
 
         HomeWhyCard::create([
             'title' => $request->title,
             'content' => $request->content,
-            'icon' => $path,
+            'icon' => $request->icon,
         ]);
 
         return back()->with('success', 'Card added');
@@ -64,24 +62,14 @@ class HomeWhyController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'icon' => 'nullable|image|max:1024',
+            'icon' => 'nullable',
         ]);
 
         $card = HomeWhyCard::findOrFail($id);
 
-        // update image if new uploaded
-        if ($request->hasFile('icon')) {
-
-            if ($card->icon) {
-                Storage::disk('public')->delete($card->icon);
-            }
-
-            $path = $request->file('icon')->store('home', 'public');
-            $card->icon = $path;
-        }
-
         $card->title = $request->title;
         $card->content = $request->content;
+        $card->icon = $request->icon;
         $card->save();
 
         return back()->with('success', 'Card updated successfully');
@@ -90,11 +78,7 @@ class HomeWhyController extends Controller
     public function deleteCard($id)
     {
         $HomeWhyCard = HomeWhyCard::findOrFail($id);
-
-        if ($HomeWhyCard->image) {
-            Storage::disk('public')->delete($HomeWhyCard->image);
-        }
-
+        
         $HomeWhyCard->delete();
 
         return response()->json([

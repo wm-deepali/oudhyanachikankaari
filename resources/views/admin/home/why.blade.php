@@ -101,7 +101,7 @@
 
                             <div class="col-md-4 mb-3">
                                 <label>Icon</label>
-                                <input type="file" name="icon" class="form-control" required>
+                                <input type="text" name="icon" class="form-control" required>
                             </div>
 
                             <div class="col-md-4 mb-3">
@@ -149,9 +149,10 @@
                                         <td>{{ $card->id }}</td>
 
                                         <td>
-                                            @if($card->icon)
-                                                <img src="{{ asset('storage/' . $card->icon) }}" width="40">
-                                            @endif
+                                            <i class="{{ $card->icon }}"></i>
+                                            <small class="text-muted ml-2">
+                                                {{ $card->icon }}
+                                            </small>
                                         </td>
 
                                         <td>{{ $card->title }}</td>
@@ -227,7 +228,7 @@
 
                     <div class="form-group">
                         <label>Icon</label>
-                        <input type="file" name="icon" class="form-control">
+                        <input type="text" name="icon" id="editIcon" class="form-control">
                         <small class="text-muted">Leave empty to keep existing icon</small>
                     </div>
 
@@ -259,6 +260,7 @@
 
             $('#editTitle').val(data.title);
             $('#editContent').val(data.content);
+            $('#editIcon').val(data.icon);
 
             // ✅ SET FORM ACTION
             $('#editCardForm').attr('action', "/admin/home-why/card/" + id);
@@ -266,10 +268,13 @@
             // ✅ SHOW CURRENT ICON
             if (data.icon) {
                 $('#currentIconPreview').html(
-                    `<img src="/storage/${data.icon}" width="50" class="border rounded">`
+                    `<i class="${data.icon}" style="font-size:32px;"></i>
+         <div class="mt-2">${data.icon}</div>`
                 );
             } else {
-                $('#currentIconPreview').html('<span class="text-muted">No icon</span>');
+                $('#currentIconPreview').html(
+                    '<span class="text-muted">No icon</span>'
+                );
             }
 
             $('#editCardModal').modal('show');

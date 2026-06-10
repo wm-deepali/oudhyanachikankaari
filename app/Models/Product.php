@@ -104,4 +104,14 @@ class Product extends Model
             'occasion_id'
         );
     }
+
+    public function collections()
+    {
+        return $this->belongsToMany(
+            Collection::class,
+            'collection_product',
+            'product_id',
+            'collection_id'
+        );
+    }
 }

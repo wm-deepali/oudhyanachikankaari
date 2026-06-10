@@ -18,27 +18,8 @@ class HomePageController extends Controller
             ],
 
             [
-                'title' => 'Hero Section',
-                'route' => route('admin.home.hero.edit'),
-                'type' => 'fixed'
-            ],
-
-            [
                 'title' => 'Why Choose Us',
                 'route' => route('admin.home.why.index'),
-                'type' => 'multiple'
-            ],
-
-            [
-                'title' => 'Offer & Product Banners',
-                'route' => route('admin.home.banners.index'),
-                'type' => 'multiple'
-            ],
-
-            // ✅ NEW (Feature Cards Section)
-            [
-                'title' => 'Feature Cards Section',
-                'route' => route('admin.home.features.index'),
                 'type' => 'multiple'
             ],
 

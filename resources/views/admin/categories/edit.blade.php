@@ -55,14 +55,14 @@
                                 <option value="">Parent Category</option>
 
                                 @foreach($parents as $parent)
-                                    <option value="{{ $parent->id }}" {{ $category->parent_id == $parent->id ? 'selected' : '' }}>
-                                        {{ $parent->name }}
+                                    <option value="{{ $parent->id }}" {{ $category->parent_id == $parent->id ? 'selected' : '' }}>{{ $parent->name }}
                                     </option>
                                 @endforeach
                             </select>
 
                             <label class="mt-2">Sort Order</label>
-<input type="number" name="sort_order" value="{{ $category->sort_order }}" class="form-control">
+                            <input type="number" name="sort_order" value="{{ $category->sort_order }}"
+                                class="form-control">
 
                         </div>
 
@@ -111,6 +111,11 @@
                                 <option value="1" {{ $category->is_featured ? 'selected' : '' }}>Yes</option>
                             </select>
 
+                            <label class="mt-2">Show In Navbar</label>
+                            <select name="show_in_navbar" class="form-control">
+                                <option value="0" {{ !$category->show_in_navbar ? 'selected' : '' }}>No</option>
+                                <option value="1" {{ $category->show_in_navbar ? 'selected' : '' }}>Yes</option>
+                            </select>
 
                             <label class="mt-2">Status</label>
                             <select name="status" class="form-control">
@@ -118,12 +123,11 @@
                                 <option value="0" {{ !$category->status ? 'selected' : '' }}>Inactive</option>
                             </select>
 
+
                         </div>
 
-                        <input type="hidden"
-       name="redirect"
-       value="{{ $redirect ?? url()->previous() }}">
-       
+                        <input type="hidden" name="redirect" value="{{ $redirect ?? url()->previous() }}">
+
                         {{-- BUTTONS --}}
                         <div class="mt-3">
                             <button type="submit" id="updateBtn" class="btn btn-success">

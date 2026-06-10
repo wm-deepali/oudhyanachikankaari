@@ -109,6 +109,7 @@ class CategoryController extends Controller
             // FLAGS
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
+            'show_in_navbar' => $request->show_in_navbar ?? 0,
 
             'added_by' => 'admin',
 
@@ -176,6 +177,7 @@ class CategoryController extends Controller
 
             'is_popular' => $request->is_popular ?? 0,
             'is_featured' => $request->is_featured ?? 0,
+            'show_in_navbar' => $request->show_in_navbar ?? 0,
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,

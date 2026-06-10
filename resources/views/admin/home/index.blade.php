@@ -74,14 +74,30 @@
                                     </td>
                                 </tr>
 
+                              <tr>
+    <td>3</td>
+    <td><strong>Feature Cards</strong></td>
+    <td>
+        <span class="badge badge-info">Multiple</span>
+    </td>
+    <td>
+        <a href="{{ route('admin.home-feature-cards.index') }}"
+            class="btn btn-sm btn-outline-dark">
+            <i class="fa fa-pencil"></i> Manage
+        </a>
+    </td>
+</tr>
+
+
+
                                 <tr>
-                                    <td>3</td>
-                                    <td><strong>Premium Gifting Gallery</strong></td>
+                                    <td>4</td>
+                                    <td><strong>Deal Banners</strong></td>
                                     <td>
                                         <span class="badge badge-info">Multiple</span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.gallery-images.index') }}"
+                                        <a href="{{ route('admin.home-deal-banners.index') }}"
                                             class="btn btn-sm btn-outline-dark">
                                             <i class="fa fa-pencil"></i> Manage
                                         </a>
@@ -89,7 +105,36 @@
                                 </tr>
 
                                 <tr>
-                                    <td>4</td>
+                                    <td>5</td>
+                                    <td><strong>Hero Slides</strong></td>
+                                    <td>
+                                        <span class="badge badge-info">Multiple</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('admin.home-hero-slides.index') }}"
+                                            class="btn btn-sm btn-outline-dark">
+                                            <i class="fa fa-pencil"></i> Manage
+                                        </a>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>6</td>
+                                    <td><strong>Hero Side Banners</strong></td>
+                                    <td>
+                                        <span class="badge badge-info">Multiple</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('admin.home-hero-banners.index') }}"
+                                            class="btn btn-sm btn-outline-dark">
+                                            <i class="fa fa-pencil"></i> Manage
+                                        </a>
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td>7</td>
                                     <td><strong>Brand Promotion Section</strong></td>
                                     <td>
                                         <span class="badge badge-primary">Fixed + Slider</span>
@@ -108,65 +153,23 @@
                                 </tr>
 
                                 <tr>
-                                    <td>5</td>
-                                    <td><strong>Corporate Deal Banners</strong></td>
+                                    <td>8</td>
+                                    <td><strong>Premium Gifting Gallery</strong></td>
                                     <td>
                                         <span class="badge badge-info">Multiple</span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.home-deal-banners.index') }}"
+                                        <a href="{{ route('admin.gallery-images.index') }}"
                                             class="btn btn-sm btn-outline-dark">
                                             <i class="fa fa-pencil"></i> Manage
                                         </a>
                                     </td>
                                 </tr>
 
-                                <tr>
-                                    <td>6</td>
-                                    <td><strong>Hero Slides</strong></td>
-                                    <td>
-                                        <span class="badge badge-info">Multiple</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.home-hero-slides.index') }}"
-                                            class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-pencil"></i> Manage
-                                        </a>
-                                    </td>
-                                </tr>
-
-                                <tr>
-                                    <td>7</td>
-                                    <td><strong>Hero Side Banners</strong></td>
-                                    <td>
-                                        <span class="badge badge-info">Multiple</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.home-hero-banners.index') }}"
-                                            class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-pencil"></i> Manage
-                                        </a>
-                                    </td>
-                                </tr>
-
-                                {{-- HERO --}}
-                                <!-- <tr>
-                                    <td>3</td>
-                                    <td><strong>Hero Section</strong></td>
-                                    <td>
-                                        <span class="badge badge-primary">Fixed</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.home.hero.edit') }}"
-                                            class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-pencil"></i> Edit
-                                        </a>
-                                    </td>
-                                </tr> -->
 
                                 {{-- WHY --}}
-                                <!-- <tr>
-                                    <td>4</td>
+                                <tr>
+                                    <td>9</td>
                                     <td><strong>Why Choose Us</strong></td>
                                     <td>
                                         <span class="badge badge-info">Multiple</span>
@@ -177,34 +180,8 @@
                                             <i class="fa fa-pencil"></i> Manage
                                         </a>
                                     </td>
-                                </tr> -->
+                                </tr>
 
-                                {{-- BANNERS --}}
-                                <!-- <tr>
-                                    <td>5</td>
-                                    <td><strong>Offer & Product Banners</strong></td>
-                                    <td>
-                                        <span class="badge badge-info">Multiple</span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('admin.home.banners.index') }}"
-                                            class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-pencil"></i> Manage
-                                        </a>
-                                    </td>
-                                </tr> -->
-
-                                <!-- <tr>
-                                    <td>6</td>
-                                    <td><strong>Feature Cards Section</strong></td>
-                                    <td><span class="badge badge-info">Multiple</span></td>
-                                    <td>
-                                        <a href="{{ route('admin.home.features.index') }}"
-                                            class="btn btn-sm btn-outline-dark">
-                                            <i class="fa fa-pencil"></i> Manage
-                                        </a>
-                                    </td>
-                                </tr> -->
 
                             </tbody>
 

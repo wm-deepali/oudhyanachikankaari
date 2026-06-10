@@ -38,7 +38,7 @@
 }
     .login-left {
         width: 45%;
-        background: linear-gradient(135deg, #003108, #146c2e);
+        background: linear-gradient(135deg, #c98fbb, #c98fbb);
         color: #fff;
         text-align: center;
         padding: 40px 20px;
@@ -73,7 +73,7 @@
     .form-control {
         border-radius: 10px;
         padding: 12px;
-        background: #00310814;
+        background: #fcf4ef;
         border: none;
     }
 
@@ -88,7 +88,7 @@
         padding: 12px;
         border-radius: 12px;
         border: none;
-        background: linear-gradient(90deg, #003108, #146c2e);
+        background: linear-gradient(90deg, #c98fbb, #c98fbb);
         color: #fff;
         font-weight: 500;
     }
@@ -131,11 +131,11 @@
         <div class="login-left">
     
     <div class="logo-box">
-        <img src="{{ asset('images/B2B_logo.png') }}" alt="B2B Gifting Logo">
+        <img src="{{ asset('assets/img/corporate/Oudhyana_img/logo.png') }}" alt="Oudhyana Chikankaari">
     </div>
 
     <h2>Oudhyana Chikankaari</h2>
-    <p>Corporate Gifting Solutions for Every Business</p>
+    <p>By Akansha Agarwal</p>
 </div>
 
         <!-- RIGHT SIDE -->
