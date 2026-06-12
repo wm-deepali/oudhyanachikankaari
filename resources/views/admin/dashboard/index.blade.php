@@ -1,315 +1,285 @@
 @include('admin.top-header')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  .stats-card {
-    transition: 0.3s ease;
-    cursor: pointer;
-  }
 
-  .stats-card:hover {
-    transform: translateY(-5px);
-  }
+/* Main Content */
+.content-area{
+    padding:20px;
+    min-height:100vh;
+}
 
-  .icon-box {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
+/* Hero */
+.hero{
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 8px 25px rgba(79,70,229,.15);
+}
 
-  .card-link {
-    text-decoration: none;
-    color: inherit;
-  }
+.hero h1,
+.hero h2,
+.hero h3,
+.hero h4,
+.hero h5,
+.hero h6,
+.hero p,
+.hero small{
+    color:#fff !important;
+}
+
+/* Cards */
+.cardx{
+    background:#fff;
+    color:#212529;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 2px 15px rgba(0,0,0,.06);
+    transition:.3s;
+    height:100%;
+}
+
+.cardx:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.cardx h1,
+.cardx h2,
+.cardx h3,
+.cardx h4,
+.cardx h5,
+.cardx h6,
+.cardx p,
+.cardx td,
+.cardx th,
+.cardx li{
+    color:#212529 !important;
+}
+
+/* KPI */
+.kpi{
+    position:relative;
+    overflow:hidden;
+}
+
+.kpi i{
+    position:absolute;
+    right:20px;
+    top:20px;
+    font-size:30px;
+    opacity:.12;
+}
+
+/* Badge */
+.badge-soft{
+    background:#eef2ff;
+    color:#4f46e5;
+}
+
+/* Table Images */
+.table img{
+    width:40px;
+    height:40px;
+    border-radius:8px;
+    object-fit:cover;
+}
+
+/* Scrollbar */
+#cssmenu::-webkit-scrollbar{
+    width:6px;
+}
+
+#cssmenu::-webkit-scrollbar-thumb{
+    background:#d1d5db;
+    border-radius:10px;
+}
+
+
+
+@media(max-width:768px){
+
+
+    .content-area{
+        padding:15px;
+    }
+
+    .hero{
+        padding:20px;
+    }
+}
 </style>
 
 <div class="main-section">
   @include('admin.header')
 
-  <div class="container-fluid">
+ <div class="container-fluid">
 
-    <!-- HEADER -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4"
-          style="background: linear-gradient(135deg, #e8f1ff, #f3e8ff, #fff1e6);">
+    <div class="content-area">
 
-          <h3 class="fw-bold mb-1 text-primary">
-            Congratulations {{ auth()->user()->name }}
-          </h3>
+        <!-- HERO -->
+        <div class="hero mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold mb-2">
+                        Welcome Back, {{ auth()->user()->name }}
+                    </h2>
 
-          <p class="text-muted mb-0">
-            Here’s what’s happening with your business today 🚀
-          </p>
+                    <p class="mb-0">
+                        Monitor revenue, orders, customers, inventory and enquiries from one dashboard.
+                    </p>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                    <h2>₹12,54,890</h2>
+                    <small>Total Revenue This Month</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI -->
+        <div class="row g-4 mb-4">
+
+            <div class="col-lg-3 col-md-6">
+                <div class="cardx kpi">
+                    <i class="fa fa-box"></i>
+                    <h6>Total Products</h6>
+                    <h2>2458</h2>
+                    <span class="badge badge-soft">+12%</span>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="cardx kpi">
+                    <i class="fa fa-shopping-cart"></i>
+                    <h6>Total Orders</h6>
+                    <h2>8245</h2>
+                    <span class="badge bg-success">+18%</span>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="cardx kpi">
+                    <i class="fa fa-users"></i>
+                    <h6>Customers</h6>
+                    <h2>1456</h2>
+                    <span class="badge bg-info">+8%</span>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="cardx kpi">
+                    <i class="fa fa-wallet"></i>
+                    <h6>Pending Payments</h6>
+                    <h2>₹58,900</h2>
+                    <span class="badge bg-warning text-dark">
+                        Pending
+                    </span>
+                </div>
+            </div>
 
         </div>
-      </div>
+
+        <!-- CHARTS -->
+        <div class="row g-4 mb-4">
+
+            <div class="col-lg-8">
+                <div class="cardx">
+                    <h5>Sales Analytics</h5>
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="cardx">
+                    <h5>Order Status</h5>
+
+                    <p>Pending</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning"
+                             style="width:35%"></div>
+                    </div>
+
+                    <p>Processing</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info"
+                             style="width:60%"></div>
+                    </div>
+
+                    <p>Delivered</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-success"
+                             style="width:90%"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+          <!-- Orders -->
+            <div class="row g-4 mb-4">
+
+                <div class="col-lg-8">
+                    <div class="cardx">
+                        <h5>Recent Orders</h5>
+
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <td>#ORD001</td>
+                                <td>John Smith</td>
+                                <td>₹2500</td>
+                                <td><span class="badge bg-success">Delivered</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>#ORD002</td>
+                                <td>Amit Kumar</td>
+                                <td>₹4200</td>
+                                <td><span class="badge bg-warning text-dark">Pending</span></td>
+                            </tr>
+
+                            <tr>
+                                <td>#ORD003</td>
+                                <td>Sara Khan</td>
+                                <td>₹1850</td>
+                                <td><span class="badge bg-info">Processing</span></td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="cardx">
+                        <h5>Top Selling Products</h5>
+
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">iPhone 16 Pro <span class="float-end">450</span></li>
+                            <li class="list-group-item">Samsung S26 <span class="float-end">390</span></li>
+                            <li class="list-group-item">MacBook Pro <span class="float-end">280</span></li>
+                            <li class="list-group-item">AirPods Pro <span class="float-end">250</span></li>
+                        </ul>
+
+                    </div>
+                </div>
+
+            </div>
+
     </div>
-
-  <div class="row">
-
-  <!-- ================= TOP 4 ================= -->
-
-  <!-- CATEGORIES -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.categories.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-success text-white me-3">
-            <i class="fa fa-folder"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Categories</h6>
-            <h4 class="fw-bold">{{ $data['categories'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <!-- PRODUCTS -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.products.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-primary text-white me-3">
-            <i class="fa fa-box"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Products</h6>
-            <h4 class="fw-bold">{{ $data['products'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <!-- PACKAGES -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.packages.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-warning text-white me-3">
-            <i class="fa fa-box-open"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Packages</h6>
-            <h4 class="fw-bold">{{ $data['packages'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <!-- CLIENT -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.clients.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-dark text-white me-3">
-            <i class="fa fa-users"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Clients</h6>
-            <h4 class="fw-bold">{{ $data['clients'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
 
 </div>
-
-<div class="row">
-
-  <!-- ================= BOTTOM 4 ================= -->
-
-  <!-- TODAY -->
-  <div class="col-md-3 mb-4">
-    <div class="card stats-card shadow-sm rounded-4 p-3">
-      <div class="d-flex align-items-center">
-        <div class="icon-box bg-info text-white me-3">
-          <i class="fa fa-calendar-day"></i>
-        </div>
-        <div style="margin-left:10px;">
-          <h6 class="mb-1">Today's Enquiry</h6>
-          <h4 class="fw-bold">{{ $data['todayEnquiries'] }}</h4>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOTAL -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.enquiries.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-danger text-white me-3">
-            <i class="fa fa-envelope"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Total Enquiries</h6>
-            <h4 class="fw-bold">{{ $data['totalEnquiries'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <!-- QUOTATION -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.package-enquiries.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-warning text-white me-3">
-            <i class="fa fa-file-invoice"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Quotation Enquiry</h6>
-            <h4 class="fw-bold">{{ $data['quotationEnquiries'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-  <!-- VENDOR -->
-  <div class="col-md-3 mb-4">
-    <a href="{{ route('admin.vendor-enquiries.index') }}" class="card-link">
-      <div class="card stats-card shadow-sm rounded-4 p-3">
-        <div class="d-flex align-items-center">
-          <div class="icon-box bg-secondary text-white me-3">
-            <i class="fa fa-truck"></i>
-          </div>
-          <div style="margin-left:10px;">
-            <h6 class="mb-1">Vendors Enquiry</h6>
-            <h4 class="fw-bold">{{ $data['vendorEnquiries'] }}</h4>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-
-</div>
-
-    <!-- ================= LATEST ENQUIRIES ================= -->
-   <div class="card shadow-sm rounded-4 mt-4">
-  <div class="card-body">
-
-    <h5 class="mb-3">Latest Enquiries</h5>
-
-    <!-- TABS -->
-    <ul class="nav nav-tabs mb-3">
-
-      <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cart">
-          Cart
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#general">
-          General
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#contact">
-          Contact
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#home">
-          Home
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#package">
-          Package
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vendor">
-          Vendor
-        </button>
-      </li>
-
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#supplier">
-          Supplier
-        </button>
-      </li>
-
-    </ul>
-
-    <!-- TAB CONTENT -->
-    <div class="tab-content">
-
-      <!-- CART -->
-      <div class="tab-pane fade show active" id="cart">
-      @include('admin.dashboard.table', [
-    'items' => $latestCartEnquiries,
-    'route' => 'admin.enquiries'
-])
-
-      </div>
-
-      <!-- GENERAL -->
-      <div class="tab-pane fade" id="general">
-        @include('admin.dashboard.table', [
-    'items' => $latestGeneralEnquiries,
-    'route' => 'admin.other-enquiries'
-])
-      </div>
-
-      <!-- CONTACT -->
-      <div class="tab-pane fade" id="contact">
-       @include('admin.dashboard.table', [
-    'items' => $latestContactEnquiries,
-    'route' => 'admin.contact-enquiries'
-])
-      </div>
-
-      <!-- HOME -->
-      <div class="tab-pane fade" id="home">
-        @include('admin.dashboard.table', [
-    'items' => $latestHomeEnquiries,
-    'route' => 'admin.home-enquiries'
-])
-      </div>
-
-      <!-- PACKAGE -->
-      <div class="tab-pane fade" id="package">
-      @include('admin.dashboard.table', [
-    'items' => $latestPackageEnquiries,
-    'route' => 'admin.package-enquiries'
-])
-
-      </div>
-
-      <!-- VENDOR -->
-      <div class="tab-pane fade" id="vendor">
-        @include('admin.dashboard.table', [
-    'items' => $latestVendorEnquiries,
-    'route' => 'admin.vendor-enquiries'
-])
-      </div>
-
-      <!-- SUPPLIER -->
-      <div class="tab-pane fade" id="supplier">
-       @include('admin.dashboard.table', [
-    'items' => $latestSupplierEnquiries,
-    'route' => 'admin.supplier-enquiries'
-])
-      </div>
-
-    </div>
 
   </div>
 </div>
@@ -318,45 +288,17 @@
   </div>
 </div>
 
-
 <script>
-
-function deleteEnquiry(id, route) {
-
-    Swal.fire({
-        title: 'Delete Enquiry?',
-        text: "This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        confirmButtonText: 'Yes, Delete'
-    }).then((result) => {
-
-        if (result.isConfirmed) {
-
-            $.ajax({
-                url: `/admin/${route.split('.').pop()}/${id}`,
-                type: "DELETE",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function (res) {
-
-                    Swal.fire('Deleted!', res.message, 'success');
-
-                    $("#row" + id).fadeOut(400, function () {
-                        $(this).remove();
-                    });
-
-                },
-                error: function () {
-                    Swal.fire('Error', 'Something went wrong', 'error');
-                }
-            });
-
-        }
-
-    });
+new Chart(document.getElementById('salesChart'),{
+type:'line',
+data:{
+labels:['Jan','Feb','Mar','Apr','May','Jun','Jul'],
+datasets:[{
+label:'Revenue',
+data:[12000,19000,15000,26000,32000,28000,41000],
+fill:true,
+tension:.4
+}]
 }
-
+});
 </script>

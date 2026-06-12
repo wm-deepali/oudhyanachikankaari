@@ -61,16 +61,13 @@ Route::controller(FrontController::class)->group(function () {
     Route::get('/faqs', 'faqs')->name('faqs');
     Route::get('/occasions', 'occasions')->name('occasions');
     Route::view('/partners', 'front-pages.partners')->name('partners');
-    Route::view('/products', 'front-pages.products')->name('products');
     Route::get('/product/{slug}', 'productDetail')->name('product.details');
     Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
     Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
     Route::get('/why-us', 'whyUs')->name('why-us');
     Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
-
-
-    Route::get('/category/{slug}', 'categoryListing')->name('category.products');
-    Route::get('/category/{slug}/filter', 'filterProducts')->name('category.filter.products');
+    Route::get('/category/{slug}', 'productListing')->name('products.listing');
+    Route::post('/products/filter/{slug}', 'filterProducts')->name('products.filter');
 
     // cart routes
     Route::post('/cart/add', 'addToCart')->name('cart.add');

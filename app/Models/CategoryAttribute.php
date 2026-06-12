@@ -30,4 +30,9 @@ class CategoryAttribute extends Model
     {
         return $this->belongsTo(Attribute::class);
     }
+
+    public function values()
+    {
+        return $this->attribute->values();
+    }
 }

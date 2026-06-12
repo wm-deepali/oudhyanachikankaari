@@ -772,8 +772,9 @@ function removeExistingImage(id) {
             return;
         }
         loadAttributes(categoryId);
+         window.subCategoryUrl = "{{ url('admin/products/subcategories') }}";
         $.get(
-            '/admin/products/subcategories/' + categoryId,
+           window.subCategoryUrl + '/' + categoryId,
             function (response) {
 
                 if (response.length > 0) {
@@ -808,9 +809,9 @@ function removeExistingImage(id) {
 
     function loadAttributes(categoryId) {
         $('#attribute-container').html('');
-
+window.attributeUrl = "{{ url('admin/products/category-attributes') }}";
         $.get(
-            '/admin/products/category-attributes/' + categoryId,
+            window.attributeUrl + '/' + categoryId,
             function (response) {
 
                 let html = '';

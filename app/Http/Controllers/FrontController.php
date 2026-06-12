@@ -40,6 +40,7 @@ use App\Models\HomeHeroBanner;
 use App\Models\HomeWhy;
 use App\Models\HomeWhyCard;
 use App\Models\HomeFeatureCard;
+use App\Models\Collection;
 
 
 class FrontController extends Controller
@@ -296,270 +297,149 @@ class FrontController extends Controller
         return view('front-pages.categories', compact('categories'));
     }
 
-    public function categoryListing($slug)
+    public function productListing(Request $request, $slug)
     {
         $category = Category::with([
             'children',
-            'brands'
+            'categoryAttributes.attribute.values'
         ])
             ->where('slug', $slug)
             ->where('status', 1)
             ->firstOrFail();
 
-        $products = Product::with(['images', 'categories', 'subcategories'])
-
-            ->where(function ($q) use ($category) {
-
-                // products attached directly to category
-                $q->whereHas('categories', function ($query) use ($category) {
-                    $query->where('categories.id', $category->id);
-                });
-
-                // products attached to subcategories
-                $q->orWhereHas('subcategories', function ($query) use ($category) {
-                    $query->where('parent_id', $category->id);
-                });
-            })
-
-            ->where('status', 1)
-            ->paginate(12);
-
         $subcategories = $category->children()
-            ->withCount('subcategoryProducts')
+            ->withCount('subCategoryProducts')
+            ->get();
+
+        $collections = Collection::where('status', 1)
             ->orderBy('sort_order')
             ->get();
 
-        $occasionIds = $products->pluck('id');
-
-        $occasions = GiftingOccasion::whereHas('products', function ($q) use ($occasionIds) {
-            $q->whereIn('products.id', $occasionIds);
-        })
-            ->where('status', 1)
-            ->orderBy('title')
+        $occasions = GiftingOccasion::where('status', 1)
             ->get();
 
-        $footerCategories = Category::where('status', 1)
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
-            ->take(10)
-            ->get();
+        $products = Product::with([
+            'images',
+            'category',
+            'subcategory',
+            'collections',
+            'occasions'
+        ]);
 
-        // dd($products->toArray(), $category->toArray(), $subcategories->toArray());
+        if ($request->filled('subcategory')) {
+
+            $subcategory = Category::where(
+                'slug',
+                $request->subcategory
+            )->first();
+
+            if ($subcategory) {
+                $products->where('subcategory_id', $subcategory->id);
+            }
+
+        } else {
+
+            $products->where(function ($query) use ($category, $subcategories) {
+                $query->where('category_id', $category->id)
+                    ->orWhereIn(
+                        'subcategory_id',
+                        $subcategories->pluck('id')
+                    );
+            });
+        }
+
+        $products = $products->latest()->paginate(12);
+
         return view(
-            'front-pages.product-listing',
+            'front-pages.products',
             compact(
                 'category',
                 'subcategories',
                 'products',
-                'occasions',
-                'footerCategories'
+                'collections',
+                'occasions'
             )
         );
     }
 
     public function filterProducts(Request $request, $slug)
     {
-        $category = Category::where('slug', $slug)
+        $category = Category::with('children')
+            ->where('slug', $slug)
             ->where('status', 1)
             ->firstOrFail();
 
+        $subcategories = $category->children()->pluck('id');
+
         $products = Product::with([
             'images',
-            'brand',
-            'categories',
-            'subcategories',
-            'occasions'
-        ])
-            ->where('status', 1)
+            'category',
+            'subcategory',
+            'collections',
+            'occasions',
+            'attributeValues'
+        ]);
 
-            ->where(function ($q) use ($category) {
+        // Category Products
+        $products->where(function ($query) use ($category, $subcategories) {
+            $query->where('category_id', $category->id)
+                ->orWhereIn('subcategory_id', $subcategories);
+        });
 
-                // Products linked directly to category
-                $q->whereHas('categories', function ($query) use ($category) {
+        // Subcategory Filter
+        if (!empty($request->subcategory_id)) {
+            $products->where('subcategory_id', $request->subcategory_id);
+        }
 
-                    $query->where(
-                        'categories.id',
-                        $category->id
-                    );
+        // Collection Filter
+        if (!empty($request->collections)) {
 
-                });
+            $products->whereHas('collections', function ($query) use ($request) {
 
-                // Products linked through subcategories
-                $q->orWhereHas('subcategories', function ($query) use ($category) {
+                $query->whereIn(
+                    'collections.id',
+                    $request->collections
+                );
 
-                    $query->where(
-                        'parent_id',
-                        $category->id
-                    );
-
-                });
             });
+        }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Search
-        |--------------------------------------------------------------------------
-        */
+        // Occasion Filter
+        if (!empty($request->occasions)) {
 
-        if ($request->filled('search')) {
+            $products->whereHas('occasions', function ($query) use ($request) {
+
+                $query->whereIn(
+                    'gifting_occasions.id',
+                    $request->occasions
+                );
+
+            });
+        }
+
+        if (!empty($request->search)) {
 
             $search = trim($request->search);
 
-            $products->where(function ($q) use ($search) {
+            $products->where(function ($query) use ($search) {
 
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sub_title', 'like', "%{$search}%")
-                    ->orWhere('summary', 'like', "%{$search}%");
-
-            });
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Brand Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($request->brands)) {
-
-            $products->whereHas('brand', function ($q) use ($request) {
-
-                $q->whereIn(
-                    'id',
-                    (array) $request->brands
-                );
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('short_description', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
 
             });
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Occasion Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($request->occasions)) {
-
-            $products->whereHas('occasions', function ($q) use ($request) {
-
-                $q->whereIn(
-                    'slug',
-                    (array) $request->occasions
-                );
-
-            });
+        if (!empty($request->min_price)) {
+            $products->where('price', '>=', $request->min_price);
         }
 
-        /*
-|--------------------------------------------------------------------------
-| Marketing Filter
-|--------------------------------------------------------------------------
-*/
-
-        if (!empty($request->marketing)) {
-
-            foreach ((array) $request->marketing as $flag) {
-
-                if (
-                    in_array($flag, [
-                        'featured',
-                        'new_arrival',
-                        'sale',
-                        'best_seller'
-                    ])
-                ) {
-
-                    $products->where($flag, 1);
-                }
-            }
+        if (!empty($request->max_price)) {
+            $products->where('price', '<=', $request->max_price);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Collection Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($request->collections)) {
-
-            foreach ((array) $request->collections as $flag) {
-
-                if (
-                    in_array($flag, [
-                        'is_premium',
-                        'is_engraving',
-                        'is_personalized_engraving'
-                    ])
-                ) {
-
-                    $products->where($flag, 1);
-                }
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Availability Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if (!empty($request->availability)) {
-
-            foreach ((array) $request->availability as $flag) {
-
-                if (
-                    in_array($flag, [
-                        'ready_to_ship',
-                        'bulk_available',
-                        'gift_hamper'
-                    ])
-                ) {
-
-                    $products->where($flag, 1);
-                }
-            }
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Subcategory Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->filled('subcategory')) {
-
-            $products->whereHas('subcategories', function ($q) use ($request) {
-
-                $q->where(
-                    'categories.slug',
-                    $request->subcategory
-                );
-
-            });
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Price Filter
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->filled('max_price')) {
-
-            $products->where(
-                'price',
-                '<=',
-                $request->max_price
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sorting
-        |--------------------------------------------------------------------------
-        */
-
-        switch ($request->sort) {
+        switch ($request->sort_by) {
 
             case 'price-low':
                 $products->orderBy('price', 'asc');
@@ -573,17 +453,30 @@ class FrontController extends Controller
                 $products->latest();
                 break;
 
+            case 'oldest':
+                $products->oldest();
+                break;
+
             default:
                 $products->latest();
                 break;
         }
 
+        if (!empty($request->attribute_values)) {
+
+            $products->whereHas('attributeValues', function ($query) use ($request) {
+
+                $query->whereIn(
+                    'attribute_value_id',
+                    $request->attribute_values
+                );
+
+            });
+        }
+
         $products = $products->paginate(12);
 
         return response()->json([
-
-            'success' => true,
-
             'html' => view(
                 'front-pages.partials.product-grid',
                 compact('products')
@@ -591,132 +484,10 @@ class FrontController extends Controller
 
             'pagination' => $products->links()->render(),
 
-            'total' => $products->total()
-
+            'count' => $products->total()
         ]);
     }
 
-
-    public function products(Request $request)
-    {
-        $query = Product::with(['images', 'categories', 'subcategories'])
-            ->where('status', 1);
-
-        $title = 'Products Collection';
-
-        switch ($request->filter) {
-
-            case 'featured':
-                $query->where('is_featured', 1);
-                $title = 'Featured Products';
-                break;
-
-            case 'new_arrivals':
-                $query->latest();
-                $title = 'New Arrivals';
-                break;
-
-            case 'sale':
-                $query->where('is_sale', 1);
-                $title = 'Exclusive on Sale';
-                break;
-
-            case 'best_sellers':
-                $query->orderByDesc('sales_count');
-                $title = 'Best Sellers';
-                break;
-        }
-        if ($request->filled('occasion')) {
-
-            $query->whereHas('occasions', function ($q) use ($request) {
-                $q->where('slug', $request->occasion);
-            });
-
-            $occasion = GiftingOccasion::where('slug', $request->occasion)->first();
-
-            if ($occasion) {
-                $title = $occasion->title;
-            }
-        }
-
-        // Budget Filter
-        if ($request->filled('budget')) {
-
-            switch ($request->budget) {
-
-                case 'under-500':
-                    $query->where('sale_price', '<', 500);
-                    $title = 'Products Under ₹500';
-                    break;
-
-                case '500-1000':
-                    $query->whereBetween('sale_price', [500, 1000]);
-                    $title = 'Products ₹500 – ₹1,000';
-                    break;
-
-                case '1000-2000':
-                    $query->whereBetween('sale_price', [1000, 2000]);
-                    $title = 'Products ₹1,000 – ₹2,000';
-                    break;
-
-                case '2000-5000':
-                    $query->whereBetween('sale_price', [2000, 5000]);
-                    $title = 'Products ₹2,000 – ₹5,000';
-                    break;
-
-                case 'above-5000':
-                    $query->where('sale_price', '>', 5000);
-                    $title = 'Products Above ₹5,000';
-                    break;
-            }
-        }
-
-
-        // Collection Filter
-        if ($request->filled('collection')) {
-
-            switch ($request->collection) {
-
-                case 'premium':
-                    $query->where('is_premium', 1);
-                    $title = 'Premium Products';
-                    break;
-
-                case 'engravings':
-                    $query->where('is_engraving', 1);
-                    $title = 'Engravings';
-                    break;
-
-                case 'personalized-engraving':
-                    $query->where('is_personalized_engraving', 1);
-                    $title = 'Personalized Engraving';
-                    break;
-            }
-        }
-
-
-        $products = $query->paginate(12)->withQueryString();
-
-        $footerCategories = Category::where('status', 1)
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
-            ->take(10)
-            ->get();
-
-        $footerOccasions = GiftingOccasion::where('status', 1)
-            ->orderBy('title')
-            ->get();
-
-        return view(
-            'front-pages.products',
-            compact(
-                'products',
-                'footerCategories',
-                'footerOccasions',
-                'title'
-            )
-        );
-    }
 
     public function productDetail($slug)
     {

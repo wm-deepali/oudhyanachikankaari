@@ -1109,8 +1109,9 @@
 
                                                 </div>
                                                 <div class="mt-40 text-center text-lg-start">
-                                                    <a href="{{ route('category.products', $category->slug) }}"
+                                                                                                        <a href="{{ route('products.listing', $category->slug) }}"
                                                         class="aq-btn-luxury">
+                                                                                                    
 
                                                         Explore {{ $category->name }}
 
