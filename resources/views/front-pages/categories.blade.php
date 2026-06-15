@@ -53,7 +53,7 @@
 
                                 <div class="col">
                                     <div class="aqf-categories-item text-center">
-                                        <a href="{{ route('products.listing', $category->slug) }}">
+                                                                               <a href="{{ route('products.listing', $category->slug) }}">
                                             <div class="aqf-categories-img">
                                                 <img src="{{ $category->image
                         ? asset('storage/' . $category->image)

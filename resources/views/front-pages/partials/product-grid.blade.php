@@ -19,8 +19,8 @@
                                             <img src="{{ isset($otherImages[1]) ? asset('storage/' . $otherImages[1]->image) : $product->display_image }}"
                                                 class="tertiary-img" alt="{{ $product->name }}" />
 
-                                            <!-- <video src="assets/img/corporate/reals_video.mp4" class="aq-product-card-video"
-                                                muted loop playsinline></video> -->
+                                            <!--<video src="assets/img/corporate/reals_video.mp4" class="aq-product-card-video"-->
+                                            <!--    muted loop playsinline></video>-->
 
                                             <div class="aq-product-media-indicator">
                                                 <span class="aq-media-dot active"></span>

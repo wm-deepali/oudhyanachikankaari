@@ -310,6 +310,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('category-attributes', CategoryAttributeController::class);
 
         Route::resource('announcements', AnnouncementController::class);
+
       Route::resource('coupons', CouponController::class);
 
         Route::get('/invoice-settings', [InvoiceSettingController::class, 'index'])->name('invoice-settings.index');

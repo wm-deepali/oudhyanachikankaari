@@ -1,252 +1,243 @@
 @include('admin.top-header')
-
 <div class="main-section">
-
     @include('admin.header')
 
+    <style>
+    :root {
+        --bg: #f1f2f4;
+        --surface: #ffffff;
+        --border: #e3e5e8;
+        --text-primary: #202223;
+        --text-secondary:#6d7175;
+        --text-hint: #8c9196;
+        --accent: #303d89;
+        --accent-light: #f0f1fc;
+        --green: #007a5e;
+        --green-bg: #e3f1ec;
+        --red: #b22222;
+        --red-bg: #fce8e8;
+        --amber: #916a00;
+        --amber-bg: #fff5cc;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px var(--border);
+        --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .detail-page { 
+        background: var(--bg); 
+        padding: 24px 28px; 
+        min-height: 100vh; 
+        font-family: var(--font); 
+        color: var(--text-primary); 
+    }
+    .detail-page * { box-sizing: border-box; }
+
+    .detail-page-header { 
+        display: flex; 
+        align-items: flex-start; 
+        justify-content: space-between; 
+        flex-wrap: wrap; 
+        gap: 12px; 
+        margin-bottom: 20px; 
+    }
+    .detail-page-header h1 { 
+        font-size: 20px; 
+        font-weight: 650; 
+        color: var(--text-primary); 
+        margin: 0; 
+    }
+    .crumb { 
+        font-size: 12.5px; 
+        color: var(--text-hint); 
+        margin-top: 3px; 
+    }
+    .crumb a { color: var(--accent); text-decoration: none; }
+    .crumb a:hover { text-decoration: underline; }
+    .crumb span { margin: 0 5px; }
+
+    .section-card { 
+        background: var(--surface); 
+        border: 1px solid var(--border); 
+        border-radius: var(--radius-md); 
+        box-shadow: var(--shadow-card); 
+        overflow: hidden; 
+        margin-bottom: 20px; 
+    }
+    .section-card-header { 
+        padding: 14px 20px; 
+        border-bottom: 1px solid var(--border); 
+        background: #fafafa; 
+    }
+    .section-card-header h5 { 
+        font-size: 13px; 
+        font-weight: 650; 
+        color: var(--text-primary); 
+        margin: 0; 
+    }
+    .section-card-body { padding: 20px; }
+
+    .field-group { margin-bottom: 16px; }
+    .field-label { 
+        display: block; 
+        font-size: 12px; 
+        font-weight: 600; 
+        color: var(--text-secondary); 
+        letter-spacing: .03em; 
+        text-transform: uppercase; 
+        margin-bottom: 6px; 
+    }
+    .field-input, .field-textarea {
+        width: 100%; 
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm); 
+        padding: 0 12px;
+        font-size: 13.5px; 
+        color: var(--text-primary);
+        background: var(--surface); 
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+        font-family: var(--font);
+    }
+    .field-input { height: 38px; }
+    .field-textarea { padding: 10px 12px; resize: vertical; min-height: 80px; }
+    .field-input:focus, .field-textarea:focus {
+        border-color: var(--accent); 
+        box-shadow: 0 0 0 3px rgba(48,61,137,.12);
+    }
+
+    .current-image {
+        max-width: 400px;
+        height: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 4px;
+        background: var(--bg);
+    }
+
+    .action-bar {
+        background: var(--surface); 
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md); 
+        box-shadow: var(--shadow-card);
+        padding: 14px 20px; 
+        display: flex; 
+        align-items: center;
+        justify-content: flex-end; 
+        gap: 10px; 
+        margin-top: 20px;
+    }
+
+    .alert {
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 20px;
+    }
+    .alert-danger { background: var(--red-bg); color: var(--red); border: 1px solid #f5c6c6; }
+
+    @media(max-width:768px) { 
+        .detail-page { padding: 16px; } 
+    }
+    </style>
+
     <div class="app-content content container-fluid">
-
-        <div class="breadcrumbs-top d-flex align-items-center bg-light mb-3">
-
-            <div class="breadcrumb-wrapper">
-
-                <ol class="breadcrumb bg-transparent mb-0">
-
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.dashboard') }}">
-                            Dashboard
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.home-page.index') }}">
-                            Home Page
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.home.sliders.index') }}">
-                            Home Sliders
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item active">
-                        Edit Slider
-                    </li>
-
-                </ol>
-
+        <div class="detail-page">
+            <!-- Page header -->
+            <div class="detail-page-header">
+                <div>
+                    <h1>Edit Slider</h1>
+                    <div class="crumb">
+                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+                        <span>›</span>
+                        <a href="{{ route('admin.home-page.index') }}">Manage Home Page</a>
+                        <span>›</span>
+                        <a href="{{ route('admin.home.sliders.index') }}">Home Sliders</a>
+                        <span>›</span>
+                        Edit
+                    </div>
+                </div>
             </div>
 
-        </div>
-
-        <div class="content-wrapper pb-4">
-
-            <div class="card shadow-sm">
-
-                <div class="card-header">
-                    <strong>Edit Slider</strong>
+            <div class="section-card">
+                <div class="section-card-header">
+                    <h5>Slider Details</h5>
                 </div>
-
-                <div class="card-body">
-
+                <div class="section-card-body">
                     @if ($errors->any())
-
                         <div class="alert alert-danger">
-
                             <ul class="mb-0">
-
                                 @foreach ($errors->all() as $error)
-
                                     <li>{{ $error }}</li>
-
                                 @endforeach
-
                             </ul>
-
                         </div>
-
                     @endif
 
-                    <form method="POST"
-                        action="{{ route('admin.home.sliders.update', $slider->id) }}"
-                        enctype="multipart/form-data">
-
+                    <form method="POST" action="{{ route('admin.home.sliders.update', $slider->id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
+                        <!-- Current Image -->
+                        <div class="field-group">
+                            <label class="field-label">Current Slider Image</label>
+                            @if($slider->image)
+                                <img src="{{ asset('storage/'.$slider->image) }}" 
+                                     class="current-image" alt="Current Slider">
+                            @else
+                                <div class="text-muted">No Image</div>
+                            @endif
+                        </div>
+
+                        <!-- Change Image -->
+                        <div class="field-group">
+                            <label class="field-label">Change Slider Image</label>
+                            <input type="file" name="image" class="field-input" accept=".jpg,.jpeg,.png,.webp">
+                            <small class="text-muted d-block mt-1">
+                                Leave empty if you don't want to change the image.<br>
+                                Recommended Size: 2048 × 730 px<br>
+                                Allowed: JPG, JPEG, PNG, WEBP | Max Size: 5 MB
+                            </small>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label">Redirect Link</label>
+                            <input type="url" name="link" value="{{ old('link', $slider->link) }}" 
+                                   class="field-input" placeholder="https://example.com">
+                        </div>
+
                         <div class="row">
-
-                            <div class="col-sm-12 form-group">
-
-                                <label>Current Slider Image</label>
-
-                                <div class="mt-2 mb-3">
-
-                                    @if($slider->image)
-
-                                        <img
-                                            src="{{ asset('storage/'.$slider->image) }}"
-                                            alt="Slider Image"
-                                            style="max-width:400px; height:auto; border:1px solid #ddd; padding:5px;">
-
-                                    @else
-
-                                        <div class="text-muted">
-                                            No Image Uploaded
-                                        </div>
-
-                                    @endif
-
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">Sort Order</label>
+                                    <input type="number" name="sort_order" 
+                                           value="{{ old('sort_order', $slider->sort_order) }}" 
+                                           class="field-input">
                                 </div>
-
                             </div>
-
-                            <div class="col-sm-12 form-group">
-
-                                <label>Change Slider Image</label>
-
-                                <input
-                                    type="file"
-                                    name="image"
-                                    class="form-control"
-                                    accept=".jpg,.jpeg,.png,.webp">
-
-                                <small class="text-muted">
-
-                                    Leave empty if you don't want to change the image.
-
-                                    <br>
-
-                                    Recommended Size:
-                                    2048 × 730 px
-
-                                    <br>
-
-                                    Allowed:
-                                    JPG, JPEG, PNG, WEBP
-
-                                    <br>
-
-                                    Maximum Size:
-                                    5 MB
-
-                                </small>
-
-                                @error('image')
-
-                                    <span class="text-danger d-block mt-1">
-                                        {{ $message }}
-                                    </span>
-
-                                @enderror
-
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">Status</label>
+                                    <select name="status" class="field-input">
+                                        <option value="1" {{ old('status', $slider->status) == 1 ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ old('status', $slider->status) == 0 ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                </div>
                             </div>
-
-                            <div class="col-sm-12 form-group">
-
-                                <label>Redirect Link</label>
-
-                                <input
-                                    type="url"
-                                    name="link"
-                                    value="{{ old('link', $slider->link) }}"
-                                    class="form-control"
-                                    placeholder="https://example.com">
-
-                                @error('link')
-
-                                    <span class="text-danger d-block mt-1">
-                                        {{ $message }}
-                                    </span>
-
-                                @enderror
-
-                            </div>
-
-                            <div class="col-sm-6 form-group">
-
-                                <label>Sort Order</label>
-
-                                <input
-                                    type="number"
-                                    name="sort_order"
-                                    value="{{ old('sort_order', $slider->sort_order) }}"
-                                    class="form-control">
-
-                                @error('sort_order')
-
-                                    <span class="text-danger d-block mt-1">
-                                        {{ $message }}
-                                    </span>
-
-                                @enderror
-
-                            </div>
-
-                            <div class="col-sm-6 form-group">
-
-                                <label>Status</label>
-
-                                <select
-                                    name="status"
-                                    class="form-control">
-
-                                    <option value="1"
-                                        {{ old('status', $slider->status) == 1 ? 'selected' : '' }}>
-                                        Active
-                                    </option>
-
-                                    <option value="0"
-                                        {{ old('status', $slider->status) == 0 ? 'selected' : '' }}>
-                                        Inactive
-                                    </option>
-
-                                </select>
-
-                                @error('status')
-
-                                    <span class="text-danger d-block mt-1">
-                                        {{ $message }}
-                                    </span>
-
-                                @enderror
-
-                            </div>
-
                         </div>
 
-                        <div class="mt-4">
-
-                            <button
-                                type="submit"
-                                class="btn btn-success">
-
-                                <i class="fa-solid fa-save"></i>
-
-                                Update Slider
-
-                            </button>
-
-                            <a href="{{ route('admin.home.sliders.index') }}"
-                                class="btn btn-secondary">
-
+                        <!-- Action bar -->
+                        <div class="action-bar">
+                            <a href="{{ route('admin.home.sliders.index') }}" class="btn-secondary-dash">
                                 Cancel
-
                             </a>
-
+                            <button type="submit" class="btn-primary-dash">
+                                <i class="fa fa-save"></i> Update Slider
+                            </button>
                         </div>
-
                     </form>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 @include('admin.footer')

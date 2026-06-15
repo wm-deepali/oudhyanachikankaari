@@ -5,12 +5,12 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-  <meta name="description" content="Krishna Chikan">
-  <meta name="keywords" content="Krishna Chikan">
+  <meta name="description" content="Oudhyana Chikankaari a exlcusive store for Lucknowi Chikan kaari">
+  <meta name="keywords" content="Oudhyana Chikankaari">
   <meta name="author" content="Webmingo">
   <meta name="csrf-token" content="{{ csrf_token() }}" />
 
-  <title>Admin Dashboard</title>
+  <title>Admin Dashboard | Oudhyana Chikankaari</title>
   <!--  <title>Krishna Chikan | @yield('title')</title> -->
 
 
@@ -35,6 +35,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   </script>
+  
+<style>
+.main-section { display: flex !important; }
+.main-section #cssmenu { width: 280px !important; min-width: 280px !important; flex-shrink: 0 !important; }
+.main-section .app-content { flex: 1 !important; min-width: 0 !important; }
+</style>
+  
 </head>
 
 <body>
@@ -44,7 +51,7 @@
     <div class="container-fluid">
       <div class="top-main-header d-flex align-items-center">
         <div class="admin-logo">
-          <img src="{{ asset('images/B2B_logo.png') }}">
+          <img src="{{ asset('assets/img/corporate/Oudhyana_img/logo.png') }}">
         </div>
         <div class="ml-auto">
 

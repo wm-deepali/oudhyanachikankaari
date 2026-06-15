@@ -1,1059 +1,691 @@
 @include('admin.top-header')
 
-<style>
-    /* GLOBAL */
-    .card {
-        border-radius: 14px;
-        border: none;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-    }
-
-    .card h5 {
-        font-weight: 600;
-        margin-bottom: 15px;
-        color: #111827;
-    }
-
-    /* HEADER */
-    .card-header {
-        background: #fff;
-        font-size: 20px;
-        font-weight: 600;
-        border-bottom: 1px solid #eee;
-    }
-
-    /* FORM */
-    label {
-        font-weight: 500;
-        margin-bottom: 3px;
-        font-size: 14px;
-    }
-
-    .form-control {
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-    }
-
-    .form-control:focus {
-        background: #fff;
-        border-color: #003108;
-        box-shadow: none;
-    }
-
-    /* CHECKBOX */
-    input[type="checkbox"] {
-        margin-right: 6px;
-    }
-
-    /* SECTION SPACING */
-    .card.p-3 {
-        padding: 20px !important;
-    }
-
-
-
-    /* GRID SPACING */
-    .row>div {
-        margin-bottom: 12px;
-    }
-
-    /* RIGHT SIDEBAR */
-    .right-sticky {
-        position: sticky;
-        top: 20px;
-    }
-
-    /* BUTTON */
-    .btn-success {
-        background: linear-gradient(90deg, #f97316, #fb923c);
-        border: none;
-        border-radius: 10px;
-        padding: 12px 25px;
-        font-weight: 500;
-    }
-
-    .btn-success:hover {
-        opacity: 0.9;
-    }
-
-    /* SMALL BUTTON */
-    .btn-sm {
-        border-radius: 8px;
-    }
-
-    /* CHECKBOX GRID */
-    .checkbox-grid label {
-        display: block;
-        margin-bottom: 6px;
-    }
-
-    /* CUSTOMIZATION BOX */
-    .custom-box {
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px;
-        transition: 0.2s;
-    }
-
-    .custom-box:hover {
-        border-color: #003108;
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    /* TEXTAREA */
-    textarea.form-control {
-        min-height: 90px;
-    }
-
-    .flag-group {
-        background: #f9fafb;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        padding: 10px 12px;
-        /* reduced from 15px */
-    }
-
-    .flag-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: #6b7280;
-        margin-bottom: 6px;
-        /* reduced */
-        text-transform: uppercase;
-    }
-
-    .flag-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 6px;
-        /* reduced */
-        border-radius: 6px;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 13px;
-        margin-bottom: 2px;
-        /* reduce vertical gap */
-    }
-
-    .flag-item:hover {
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-    }
-
-    .flag-item input[type="checkbox"] {
-        accent-color: #003108;
-        transform: scale(1);
-    }
-
-    .occasion-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 6px 12px;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        background: #ffffff;
-        cursor: pointer;
-        transition: 0.2s;
-        font-size: 14px;
-    }
-
-    .occasion-box:hover {
-        background: linear-gradient(180deg, rgba(0, 49, 8, 0) 40%, rgba(0, 49, 8, 0.03) 100%);
-        border-color: #003108;
-    }
-
-    .occasion-box input[type="checkbox"] {
-        accent-color: #003108;
-        transform: scale(1.1);
-        cursor: pointer;
-    }
-
-    /* Optional: active feel when checked */
-    .occasion-box input[type="checkbox"]:checked+span {
-        font-weight: 500;
-        color: #003108;
-    }
-
-    /* tumhara existing CSS */
-
-    select.form-control {
-        /*height: 45px;*/
-        /*padding: 10px 12px;*/
-        padding: 0px 8px;
-    }
-
-    .flag-item input[type="checkbox"] {
-        accent-color: #003108;
-        cursor: pointer;
-    }
-
-    /* TITLE SPACING */
-    h5 b {
-        font-weight: 600;
-    }
-
-
-
-    .thumb-box {
-        position: relative;
-        margin: 5px;
-    }
-
-    .thumb-box img {
-        width: 80px;
-        height: 80px;
-        border-radius: 8px;
-        object-fit: cover;
-        border: 2px solid #eee;
-    }
-
-    .thumb-actions {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-    }
-
-    .remove-btn {
-        background: red;
-        color: #fff;
-        border: none;
-        border-radius: 50%;
-        font-size: 12px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-</style>
 <div class="main-section">
-
     @include('admin.header')
 
+    <style>
+    :root {
+        --bg:            #f1f2f4;
+        --surface:       #ffffff;
+        --border:        #e3e5e8;
+        --text-primary:  #202223;
+        --text-secondary:#6d7175;
+        --text-hint:     #8c9196;
+        --accent:        #303d89;
+        --accent-light:  #f0f1fc;
+        --green:         #007a5e;
+        --green-bg:      #e3f1ec;
+        --red:           #b22222;
+        --red-bg:        #fce8e8;
+        --amber:         #916a00;
+        --amber-bg:      #fff5cc;
+        --radius-sm:     8px;
+        --radius-md:     12px;
+        --shadow-card:   0 1px 3px rgba(0,0,0,.08), 0 0 0 1px var(--border);
+        --font:          'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .product-create-page { background: var(--bg); padding: 24px 28px; min-height: 100vh; font-family: var(--font); color: var(--text-primary); }
+    .product-create-page * { box-sizing: border-box; }
+
+    /* ── Page header ────────────────────────────────────────── */
+    .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .page-header h1 { font-size: 20px; font-weight: 650; color: var(--text-primary); margin: 0; }
+    .crumb { font-size: 12.5px; color: var(--text-hint); margin-top: 3px; }
+    .crumb a { color: var(--accent); text-decoration: none; }
+    .crumb a:hover { text-decoration: underline; }
+    .crumb span { margin: 0 5px; }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    .product-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+    @media(max-width:960px) { .product-layout { grid-template-columns: 1fr; } }
+
+    /* ── Section card ───────────────────────────────────────── */
+    .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); overflow: hidden; margin-bottom: 16px; }
+    .section-card:last-child { margin-bottom: 0; }
+    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
+    .section-card-header h5 { font-size: 13px; font-weight: 650; color: var(--text-primary); margin: 0; }
+    .section-card-body { padding: 20px; }
+
+    /* ── Form fields ────────────────────────────────────────── */
+    .field-group { margin-bottom: 16px; }
+    .field-group:last-child { margin-bottom: 0; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: .03em; text-transform: uppercase; margin-bottom: 6px; }
+    .field-label .req { color: var(--red); margin-left: 2px; }
+    .field-input, .field-select, .field-textarea {
+        width: 100%; height: 38px; border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 0 12px;
+        font-size: 13.5px; color: var(--text-primary); background: var(--surface);
+        outline: none; transition: border-color .15s, box-shadow .15s; font-family: var(--font);
+    }
+    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12); }
+    .field-textarea { height: auto; padding: 10px 12px; resize: vertical; min-height: 80px; }
+    .field-input[readonly] { background: var(--bg); color: var(--text-secondary); cursor: default; }
+    .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 4px; }
+
+    /* ── Slug prefix ────────────────────────────────────────── */
+    .slug-wrap { position: relative; }
+    .slug-prefix { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 10px; background: var(--bg); border: 1px solid var(--border); border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm); font-size: 12px; color: var(--text-hint); white-space: nowrap; pointer-events: none; }
+    .slug-input { padding-left: 68px !important; }
+
+    /* ── Pricing row ────────────────────────────────────────── */
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media(max-width:640px) { .pricing-grid { grid-template-columns: 1fr 1fr; } }
+
+    .final-price-box { background: var(--accent-light); border: 1px solid #c7cdf5; border-radius: var(--radius-sm); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .final-price-box .label { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .04em; }
+    .final-price-box .value { font-size: 22px; font-weight: 700; color: var(--accent); }
+
+    /* ── Inventory grid ─────────────────────────────────────── */
+    .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── Checkbox toggles ───────────────────────────────────── */
+    .check-toggle { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all .15s; background: var(--surface); margin-bottom: 8px; }
+    .check-toggle:hover { border-color: var(--accent); background: var(--accent-light); }
+    .check-toggle input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; margin: 0; }
+    .check-toggle input[type="checkbox"]:checked ~ span { font-weight: 600; color: var(--accent); }
+    .check-toggle:has(input:checked) { border-color: var(--accent); background: var(--accent-light); }
+    .check-toggle span { font-size: 13px; color: var(--text-primary); }
+
+    /* ── Image upload ───────────────────────────────────────── */
+    .file-upload-area { border: 2px dashed var(--border); border-radius: var(--radius-md); padding: 24px 20px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+    .file-upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+    .file-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .file-upload-area .upload-icon { font-size: 24px; color: var(--text-hint); margin-bottom: 8px; }
+    .file-upload-area p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+    .file-upload-area small { font-size: 11.5px; color: var(--text-hint); }
+
+    /* Thumb previews */
+    #previewContainer { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .thumb-box { position: relative; }
+    .thumb-box img { width: 76px; height: 76px; border-radius: var(--radius-sm); object-fit: cover; border: 1.5px solid var(--border); display: block; }
+    .remove-btn { position: absolute; top: -6px; right: -6px; background: var(--red); color: #fff; border: 2px solid #fff; border-radius: 50%; font-size: 11px; width: 20px; height: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; padding: 0; }
+    .thumb-default { text-align: center; margin-top: 4px; font-size: 11px; color: var(--text-hint); }
+    .thumb-default input { accent-color: var(--accent); }
+
+    /* ── Settings toggle rows ───────────────────────────────── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg); }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .toggle-sub { font-size: 11.5px; color: var(--text-hint); margin-top: 2px; }
+    .field-select-sm {
+        height: 32px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 0 28px 0 10px; font-size: 12.5px; color: var(--text-primary);
+        background: var(--surface); outline: none; font-family: var(--font);
+        min-width: 90px; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238c9196'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 9px center;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .field-select-sm:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12); }
+
+    /* ── Attributes (dynamic) ───────────────────────────────── */
+    #attribute-container .section-card-body label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    #attribute-container .check-toggle { margin-bottom: 6px; }
+
+    /* ── Variants table (dynamic) ───────────────────────────── */
+    .variants-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .variants-table thead th { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-hint); padding: 10px 12px; border-bottom: 1px solid var(--border); background: #fafafa; white-space: nowrap; text-align: left; }
+    .variants-table tbody tr { border-bottom: 1px solid var(--border); }
+    .variants-table tbody tr:last-child { border-bottom: none; }
+    .variants-table tbody td { padding: 10px 12px; vertical-align: middle; }
+    .variants-table .field-input { height: 34px; font-size: 13px; }
+    .variants-table .field-select { height: 34px; font-size: 13px; }
+    .variant-name-cell { font-weight: 600; font-size: 13px; color: var(--text-primary); white-space: nowrap; }
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn-primary-dash {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--accent); color: #fff !important; border: none;
+        border-radius: var(--radius-sm); padding: 9px 20px;
+        font-size: 13px; font-weight: 600; cursor: pointer;
+        text-decoration: none !important; font-family: var(--font);
+        transition: background .15s; box-shadow: 0 1px 3px rgba(48,61,137,.25);
+    }
+    .btn-primary-dash:hover:not(:disabled) { background: #252f70; }
+    .btn-primary-dash:disabled { opacity: .65; cursor: not-allowed; }
+    .btn-secondary-dash {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--surface); color: var(--text-primary) !important;
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer;
+        text-decoration: none !important; font-family: var(--font); transition: background .15s;
+    }
+    .btn-secondary-dash:hover { background: var(--bg); }
+    .btn-outline-accent {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--accent-light); color: var(--accent) !important; border: 1.5px solid #c7cdf5;
+        border-radius: var(--radius-sm); padding: 8px 16px;
+        font-size: 13px; font-weight: 600; cursor: pointer;
+        text-decoration: none !important; font-family: var(--font); transition: all .15s;
+    }
+    .btn-outline-accent:hover { background: var(--accent); color: #fff !important; border-color: var(--accent); }
+
+    /* ── Action bar ─────────────────────────────────────────── */
+    .action-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 14px 20px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* CKEditor override */
+    .cke { border-radius: var(--radius-sm) !important; border: 1px solid var(--border) !important; overflow: hidden; }
+    .cke_top { background: #fafafa !important; border-bottom: 1px solid var(--border) !important; }
+
+    @media(max-width:768px) { .product-create-page { padding: 16px; } .pricing-grid { grid-template-columns: 1fr 1fr; } .inv-grid { grid-template-columns: 1fr; } }
+    </style>
+
     <div class="app-content content container-fluid">
+        <div class="product-create-page">
 
-        <div class="breadcrumbs-top d-flex align-items-center bg-light mb-3">
-
-            <div class="breadcrumb-wrapper">
-
-                <ol class="breadcrumb bg-transparent mb-0">
-
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.dashboard') }}">
-                            Dashboard
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.products.index') }}">
-                            Products
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item active">
+            <!-- Page header -->
+            <div class="page-header">
+                <div>
+                    <h1>Add Product</h1>
+                    <div class="crumb">
+                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
+                        <span>›</span>
+                        <a href="{{ route('admin.products.index') }}">Products</a>
+                        <span>›</span>
                         Add Product
-                    </li>
-
-                </ol>
-
+                    </div>
+                </div>
             </div>
 
-        </div>
-
-        <div class="content-wrapper pb-4">
-
-            <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data"
-                class="save-form">
-
+            <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" class="save-form">
                 @csrf
 
-                <div class="row">
+                <div class="product-layout">
 
-                    <!-- LEFT -->
-                    <div class="col-md-6">
+                    <!-- ══════════ LEFT COLUMN ══════════ -->
+                    <div>
 
-                        <div class="card p-3 mb-3">
-                            <h5><b>Basic Info</b></h5>
+                        <!-- Basic Info -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Basic Information</h5></div>
+                            <div class="section-card-body">
 
-                            <div class="form-group">
-
-                                <label>Category *</label>
-
-                                <select name="category_id" id="category_id" class="form-control" required>
-
-                                    <option value="">
-                                        Select Category
-                                    </option>
-
-                                    @foreach($categories as $category)
-
-                                        <option value="{{ $category->id }}">
-                                            {{ $category->name }}
-                                        </option>
-
-                                    @endforeach
-
-                                </select>
-
-                            </div>
-
-
-
-                            <div class="form-group" id="subcategory-wrapper" style="display:none;">
-
-                                <label>Sub Category</label>
-
-                                <select name="subcategory_id" id="subcategory_id" class="form-control">
-
-                                    <option value="">
-                                        Select Sub Category
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>Product Name *</label>
-
-                                <input type="text" name="name" id="product_name" class="form-control" required>
-
-                            </div>
-
-
-                            <div class="form-group">
-
-                                <label>Slug</label>
-
-                                <input type="text" name="slug" id="slug" class="form-control">
-
-                            </div>
-
-
-
-                            <div class="form-group">
-
-                                <label>Short Description</label>
-
-                                <textarea name="short_description" class="form-control" rows="3"></textarea>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="card p-3 mb-3">
-                            <h5><b>Content</b></h5>
-
-                            <label>Details</label>
-                            <textarea name="description" id="description" class="form-control"></textarea>
-
-                            <label class="mt-2">Delivery & Returns</label>
-                            <textarea name="delivery_returns" id="delivery_returns" class="form-control"></textarea>
-                        </div>
-
-
-                        <div class="card p-3 mb-3">
-                            <h5><b>Media</b></h5>
-                            <label class="mt-2">Upload Images (Max 6)</label>
-                            <input type="file" id="images" name="images[]" multiple accept="image/*"
-                                class="form-control">
-
-                            <small class="text-muted">Max 6 images allowed</small>
-
-                            <!-- Thumbnails Preview -->
-                            <div id="previewContainer" class="d-flex flex-wrap mt-2"></div>
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="card p-3 mb-3">
-                            <h5><b>Pricing</b></h5>
-
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>MRP</label>
-                                    <input type="number" name="mrp" id="mrp" class="form-control">
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label>Discount Type</label>
-                                    <select name="discount_type" id="discount_type" class="form-control">
-                                        <option value="amount">Amount</option>
-                                        <option value="percentage">%</option>
+                                <div class="field-group">
+                                    <label class="field-label">Category <span class="req">*</span></label>
+                                    <select name="category_id" id="category_id" class="field-select" required>
+                                        <option value="">— Select Category —</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
-                                    <label>Discount</label>
-                                    <input type="number" name="discount" id="discount" class="form-control">
-                                </div>
-                            </div>
-
-                            <label class="mt-2">Final Price</label>
-                            <input type="text" name="price" id="price" readonly class="form-control">
-                        </div>
-
-                        <div class="card p-3 mb-3">
-                            <h5><b>Inventory</b></h5>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label>SKU</label>
-                                    <input type="text" name="sku" class="form-control">
+                                <div class="field-group" id="subcategory-wrapper" style="display:none;">
+                                    <label class="field-label">Sub Category</label>
+                                    <select name="subcategory_id" id="subcategory_id" class="field-select">
+                                        <option value="">Select Sub Category</option>
+                                    </select>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label>Min Qty</label>
-                                    <input type="number" name="min_qty" class="form-control" required>
+                                <div class="field-group">
+                                    <label class="field-label">Product Name <span class="req">*</span></label>
+                                    <input type="text" name="name" id="product_name" class="field-input" required placeholder="e.g. Hand-Knotted Wool Rug">
                                 </div>
 
-                                <div class="col-md-6">
-                                    <label>Stock</label>
-                                    <input type="number" name="stock" class="form-control" required>
-                                </div>
-
-
-                                <div class="col-md-6">
-                                    <label>Product Code</label>
-                                    <input type="text" name="product_code" class="form-control">
-                                </div>
-
-                            </div>
-
-                            <label class="mt-2">Delivery Time</label>
-                            <input type="text" name="delivery_time" class="form-control">
-
-                            <div class="mt-3">
-                                <div class="row">
-
-                                    <div class="col-md-6 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="quality">
-                                            <span>Quality Assurance</span>
-                                        </label>
+                                <div class="field-group">
+                                    <label class="field-label">Slug</label>
+                                    <div class="slug-wrap">
+                                        <span class="slug-prefix">/p/</span>
+                                        <input type="text" name="slug" id="slug" class="field-input slug-input" placeholder="auto-generated">
                                     </div>
-
-                                    <div class="col-md-6 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="pan_india">
-                                            <span>PAN India Delivery</span>
-                                        </label>
-                                    </div>
-
                                 </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Short Description</label>
+                                    <textarea name="short_description" class="field-textarea" rows="3" placeholder="Brief summary shown on listing pages…"></textarea>
+                                </div>
+
                             </div>
                         </div>
 
-                        {{-- OCCASIONS --}}
-                        <div class="card p-3 mb-3">
-                            <h5 class="mb-3"><b>Occasions (Suitable for)</b></h5>
+                        <!-- Content -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Content</h5></div>
+                            <div class="section-card-body">
 
-                            <div class="row">
-                                @foreach($occasions as $o)
-                                    <div class="col-12 mb-2">
-                                        <label class="occasion-box">
-                                            <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
-                                            <span>{{ $o->title }}</span>
-                                        </label>
+                                <div class="field-group">
+                                    <label class="field-label">Product Details</label>
+                                    <textarea name="description" id="description" class="field-textarea"></textarea>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Delivery &amp; Returns</label>
+                                    <textarea name="delivery_returns" id="delivery_returns" class="field-textarea"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Pricing -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Pricing</h5></div>
+                            <div class="section-card-body">
+
+                                <div class="pricing-grid">
+                                    <div class="field-group" style="margin:0">
+                                        <label class="field-label">MRP</label>
+                                        <input type="number" name="mrp" id="mrp" class="field-input" placeholder="0.00">
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- COLLECTIONS --}}
-                        <div class="card p-3 mb-3">
-                            <h5 class="mb-3"><b>Collections</b></h5>
-
-                            <div class="row">
-
-                                @foreach($collections as $collection)
-
-                                    <div class="col-12 mb-2">
-
-                                        <label class="occasion-box">
-
-                                            <input type="checkbox" name="collections[]" value="{{ $collection->id }}">
-
-                                            <span>{{ $collection->name }}</span>
-
-                                        </label>
-
+                                    <div class="field-group" style="margin:0">
+                                        <label class="field-label">Discount Type</label>
+                                        <select name="discount_type" id="discount_type" class="field-select">
+                                            <option value="amount">Amount (₹)</option>
+                                            <option value="percentage">Percentage (%)</option>
+                                        </select>
                                     </div>
+                                    <div class="field-group" style="margin:0">
+                                        <label class="field-label">Discount</label>
+                                        <input type="number" name="discount" id="discount" class="field-input" placeholder="0">
+                                    </div>
+                                </div>
 
-                                @endforeach
+                                <div class="final-price-box">
+                                    <span class="label">Final Price</span>
+                                    <span class="value" id="price-display">₹0.00</span>
+                                    <input type="hidden" name="price" id="price" value="">
+                                </div>
 
                             </div>
                         </div>
 
-                        <div class="card p-3 mb-3">
-                            <h5><b>SEO</b></h5>
+                        <!-- Media -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Media</h5></div>
+                            <div class="section-card-body">
 
-                            <label>Meta Title</label>
-                            <input type="text" name="meta_title" class="form-control">
+                                <div class="file-upload-area">
+                                    <input type="file" id="images" name="images[]" multiple accept="image/*">
+                                    <div class="upload-icon"><i class="fa fa-cloud-upload"></i></div>
+                                    <p>Click or drag images here</p>
+                                    <small>PNG, JPG, WEBP — max 6 images, 2 MB each</small>
+                                </div>
 
-                            <label class="mt-2">Meta Description</label>
-                            <textarea name="meta_description" class="form-control"></textarea>
+                                <div id="previewContainer"></div>
+
+                            </div>
                         </div>
 
-
-                        <div class="card p-3">
-                            <label>Status</label>
-                            <select name="status" class="form-control">
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-12">
-                        {{-- Attributes will come here later --}}
+                        <!-- Attributes (dynamic) -->
                         <div id="attribute-container"></div>
 
+                        <!-- Generate Variants button -->
                         <div class="mb-3" id="variant-btn-wrapper" style="display:none;">
-
-                            <button type="button" id="generate-variants" class="btn btn-primary">
-
-                                <i class="fa fa-cogs"></i>
-                                Generate Variants
-
+                            <button type="button" id="generate-variants" class="btn-outline-accent">
+                                <i class="fa fa-cogs"></i> Generate Variants
                             </button>
-
                         </div>
 
-                        {{-- Variants will come here later --}}
+                        <!-- Variants (dynamic) -->
                         <div id="variant-container"></div>
+
                     </div>
 
+                    <!-- ══════════ RIGHT COLUMN ══════════ -->
+                    <div>
 
+                        <!-- Status -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Status</h5></div>
+                            <div class="section-card-body" style="padding:16px 20px">
+                                <div class="toggle-row" style="padding:0;border:none">
+                                    <div>
+                                        <div class="toggle-label">Visibility</div>
+                                        <div class="toggle-sub">Visible to customers</div>
+                                    </div>
+                                    <select name="status" class="field-select-sm">
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inventory -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Inventory</h5></div>
+                            <div class="section-card-body">
+
+                                <div class="inv-grid">
+                                    <div class="field-group">
+                                        <label class="field-label">SKU</label>
+                                        <input type="text" name="sku" class="field-input" placeholder="SKU-001">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Product Code</label>
+                                        <input type="text" name="product_code" class="field-input">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Stock <span class="req">*</span></label>
+                                        <input type="number" name="stock" class="field-input" required placeholder="0">
+                                    </div>
+                                    <div class="field-group">
+                                        <label class="field-label">Min Qty <span class="req">*</span></label>
+                                        <input type="number" name="min_qty" class="field-input" required placeholder="1">
+                                    </div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Delivery Time</label>
+                                    <input type="text" name="delivery_time" class="field-input" placeholder="e.g. 3–5 business days">
+                                </div>
+
+                                <div style="margin-top:4px">
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="quality">
+                                        <span>Quality Assurance</span>
+                                    </label>
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="pan_india">
+                                        <span>PAN India Delivery</span>
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Occasions -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Occasions</h5></div>
+                            <div class="section-card-body">
+                                @foreach($occasions as $o)
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
+                                        <span>{{ $o->title }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- Collections -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Collections</h5></div>
+                            <div class="section-card-body">
+                                @foreach($collections as $collection)
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="collections[]" value="{{ $collection->id }}">
+                                        <span>{{ $collection->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <!-- SEO -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>SEO</h5></div>
+                            <div class="section-card-body">
+                                <div class="field-group">
+                                    <label class="field-label">Meta Title</label>
+                                    <input type="text" name="meta_title" class="field-input">
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-label">Meta Description</label>
+                                    <textarea name="meta_description" class="field-textarea"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-success save-btn">
-
-                    <i class="fa fa-save"></i>
-                    Save Product
-
-                </button>
-
-                <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">
-
-                    Cancel
-
-                </a>
+                <!-- Action bar -->
+                <div class="action-bar">
+                    <a href="{{ route('admin.products.index') }}" class="btn-secondary-dash">Cancel</a>
+                    <button type="submit" class="btn-primary-dash save-btn">
+                        <i class="fa fa-save"></i> Save Product
+                    </button>
+                </div>
 
             </form>
-
         </div>
-
     </div>
-
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
 <script>
+/* ── CKEditor ───────────────────────────────────────────────── */
+CKEDITOR.config.versionCheck = false;
+CKEDITOR.replace('description');
+CKEDITOR.replace('delivery_returns');
 
-    CKEDITOR.config.versionCheck = false;
-    CKEDITOR.replace('description');
-    CKEDITOR.replace('delivery_returns');
+/* ── Slug auto-generate ─────────────────────────────────────── */
+$(document).on('keyup', '#product_name', function () {
+    let slug = $(this).val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    $('#slug').val(slug);
+});
 
+/* ── Pricing calculator ─────────────────────────────────────── */
+function calcPrice() {
+    let m = +$('#mrp').val() || 0;
+    let d = +$('#discount').val() || 0;
+    let t = $('#discount_type').val();
+    let p = t === 'percentage' ? m - (m * d / 100) : m - d;
+    if (p < 0) p = 0;
+    $('#price').val(p.toFixed(2));
+    $('#price-display').text('₹' + p.toFixed(2));
+}
+$('#mrp, #discount, #discount_type').on('keyup change', calcPrice);
 
-    $(document).on('keyup', '#product_name', function () {
+/* ── Submit spinner ─────────────────────────────────────────── */
+$(document).on('submit', '.save-form', function () {
+    let btn = $(this).find('.save-btn');
+    btn.prop('disabled', true);
+    btn.html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+});
 
-        let slug = $(this)
-            .val()
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
+/* ── Image preview ──────────────────────────────────────────── */
+let selectedFiles = [];
 
-        $('#slug').val(slug);
+$('#images').on('change', function (e) {
+    let files = Array.from(e.target.files);
+    if ((selectedFiles.length + files.length) > 6) {
+        alert('Maximum 6 images allowed');
+        return;
+    }
+    files.forEach(file => selectedFiles.push(file));
+    renderPreview();
+});
 
-    });
-
-    $('#mrp,#discount,#discount_type').on('keyup change', function () {
-        let m = +$('#mrp').val() || 0;
-        let d = +$('#discount').val() || 0;
-        let t = $('#discount_type').val();
-
-        let p = t == 'percentage' ? m - (m * d / 100) : m - d;
-        if (p < 0) p = 0;
-
-        $('#price').val(p.toFixed(2));
-    });
-
-    $(document).on('submit', '.save-form', function () {
-
-        let btn = $(this).find('.save-btn');
-
-        btn.prop('disabled', true);
-
-        btn.html(
-            '<i class="fa fa-spinner fa-spin"></i> Processing...'
-        );
-
-    });
-
-    let selectedFiles = [];
-
-    $('#images').on('change', function (e) {
-        let files = Array.from(e.target.files);
-
-        if ((selectedFiles.length + files.length) > 6) {
-            alert('Maximum 6 images allowed');
-            return;
-        }
-
-        files.forEach(file => {
-            selectedFiles.push(file);
-        });
-
-        renderPreview();
-    });
-
-    function renderPreview() {
-        $('#previewContainer').html('');
-
-        selectedFiles.forEach((file, index) => {
-            let reader = new FileReader();
-
-            reader.onload = function (e) {
-                let html = `
+function renderPreview() {
+    $('#previewContainer').html('');
+    selectedFiles.forEach((file, index) => {
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let html = `
                 <div class="thumb-box">
-                    <img src="${e.target.result}">
-
-                    <div class="thumb-actions">
-                        <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
+                    <div class="thumb-default">
+                        <input type="radio" name="default_image" value="${index}" ${index === 0 ? 'checked' : ''}> Default
                     </div>
-
-                    <div class="text-center mt-1">
-                        <input type="radio" name="default_image" value="${index}" ${index === 0 ? 'checked' : ''}>
-                        <small>Default</small>
-                    </div>
-                </div>
-            `;
-                $('#previewContainer').append(html);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function removeImage(index) {
-        selectedFiles.splice(index, 1);
-        renderPreview();
-    }
-
-    $('form').on('submit', function () {
-        let dataTransfer = new DataTransfer();
-
-        selectedFiles.forEach(file => {
-            dataTransfer.items.add(file);
-        });
-
-        document.getElementById('images').files = dataTransfer.files;
+                </div>`;
+            $('#previewContainer').append(html);
+        };
+        reader.readAsDataURL(file);
     });
+}
 
-    $('#category_id').on('change', function () {
+function removeImage(index) {
+    selectedFiles.splice(index, 1);
+    renderPreview();
+}
 
-        let categoryId = $(this).val();
-        $('#variant-container').html('');
-        $('#variant-btn-wrapper').hide();
+$('form').on('submit', function () {
+    let dataTransfer = new DataTransfer();
+    selectedFiles.forEach(file => dataTransfer.items.add(file));
+    document.getElementById('images').files = dataTransfer.files;
+});
 
-        $('#subcategory_id').html(
-            '<option value="">Loading...</option>'
-        );
+/* ── Category → subcategories & attributes ──────────────────── */
+$('#category_id').on('change', function () {
+    let categoryId = $(this).val();
+    $('#variant-container').html('');
+    $('#variant-btn-wrapper').hide();
+    $('#subcategory_id').html('<option value="">Loading...</option>');
 
-        if (!categoryId) {
-
-            $('#subcategory-wrapper').hide();
-
-            return;
-        }
-        loadAttributes(categoryId);
-        window.subCategoryUrl = "{{ url('admin/products/subcategories') }}";
-
-        $.get(
-            window.subCategoryUrl + '/' + categoryId,
-            function (response) {
-
-                if (response.length > 0) {
-
-                    let html =
-                        '<option value="">Select Sub Category</option>';
-
-                    $.each(response, function (i, item) {
-
-                        html += `
-                        <option value="${item.id}">
-                            ${item.name}
-                        </option>
-                    `;
-
-                    });
-
-                    $('#subcategory_id').html(html);
-
-                    $('#subcategory-wrapper').show();
-
-                } else {
-
-                    $('#subcategory-wrapper').hide();
-
-                }
-
-            }
-        );
-
-    });
-
-    function loadAttributes(categoryId) {
+    if (!categoryId) {
+        $('#subcategory-wrapper').hide();
         $('#attribute-container').html('');
-        window.attributeUrl = "{{ url('admin/products/category-attributes') }}";
-        $.get(
-            window.attributeUrl + '/' + categoryId,
-            function (response) {
-
-                let html = '';
-
-                if (response.length > 0) {
-
-                    html += `
-                    <div class="card shadow-sm mb-3">
-
-                        <div class="card-header">
-                            <strong>Attributes</strong>
-                        </div>
-
-                        <div class="card-body">
-                `;
-
-                    response.forEach(function (item) {
-
-                        html += `
-                        <div class="form-group">
-
-                            <label>
-                                ${item.attribute.name}
-                            </label>
-                    `;
-
-                        if (item.attribute.has_values) {
-
-                            item.attribute.values.forEach(function (value) {
-
-                                html += `
-                                <div>
-
-                                    <label>
-
-                                     <input
-    type="checkbox"
-    class="attribute-value"
-
-    data-attribute-id="${item.attribute.id}"
-
-    data-attribute-name="${item.attribute.name}"
-
-    data-value-name="${value.value}"
-
-    data-variant="${item.used_for_variant}"
-
-    name="attribute_values[${item.attribute.id}][]"
-
-    value="${value.id}"
->
-
-                                        ${value.value}
-
-                                    </label>
-
-                                </div>
-                            `;
-
-                            });
-
-                        }
-
-                        html += `</div>`;
-
-                    });
-
-                    html += `
-                        </div>
-                    </div>
-                `;
-
-                    $('#attribute-container').html(html);
-                    $('#variant-btn-wrapper').show();
-
-
-                }
-                else {
-
-                    $('#attribute-container').html('');
-                    $('#variant-btn-wrapper').hide();
-
-                }
-            }
-        );
+        return;
     }
 
-    $(document).on('click', '#generate-variants', function () {
+    loadAttributes(categoryId);
 
-        let variantAttributes = {};
+    window.subCategoryUrl = "{{ url('admin/products/subcategories') }}";
+    $.get(window.subCategoryUrl + '/' + categoryId, function (response) {
+        if (response.length > 0) {
+            let html = '<option value="">Select Sub Category</option>';
+            $.each(response, function (i, item) {
+                html += `<option value="${item.id}">${item.name}</option>`;
+            });
+            $('#subcategory_id').html(html);
+            $('#subcategory-wrapper').show();
+        } else {
+            $('#subcategory-wrapper').hide();
+        }
+    });
+});
 
-        $('.attribute-value:checked').each(function () {
+/* ── Load attributes ────────────────────────────────────────── */
+function loadAttributes(categoryId) {
+    $('#attribute-container').html('');
+    window.attributeUrl = "{{ url('admin/products/category-attributes') }}";
 
-            if ($(this).data('variant') != 1) {
-                return;
-            }
+    $.get(window.attributeUrl + '/' + categoryId, function (response) {
+        if (response.length > 0) {
+            let html = `
+                <div class="section-card" style="margin-bottom:16px">
+                    <div class="section-card-header"><h5>Attributes</h5></div>
+                    <div class="section-card-body">`;
 
-            let attributeId = $(this).data('attribute-id');
+            response.forEach(function (item) {
+                html += `<div class="field-group">
+                    <label class="field-label">${item.attribute.name}</label>`;
 
-            if (!variantAttributes[attributeId]) {
-                variantAttributes[attributeId] = [];
-            }
-
-            variantAttributes[attributeId].push({
-
-                id: $(this).val(),
-
-                name: $(this).data('value-name')
-
+                if (item.attribute.has_values) {
+                    item.attribute.values.forEach(function (value) {
+                        html += `
+                            <label class="check-toggle">
+                                <input type="checkbox"
+                                    class="attribute-value"
+                                    data-attribute-id="${item.attribute.id}"
+                                    data-attribute-name="${item.attribute.name}"
+                                    data-value-name="${value.value}"
+                                    data-variant="${item.used_for_variant}"
+                                    name="attribute_values[${item.attribute.id}][]"
+                                    value="${value.id}">
+                                <span>${value.value}</span>
+                            </label>`;
+                    });
+                }
+                html += `</div>`;
             });
 
-        });
-
-        let groups = Object.values(variantAttributes);
-
-        if (groups.length === 0) {
-
-            alert(
-                'Please select at least one value from attributes marked as Variant.'
-            );
-
-            return;
+            html += `</div></div>`;
+            $('#attribute-container').html(html);
+            $('#variant-btn-wrapper').show();
+        } else {
+            $('#attribute-container').html('');
+            $('#variant-btn-wrapper').hide();
         }
+    });
+}
 
-        let combinations = cartesian(groups);
+/* ── Generate variants ──────────────────────────────────────── */
+$(document).on('click', '#generate-variants', function () {
+    let variantAttributes = {};
 
-        renderVariants(combinations);
-
+    $('.attribute-value:checked').each(function () {
+        if ($(this).data('variant') != 1) return;
+        let attributeId = $(this).data('attribute-id');
+        if (!variantAttributes[attributeId]) variantAttributes[attributeId] = [];
+        variantAttributes[attributeId].push({ id: $(this).val(), name: $(this).data('value-name') });
     });
 
-    function cartesian(arr) {
-        if (arr.length === 1) {
-            return arr[0].map(item => [item]);
-        }
-
-        return arr.reduce(function (a, b) {
-
-            return a.flatMap(function (d) {
-
-                return b.map(function (e) {
-
-                    return [].concat(d, e);
-
-                });
-
-            });
-
-        });
+    let groups = Object.values(variantAttributes);
+    if (groups.length === 0) {
+        alert('Please select at least one value from attributes marked as Variant.');
+        return;
     }
 
+    renderVariants(cartesian(groups));
+});
 
-    function renderVariants(combinations) {
-        let html = `
+function cartesian(arr) {
+    if (arr.length === 1) return arr[0].map(item => [item]);
+    return arr.reduce(function (a, b) {
+        return a.flatMap(function (d) {
+            return b.map(function (e) { return [].concat(d, e); });
+        });
+    });
+}
 
-    <div class="card shadow-sm">
-
-        <div class="card-header">
-
-            <strong>Variants</strong>
-
-        </div>
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered">
-
+function renderVariants(combinations) {
+    let html = `
+        <div class="section-card" style="margin-bottom:16px">
+            <div class="section-card-header"><h5>Variants</h5></div>
+            <div class="section-card-body" style="padding:0;overflow-x:auto">
+                <table class="variants-table">
                     <thead>
-
                         <tr>
-
-                          <th>Variant</th>
-<th>SKU</th>
-<th>MRP</th>
-<th>Discount Type</th>
-<th>Discount</th>
-<th>Final Price</th>
-<th>Stock</th>
-<th>Image</th>
-
+                            <th>Variant</th>
+                            <th>SKU</th>
+                            <th>MRP</th>
+                            <th>Discount Type</th>
+                            <th>Discount</th>
+                            <th>Final Price</th>
+                            <th>Stock</th>
+                            <th>Image</th>
                         </tr>
-
                     </thead>
+                    <tbody>`;
 
-                    <tbody>
+    combinations.forEach(function (combo, index) {
+        if (!Array.isArray(combo)) combo = [combo];
+        let names = combo.map(x => x.name);
 
-    `;
+        html += `<tr>
+            <td><span class="variant-name-cell">${names.join(' / ')}</span></td>
+            <td><input type="text" name="variants[${index}][sku]" class="field-input"></td>
+            <td><input type="number" step="0.01" name="variants[${index}][mrp]" class="field-input"></td>
+            <td>
+                <select name="variants[${index}][discount_type]" class="field-select">
+                    <option value="amount">Amount</option>
+                    <option value="percentage">%</option>
+                </select>
+            </td>
+            <td><input type="number" step="0.01" name="variants[${index}][discount]" class="field-input"></td>
+            <td><input type="number" step="0.01" name="variants[${index}][price]" class="field-input" readonly></td>
+            <td><input type="number" name="variants[${index}][stock]" class="field-input"></td>
+            <td><input type="file" name="variants[${index}][image]" class="field-input" style="height:auto;padding:4px 8px;font-size:12px"></td>
+        </tr>`;
 
-        combinations.forEach(function (combo, index) {
-
-            if (!Array.isArray(combo)) {
-                combo = [combo];
-            }
-
-            let names = combo.map(x => x.name);
-
-            html += `
-
-            <tr>
-
-                <td>
-
-                    ${names.join(' / ')}
-
-                </td>
-
-                <td>
-    <input type="text"
-           name="variants[${index}][sku]"
-           class="form-control">
-</td>
-
-<td>
-    <input type="number"
-           step="0.01"
-           name="variants[${index}][mrp]"
-           class="form-control">
-</td>
-
-<td>
-    <select
-        name="variants[${index}][discount_type]"
-        class="form-control">
-
-        <option value="amount">Amount</option>
-        <option value="percentage">%</option>
-
-    </select>
-</td>
-
-<td>
-    <input type="number"
-           step="0.01"
-           name="variants[${index}][discount]"
-           class="form-control">
-</td>
-
-<td>
-    <input type="number"
-           step="0.01"
-           name="variants[${index}][price]"
-           class="form-control"
-           readonly>
-</td>
-
-<td>
-    <input type="number"
-           name="variants[${index}][stock]"
-           class="form-control">
-</td>
-
-<td>
-    <input type="file"
-           name="variants[${index}][image]"
-           class="form-control">
-</td>
-            </tr>
-
-        `;
-
-            combo.forEach(function (item) {
-
-                html += `
-
-                <input
-                    type="hidden"
-                    name="variants[${index}][values][]"
-                    value="${item.id}">
-
-            `;
-
-            });
-
+        combo.forEach(function (item) {
+            html += `<input type="hidden" name="variants[${index}][values][]" value="${item.id}">`;
         });
+    });
 
-        html += `
+    html += `</tbody></table></div></div>`;
+    $('#variant-container').html(html);
+}
 
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    `;
-
-        $('#variant-container').html(html);
+/* ── Variant price calculator ───────────────────────────────── */
+$(document).on(
+    'keyup change',
+    'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
+    function () {
+        let row = $(this).closest('tr');
+        let mrp = parseFloat(row.find('input[name$="[mrp]"]').val()) || 0;
+        let discount = parseFloat(row.find('input[name$="[discount]"]').val()) || 0;
+        let discountType = row.find('select[name$="[discount_type]"]').val();
+        let finalPrice = discountType === 'percentage' ? mrp - (mrp * discount / 100) : mrp - discount;
+        if (finalPrice < 0) finalPrice = 0;
+        row.find('input[name$="[price]"]').val(finalPrice.toFixed(2));
     }
-
-    $(document).on(
-        'keyup change',
-        'input[name$="[mrp]"], input[name$="[discount]"], select[name$="[discount_type]"]',
-        function () {
-
-            let row = $(this).closest('tr');
-
-            let mrp = parseFloat(
-                row.find('input[name$="[mrp]"]').val()
-            ) || 0;
-
-            let discount = parseFloat(
-                row.find('input[name$="[discount]"]').val()
-            ) || 0;
-
-            let discountType = row
-                .find('select[name$="[discount_type]"]')
-                .val();
-
-            let finalPrice = 0;
-
-            if (discountType === 'percentage') {
-
-                finalPrice =
-                    mrp - (mrp * discount / 100);
-
-            } else {
-
-                finalPrice =
-                    mrp - discount;
-
-            }
-
-            if (finalPrice < 0) {
-                finalPrice = 0;
-            }
-
-            row.find('input[name$="[price]"]')
-                .val(finalPrice.toFixed(2));
-
-        }
-    );
-
+);
 </script>
-
 
 @include('admin.footer')
