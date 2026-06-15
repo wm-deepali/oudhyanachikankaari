@@ -46,37 +46,46 @@ use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\CategoryAttributeController;
 use App\Http\Controllers\Frontend\Auth\CustomerAuthController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\InvoiceSettingController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 Route::controller(FrontController::class)->group(function () {
 
     Route::get('/', 'home')->name('home');
+    Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
+    Route::get('/occasions', 'occasions')->name('occasions');
+    Route::get('/categories', 'categories')->name('categories');
+    Route::get('/category/{slug}', 'productListing')->name('products.listing');
+    Route::post('/products/filter/{slug}', 'filterProducts')->name('products.filter');
+    Route::get('/product/{slug}', 'productDetail')->name('product.details');
+
     Route::get('/about-us', 'aboutUs')->name('about-us');
     Route::get('/blogs', 'blogs')->name('blogs');
     Route::get('/blog/{slug}', 'blogDetails')->name('blog.details');
     Route::get('/bulk-enquiry', 'bulkEnquiry')->name('bulk-enquiry');
-    Route::get('/cart', 'shoppingCart')->name('cart');
-    Route::get('/categories', 'categories')->name('categories');
-    Route::view('/checkout', 'front-pages.checkout')->name('checkout');
     Route::get('/contact-us', 'contactUs')->name('contact-us');
     Route::get('/faqs', 'faqs')->name('faqs');
-    Route::get('/occasions', 'occasions')->name('occasions');
     Route::view('/partners', 'front-pages.partners')->name('partners');
-    Route::get('/product/{slug}', 'productDetail')->name('product.details');
     Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
     Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
     Route::get('/why-us', 'whyUs')->name('why-us');
-    Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
-    Route::get('/category/{slug}', 'productListing')->name('products.listing');
-    Route::post('/products/filter/{slug}', 'filterProducts')->name('products.filter');
 
     // cart routes
-    Route::post('/cart/add', 'addToCart')->name('cart.add');
-    Route::post('/cart/remove', 'removeFromCart')->name('cart.remove');
-    Route::post('/cart/update-quantity', 'updateQuantity')->name('cart.update.quantity');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'cart'])->name('cart');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.update.quantity');
+    Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply.coupon');
+    Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.remove.coupon');
+
+    Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
     // wishlist routes
     Route::post('/wishlist/add', 'addToWishlist')->name('wishlist.add');
     Route::delete('/wishlist/{id}', 'removeWishlist')->name('wishlist.remove');
+
 
 
     Route::get('/vendors', 'vendors')->name('vendors');
@@ -301,7 +310,55 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('category-attributes', CategoryAttributeController::class);
 
         Route::resource('announcements', AnnouncementController::class);
+      Route::resource('coupons', CouponController::class);
 
+        Route::get('/invoice-settings', [InvoiceSettingController::class, 'index'])->name('invoice-settings.index');
+        Route::post('/invoice-settings', [InvoiceSettingController::class, 'store'])->name('invoice-settings.store');
+        Route::get('/get-cities', [InvoiceSettingController::class, 'getCities'])->name('get-cities');
 
+Route::view('/orders', 'admin.orders-and-payments.index')->name('orders.index');
+
+    Route::view('/payments',
+    'admin.orders-and-payments.payments-and-transaction')
+        ->name('payments.index');
+
+    Route::view('/order-detail/{id?}', 'admin.orders-and-payments.view-order-details')
+        ->name('orders.detail');
+
+    Route::view('/customers', 'admin.customers.index')
+        ->name('customers.index');
+        
+         Route::view('/customer/{id?}', 'admin.customers.view-customer-detail')
+        ->name('customers.detail');
+
+    Route::view('/returns', 'admin.orders-and-payments.return-order')
+        ->name('returns.index');
+
+    Route::view('/refunds', 'admin.orders-and-payments.payment-refunds')->name('refunds.index');
+
+    Route::view('/address-book', 'admin.customers.customer-address-book')
+        ->name('address-book.index');
+        
+         Route::view('/customer-cart', 'admin.customers.customer-cart')
+        ->name('customer-cart.index');
+        
+        Route::view('/product-reviews', 'admin.products.product-reviews')
+        ->name('product-reviews.index');
+        Route::view('/stock-management', 'admin.products.stock-management')
+        ->name('stock-management.index');
+        
+        Route::view('/stock-alerts', 'admin.products.stock-alerts')
+        ->name('stock-alerts.index');
+        
+        Route::view('/admin-setting', 'admin.admin-settings.admin-setting')
+        ->name('admin-setting.index');
+        
+        Route::view('/sales-report', 'admin.reports.sales-report')
+        ->name('sales-report.index');
+        Route::view('/customer-report', 'admin.reports.customer-report')
+        ->name('customer-report.index');
+        Route::view('/product-report', 'admin.reports.product-report')
+        ->name('product-report.index');
+        
     });
 });

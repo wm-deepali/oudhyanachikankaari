@@ -488,205 +488,104 @@ class FrontController extends Controller
         ]);
     }
 
-
     public function productDetail($slug)
     {
-        // $product = Product::with([
-        //     'brand',
-        //     'images',
-        //     'categories',
-        //     'subcategories',
-        //     'occasions',
-        //     'customizations',
-        //     'inclusions'
-        // ])
-        //     ->where('slug', $slug)
-        //     ->where('status', 1)
-        //     ->firstOrFail();
+        $product = Product::with([
+            'images',
+            'category',
+            'subcategory',
+            'occasions',
+            'collections',
 
-        // $subcategoryIds = $product->subcategories->pluck('id');
-        // $categoryIds = $product->categories->pluck('id');
+            'attributeValues.attribute',
+            'attributeValues.value',
 
-        // $relatedProducts = Product::with(['brand', 'images'])
-        //     ->where('id', '!=', $product->id)
-        //     ->where(function ($query) use ($subcategoryIds, $categoryIds) {
-
-        //         if ($subcategoryIds->count()) {
-
-        //             $query->whereHas('subcategories', function ($q) use ($subcategoryIds) {
-        //                 $q->whereIn('categories.id', $subcategoryIds);
-        //             });
-
-        //         } elseif ($categoryIds->count()) {
-
-        //             $query->whereHas('categories', function ($q) use ($categoryIds) {
-        //                 $q->whereIn('categories.id', $categoryIds);
-        //             });
-
-        //         }
-
-        //     })
-        //     ->latest()
-        //     ->take(4)
-        //     ->get();
-
-        // $newArrivals = Product::with(['brand', 'images'])
-        //     ->where('new_arrival', 1)
-        //     ->where('status', 1)
-        //     ->where('id', '!=', $product->id)
-        //     ->latest()
-        //     ->take(4)
-        //     ->get();
-
-        // $faqs = Faq::where('status', 1)
-        //     ->get();
-
-        // $otherCategories = Category::where('status', 1)
-        //     ->whereNull('parent_id')
-        //     ->whereNotIn(
-        //         'id',
-        //         $product->categories->pluck('id')
-        //     )
-        //     ->take(8)
-        //     ->get();
-
-        return view(
-            'front-pages.product-detail',
-            // compact('product', 'relatedProducts', 'faqs', 'newArrivals', 'otherCategories')
-        );
-    }
-
-    public function addToCart(Request $request)
-    {
-        $product = Product::findOrFail($request->product_id);
-
-        $customizationId = $request->customization_id;
-
-        // Get session id
-        $sessionId = session()->getId();
-
-        // Get or create cart
-        $cart = Cart::firstOrCreate(
-            ['session_id' => $sessionId],
-            ['total_amount' => 0]
-        );
-
-        // Same product + same customization
-        $item = CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $product->id)
-            ->where('customization_id', $customizationId)
-            ->first();
-
-        if ($item) {
-
-            $item->quantity += 1;
-            $item->total = $item->quantity * $item->price;
-            $item->save();
-
-        } else {
-
-            CartItem::create([
-                'cart_id' => $cart->id,
-                'product_id' => $product->id,
-                'customization_id' => $customizationId,
-                'quantity' => 1,
-                'price' => $product->price,
-                'total' => $product->price,
-            ]);
-        }
-
-        $cart->total_amount = $cart->items()->sum('total');
-        $cart->save();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Product added to cart',
-            'cart_count' => $cart->items()->count()
-        ]);
-    }
-
-    public function shoppingCart(Request $request)
-    {
-        $sessionId = session()->getId();
-
-        $cart = Cart::with([
-            'items.product.categories',
-            'items.product.subcategories',
-            'items.product.images',
-            'items.customization'
+            'variants.values.attributeValue.attribute'
         ])
-            ->where('session_id', $sessionId)
-            ->first();
+            ->where('slug', $slug)
+            ->where('status', 1)
+            ->firstOrFail();
 
-        $cartItems = $cart ? $cart->items : collect();
+        $newArrivals = Product::with([
+            'images',
+            'category',
+            'subcategory',
+            'collections'
+        ])
+            ->where('status', 1)
+            ->where('id', '!=', $product->id)
+            ->latest()
+            ->take(4)
+            ->get();
 
-        $subtotal = $cartItems->sum('total');
-        $totalItems = $cartItems->sum('quantity');
+        $relatedProducts = Product::with([
+            'images',
+            'category',
+            'subcategory',
+            'collections'
+        ])
+            ->where('status', 1)
+            ->where('id', '!=', $product->id)
+            ->where(function ($query) use ($product) {
 
-        $shipping = 0;
-        $customization = 0;
-        $grandTotal = $subtotal + $shipping + $customization;
+                $query->where('category_id', $product->category_id);
 
-        // ✅ ADD THIS
-        $states = State::orderBy('name')->get();
+                if ($product->subcategory_id) {
+                    $query->orWhere(
+                        'subcategory_id',
+                        $product->subcategory_id
+                    );
+                }
+            })
+            ->take(4)
+            ->get();
 
-        return view('front-pages.cart', compact(
-            'cartItems',
-            'subtotal',
-            'totalItems',
-            'shipping',
-            'customization',
-            'grandTotal',
-            'states' // 🔥 IMPORTANT
-        ));
-    }
+        $variantAttributes = [];
 
-    public function removeFromCart(Request $request)
-    {
-        $item = CartItem::find($request->item_id);
+        foreach ($product->variants as $variant) {
 
-        if ($item) {
-            $cart = Cart::find($item->cart_id);
+            foreach ($variant->values as $value) {
 
-            $item->delete();
+                $attributeName =
+                    $value->attributeValue->attribute->name;
 
-            // Update cart total
-            if ($cart) {
-                $cart->total_amount = $cart->items()->sum('total');
-                $cart->save();
+                $attributeId =
+                    $value->attributeValue->attribute->id;
+
+                $variantAttributes[$attributeId]['name']
+                    = $attributeName;
+
+                $variantAttributes[$attributeId]['values'][
+                    $value->attributeValue->id
+                ] = $value->attributeValue->value;
             }
         }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Item removed successfully'
-        ]);
+        $variantsJson = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'sku' => $variant->sku,
+                'mrp' => $variant->mrp,
+                'price' => $variant->price,
+                'stock' => $variant->stock,
+                'image' => $variant->image,
+
+                'values' => $variant->values
+                    ->pluck('attribute_value_id')
+                    ->values()
+                    ->toArray(),
+            ];
+        });
+
+        return view('front-pages.product-detail', compact(
+            'product',
+            'newArrivals',
+            'relatedProducts',
+            'variantAttributes',
+            'variantsJson'
+        ));
     }
 
-    public function updateQuantity(Request $request)
-    {
-        $item = CartItem::findOrFail($request->item_id);
-
-        $quantity = max(1, (int) $request->quantity);
-
-        $item->quantity = $quantity;
-        $item->total = $item->price * $quantity;
-        $item->save();
-
-        $cart = Cart::find($item->cart_id);
-
-        if ($cart) {
-            $cart->total_amount = $cart->items()->sum('total');
-            $cart->save();
-        }
-
-        return response()->json([
-            'status' => true,
-            'quantity' => $item->quantity,
-            'item_total' => number_format($item->total),
-            'cart_total' => number_format($cart->total_amount)
-        ]);
-    }
 
     public function thankYou($id)
     {

@@ -15,17 +15,13 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">Cart </h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>Cart</span>
                 </div>
             </div>
         </section>
-
         <!-- Breadcrumb Bar -->
-
-
-
 
         <section class="aq-cart-wrapper" id="aqCartMainSection">
             <div class="container">
@@ -36,94 +32,104 @@
                         <div class="aq-cart-items-list" id="aqCartItemsList">
 
                             <!-- Cart Row 1: Bespoke Welcome Kit -->
-                            <div class="aq-cart-item-row" data-id="item-welcome-kit">
-                                <div class="aq-cart-item-thumb">
-                                    <img src="assets/img/corporate/p-01.jpg" alt="Welcome Kit" />
-                                </div>
-                                <div class="aq-cart-item-details">
-                                    <span class="aq-cart-item-category">Women's Wear</span>
-                                    <h4 class="aq-cart-item-title"><a href="product_details.html">Roohani Organza
-                                            Saree</a></h4>
-                                    <div class="aq-cart-customization-badges">
-                                        <span class="aq-cart-badge engrave"><i class="fa-solid fa-pen-nib mr-5"></i>
-                                            Handcrafted Embroidery</span>
-                                        <span class="aq-cart-badge"><i class="fa-solid fa-sparkles mr-5"></i> Premium
-                                            Silk Fabric</span>
-                                    </div>
-                                </div>
-                                <div class="aq-cart-item-price-qty">
-                                    <!-- Qty Selector -->
-                                    <div class="aq-cart-qty-selector">
-                                        <button class="aq-cart-qty-btn qty-minus" aria-label="Decrease quantity"><i
-                                                class="fa-solid fa-minus"></i></button>
-                                        <input type="text" class="aq-cart-qty-input" value="100" />
-                                        <button class="aq-cart-qty-btn qty-plus" aria-label="Increase quantity"><i
-                                                class="fa-solid fa-plus"></i></button>
-                                    </div>
-                                    <!-- Price & Actions -->
-                                    <div class="aq-cart-price-block d-flex flex-column align-items-start align-items-md-end text-start text-md-end"
-                                        style="gap: 4px;">
-                                        <span class="aq-cart-discount-tag"
-                                            style="background: #eef6ee; color: #2e8b57; padding: 3px 8px; border-radius: 4px; font-size: 11px;">24%
-                                            OFF</span>
-                                        <div class="aq-cart-mrp-row" style="display: flex; align-items: center; gap: 10px;">
-                                            <span class="aq-cart-mrp"
-                                                style="font-size: 13px; color: #999; text-decoration: line-through;">₹1,950</span>
-                                            <button class="aq-cart-item-remove" aria-label="Remove item"
-                                                style="color: #d9534f; border: none; background: transparent; padding: 0;"><i
-                                                    class="fa-regular fa-trash-can"></i></button>
-                                        </div>
-                                        <span class="aq-cart-price" data-base-price="1482"
-                                            style="font-size: 20px; font-weight: 700; color: #C98F9D;">₹1,48,200</span>
-                                    </div>
-                                </div>
-                            </div>
+                            @if($cart && $cart->items->count())
 
-                            <!-- Cart Row 2: Elite Tech Suite -->
-                            <div class="aq-cart-item-row" data-id="item-tech-suite">
-                                <div class="aq-cart-item-thumb">
-                                    <img src="assets/img/corporate/p-02.jpg" alt="Tech Gadgets" />
-                                </div>
-                                <div class="aq-cart-item-details">
-                                    <span class="aq-cart-item-category">Women's Wear</span>
-                                    <h4 class="aq-cart-item-title"><a href="product_details.html">Meher Silk Dupatta</a>
-                                    </h4>
-                                    <div class="aq-cart-customization-badges">
-                                        <span class="aq-cart-badge engrave"><i class="fa-solid fa-signature mr-5"></i>
-                                            Intricate Zari Work</span>
-                                        <span class="aq-cart-badge"><i class="fa-solid fa-battery-three-quarters mr-5"></i>
-                                            Vibrant
-                                            Color</span>
-                                    </div>
-                                </div>
-                                <div class="aq-cart-item-price-qty">
-                                    <!-- Qty Selector -->
-                                    <div class="aq-cart-qty-selector">
-                                        <button class="aq-cart-qty-btn qty-minus" aria-label="Decrease quantity"><i
-                                                class="fa-solid fa-minus"></i></button>
-                                        <input type="text" class="aq-cart-qty-input" value="50" />
-                                        <button class="aq-cart-qty-btn qty-plus" aria-label="Increase quantity"><i
-                                                class="fa-solid fa-plus"></i></button>
-                                    </div>
-                                    <!-- Price & Actions -->
-                                    <div class="aq-cart-price-block d-flex flex-column align-items-start align-items-md-end text-start text-md-end"
-                                        style="gap: 4px;">
-                                        <span class="aq-cart-discount-tag"
-                                            style="background: #eef6ee; color: #2e8b57; padding: 3px 8px; border-radius: 4px; font-size: 11px;">15%
-                                            OFF</span>
-                                        <div class="aq-cart-mrp-row" style="display: flex; align-items: center; gap: 10px;">
-                                            <span class="aq-cart-mrp"
-                                                style="font-size: 13px; color: #999; text-decoration: line-through;">₹3,500</span>
-                                            <button class="aq-cart-item-remove" aria-label="Remove item"
-                                                style="color: #d9534f; border: none; background: transparent; padding: 0;"><i
-                                                    class="fa-regular fa-trash-can"></i></button>
-                                        </div>
-                                        <span class="aq-cart-price" data-base-price="2975"
-                                            style="font-size: 20px; font-weight: 700; color: #C98F9D;">₹1,48,750</span>
-                                    </div>
-                                </div>
-                            </div>
+                                @foreach($cart->items as $item)
 
+                                    <div class="aq-cart-item-row" id="cart-row-{{ $item->id }}">
+                                        <div class="aq-cart-item-thumb">
+                                            <img src="{{ $item->product->display_image }}" alt="{{ $item->product->name }}">
+                                        </div>
+                                        <div class="aq-cart-item-details">
+                                            <span class="aq-cart-item-category"> {{ $item->product->category->name ?? '' }}</span>
+                                            <h4 class="aq-cart-item-title">
+                                                <a href="{{ route('product.details', $item->product->slug) }}">
+                                                    {{ $item->product->name }}
+                                                </a>
+                                            </h4>
+                                            @if($item->variant && $item->variant->values->count())
+
+                                                <div class="aq-cart-customization-badges">
+
+                                                    @foreach($item->variant->values as $variantValue)
+
+                                                        <span class="aq-cart-badge">
+
+                                                            {{ $variantValue->attributeValue->attribute->name }}
+                                                            :
+
+                                                            {{ $variantValue->attributeValue->value }}
+
+                                                        </span>
+
+                                                    @endforeach
+
+                                                </div>
+
+                                            @endif
+                                        </div>
+                                        <div class="aq-cart-item-price-qty">
+                                            <!-- Qty Selector -->
+                                            <div class="aq-cart-qty-selector">
+                                                <button class="aq-cart-qty-btn qty-minus" aria-label="Decrease quantity"
+                                                    data-id="{{ $item->id }}">
+                                                    <i class="fa-solid fa-minus"></i>
+                                                </button>
+                                                <input type="text" class="aq-cart-qty-input" value="{{ $item->quantity }}" readonly
+                                                    data-id="{{ $item->id }}">
+                                                <button class="aq-cart-qty-btn qty-plus" data-id="{{ $item->id }}"
+                                                    aria-label="Increase quantity"><i class="fa-solid fa-plus"></i></button>
+                                            </div>
+
+                                            @php
+                                                $mrp = $item->variant->mrp ?? $item->product->mrp;
+                                                $totalMrp = $mrp * $item->quantity;
+
+                                                $discountPercentage = 0;
+
+                                                if ($totalMrp > 0) {
+                                                    $discountPercentage = round(
+                                                        (($totalMrp - $item->total) / $totalMrp) * 100
+                                                    );
+                                                }
+                                            @endphp
+
+                                            <!-- Price & Actions -->
+                                            <div class="aq-cart-price-block d-flex flex-column align-items-start align-items-md-end text-start text-md-end"
+                                                style="gap: 4px;">
+
+                                                @if($discountPercentage > 0)
+                                                    <span class="aq-cart-discount-tag"
+                                                        style="background: #eef6ee; color: #2e8b57; padding: 3px 8px; border-radius: 4px; font-size: 11px;">
+                                                        {{ $discountPercentage }}% OFF
+                                                    </span>
+                                                @endif
+
+                                                <div class="aq-cart-mrp-row" style="display: flex; align-items: center; gap: 10px;">
+                                                    <span class="aq-cart-mrp" id="mrp-{{ $item->id }}"
+                                                        style="font-size: 13px; color: #999; text-decoration: line-through;">
+                                                        ₹{{ number_format($totalMrp) }}
+                                                    </span>
+                                                    <button class="aq-cart-item-remove remove-cart-item" data-id="{{ $item->id }}"
+                                                        aria-label="Remove item"
+                                                        style="color: #d9534f; border: none; background: transparent; padding: 0;"><i
+                                                            class="fa-regular fa-trash-can"></i></button>
+                                                </div>
+                                                <span class="aq-cart-price" id="total-{{ $item->id }}"
+                                                    style="font-size: 20px; font-weight: 700; color: #C98F9D;">₹{{ number_format($item->total) }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                @endforeach
+
+                            @else
+
+                                <div class="text-center py-5">
+                                    <h4>Your cart is empty.</h4>
+                                </div>
+
+                            @endif
                         </div>
                     </div>
 
@@ -132,30 +138,95 @@
                         <div class="aq-summary-card">
                             <h3 class="aq-summary-title">Order Summary</h3>
 
+                            @if($cart && $cart->items->count())
+
+                                <div class="mb-3">
+
+                                    <label class="mb-2 fw-bold">
+                                        Coupon Code
+                                    </label>
+
+                                    <div class="d-flex gap-2">
+
+                                        <input type="text" id="coupon_code" class="form-control"
+                                            placeholder="Enter coupon code">
+
+                                        <button type="button" id="applyCouponBtn" class="btn btn-dark">
+                                            Apply
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                                @if($cart->coupon_code)
+
+                                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+
+                                        <span>
+                                            Coupon Applied:
+                                            <strong>{{ $cart->coupon_code }}</strong>
+                                        </span>
+
+                                        <button type="button" id="removeCouponBtn" class="btn btn-sm btn-danger">
+                                            Remove
+                                        </button>
+
+                                    </div>
+
+                                @endif
+
+                            @endif
+
                             <div class="aq-summary-row">
                                 <span>Cart Subtotal</span>
-                                <span id="summarySubtotal">₹2,96,950</span>
+                                <span id="summarySubtotal">
+                                    ₹{{ number_format($cart->subtotal ?? 0, 2) }}
+                                </span>
                             </div>
+                            <div class="aq-summary-row">
+                                <span>Coupon Discount</span>
+                                <span id="summaryDiscount" style="color:green">
+                                    - ₹{{ number_format($cart->discount ?? 0, 2) }}
+                                </span>
+                            </div>
+
+
                             <div class="aq-summary-row">
                                 <span>Shipping & Handling</span>
                                 <span class="text-success font-weight-bold">Free</span>
                             </div>
                             <div class="aq-summary-row">
                                 <span>GST (Taxes)</span>
-                                <span id="summaryGST">Included</span>
+                                <span id="summaryGST">
+                                    ₹{{ number_format($cart->tax_amount ?? 0, 2) }}
+                                </span>
                             </div>
 
                             <div class="aq-summary-row total-row">
                                 <span>Total Amount</span>
-                                <span id="summaryTotal">₹2,96,950</span>
+                                <span id="summaryTotal">
+                                    ₹{{ number_format($cart->grand_total ?? 0, 2) }}
+                                </span>
                             </div>
 
-                            <button type="button" class="aq-btn-final-quote"
-                                style="background: #C98F9D; border-color: #C98F9D;" data-bs-toggle="modal"
-                                data-bs-target="#finalQuoteModal">
-                                <span>Proceed to Checkout</span>
-                                <i class="fa-solid fa-arrow-right-long"></i>
-                            </button>
+                            @if(auth('customer')->check())
+
+                                <a href="{{ route('checkout') }}" class="aq-btn-final-quote"
+                                    style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
+                                    <span>Proceed to Checkout</span>
+                                    <i class="fa-solid fa-arrow-right-long"></i>
+                                </a>
+
+                            @else
+
+                                <a href="{{ route('user.login') }}" class="aq-btn-final-quote"
+                                    style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
+                                    <span>Login To Checkout</span>
+                                    <i class="fa-solid fa-arrow-right-long"></i>
+                                </a>
+
+                            @endif
 
                             <div class="aq-summary-perks">
                                 <div class="aq-summary-perk-item">
@@ -177,130 +248,175 @@
 
     </main>
 
-      <!-- Final Quote Modal -->
-    <div class="modal fade aq-premium-modal final-quote-modal" id="finalQuoteModal" tabindex="-1"
-        aria-labelledby="finalQuoteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).on('click', '.remove-cart-item', function () {
 
-                <div class="row g-0">
-                    <!-- Left: Creative Visual Side -->
-                    <div class="col-lg-5 d-none d-lg-block aq-modal-left-panel">
-                        <div>
-                            <div class="mb-5">
-                                <i class="fa-solid fa-gem aq-modal-icon"></i>
-                            </div>
-                            <h3 class="font-family-heading mb-3 aq-modal-title">
-                                Finalize Your <br><span>Curated Experience</span>
-                            </h3>
-                            <p class="aq-modal-desc">
-                                Provide your details to receive the final customized quotation and digital proofs for
-                                your selected luxury gifts.
-                            </p>
-                        </div>
-                        <div class="aq-modal-left-features">
-                            <div class="aq-modal-feature-item">
-                                <i class="fa-solid fa-check text-success mr-10"></i>
-                                <span>Dedicated Corporate Manager</span>
-                            </div>
-                            <div class="aq-modal-feature-item">
-                                <i class="fa-solid fa-check text-success mr-10"></i>
-                                <span>Free Mockups & Virtual Proofs</span>
-                            </div>
-                        </div>
-                    </div>
+            if (!confirm('Remove this item from cart?')) {
+                return;
+            }
 
-                    <!-- Right: Form Side -->
-                    <div class="col-lg-7 col-12 aq-modal-right-panel">
-                        <div class="aq-login-top mb-30">
-                            <h3 class="font-family-heading aq-modal-title">Submit Enquiry</h3>
-                            <p class="aq-modal-desc">We'll get back to you within 2 business hours.</p>
-                        </div>
+            let itemId = $(this).data('id');
 
-                        <form id="aqFinalQuoteForm" onsubmit="handleFinalQuoteSubmit(event)">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="aq-form-label">Business Name *</label>
-                                    <div class="position-relative">
-                                        <i class="fa-solid fa-building position-absolute input-icon"></i>
-                                        <input type="text" class="form-control with-icon" required
-                                            placeholder="XYZ Corp" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="aq-form-label">Owner Name *</label>
-                                    <div class="position-relative">
-                                        <i class="fa-regular fa-user position-absolute input-icon"></i>
-                                        <input type="text" class="form-control with-icon" required
-                                            placeholder="Rajesh Kumar" />
-                                    </div>
-                                </div>
-                            </div>
+            $.ajax({
+                url: '/cart/remove/' + itemId,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
 
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="aq-form-label">Email *</label>
-                                    <div class="position-relative">
-                                        <i class="fa-regular fa-envelope position-absolute input-icon"></i>
-                                        <input type="email" class="form-control with-icon" required
-                                            placeholder="rajesh@company.com" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="aq-form-label">Mobile *</label>
-                                    <div class="position-relative">
-                                        <i class="fa-solid fa-phone position-absolute input-icon"></i>
-                                        <input type="tel" class="form-control with-icon" required
-                                            placeholder="+91 0000 000 000" />
-                                    </div>
-                                </div>
-                            </div>
+                    if (response.status) {
 
-                            <div class="mb-3">
-                                <label class="aq-form-label">Full Address *</label>
-                                <textarea class="form-control" required
-                                    placeholder="Enter building, street, and area details" rows="2"></textarea>
-                            </div>
+                        $('#cart-row-' + itemId).remove();
 
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="aq-form-label">State *</label>
-                                    <select class="form-select" required>
-                                        <option value="" disabled selected>Select State</option>
-                                        <option value="Delhi">Delhi</option>
-                                        <option value="Maharashtra">Maharashtra</option>
-                                        <option value="Karnataka">Karnataka</option>
-                                        <option value="Tamil Nadu">Tamil Nadu</option>
-                                        <option value="Gujarat">Gujarat</option>
-                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <label class="aq-form-label">City *</label>
-                                    <select class="form-select" required>
-                                        <option value="" disabled selected>Select City</option>
-                                        <option value="New Delhi">New Delhi</option>
-                                        <option value="Mumbai">Mumbai</option>
-                                        <option value="Bangalore">Bangalore</option>
-                                        <option value="Chennai">Chennai</option>
-                                        <option value="Ahmedabad">Ahmedabad</option>
-                                        <option value="Noida">Noida</option>
-                                        <option value="Gurgaon">Gurgaon</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="submit" class="aq-btn-submit">
-                                <span>Submit Enquiry</span>
-                                <i class="fa-solid fa-arrow-right-long"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                        $('#summarySubtotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
+
+                        $('#summaryTotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
+
+                        $('.cart-count').text(
+                            response.cart_count
+                        );
+
+                        if ($('.aq-cart-item-row').length === 0) {
+
+                            $('#aqCartItemsList').html(`
+                                                                        <div class="text-center py-5">
+                                                                            <h4>Your cart is empty.</h4>
+                                                                        </div>
+                                                                    `);
+                        }
+                    }
+                },
+                error: function () {
+                    alert('Unable to remove item.');
+                }
+            });
+
+        });
+
+        $(document).on('click', '.qty-plus, .qty-minus', function () {
+
+            let itemId = $(this).data('id');
+
+            let action = $(this).hasClass('qty-plus')
+                ? 'plus'
+                : 'minus';
+
+            $.ajax({
+                url: "{{ route('cart.update.quantity') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    item_id: itemId,
+                    action: action
+                },
+                success: function (response) {
+
+                    if (response.status) {
+
+                        $('.aq-cart-qty-input[data-id="' + itemId + '"]')
+                            .val(response.quantity);
+
+                        $('#total-' + itemId).text(
+                            '₹' + Number(response.item_total).toLocaleString()
+                        );
+
+                        $('#mrp-' + itemId).text(
+                            '₹' + Number(response.total_mrp).toLocaleString()
+                        );
+
+                        $('#summarySubtotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
+
+                        $('#summaryTotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
+                    }
+                }
+            });
+
+        });
+
+        $('#applyCouponBtn').on('click', function () {
+
+            $.ajax({
+
+                url: "{{ route('cart.apply.coupon') }}",
+
+                type: "POST",
+
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    coupon_code: $('#coupon_code').val()
+                },
+
+                success: function (response) {
+
+                    if (response.status) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Coupon Applied',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+
+                            location.reload();
+
+                        });
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Coupon Error',
+                            text: response.message,
+                            confirmButtonColor: '#C98F9D'
+                        });
+
+                    }
+                }
+            });
+
+        });
+
+        $(document).on('click', '#removeCouponBtn', function () {
+
+            $.ajax({
+
+                url: "{{ route('cart.remove.coupon') }}",
+
+                type: "POST",
+
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+
+                success: function () {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Coupon Removed',
+                        timer: 1200,
+                        showConfirmButton: false
+                    }).then(() => {
+
+                        location.reload();
+
+                    });
+
+                }
+            });
+
+        });
+
+    </script>
 
 @endsection
-

@@ -146,7 +146,7 @@
                                     <!-- Women Wear -->
                                     <div class="swiper-slide">
                                         <div class="aqf-categories-item text-center">
-                                            <a href="product-all-categories.html">
+                                            <a href="{{ route('products.listing', $category->slug) }}">
                                                 <div class="aqf-categories-img">
                                                     <img src="{{ asset('storage/' . $category->image) }}"
                                                         alt="{{ $category->name }}" alt="{{$category->name  }}">

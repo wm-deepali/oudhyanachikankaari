@@ -60,8 +60,8 @@
                 <li><a href="{{ route('admin.category-attributes.index') }}">Attribute Mapping</a></li>
                 <li><a href="{{ route('admin.gifting-occasions.index') }}">Manage Occasions</a></li>
                 <li><a href="{{ route('admin.collections.index') }}">Manage Collections</a></li>
-                <li><a href="#">Manage Brands</a></li>
-                <li><a href="{{ route('admin.packages.index') }}">Manage Membership Packages</a></li>
+               <!-- <li><a href="#">Manage Brands</a></li>
+                <li><a href="{{ route('admin.packages.index') }}">Manage Membership Packages</a></li> -->
             </ul>
         </li>
 
@@ -75,9 +75,9 @@
             <a href="#"><i class="fa-solid fa-box"></i> Product & Inventories</a>
             <ul>
                 <li><a href="{{ route('admin.products.index') }}">Manage Products</a></li>
-                <li><a href="#">Product Reviews</a></li>
-                <li><a href="#">Stock Management</a></li>
-                <li><a href="#">Stock Alerts</a></li>
+                <li><a href="{{ route('admin.product-reviews.index') }}">Product Reviews</a></li>
+                <li><a href="{{ route('admin.stock-management.index') }}">Stock Management</a></li>
+                <li><a href="{{ route('admin.stock-alerts.index') }}">Stock Alerts</a></li>
             </ul>
         </li>
 
@@ -91,18 +91,14 @@
 ) ? 'active' : '' }}">
             <a href="#"><i class="fa-solid fa-cart-shopping"></i> Customer & Orders</a>
             <ul>
-                <li><a href="#">Manage Orders</a></li>
-                <li><a href="#">Payments & Transactions</a></li>
-                <li><a href="#">Manage Returns</a></li>
-                <li><a href="#">Manage Refunds</a></li>
-
-                <li>
-                    <a href="#">Manage Customers</a>
-                    <ul>
-                        <li><a href="#">Customer Address Book</a></li>
-                        <li><a href="#">Cart Stored</a></li>
-                    </ul>
-                </li>
+                <li><a href="{{ route('admin.orders.index')}}">Manage Orders</a></li>
+                <li><a href="{{ route('admin.payments.index')}}">Payments & Transactions</a></li>
+                <li><a href="{{ route('admin.returns.index')}}">Manage Returns</a></li>
+                <li><a href="{{route('admin.refunds.index') }}">Manage Refunds</a></li>
+                <li><a href="{{ route('admin.customers.index') }}">Manage Customers</a></li>
+                <li><a href="{{ route('admin.address-book.index') }}">Customer Address Book</a></li>
+                <li><a href="{{ route('admin.customer-cart.index') }}">Customer Carts</a></li>
+                
             </ul>
         </li>
 
@@ -126,9 +122,9 @@
                 <li><a href="{{ route('admin.blogs.index') }}">Blog Management</a></li>
                 <li><a href="{{ route('admin.pages.index') }}">Dynamic Pages</a></li>
                 <li><a href="{{ route('admin.announcements.index') }}">Announcement Bar</a></li>
-                <li><a href="{{ route('admin.clients.index') }}">Manage Clients</a></li>
+              <!--  <li><a href="{{ route('admin.clients.index') }}">Manage Clients</a></li> -->
                 <li><a href="{{ route('admin.testimonials.index') }}">Testimonial & Feedback</a></li>
-                <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li>
+              <!--  <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li> -->
             </ul>
         </li>
 
@@ -141,7 +137,7 @@
 ) ? 'active' : '' }}">
             <a href="#"><i class="fa-solid fa-envelope"></i> Enquiries</a>
             <ul>
-                <li><a href="{{ route('admin.enquiries.index') }}">Product Enquiries</a></li>
+              <!--  <li><a href="{{ route('admin.enquiries.index') }}">Product Enquiries</a></li> -->
                 <li><a href="{{ route('admin.contact-enquiries.index') }}">Contact Us Enquiries</a></li>
                 <li><a href="#">Callback Enquiries</a></li>
                 <li><a href="{{ route('admin.supplier-enquiries.index') }}">Bulk Order Enquiries</a></li>
@@ -150,7 +146,6 @@
 
         {{-- MARKETING & SETTINGS --}}
         <li class="{{ request()->routeIs(
-    'admin.settings.*',
     'admin.coupons.*',
     'admin.seo.*',
     'admin.footer-settings.*'
@@ -158,22 +153,39 @@
             <a href="#"><i class="fa-solid fa-gear"></i> Marketing & Settings</a>
             <ul>
 
+                
                 <li>
-                    <a href="#">Admin Setting</a>
-                    <ul>
-                        <li><a href="#">General Setting</a></li>
-                        <li><a href="#">Payment Gateway</a></li>
-                        <li><a href="#">SMTP</a></li>
-                        <li><a href="#">GST & Invoice</a></li>
-                    </ul>
+                    <a href="{{ route('admin.coupons.index') }}">
+                        Coupon Management
+                    </a>
                 </li>
-
-                <li><a href="#">Coupon Management</a></li>
                 <li><a href="{{ route('admin.seo.index') }}">SEO Management</a></li>
-                <li><a href="{{ route('admin.footer-settings.index') }}">Footer Setting</a></li>
+                
 
             </ul>
         </li>
+        
+        
+        {{-- Admin Setting --}}
+        <li class="{{ request()->routeIs(
+    'admin.settings.*',
+) ? 'active' : '' }}">
+            <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+            <ul>
+
+                        <li><a href="{{ route('admin.admin-setting.index') }}">General Setting</a></li>
+                        <li><a href="{{ route('admin.admin-setting.index') }}">Payment Gateway</a></li>
+                        <li><a href="{{ route('admin.admin-setting.index') }}">SMTP</a></li>
+                        <li><a href="{{ route('admin.admin-setting.index') }}">GST & Invoice</a></li>
+                        <li><a href="{{ route('admin.footer-settings.index') }}">Footer Setting</a></li>
+
+
+            </ul>
+        </li>
+        
+        
+        
+        
 
         {{-- REPORTS --}}
         <li class="{{ request()->routeIs(
@@ -183,9 +195,9 @@
 ) ? 'active' : '' }}">
             <a href="#"><i class="fa-solid fa-chart-column"></i> Reports</a>
             <ul>
-                <li><a href="#">Sales Report</a></li>
-                <li><a href="#">Product Report</a></li>
-                <li><a href="#">Customer Report</a></li>
+                <li><a href="{{ route('admin.sales-report.index') }}">Sales Report</a></li>
+                <li><a href="{{ route('admin.product-report.index') }}">Product Report</a></li>
+                <li><a href="{{ route('admin.customer-report.index') }}">Customer Report</a></li>
             </ul>
         </li>
 

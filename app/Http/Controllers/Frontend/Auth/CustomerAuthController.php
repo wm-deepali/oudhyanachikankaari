@@ -7,6 +7,8 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use App\Models\Cart;
+use App\Models\CartItem;
 class CustomerAuthController extends Controller
 {
     public function registerForm()
@@ -39,8 +41,6 @@ class CustomerAuthController extends Controller
         );
         $customer = Customer::create($validated);
 
-        Auth::guard('customer')->login($customer);
-
         return redirect()
             ->route('user.login')
             ->with('success', 'Registration completed successfully. Please login.');
@@ -57,6 +57,10 @@ class CustomerAuthController extends Controller
         $remember = $request->boolean('remember');
 
         if (Auth::guard('customer')->attempt($credentials, $remember)) {
+
+            $this->mergeGuestCart(
+                Auth::guard('customer')->user()
+            );
 
             $request->session()->regenerate();
 
@@ -98,6 +102,8 @@ class CustomerAuthController extends Controller
 
         Auth::guard('customer')->login($customer);
 
+        $this->mergeGuestCart($customer);
+
         return redirect()->route('home');
     }
 
@@ -111,4 +117,69 @@ class CustomerAuthController extends Controller
         return redirect()->route('user.login');
     }
 
+    private function mergeGuestCart(Customer $customer)
+    {
+        $guestCart = Cart::where(
+            'session_id',
+            session()->getId()
+        )->first();
+
+        if (!$guestCart) {
+            return;
+        }
+
+        $userCart = Cart::firstOrCreate(
+            [
+                'user_id' => $customer->id
+            ],
+            [
+                'session_id' => session()->getId(),
+                'total_amount' => 0
+            ]
+        );
+
+        if ($guestCart->id == $userCart->id) {
+
+            $userCart->update([
+                'user_id' => $customer->id
+            ]);
+
+            return;
+        }
+
+        foreach ($guestCart->items as $item) {
+
+            $existingItem = CartItem::where('cart_id', $userCart->id)
+                ->where('product_id', $item->product_id)
+                ->where('variant_id', $item->variant_id)
+                ->first();
+
+            if ($existingItem) {
+
+                $existingItem->quantity += $item->quantity;
+                $existingItem->total =
+                    $existingItem->quantity * $existingItem->price;
+
+                $existingItem->save();
+
+            } else {
+
+                CartItem::create([
+                    'cart_id' => $userCart->id,
+                    'product_id' => $item->product_id,
+                    'variant_id' => $item->variant_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->price,
+                    'total' => $item->total,
+                ]);
+            }
+        }
+
+        $userCart->update([
+            'total_amount' => $userCart->items()->sum('total')
+        ]);
+
+        $guestCart->items()->delete();
+        $guestCart->delete();
+    }
 }

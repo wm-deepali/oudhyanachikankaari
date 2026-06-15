@@ -114,4 +114,11 @@ class Product extends Model
             'collection_id'
         );
     }
+
+    public function cartItems()
+    {
+        return $this->hasMany(
+            CartItem::class
+        );
+    }
 }

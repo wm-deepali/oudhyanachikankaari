@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
             $cart = Cart::with([
                 'items.product.images',
-                'items.customization'
+                'items'
             ])
                 ->where('session_id', $sessionId)
                 ->first();

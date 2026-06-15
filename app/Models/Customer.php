@@ -36,4 +36,13 @@ class Customer extends Authenticatable
             'status' => 'boolean',
         ];
     }
+
+    public function addresses()
+    {
+        return $this->hasMany(
+            CustomerAddress::class,
+            'customer_id'
+        );
+    }
+    
 }
