@@ -196,13 +196,36 @@
                                 <span>Shipping & Handling</span>
                                 <span class="text-success font-weight-bold">Free</span>
                             </div>
-                            <div class="aq-summary-row">
-                                <span>GST (Taxes)</span>
-                                <span id="summaryGST">
-                                    ₹{{ number_format($cart->tax_amount ?? 0, 2) }}
-                                </span>
-                            </div>
+                            @if($cart && $cart->tax_amount > 0)
 
+                                @if($cart->gst_type == 'cgst_sgst')
+
+                                    <div class="aq-summary-row">
+                                        <span>CGST ({{ $cart->cgst_rate }}%)</span>
+                                        <span>
+                                            ₹{{ number_format($cart->cgst_amount, 2) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="aq-summary-row">
+                                        <span>SGST ({{ $cart->sgst_rate }}%)</span>
+                                        <span>
+                                            ₹{{ number_format($cart->sgst_amount, 2) }}
+                                        </span>
+                                    </div>
+
+                                @elseif($cart->gst_type == 'igst')
+
+                                    <div class="aq-summary-row">
+                                        <span>IGST ({{ $cart->igst_rate }}%)</span>
+                                        <span>
+                                            ₹{{ number_format($cart->igst_amount, 2) }}
+                                        </span>
+                                    </div>
+
+                                @endif
+
+                            @endif
                             <div class="aq-summary-row total-row">
                                 <span>Total Amount</span>
                                 <span id="summaryTotal">
@@ -285,10 +308,10 @@
                         if ($('.aq-cart-item-row').length === 0) {
 
                             $('#aqCartItemsList').html(`
-                                                                        <div class="text-center py-5">
-                                                                            <h4>Your cart is empty.</h4>
-                                                                        </div>
-                                                                    `);
+                                                                            <div class="text-center py-5">
+                                                                                <h4>Your cart is empty.</h4>
+                                                                            </div>
+                                                                        `);
                         }
                     }
                 },

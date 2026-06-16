@@ -153,6 +153,12 @@ class CartController extends Controller
                 ->first();
         }
 
+        // Recalculate GST based on latest default address
+        if ($cart) {
+            $cart->recalculateTotals();
+            $cart->refresh();
+        }
+
         return view(
             'front-pages.cart',
             compact('cart')
@@ -325,6 +331,7 @@ class CartController extends Controller
         ]);
 
         $cart->recalculateTotals();
+        $cart->refresh();
 
         return response()->json([
             'status' => true,
@@ -345,6 +352,7 @@ class CartController extends Controller
         ]);
 
         $cart->recalculateTotals();
+        $cart->refresh();
 
         return response()->json([
             'status' => true

@@ -44,5 +44,12 @@ class Customer extends Authenticatable
             'customer_id'
         );
     }
-    
+
+    public function orders()
+    {
+        return $this->hasMany(
+            Order::class
+        );
+    }
+
 }

@@ -47,7 +47,7 @@ use App\Http\Controllers\Admin\AttributeValueController;
 use App\Http\Controllers\Admin\CategoryAttributeController;
 use App\Http\Controllers\Frontend\Auth\CustomerAuthController;
 use App\Http\Controllers\Admin\CouponController;
-use App\Http\Controllers\Admin\InvoiceSettingController;
+use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 
@@ -80,12 +80,28 @@ Route::controller(FrontController::class)->group(function () {
     Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply.coupon');
     Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.remove.coupon');
 
-    Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
+    Route::middleware('customer')->group(function () {
+
+        Route::get('/checkout', [CheckoutController::class, 'checkout'])
+            ->name('checkout');
+
+        Route::post('/checkout/change-default-address', [CheckoutController::class, 'changeDefaultAddress'])
+            ->name('checkout.change-default-address');
+
+        Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])
+            ->name('checkout.place-order');
+
+        Route::post('/payment/razorpay/success', [CheckoutController::class, 'razorpaySuccess'])
+            ->name('checkout.razorpay.success');
+
+        Route::get('/order-success/{order}', [CheckoutController::class, 'orderSuccess'])
+            ->name('order.success');
+
+    });
 
     // wishlist routes
     Route::post('/wishlist/add', 'addToWishlist')->name('wishlist.add');
     Route::delete('/wishlist/{id}', 'removeWishlist')->name('wishlist.remove');
-
 
 
     Route::get('/vendors', 'vendors')->name('vendors');
@@ -125,6 +141,8 @@ Route::prefix('user')->name('user.')->group(function () {
 
     Route::middleware('customer')->group(function () {
 
+        Route::post('/address/store', [CheckoutController::class, 'storeAddress'])->name('address.store');
+
         Route::view('/dashboard', 'front-pages.dashboard')->name('dashboard');
         Route::view('/account-details', 'front-pages.account-details')->name('account.details');
         Route::view('/address', 'front-pages.address')->name('address');
@@ -140,7 +158,7 @@ Route::prefix('user')->name('user.')->group(function () {
 
 Route::get('/get-cities/{state}', function ($id) {
     return \App\Models\City::where('state_id', $id)->orderBy('name')->get();
-});
+})->name('get.cities');
 
 // Admin Routes list
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -311,55 +329,58 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('announcements', AnnouncementController::class);
 
-      Route::resource('coupons', CouponController::class);
+        Route::resource('coupons', CouponController::class);
 
-        Route::get('/invoice-settings', [InvoiceSettingController::class, 'index'])->name('invoice-settings.index');
-        Route::post('/invoice-settings', [InvoiceSettingController::class, 'store'])->name('invoice-settings.store');
-        Route::get('/get-cities', [InvoiceSettingController::class, 'getCities'])->name('get-cities');
+        Route::get('/admin-setting', [AdminSettingController::class, 'index'])->name('admin-setting.index');
+        Route::post('/invoice-settings', [AdminSettingController::class, 'invoiceSettingStore'])->name('invoice-settings.store');
+        Route::get('/get-cities', [AdminSettingController::class, 'getCities'])->name('get-cities');
+        Route::post('/smtp-settings/store', [AdminSettingController::class, 'smtpSettingStore'])->name('smtp-settings.store');
+        Route::post('/payment-settings/store', [AdminSettingController::class, 'paymentSettingStore'])->name('payment-settings.store');
 
-Route::view('/orders', 'admin.orders-and-payments.index')->name('orders.index');
+        Route::view('/orders', 'admin.orders-and-payments.index')->name('orders.index');
 
-    Route::view('/payments',
-    'admin.orders-and-payments.payments-and-transaction')
-        ->name('payments.index');
+        Route::view(
+            '/payments',
+            'admin.orders-and-payments.payments-and-transaction'
+        )
+            ->name('payments.index');
 
-    Route::view('/order-detail/{id?}', 'admin.orders-and-payments.view-order-details')
-        ->name('orders.detail');
+        Route::view('/order-detail/{id?}', 'admin.orders-and-payments.view-order-details')
+            ->name('orders.detail');
 
-    Route::view('/customers', 'admin.customers.index')
-        ->name('customers.index');
-        
-         Route::view('/customer/{id?}', 'admin.customers.view-customer-detail')
-        ->name('customers.detail');
+        Route::view('/customers', 'admin.customers.index')
+            ->name('customers.index');
 
-    Route::view('/returns', 'admin.orders-and-payments.return-order')
-        ->name('returns.index');
+        Route::view('/customer/{id?}', 'admin.customers.view-customer-detail')
+            ->name('customers.detail');
 
-    Route::view('/refunds', 'admin.orders-and-payments.payment-refunds')->name('refunds.index');
+        Route::view('/returns', 'admin.orders-and-payments.return-order')
+            ->name('returns.index');
 
-    Route::view('/address-book', 'admin.customers.customer-address-book')
-        ->name('address-book.index');
-        
-         Route::view('/customer-cart', 'admin.customers.customer-cart')
-        ->name('customer-cart.index');
-        
+        Route::view('/refunds', 'admin.orders-and-payments.payment-refunds')->name('refunds.index');
+
+        Route::view('/address-book', 'admin.customers.customer-address-book')
+            ->name('address-book.index');
+
+        Route::view('/customer-cart', 'admin.customers.customer-cart')
+            ->name('customer-cart.index');
+
         Route::view('/product-reviews', 'admin.products.product-reviews')
-        ->name('product-reviews.index');
+            ->name('product-reviews.index');
         Route::view('/stock-management', 'admin.products.stock-management')
-        ->name('stock-management.index');
-        
+            ->name('stock-management.index');
+
         Route::view('/stock-alerts', 'admin.products.stock-alerts')
-        ->name('stock-alerts.index');
-        
-        Route::view('/admin-setting', 'admin.admin-settings.admin-setting')
-        ->name('admin-setting.index');
-        
+            ->name('stock-alerts.index');
+
+
+
         Route::view('/sales-report', 'admin.reports.sales-report')
-        ->name('sales-report.index');
+            ->name('sales-report.index');
         Route::view('/customer-report', 'admin.reports.customer-report')
-        ->name('customer-report.index');
+            ->name('customer-report.index');
         Route::view('/product-report', 'admin.reports.product-report')
-        ->name('product-report.index');
-        
+            ->name('product-report.index');
+
     });
 });

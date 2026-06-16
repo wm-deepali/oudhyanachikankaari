@@ -550,6 +550,57 @@ document.querySelectorAll(
                 });
             }
         });
+
+             function addToCart(productId) {
+       
+            $.ajax({
+                url: "{{ route('cart.add') }}",
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    product_id: productId,
+                    quantity: 1
+                },
+                success: function (response) {
+
+                    if (response.status) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        $('.cart-count').text(
+                            response.cart_count
+                        );
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to add product.'
+                        });
+
+                    }
+                },
+                error: function (xhr) {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message ??
+                            'Something went wrong.'
+                    });
+
+                }
+            });
+        }
+
+
     </script>
 
 @endsection

@@ -82,7 +82,7 @@
                                             <span class="aq-size-badge">XXL</span>
                                         </div>
                                         <div class="aq-product-card-bottom">
-                                            <button class="aq-product-card-cta">
+                                            <button class="aq-product-card-cta"  onclick="addToCart({{ $product->id }})">
                                                 <i class="fa-solid fa-cart-shopping"></i> Add to Cart
                                             </button>
                                         </div>

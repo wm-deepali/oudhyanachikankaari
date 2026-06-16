@@ -26,7 +26,27 @@ return new class extends Migration
                 2
             )->default(0);
 
+             $table->decimal('subtotal', 12, 2)
+                ->default(0);
+
+            $table->decimal('discount', 12, 2)
+                ->default(0);
+
+            $table->decimal('tax_amount', 12, 2)
+                ->default(0);
+
+            $table->decimal('grand_total', 12, 2)
+                ->default(0);
+
+            $table->foreignId('coupon_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
+
+            $table->string('coupon_code')
+                ->nullable();
             $table->timestamps();
+            
         });
     }
 

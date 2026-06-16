@@ -8,57 +8,49 @@ class InvoiceSetting extends Model
 {
     protected $fillable = [
 
-        // 🔹 Company
         'company_name',
         'company_logo',
         'company_address',
         'company_phone',
+        'company_email',
+
         'company_gstin',
+        'company_pan',
+
         'company_state',
         'company_city',
         'company_pincode',
 
-        // 🔹 Invoice
-        'invoice_prefix',
-        'invoice_serial',
-        'invoice_type', // ✅ NEW (serial / random)
-        'random_length',
-        'terms_conditions',
-
-        // 🔹 GST
         'cgst',
         'sgst',
         'igst',
-        'gst_enabled',
+
+        'tax_type',
+        'business_type',
+        'show_gst_breakup',
+
+        'invoice_prefix',
+        'invoice_serial',
+        'invoice_year_format',
+        'invoice_separator',
+        'invoice_date_format',
+
+        'auto_generate_invoice',
+        'email_invoice_customer',
+
+        'terms_conditions',
     ];
 
     protected $casts = [
-        'gst_enabled' => 'boolean',
-        'invoice_serial' => 'integer',
-        'random_length' => 'integer',
+
+        'show_gst_breakup' => 'boolean',
+        'auto_generate_invoice' => 'boolean',
+        'email_invoice_customer' => 'boolean',
+
+        'cgst' => 'decimal:2',
+        'sgst' => 'decimal:2',
+        'igst' => 'decimal:2',
     ];
-
-    /*
-    |--------------------------------------------------------------------------
-    | 🔥 Helper Methods (important for clean usage)
-    |--------------------------------------------------------------------------
-    */
-
-    public function isSerial()
-    {
-        return $this->invoice_type === 'serial';
-    }
-
-    public function isRandom()
-    {
-        return $this->invoice_type === 'random';
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 🔗 Relations
-    |--------------------------------------------------------------------------
-    */
 
     public function state()
     {

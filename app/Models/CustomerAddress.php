@@ -17,7 +17,6 @@ class CustomerAddress extends Model
         'address_line_1',
         'address_line_2',
 
-        'country',
         'state_id',
         'city_id',
 
@@ -81,4 +80,13 @@ class CustomerAddress extends Model
             $this->country,
         ])->filter()->implode(', ');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(
+            Order::class,
+            'address_id'
+        );
+    }
+
 }

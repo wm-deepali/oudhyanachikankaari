@@ -13,14 +13,23 @@ class Cart extends Model
 
         'total_amount',
 
-        // Coupon
         'coupon_id',
         'coupon_code',
 
-        // Calculations
         'subtotal',
         'discount',
         'tax_amount',
+
+        'gst_type',
+
+        'cgst_rate',
+        'sgst_rate',
+        'igst_rate',
+
+        'cgst_amount',
+        'sgst_amount',
+        'igst_amount',
+
         'grand_total',
     ];
 
@@ -59,28 +68,120 @@ class Cart extends Model
         );
 
         $taxAmount = 0;
+        $grandTotal = $taxableAmount;
+
+        $gstType = null;
+
+        $cgstRate = 0;
+        $sgstRate = 0;
+        $igstRate = 0;
+
+        $cgstAmount = 0;
+        $sgstAmount = 0;
+        $igstAmount = 0;
 
         if (
             $invoiceSetting &&
-            $invoiceSetting->gst_enabled
+            $invoiceSetting->business_type === 'registered'
         ) {
+            if ($this->user_id) {
 
-            $gstPercentage =
-                ($invoiceSetting->cgst ?? 0) +
-                ($invoiceSetting->sgst ?? 0);
+                $defaultAddress = CustomerAddress::where(
+                    'customer_id',
+                    $this->user_id
+                )
+                    ->where('is_default', 1)
+                    ->first();
 
-            $taxAmount =
-                ($taxableAmount * $gstPercentage) / 100;
+                if (
+                    $defaultAddress &&
+                    $defaultAddress->state_id ==
+                    $invoiceSetting->company_state
+                ) {
+
+                    $gstType = 'cgst_sgst';
+
+                    $cgstRate = $invoiceSetting->cgst ?? 0;
+                    $sgstRate = $invoiceSetting->sgst ?? 0;
+
+                    $gstPercentage =
+                        $cgstRate + $sgstRate;
+
+                } else {
+
+                    $gstType = 'igst';
+
+                    $igstRate =
+                        $invoiceSetting->igst ?? 0;
+
+                    $gstPercentage = $igstRate;
+                }
+
+            } else {
+
+                $gstType = 'cgst_sgst';
+
+                $cgstRate = $invoiceSetting->cgst ?? 0;
+                $sgstRate = $invoiceSetting->sgst ?? 0;
+
+                $gstPercentage =
+                    $cgstRate + $sgstRate;
+            }
+
+            if ($invoiceSetting->tax_type === 'exclusive') {
+
+                $taxAmount =
+                    ($taxableAmount * $gstPercentage)
+                    / 100;
+
+                $grandTotal =
+                    $taxableAmount + $taxAmount;
+
+            } else {
+
+                $taxAmount =
+                    ($taxableAmount * $gstPercentage)
+                    /
+                    (100 + $gstPercentage);
+
+                $grandTotal = $taxableAmount;
+            }
+
+            if ($gstType === 'cgst_sgst') {
+
+                $cgstAmount =
+                    round($taxAmount / 2, 2);
+
+                $sgstAmount =
+                    round($taxAmount / 2, 2);
+
+            } else {
+
+                $igstAmount =
+                    round($taxAmount, 2);
+            }
         }
 
-        $grandTotal =
-            $taxableAmount + $taxAmount;
-
         $this->update([
-            'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
-            'grand_total' => $grandTotal,
-            'total_amount' => $grandTotal,
+
+            'subtotal' => round($subtotal, 2),
+            'discount' => round($discount, 2),
+
+            'gst_type' => $gstType,
+
+            'cgst_rate' => $cgstRate,
+            'sgst_rate' => $sgstRate,
+            'igst_rate' => $igstRate,
+
+            'cgst_amount' => $cgstAmount,
+            'sgst_amount' => $sgstAmount,
+            'igst_amount' => $igstAmount,
+
+            'tax_amount' => round($taxAmount, 2),
+
+            'grand_total' => round($grandTotal, 2),
+            'total_amount' => round($grandTotal, 2),
         ]);
     }
+
 }

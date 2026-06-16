@@ -656,7 +656,7 @@
                                             <div style="margin-top:15px;text-align:center">
 
                                                 <img src="{{ asset('storage/' . $setting->company_logo) }}" alt="Company Logo" style="
-                                        max-width:100%;
+                                        width:200px;
                                         max-height:120px;
                                         border-radius:8px;
                                         border:1px solid #ddd;
@@ -671,7 +671,7 @@
                                 <div id="imagePreview" style="display:none;margin-top:15px;text-align:center">
 
                                     <img id="previewImg" src="" alt="Preview" style="
-                        max-width:100%;
+                        width:200px;
                         border-radius:8px;
                         border:1px solid #ddd;
                     ">
