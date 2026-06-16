@@ -96,8 +96,8 @@
                 <li><a href="{{ route('admin.returns.index')}}">Manage Returns</a></li>
                 <li><a href="{{route('admin.refunds.index') }}">Manage Refunds</a></li>
                 <li><a href="{{ route('admin.customers.index') }}">Manage Customers</a></li>
-                <li><a href="{{ route('admin.address-book.index') }}">Customer Address Book</a></li>
-                <li><a href="{{ route('admin.customer-cart.index') }}">Customer Carts</a></li>
+                <li><a href="{{ route('admin.customers.addresses.index') }}">Customer Address Book</a></li>
+                <li><a href="{{ route('admin.stored-carts.index') }}">Customer Carts</a></li>
 
             </ul>
         </li>

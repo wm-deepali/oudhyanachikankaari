@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewOrderAdminMail;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Cart;
 use App\Models\CustomerAddress;
+use App\Models\Setting;
+use App\Models\SmtpSetting;
 use App\Models\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Razorpay\Api\Api;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Invoice;
 use App\Models\PaymentSetting;
 use App\Http\Controllers\Admin\AdminSettingController;
+use App\Helpers\MailHelper;
 
 class CheckoutController extends Controller
 {
@@ -359,6 +365,8 @@ class CheckoutController extends Controller
 
                 DB::commit();
 
+                $this->sendOrderEmails($order);
+
                 return response()->json([
                     'success' => true,
                     'type' => 'cod',
@@ -623,6 +631,8 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            $this->sendOrderEmails($order);
+
             return response()->json([
 
                 'success' => true,
@@ -656,5 +666,33 @@ class CheckoutController extends Controller
         );
     }
 
+
+    protected function sendOrderEmails(Order $order)
+    {
+        $smtpSetting = SmtpSetting::first();
+
+        if (!$smtpSetting) {
+            return;
+        }
+
+        MailHelper::configure();
+
+        if ($smtpSetting->order_confirmation) {
+
+            Mail::to($order->customer_email)
+                ->send(
+                    new OrderConfirmationMail($order)
+                );
+        }
+
+        if ($smtpSetting->new_order_alert) {
+
+            $setting = Setting::first();
+
+            Mail::to($setting->admin_email)->send(
+                new NewOrderAdminMail($order)
+            );
+        }
+    }
 
 }

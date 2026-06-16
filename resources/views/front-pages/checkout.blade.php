@@ -614,7 +614,7 @@
                 );
 
                 $.ajax({
-                    url: "{{ route('admin.get-cities') }}",
+                    url: "{{ route('get-cities') }}",
                     type: "GET",
                     data: {
                         state_id: stateId

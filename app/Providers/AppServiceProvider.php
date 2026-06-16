@@ -77,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('sort_order')
                 ->get();
 
-            $footerSetting = \App\Models\FooterSetting::first();
+            $general = \App\Models\Setting::first();
 
             $view->with(
                 [
@@ -89,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
                     'menuCategories' => $menuCategories,
                     'headerFabrics' => $headerFabrics,
                     'navbarCategories' => $navbarCategories,
-                    'footerSetting' => $footerSetting
+                    'general' => $general
                 ]
             );
         });

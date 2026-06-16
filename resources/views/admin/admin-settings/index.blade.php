@@ -980,7 +980,7 @@
         if (stateId) {
 
             $.ajax({
-                url: "{{ route('admin.get-cities') }}",
+                url: "{{ route('get-cities') }}",
                 type: "GET",
                 data: {
                     state_id: stateId
@@ -1013,7 +1013,6 @@
         reader.onload = e => {
             document.getElementById('previewImg').src = e.target.result;
             document.getElementById('imagePreview').style.display = 'block';
-            document.getElementById('uploadArea').style.display = 'none';
         };
         reader.readAsDataURL(file);
     });
@@ -1021,7 +1020,41 @@
     function clearImage() {
         document.getElementById('imageInput').value = '';
         document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('uploadArea').style.display = 'block';
+    }
+
+
+      // logo preview
+    document.getElementById('logo').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewlogo').src = e.target.result;
+            document.getElementById('logoPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function clearImage() {
+        document.getElementById('logo').value = '';
+        document.getElementById('logoPreview').style.display = 'none';
+    }
+
+ // favicon preview
+      document.getElementById('favicon').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewFavicon').src = e.target.result;
+            document.getElementById('faviconPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function clearImage() {
+        document.getElementById('favicon').value = '';
+        document.getElementById('faviconPreview').style.display = 'none';
     }
 
     function toggleBusinessType() {

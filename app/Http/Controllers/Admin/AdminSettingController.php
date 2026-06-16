@@ -10,17 +10,18 @@ use Illuminate\Support\Facades\DB;
 use App\Models\City;
 use App\Models\SmtpSetting;
 use App\Models\PaymentSetting;
-
+use App\Models\Setting;
 
 class AdminSettingController extends Controller
 {
     // 🔹 Show form
 
-    public function index()
+    public function index(Request $request)
     {
         $invoice_setting = InvoiceSetting::first();
         $smtp = SmtpSetting::first();
         $payment = PaymentSetting::first();
+        $general = Setting::first();
 
         $states = State::all();
         $activeTab = $request->tab ?? 'general';
@@ -31,6 +32,7 @@ class AdminSettingController extends Controller
                 'invoice_setting',
                 'smtp',
                 'payment',
+                'general',
                 'states',
                 'activeTab'
             )
@@ -259,6 +261,72 @@ class AdminSettingController extends Controller
         return back()->with(
             'success',
             'Payment settings saved successfully.'
+        );
+    }
+
+    public function generalSettingStore(Request $request)
+    {
+        $validated = $request->validate([
+
+            'site_name' => 'nullable|string|max:255',
+            'tagline' => 'nullable|string|max:255',
+
+            'admin_email' => 'nullable|email|max:255',
+            'support_email' => 'nullable|email|max:255',
+
+            'phone' => 'nullable|string|max:20',
+            'whatsapp' => 'nullable|string|max:20',
+
+            'business_address' => 'nullable|string',
+
+            'footer_description' => 'nullable|string',
+
+            'facebook' => 'nullable|url|max:255',
+            'instagram' => 'nullable|url|max:255',
+            'twitter' => 'nullable|url|max:255',
+            'linkedin' => 'nullable|url|max:255',
+            'youtube' => 'nullable|url|max:255',
+            'pinterest' => 'nullable|url|max:255',
+
+            'currency' => 'nullable|string|max:10',
+            'currency_symbol' => 'nullable|string|max:10',
+            'timezone' => 'nullable|string|max:100',
+        ]);
+
+        $validated['maintenance_mode']
+            = $request->has('maintenance_mode');
+
+        $validated['product_reviews']
+            = $request->has('product_reviews');
+
+        $validated['wishlist']
+            = $request->has('wishlist');
+
+        $validated['stock_alerts']
+            = $request->has('stock_alerts');
+
+        if ($request->hasFile('logo')) {
+
+            $validated['logo'] = $request
+                ->file('logo')
+                ->store('settings', 'public');
+        }
+
+        if ($request->hasFile('favicon')) {
+
+            $validated['favicon'] = $request
+                ->file('favicon')
+                ->store('settings', 'public');
+        }
+
+        Setting::updateOrCreate(
+            ['id' => 1],
+            $validated
+        );
+
+        return back()->with(
+            'success',
+            'General settings updated successfully.'
         );
     }
 
