@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Wishlist;
+
 class CustomerAuthController extends Controller
 {
     public function registerForm()
@@ -58,14 +60,15 @@ class CustomerAuthController extends Controller
 
         if (Auth::guard('customer')->attempt($credentials, $remember)) {
 
-            $this->mergeGuestCart(
-                Auth::guard('customer')->user()
-            );
+            $customer = Auth::guard('customer')->user();
+
+            $this->mergeGuestCart($customer);
+            $this->mergeGuestWishlist($customer);
 
             $request->session()->regenerate();
 
             return redirect()
-                ->route('user.dashboard')
+                ->route('user.dashboard.index')
                 ->with('success', 'Login successful.');
         }
 
@@ -103,6 +106,7 @@ class CustomerAuthController extends Controller
         Auth::guard('customer')->login($customer);
 
         $this->mergeGuestCart($customer);
+        $this->mergeGuestWishlist($customer);
 
         return redirect()->route('home');
     }
@@ -182,4 +186,45 @@ class CustomerAuthController extends Controller
         $guestCart->items()->delete();
         $guestCart->delete();
     }
+
+    private function mergeGuestWishlist(Customer $customer)
+    {
+        $guestWishlistItems = Wishlist::where(
+            'session_id',
+            session()->getId()
+        )->get();
+
+        if ($guestWishlistItems->isEmpty()) {
+            return;
+        }
+
+        foreach ($guestWishlistItems as $item) {
+
+            $exists = Wishlist::where(
+                'customer_id',
+                $customer->id
+            )
+                ->where(
+                    'product_id',
+                    $item->product_id
+                )
+                ->exists();
+
+            if (!$exists) {
+
+                Wishlist::create([
+                    'customer_id' => $customer->id,
+                    'session_id' => null,
+                    'product_id' => $item->product_id,
+                    'expires_at' => $item->expires_at,
+                ]);
+            }
+        }
+
+        Wishlist::where(
+            'session_id',
+            session()->getId()
+        )->delete();
+    }
+
 }

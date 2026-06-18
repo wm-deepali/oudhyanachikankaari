@@ -907,53 +907,45 @@
                         </div>
                         <div class="section-card-body">
                             <div class="timeline">
-                                @if($order->status === 'cancelled')
-                                    {{-- Cancelled: show placed + cancelled --}}
+
+                                @foreach($order->statusHistory as $history)
+
+                                    @php
+                                        $dotClass = match ($history->status) {
+                                            'pending' => 'done',
+                                            'processing' => 'active',
+                                            'shipped' => 'active',
+                                            'delivered' => 'done',
+                                            'cancelled' => 'cancelled',
+                                            default => 'pending',
+                                        };
+                                    @endphp
+
                                     <div class="timeline-item">
-                                        <div class="timeline-dot done"></div>
-                                        <div class="timeline-title">Order Placed</div>
-                                        <div class="timeline-time">{{ $order->created_at->format('d M Y, h:i A') }}</div>
-                                        <div class="timeline-desc">Customer placed the order successfully.</div>
-                                    </div>
-                                    <div class="timeline-item">
-                                        <div class="timeline-dot cancelled"></div>
-                                        <div class="timeline-title">Cancelled</div>
-                                        <div class="timeline-time">{{ $order->updated_at->format('d M Y, h:i A') }}</div>
-                                        <div class="timeline-desc">Order was cancelled.</div>
-                                    </div>
-                                @else
-                                    @foreach($statusFlow as $idx => $step)
-                                        @php
-                                            if ($idx < $currentIdx) {
-                                                $dotClass = 'done';
-                                            } elseif ($idx === $currentIdx) {
-                                                $dotClass = 'active';
-                                            } else {
-                                                $dotClass = 'pending';
-                                            }
-                                        @endphp
-                                        <div class="timeline-item">
-                                            <div class="timeline-dot {{ $dotClass }}"></div>
-                                            <div class="timeline-title"
-                                                style="{{ $dotClass === 'pending' ? 'color:var(--text-hint)' : '' }}">
-                                                {!! $timelineSteps[$step]['title'] !!}
-                                            </div>
-                                            @if($dotClass !== 'pending')
-                                                                    <div class="timeline-time">
-                                                                        {{-- Use created_at for first step, updated_at for current --}}
-                                                                        {{ $idx === 0
-                                                ? $order->created_at->format('d M Y, h:i A')
-                                                : ($idx === $currentIdx ? $order->updated_at->format('d M Y, h:i A') : '') }}
-                                                                    </div>
-                                            @endif
-                                            <div class="timeline-desc"
-                                                style="{{ $dotClass === 'pending' ? 'color:var(--text-hint)' : '' }}">
-                                                {{ $timelineSteps[$step]['desc'] }}
-                                            </div>
+
+                                        <div class="timeline-dot {{ $dotClass }}"></div>
+
+                                        <div class="timeline-title">
+                                            {{ ucfirst($history->status) }}
                                         </div>
-                                    @endforeach
-                                @endif
+
+                                        <div class="timeline-time">
+                                            {{ $history->created_at->format('d M Y, h:i A') }}
+                                        </div>
+
+
+                                        @if($history->remarks)
+                                            <div class="timeline-desc">
+                                                {{ $history->remarks }}
+                                            </div>
+                                        @endif
+
+                                    </div>
+
+                                @endforeach
+
                             </div>
+
                         </div>
                     </div>
 
@@ -975,18 +967,54 @@
                                     <div style="margin-bottom:12px">
                                         <label class="field-label">Order Status</label>
                                         <select name="status" class="field-select-full">
-                                            @foreach(['new', 'processing', 'shipped', 'delivered', 'cancelled'] as $s)
+                                            @foreach(['pending', 'processing', 'shipped', 'delivered', 'cancelled'] as $s)
                                                 <option value="{{ $s }}" {{ $order->status === $s ? 'selected' : '' }}>
                                                     {{ ucfirst($s) }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div style="margin-bottom:12px">
-                                        <label class="field-label">Tracking Number</label>
-                                        <input type="text" name="tracking_number" class="field-input-full"
-                                            placeholder="e.g. DTDC123456789">
-                                    </div>
+                                    <div id="shipping-details"
+     style="{{ in_array($order->status, ['shipped','delivered']) ? '' : 'display:none' }}">
+
+    <div style="margin-bottom:12px">
+        <label class="field-label">
+            Courier
+        </label>
+
+        <select name="courier_id" class="field-select-full">
+
+            <option value="">
+                Select Courier
+            </option>
+
+            @foreach($couriers as $courier)
+
+                <option value="{{ $courier->id }}"
+                    {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
+                    {{ $courier->name }}
+                </option>
+
+            @endforeach
+
+        </select>
+    </div>
+
+    <div style="margin-bottom:12px">
+        <label class="field-label">
+            Tracking Number
+        </label>
+
+        <input type="text"
+               name="tracking_number"
+               class="field-input-full"
+               value="{{ $order->tracking_number }}"
+               placeholder="Enter tracking number">
+    </div>
+
+</div>
+
+                                  
                                     <div style="margin-bottom:14px">
                                         <label class="field-label">Note (optional)</label>
                                         <textarea name="note" class="field-textarea"
@@ -1090,6 +1118,45 @@
                                 <span
                                     class="info-value">{{ ucfirst(str_replace('_', ' ', $order->payment_method ?? '—')) }}</span>
                             </div>
+                            @if($order->courier)
+
+                                <div class="info-row">
+                                    <span class="info-label">Courier</span>
+
+                                    <span class="info-value">
+                                        {{ $order->courier->name }}
+                                    </span>
+                                </div>
+
+                            @endif
+                            @if($order->tracking_number)
+
+                                <div class="info-row">
+                                    <span class="info-label">Tracking Number</span>
+
+                                    <span class="info-value"
+                                        style="font-family:'SF Mono','Fira Code',monospace;font-size:12px">
+                                        {{ $order->tracking_number }}
+                                    </span>
+                                </div>
+
+                            @endif
+
+                            @if($order->courier && $order->courier->website_url)
+
+                                <div class="info-row">
+                                    <span class="info-label">Tracking Site</span>
+
+                                    <span class="info-value">
+                                        <a href="{{ $order->courier->website_url }}" target="_blank"
+                                            style="color:var(--accent)">
+                                            Open Tracking Site
+                                        </a>
+                                    </span>
+                                </div>
+
+                            @endif
+
                             @if($order->coupon_code)
                                 <div class="info-row">
                                     <span class="info-label">Coupon</span>
@@ -1116,5 +1183,30 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const statusSelect = document.querySelector('[name="status"]');
+    const shippingBlock = document.getElementById('shipping-details');
+
+    function toggleShippingFields() {
+
+        if (
+            statusSelect.value === 'shipped' ||
+            statusSelect.value === 'delivered'
+        ) {
+            shippingBlock.style.display = 'block';
+        } else {
+            shippingBlock.style.display = 'none';
+        }
+    }
+
+    toggleShippingFields();
+
+    statusSelect.addEventListener('change', toggleShippingFields);
+
+});
+</script>
 
 @include('admin.footer')

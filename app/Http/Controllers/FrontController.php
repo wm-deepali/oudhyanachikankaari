@@ -181,6 +181,14 @@ class FrontController extends Controller
 
         $whyCards = HomeWhyCard::orderBy('id')->get();
 
+        $wishlistIds = Wishlist::current()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->pluck('product_id')
+            ->toArray();
+
 
         return view('front-pages.home', compact(
             'sliders',
@@ -204,7 +212,8 @@ class FrontController extends Controller
             'featuredCategories',
             'exclusiveCollections',
             'why',
-            'whyCards'
+            'whyCards',
+            'wishlistIds'
         ));
     }
 
@@ -1206,54 +1215,5 @@ class FrontController extends Controller
         return view('front-pages.occasions', compact('occasions'));
     }
 
-    public function addToWishlist(Request $request)
-    {
-        $request->validate([
-            'product_id' => 'required|exists:products,id'
-        ]);
-
-        Wishlist::firstOrCreate(
-            [
-                'session_id' => session()->getId(),
-                'product_id' => $request->product_id,
-            ],
-            [
-                'expires_at' => Carbon::now()->addDay()
-            ]
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Product added to wishlist'
-        ]);
-    }
-
-    public function wishlist()
-    {
-        Wishlist::where('expires_at', '<', now())->delete();
-
-        $products = Product::with(['images'])
-            ->whereIn(
-                'id',
-                Wishlist::where('session_id', session()->getId())
-                    ->pluck('product_id')
-            )
-            ->paginate(12);
-
-        return view('front-pages.wishlist', compact('products'));
-    }
-
-
-    public function removeWishlist($id)
-    {
-        Wishlist::where('session_id', session()->getId())
-            ->where('product_id', $id)
-            ->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Removed from wishlist'
-        ]);
-    }
 
 }

@@ -294,6 +294,24 @@ class CheckoutController extends Controller
                 'status' => 'pending',
             ]);
 
+            $order->statusHistory()->create([
+                'status' => 'pending',
+                'remarks' => 'Order placed successfully',
+            ]);
+
+            \App\Models\Notification::create([
+                'customer_id' => $customer->id,
+                'title' => 'Order Placed',
+                'message' => 'Your order ' . $order->order_number . ' has been placed successfully.',
+                'icon' => 'fa-cart-shopping',
+                'color' => 'order-icon',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => 'pending',
+                ],
+            ]);
+
             foreach ($cart->items as $item) {
 
                 OrderItem::create([
@@ -533,6 +551,25 @@ class CheckoutController extends Controller
                     $request->razorpay_payment_id,
 
                 'status' => 'processing',
+            ]);
+
+            $order->statusHistory()->create([
+                'status' => 'processing',
+                'remarks' => 'Payment received successfully via Razorpay',
+            ]);
+
+
+            \App\Models\Notification::create([
+                'customer_id' => $order->customer_id,
+                'title' => 'Payment Successful',
+                'message' => 'Payment received for order ' . $order->order_number . '. Your order is now being processed.',
+                'icon' => 'fa-credit-card',
+                'color' => 'success-icon',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => 'processing',
+                ],
             ]);
 
             /*

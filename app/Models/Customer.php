@@ -16,6 +16,8 @@ class Customer extends Authenticatable
         'email',
         'mobile',
         'alternate_mobile',
+        'dob',
+        'gender',
         'google_id',
         'avatar',
         'password',
@@ -50,6 +52,16 @@ class Customer extends Authenticatable
         return $this->hasMany(
             Order::class
         );
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 
 }

@@ -11,6 +11,7 @@ use App\Models\City;
 use App\Models\SmtpSetting;
 use App\Models\PaymentSetting;
 use App\Models\Setting;
+use App\Models\Courier;
 
 class AdminSettingController extends Controller
 {
@@ -24,6 +25,9 @@ class AdminSettingController extends Controller
         $general = Setting::first();
 
         $states = State::all();
+
+        $couriers = Courier::latest()->get();
+
         $activeTab = $request->tab ?? 'general';
 
         return view(
@@ -34,6 +38,7 @@ class AdminSettingController extends Controller
                 'payment',
                 'general',
                 'states',
+                'couriers',
                 'activeTab'
             )
         );
@@ -328,6 +333,47 @@ class AdminSettingController extends Controller
             'success',
             'General settings updated successfully.'
         );
+    }
+
+    public function courierStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'website_url' => 'nullable|url|max:255',
+        ]);
+
+        $validated['is_active'] =
+            $request->has('is_active');
+
+        Courier::updateOrCreate(
+            ['id' => $request->id],
+            $validated
+        );
+
+        return redirect()
+            ->route(
+                'admin.admin-setting.index',
+                ['tab' => 'couriers']
+            )
+            ->with(
+                'success',
+                'Courier saved successfully.'
+            );
+    }
+
+    public function courierDelete(Courier $courier)
+    {
+        $courier->delete();
+
+        return redirect()
+            ->route(
+                'admin.admin-setting.index',
+                ['tab' => 'couriers']
+            )
+            ->with(
+                'success',
+                'Courier deleted successfully.'
+            );
     }
 
 }

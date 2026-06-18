@@ -1,8 +1,18 @@
 @extends('layouts.app')
 @section('content')
 
-    <main>
+    <style>
+        .wishlist-active {
+            background: #ff4d94 !important;
+            color: #fff !important;
+        }
 
+        .wishlist-active svg path {
+            stroke: #fff !important;
+        }
+    </style>
+
+    <main>
 
         <!-- slider area start -->
         <div class="aqf-slider-area">
@@ -146,7 +156,7 @@
                                     <!-- Women Wear -->
                                     <div class="swiper-slide">
                                         <div class="aqf-categories-item text-center">
-                                                                                       <a href="{{ route('products.listing', $category->slug) }}">
+                                            <a href="{{ route('products.listing', $category->slug) }}">
 
                                                 <div class="aqf-categories-img">
                                                     <img src="{{ asset('storage/' . $category->image) }}"
@@ -392,7 +402,8 @@
                                                                     </div>
                                                                 @endif
                                                                 <div class="aq-product-action">
-                                                                    <button type="button" onclick="addToCart({{ $product->id }})"
+                                                                    <button type="button"
+                                                                        onclick="addToCart({{ $product->id }})"
                                                                         class="aq-product-action-btn aq-tooltip">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18"
                                                                             height="18" viewBox="0 0 18 18" fill="none">
@@ -423,7 +434,8 @@
                                                                         <span class="aq-tooltip-item">Quick View</span>
                                                                     </button>
                                                                     <button type="button"
-                                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                                        onclick="addToWishlist({{ $product->id }})"
+                                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18"
                                                                             height="16" viewBox="0 0 18 16" fill="none">
                                                                             <path
@@ -577,8 +589,8 @@
                                                         </svg>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
-                                                    <button type="button"
-                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                    <button type="button" onclick="addToWishlist({{ $product->id }})"
+                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16"
                                                             viewBox="0 0 18 16" fill="none">
                                                             <path
@@ -678,8 +690,8 @@
                                                         </svg>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
-                                                    <button type="button"
-                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                    <button type="button" onclick="addToWishlist({{ $product->id }})"
+                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16"
                                                             viewBox="0 0 18 16" fill="none">
                                                             <path
@@ -785,8 +797,8 @@
                                                         </svg>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
-                                                    <button type="button"
-                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                    <button type="button" onclick="addToWishlist({{ $product->id }})"
+                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16"
                                                             viewBox="0 0 18 16" fill="none">
                                                             <path
@@ -1110,9 +1122,9 @@
 
                                                 </div>
                                                 <div class="mt-40 text-center text-lg-start">
-                                                                                                        <a href="{{ route('products.listing', $category->slug) }}"
+                                                    <a href="{{ route('products.listing', $category->slug) }}"
                                                         class="aq-btn-luxury">
-                                                                                                    
+
 
                                                         Explore {{ $category->name }}
 
@@ -1204,8 +1216,8 @@
                                                         <i class="fa-regular fa-eye"></i>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
-                                                    <button type="button"
-                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                    <button type="button" onclick="addToWishlist({{ $product->id }})"
+                                                        class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
                                                         <i class="fa-regular fa-heart"></i>
                                                         <span class="aq-tooltip-item">Add To Wishlist</span>
                                                     </button>
@@ -1798,57 +1810,103 @@
         </section>
         <!-- footer categories area end -->
 
-<script>
-    
-        function addToCart(productId) {
-       
-            $.ajax({
-                url: "{{ route('cart.add') }}",
-                type: "POST",
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    product_id: productId,
-                    quantity: 1
-                },
-                success: function (response) {
+        <script>
 
-                    if (response.status) {
+            function addToCart(productId) {
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+                $.ajax({
+                    url: "{{ route('cart.add') }}",
+                    type: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        product_id: productId,
+                        quantity: 1
+                    },
+                    success: function (response) {
 
-                        $('.cart-count').text(
-                            response.cart_count
-                        );
+                        if (response.status) {
 
-                    } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('.cart-count').text(
+                                response.cart_count
+                            );
+
+                        } else {
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Unable to add product.'
+                            });
+
+                        }
+                    },
+                    error: function (xhr) {
 
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Unable to add product.'
+                            text: xhr.responseJSON?.message ??
+                                'Something went wrong.'
                         });
 
                     }
-                },
-                error: function (xhr) {
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message ??
-                            'Something went wrong.'
-                    });
-
-                }
-            });
-        }
+                });
+            }
 
 
-</script>
+            function addToWishlist(productId) {
+
+                $.ajax({
+                    url: "{{ route('wishlist.add') }}",
+                    type: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        product_id: productId
+                    },
+                    success: function (response) {
+
+                        if (response.status) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('.wishlist-count').text(response.wishlist_count);
+
+                        } else {
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message ?? 'Unable to add to wishlist.'
+                            });
+
+                        }
+
+                    },
+                    error: function (xhr) {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                        });
+
+                    }
+                });
+            }
+
+        </script>
 @endsection

@@ -97,6 +97,11 @@
     .id-chip { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 11.5px; font-family: 'SF Mono','Fira Mono',monospace; color: var(--text-secondary); }
     .order-id { color: var(--accent); font-weight: 700; font-family: 'SF Mono','Fira Mono',monospace; }
 
+    .cust-cell { display: flex; align-items: center; gap: 9px; }
+    .cust-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+    .cust-name { font-size: 13px; font-weight: 500; }
+    .cust-email { font-size: 11.5px; color: var(--text-hint); }
+
     /* Pills */
     .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
     .pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
@@ -136,13 +141,13 @@
                 <div>
                     <h1>Refunds</h1>
                     <div class="crumb">
-                        <a href="#">Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
                         <span>›</span>
                         Refunds
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
-                    <a href="#" class="btn-secondary-dash">
+                    <a href="{{ route('admin.refunds.export') }}" class="btn-secondary-dash">
                         <i class="fa fa-download"></i> Export CSV
                     </a>
                 </div>
@@ -152,22 +157,22 @@
             <div class="stat-strip">
                 <div class="stat-card">
                     <div class="stat-label">Total Refunds</div>
-                    <div class="stat-value">142</div>
+                    <div class="stat-value">{{ number_format($stats['total']) }}</div>
                     <div class="stat-sub">All processed refunds</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Total Refunded</div>
-                    <div class="stat-value" style="color:var(--green)">₹12,84,750</div>
+                    <div class="stat-value" style="color:var(--green)">₹{{ number_format($stats['total_amount'], 0) }}</div>
                     <div class="stat-sub">Amount returned</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">This Month</div>
-                    <div class="stat-value" style="color:var(--accent)">38</div>
-                    <div class="stat-sub">Refunds in June</div>
+                    <div class="stat-value" style="color:var(--accent)">{{ number_format($stats['this_month']) }}</div>
+                    <div class="stat-sub">Refunds in {{ now()->format('F') }}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Failed</div>
-                    <div class="stat-value" style="color:var(--red)">7</div>
+                    <div class="stat-value" style="color:var(--red)">{{ number_format($stats['failed']) }}</div>
                     <div class="stat-sub">Refund attempts failed</div>
                 </div>
             </div>
@@ -176,34 +181,39 @@
             <div class="list-card">
                 <!-- Filter bar -->
                 <div class="filter-bar">
-                    <form method="GET">
+                    <form method="GET" action="{{ route('admin.refunds.index') }}">
                         <div class="filter-row">
                             <div class="filter-group" style="flex:1;min-width:200px">
                                 <label>Search</label>
                                 <div class="search-wrap">
                                     <i class="fa fa-search search-ico"></i>
-                                    <input type="text" class="filter-control filter-control-wide"
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                           class="filter-control filter-control-wide"
                                            placeholder="Refund ID, Order ID, Customer...">
                                 </div>
                             </div>
                             <div class="filter-group">
                                 <label>Status</label>
-                                <select class="filter-control">
+                                <select name="status" class="filter-control">
                                     <option value="">All Status</option>
-                                    <option value="refunded" selected>Refunded</option>
-                                    <option value="processing">Processing</option>
-                                    <option value="failed">Failed</option>
+                                    <option value="refunded"  {{ request('status')=='refunded'  ? 'selected':'' }}>Refunded</option>
                                 </select>
                             </div>
                             <div class="filter-group">
                                 <label>From Date</label>
-                                <input type="date" class="filter-control" style="min-width:140px">
+                                <input type="date" name="from_date" value="{{ request('from_date') }}"
+                                       class="filter-control" style="min-width:140px">
+                            </div>
+                            <div class="filter-group">
+                                <label>To Date</label>
+                                <input type="date" name="to_date" value="{{ request('to_date') }}"
+                                       class="filter-control" style="min-width:140px">
                             </div>
                             <div class="filter-actions">
-                                <button type="button" class="btn-primary-dash">
+                                <button type="submit" class="btn-primary-dash">
                                     <i class="fa fa-search"></i> Search
                                 </button>
-                                <a href="#" class="btn-secondary-dash">
+                                <a href="{{ route('admin.refunds.index') }}" class="btn-secondary-dash">
                                     <i class="fa fa-refresh"></i> Reset
                                 </a>
                             </div>
@@ -228,48 +238,52 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse($refunds as $refund)
                             <tr>
-                                <td><span class="id-chip">REF-3928</span></td>
-                                <td><span class="order-id">#ORD-78492</span></td>
+                                <td><span class="id-chip">REF-{{ str_pad($refund->id, 4, '0', STR_PAD_LEFT) }}</span></td>
+                                <td><span class="order-id">#ORD-{{ $refund->order_id }}</span></td>
                                 <td>
                                     <div class="cust-cell">
-                                        <div class="cust-avatar">SJ</div>
+                                        <div class="cust-avatar">
+                                            {{ strtoupper(substr($refund->customer->name ?? '?', 0, 1)) }}{{ strtoupper(substr(strstr($refund->customer->name ?? '', ' '), 1, 1)) }}
+                                        </div>
                                         <div>
-                                            <div class="cust-name">Sarah Johnson</div>
-                                            <div class="cust-email">sarah.j@email.com</div>
+                                            <div class="cust-name">{{ $refund->customer->name ?? '—' }}</div>
+                                            <div class="cust-email">{{ $refund->customer->email ?? '' }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td style="font-weight:700;color:var(--green)">₹2,499</td>
-                                <td style="color:var(--text-secondary);font-size:13px">UPI</td>
-                                <td style="color:var(--text-secondary);font-size:12.5px">Defective Product</td>
-                                <td style="color:var(--text-secondary);font-size:12.5px">12 Jun 2026</td>
-                                <td><span class="pill pill-refunded">Refunded</span></td>
+                                <td style="font-weight:700;color:var(--green)">₹{{ number_format($refund->amount, 0) }}</td>
+                                <td style="color:var(--text-secondary);font-size:13px">{{ $methodLabels[$refund->refund_method] ?? strtoupper($refund->refund_method) }}</td>
+                                <td style="color:var(--text-secondary);font-size:12.5px">{{ $refund->orderReturn->returnReason->title ?? $refund->orderReturn->details ?? '—' }}</td>
+                                <td style="color:var(--text-secondary);font-size:12.5px">{{ $refund->created_at->format('d M Y') }}</td>
                                 <td>
-                                    <a href="#" class="action-btn view" title="View Details"><i class="fa fa-eye"></i></a>
+                                    @php
+                                        $pillMap = ['completed'=>'pill-refunded','processing'=>'pill-processing','failed'=>'pill-failed'];
+                                        $labelMap = ['completed'=>'Refunded','processing'=>'Processing','failed'=>'Failed'];
+                                    @endphp
+                                    <span class="pill-refunded">
+                                      refunded
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.order-returns.show', $refund->order_return_id) }}"
+                                       class="action-btn view" title="View Return & Refund Details">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
+                            @empty
                             <tr>
-                                <td><span class="id-chip">REF-3927</span></td>
-                                <td><span class="order-id">#ORD-78215</span></td>
-                                <td>
-                                    <div class="cust-cell">
-                                        <div class="cust-avatar">RK</div>
-                                        <div>
-                                            <div class="cust-name">Rahul Kumar</div>
-                                            <div class="cust-email">rahul.k@email.com</div>
-                                        </div>
+                                <td colspan="9">
+                                    <div class="empty-state">
+                                        <div class="empty-icon-wrap"><i class="fa fa-credit-card"></i></div>
+                                        <p style="font-weight:600;margin-bottom:4px">No refunds found</p>
+                                        <p style="color:var(--text-hint);font-size:13px">Try adjusting your filters</p>
                                     </div>
                                 </td>
-                                <td style="font-weight:700;color:var(--green)">₹1,299</td>
-                                <td style="color:var(--text-secondary);font-size:13px">Credit Card</td>
-                                <td style="color:var(--text-secondary);font-size:12.5px">Wrong Size</td>
-                                <td style="color:var(--text-secondary);font-size:12.5px">11 Jun 2026</td>
-                                <td><span class="pill pill-refunded">Refunded</span></td>
-                                <td>
-                                    <a href="#" class="action-btn view" title="View Details"><i class="fa fa-eye"></i></a>
-                                </td>
                             </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -277,11 +291,25 @@
                 <!-- Pagination -->
                 <div class="pagination-bar">
                     <div class="pagination-info">
-                        Showing 1–25 of 142 refunds
+                        @if($refunds->total() > 0)
+                            Showing {{ $refunds->firstItem() }}–{{ $refunds->lastItem() }}
+                            of {{ number_format($refunds->total()) }} refunds
+                        @else
+                            No refunds found
+                        @endif
                     </div>
-                    <div>
-                        <a href="#" class="btn-secondary-dash">← Previous</a>
-                        <a href="#" class="btn-secondary-dash">Next →</a>
+                    <div style="display:flex;gap:6px">
+                        @if($refunds->onFirstPage())
+                            <span class="btn-secondary-dash" style="opacity:.4;pointer-events:none">← Previous</span>
+                        @else
+                            <a href="{{ $refunds->previousPageUrl() }}" class="btn-secondary-dash">← Previous</a>
+                        @endif
+
+                        @if($refunds->hasMorePages())
+                            <a href="{{ $refunds->nextPageUrl() }}" class="btn-secondary-dash">Next →</a>
+                        @else
+                            <span class="btn-secondary-dash" style="opacity:.4;pointer-events:none">Next →</span>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
+use App\Mail\OrderDeliveredMail;
+use App\Mail\OrderShippedMail;
+use App\Models\Courier;
 use App\Models\InvoiceSetting;
 use App\Models\Order;
+use App\Models\SmtpSetting;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -154,6 +160,8 @@ class OrderController extends Controller
             'state',
             'city',
             'invoice',
+            'statusHistory',
+
         ]);
 
         // Customer's total order count (for sidebar)
@@ -199,6 +207,11 @@ class OrderController extends Controller
             'cancelled' => ['title' => 'Cancelled', 'desc' => 'Order was cancelled.'],
         ];
 
+        $couriers = Courier::where('is_active', 1)
+            ->orderBy('name')
+            ->get();
+
+
         return view('admin.orders.show', compact(
             'order',
             'customerOrderCount',
@@ -207,7 +220,8 @@ class OrderController extends Controller
             'orderClass',
             'statusFlow',
             'currentIdx',
-            'timelineSteps'
+            'timelineSteps',
+            'couriers'
         ));
     }
 
@@ -216,21 +230,136 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:new,processing,shipped,delivered,cancelled',
+            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+            'courier_id' => 'nullable|exists:couriers,id',
             'tracking_number' => 'nullable|string|max:100',
             'note' => 'nullable|string|max:500',
         ]);
 
+        $oldStatus = $order->status;
+
         $order->update([
             'status' => $request->status,
-            // store tracking on the order if you add a tracking_number column,
-            // otherwise handle via OrderStatusLog if you have one
+            'courier_id' => $request->courier_id,
+            'tracking_number' => $request->tracking_number,
         ]);
 
-        return back()->with('success', 'Order status updated successfully.');
+        if ($oldStatus !== $request->status) {
+
+            $remarks = $request->note;
+
+            if (!$remarks) {
+
+                $remarks = 'Order status changed from '
+                    . ucfirst($oldStatus)
+                    . ' to '
+                    . ucfirst($request->status);
+
+                if ($request->tracking_number) {
+                    $remarks .= ' | Tracking Number: '
+                        . $request->tracking_number;
+                }
+            }
+
+            $order->statusHistory()->create([
+                'status' => $request->status,
+                'remarks' => $remarks,
+            ]);
+
+            if ($order->customer_id) {
+
+                $notificationData = match ($request->status) {
+
+                    'processing' => [
+                        'title' => 'Order Processing',
+                        'message' => "Your order {$order->order_number} is now being processed.",
+                        'icon' => 'fa-box-open',
+                        'color' => 'order-icon',
+                    ],
+
+                    'shipped' => [
+                        'title' => 'Order Shipped',
+                        'message' => "Your order {$order->order_number} has been shipped."
+                            . ($order->tracking_number
+                                ? " Tracking Number: {$order->tracking_number}"
+                                : ''),
+                        'icon' => 'fa-truck-fast',
+                        'color' => 'order-icon',
+                    ],
+
+                    'delivered' => [
+                        'title' => 'Order Delivered',
+                        'message' => "Your order {$order->order_number} has been delivered successfully.",
+                        'icon' => 'fa-box-check',
+                        'color' => 'success-icon',
+                    ],
+
+                    'cancelled' => [
+                        'title' => 'Order Cancelled',
+                        'message' => "Your order {$order->order_number} has been cancelled.",
+                        'icon' => 'fa-circle-xmark',
+                        'color' => 'security-icon',
+                    ],
+
+                    default => [
+                        'title' => 'Order Updated',
+                        'message' => "Your order {$order->order_number} status changed to {$request->status}.",
+                        'icon' => 'fa-bell',
+                        'color' => 'system-icon',
+                    ],
+                };
+
+                \App\Models\Notification::create([
+                    'customer_id' => $order->customer_id,
+                    'title' => $notificationData['title'],
+                    'message' => $notificationData['message'],
+                    'icon' => $notificationData['icon'],
+                    'color' => $notificationData['color'],
+                    'data' => [
+                        'order_id' => $order->id,
+                        'order_number' => $order->order_number,
+                        'status' => $request->status,
+                    ],
+                ]);
+            }
+
+
+            // Send status mails
+            $smtpSetting = SmtpSetting::first();
+
+            if ($smtpSetting) {
+
+                MailHelper::configure();
+
+                // Shipped Mail
+                if (
+                    $request->status === 'shipped' &&
+                    $smtpSetting->order_shipped
+                ) {
+                    Mail::to($order->customer_email)
+                        ->send(
+                            new OrderShippedMail($order)
+                        );
+                }
+
+                // Delivered Mail
+                if (
+                    $request->status === 'delivered' &&
+                    $smtpSetting->order_delivered
+                ) {
+                    Mail::to($order->customer_email)
+                        ->send(
+                            new OrderDeliveredMail($order)
+                        );
+                }
+            }
+        }
+
+        return back()->with(
+            'success',
+            'Order status updated successfully.'
+        );
     }
-
-
 
 
     // ── 1. Browser preview ────────────────────────────────────────────────────────
@@ -255,7 +384,7 @@ class OrderController extends Controller
             'city',
         ]);
 
-         $logo_64 = null;
+        $logo_64 = null;
 
         if ($setting?->company_logo) {
             $logoPath = storage_path('app/public/' . $setting->company_logo);

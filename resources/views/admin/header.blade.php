@@ -93,7 +93,12 @@
             <ul>
                 <li><a href="{{ route('admin.orders.index')}}">Manage Orders</a></li>
                 <li><a href="{{ route('admin.payments.index')}}">Payments & Transactions</a></li>
-                <li><a href="{{ route('admin.returns.index')}}">Manage Returns</a></li>
+                <li><a href="{{ route('admin.order-returns.index')}}">Manage Returns</a></li>
+                <li>
+                    <a href="{{ route('admin.return-reasons.index') }}">
+                        Return Reasons
+                    </a>
+                </li>
                 <li><a href="{{route('admin.refunds.index') }}">Manage Refunds</a></li>
                 <li><a href="{{ route('admin.customers.index') }}">Manage Customers</a></li>
                 <li><a href="{{ route('admin.customers.addresses.index') }}">Customer Address Book</a></li>
@@ -181,9 +186,11 @@
                         GST & Invoice
                     </a>
                 </li>
-                <li><a href="{{ route('admin.footer-settings.index') }}">Footer Setting</a></li>
-
-
+                <li>
+                    <a href="{{ route('admin.admin-setting.index', ['tab' => 'couriers']) }}">
+                        Courier Management
+                    </a>
+                </li>
             </ul>
         </li>
 

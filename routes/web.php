@@ -1,60 +1,69 @@
 <?php
 
-use App\Http\Controllers\Admin\AwardController;
-use App\Http\Controllers\Admin\BlogController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\ClientController;
-use App\Http\Controllers\Admin\ContactBranchController;
-use App\Http\Controllers\Admin\ContactEnquiryController;
-use App\Http\Controllers\Admin\CustomizationController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\DynamicPageController;
-use App\Http\Controllers\Admin\EnquiryController;
-use App\Http\Controllers\Admin\FaqController;
-use App\Http\Controllers\Admin\GiftingOccasionController;
-use App\Http\Controllers\Admin\HomeEnquiryController;
-use App\Http\Controllers\Admin\HomePageController;
-use App\Http\Controllers\Admin\HomeSliderController;
-use App\Http\Controllers\Admin\HomeTextSliderController;
-use App\Http\Controllers\Admin\HomeWhyController;
-use App\Http\Controllers\Admin\LogoutController;
-use App\Http\Controllers\Admin\PackageController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\ProfileSettingController;
-use App\Http\Controllers\Admin\SeoController;
-use App\Http\Controllers\Admin\SupplierEnquiryController;
-use App\Http\Controllers\Admin\TeamController;
-use App\Http\Controllers\Admin\TestimonialController;
-use App\Http\Controllers\Admin\PackageEnquiryController;
-use App\Http\Controllers\Admin\OtherEnquiryController;
-use App\Http\Controllers\Admin\VendorEnquiryController;
-use App\Http\Controllers\Admin\VendorTypeController;
+use App\Http\Controllers\Admin\{
+    AdminSettingController,
+    AnnouncementController,
+    AttributeController,
+    AttributeValueController,
+    AwardController,
+    BlogController,
+    CategoryAttributeController,
+    CategoryController,
+    ClientController,
+    CollectionController,
+    ContactBranchController,
+    ContactEnquiryController,
+    CouponController,
+    CustomerAddressController,
+    CustomerController,
+    CustomizationController,
+    DashboardController,
+    DynamicPageController,
+    EnquiryController,
+    FaqController,
+    GalleryImageController,
+    GiftingOccasionController,
+    HomeBrandSectionController,
+    HomeBrandSectionImageController,
+    HomeDealBannerController,
+    HomeEnquiryController,
+    HomeFeatureCardController,
+    HomeHeroBannerController,
+    HomeHeroSlideController,
+    HomePageController,
+    HomeSliderController,
+    HomeTextSliderController,
+    HomeWhyController,
+    LogoutController,
+    OrderController,
+    OtherEnquiryController,
+    PackageController,
+    PackageEnquiryController,
+    PaymentController,
+    ProductController,
+    ProfileSettingController,
+    ReturnReasonController,
+    SeoController,
+    StoredCartController,
+    SupplierEnquiryController,
+    TeamController,
+    TestimonialController,
+    VendorEnquiryController,
+    VendorTypeController,
+    OrderReturnController,
+    RefundController
+};
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\AnnouncementController;
-use App\Http\Controllers\Admin\GalleryImageController;
-use App\Http\Controllers\Admin\HomeBrandSectionController;
-use App\Http\Controllers\Admin\HomeBrandSectionImageController;
-use App\Http\Controllers\Admin\HomeDealBannerController;
-use App\Http\Controllers\Admin\HomeHeroSlideController;
-use App\Http\Controllers\Admin\HomeHeroBannerController;
-use App\Http\Controllers\Admin\FooterSettingController;
 use App\Http\Controllers\FrontController;
-use App\Http\Controllers\Admin\CollectionController;
-use App\Http\Controllers\Admin\HomeFeatureCardController;
-use App\Http\Controllers\Admin\AttributeController;
-use App\Http\Controllers\Admin\AttributeValueController;
-use App\Http\Controllers\Admin\CategoryAttributeController;
 use App\Http\Controllers\Frontend\Auth\CustomerAuthController;
-use App\Http\Controllers\Admin\CouponController;
-use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\PaymentController;
-use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\CustomerAddressController;
-use App\Http\Controllers\Admin\StoredCartController;
+use App\Http\Controllers\User\WishlistController;
+use App\Http\Controllers\User\AccountController;
+use App\Http\Controllers\User\NotificationController;
+
 
 Route::middleware('maintenance.mode')->group(function () {
 
@@ -80,6 +89,16 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
         Route::get('/why-us', 'whyUs')->name('why-us');
 
+
+        Route::prefix('wishlist')->name('wishlist.')->group(function () {
+
+            Route::get('/', [WishlistController::class, 'index'])->name('index');
+            Route::post('/add', [WishlistController::class, 'add'])->name('add');
+            Route::delete('/{product}', [WishlistController::class, 'remove'])->name('remove');
+            Route::post('/{product}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('moveToCart');
+
+        });
+
         // cart routes
         Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
         Route::get('/cart', [CartController::class, 'cart'])->name('cart');
@@ -92,6 +111,8 @@ Route::middleware('maintenance.mode')->group(function () {
 
             Route::get('/checkout', [CheckoutController::class, 'checkout'])
                 ->name('checkout');
+
+            Route::post('/address/store', [CheckoutController::class, 'storeAddress'])->name('address.store');
 
             Route::post('/checkout/change-default-address', [CheckoutController::class, 'changeDefaultAddress'])
                 ->name('checkout.change-default-address');
@@ -107,9 +128,7 @@ Route::middleware('maintenance.mode')->group(function () {
 
         });
 
-        // wishlist routes
-        Route::post('/wishlist/add', 'addToWishlist')->name('wishlist.add');
-        Route::delete('/wishlist/{id}', 'removeWishlist')->name('wishlist.remove');
+
 
 
         Route::get('/vendors', 'vendors')->name('vendors');
@@ -149,14 +168,31 @@ Route::middleware('maintenance.mode')->group(function () {
 
         Route::middleware('customer')->group(function () {
 
-            Route::post('/address/store', [CheckoutController::class, 'storeAddress'])->name('address.store');
+            Route::view('/dashboard', 'user.dashboard')->name('dashboard.index');
+            Route::get('orders', [App\Http\Controllers\User\OrderController::class, 'index'])->name('orders.index');
+            Route::get('orders/{order}', [App\Http\Controllers\User\OrderController::class, 'show'])->name('orders.show');
+            Route::get('orders/{order}/invoice', [App\Http\Controllers\User\OrderController::class, 'invoice'])->name('orders.invoice');
+            Route::post('orders/return', [App\Http\Controllers\User\OrderController::class, 'submitReturn'])->name('orders.return');
+            Route::get('orders/{order}/reorder', [App\Http\Controllers\User\OrderController::class, 'reorder'])->name('orders.reorder');
 
-            Route::view('/dashboard', 'front-pages.dashboard')->name('dashboard');
-            Route::view('/account-details', 'front-pages.account-details')->name('account.details');
-            Route::view('/address', 'front-pages.address')->name('address');
-            Route::view('/orders', 'front-pages.orders')->name('orders');
-            Route::view('/wishlist', 'front-pages.wishlist')->name('wishlist');
-            Route::view('/notifications', 'front-pages.notifications')->name('notifications');
+            // Addresses
+            Route::get('addresses', [App\Http\Controllers\User\AddressController::class, 'index'])->name('address.index');
+            Route::post('addresses', [App\Http\Controllers\User\AddressController::class, 'store'])->name('address.store');
+            Route::get('addresses/{address}/edit', [App\Http\Controllers\User\AddressController::class, 'edit'])->name('address.edit');
+            Route::put('addresses/{address}', [App\Http\Controllers\User\AddressController::class, 'update'])->name('address.update');
+            Route::delete('addresses/{address}', [App\Http\Controllers\User\AddressController::class, 'destroy'])->name('address.destroy');
+            Route::patch('addresses/{address}/default', [App\Http\Controllers\User\AddressController::class, 'setDefault'])->name('address.default');
+            Route::get('addresses/cities', [App\Http\Controllers\User\AddressController::class, 'cities'])->name('address.cities');
+
+            Route::get('/account-details', [AccountController::class, 'index'])->name('account.details');
+            Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('profile.update');
+            Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('password.update');
+            Route::delete('/account', [AccountController::class, 'deleteAccount'])->name('account.delete');
+
+            Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+            Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+            Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
             Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
 
         });
@@ -176,7 +212,7 @@ Route::get('/get-cities', [AdminSettingController::class, 'getCities'])->name('g
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::middleware(['auth','admin.timeout'])->group(function () {
+    Route::middleware(['auth', 'admin.timeout'])->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('/profile-setting', ProfileSettingController::class);
@@ -322,12 +358,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('home-feature-cards', HomeFeatureCardController::class);
 
 
-        Route::get('/footer-settings', [FooterSettingController::class, 'index'])
-            ->name('footer-settings.index');
-
-        Route::post('/footer-settings', [FooterSettingController::class, 'store'])
-            ->name('footer-settings.store');
-
         Route::get('/seo', [SeoController::class, 'index'])->name('seo.index');
         Route::put('/seo/{id}', [SeoController::class, 'update'])->name('seo.update');
 
@@ -348,6 +378,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/smtp-settings/store', [AdminSettingController::class, 'smtpSettingStore'])->name('smtp-settings.store');
         Route::post('/payment-settings/store', [AdminSettingController::class, 'paymentSettingStore'])->name('payment-settings.store');
         Route::post('/settings/general', [AdminSettingController::class, 'generalSettingStore'])->name('settings.general.store');
+        Route::post('/settings/courier/store', [AdminSettingController::class, 'courierStore'])->name('couriers.store');
+        Route::delete('/settings/courier/{courier}', [AdminSettingController::class, 'courierDelete'])->name('couriers.delete');
 
         // Orders routes
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
@@ -376,13 +408,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('stored-carts/{cart}', [StoredCartController::class, 'destroy'])->name('stored-carts.destroy');
         Route::get('stored-carts/export', [StoredCartController::class, 'export'])->name('stored-carts.export');
 
+        Route::resource('return-reasons', ReturnReasonController::class)->names('return-reasons');
 
 
-        Route::view('/returns', 'admin.orders-and-payments.return-order')
-            ->name('returns.index');
+        Route::get('order-returns', [OrderReturnController::class, 'index'])->name('order-returns.index');
+        Route::get('order-returns/export', [OrderReturnController::class, 'export'])->name('order-returns.export');
+        Route::get('order-returns/{orderReturn}', [OrderReturnController::class, 'show'])->name('order-returns.show');
+        Route::patch('order-returns/{orderReturn}/approve', [OrderReturnController::class, 'approve'])->name('order-returns.approve');
+        Route::patch('order-returns/{orderReturn}/reject', [OrderReturnController::class, 'reject'])->name('order-returns.reject');
+        Route::post('order-returns/{orderReturn}/refund', [OrderReturnController::class, 'refund'])->name('order-returns.refund');
 
-        Route::view('/refunds', 'admin.orders-and-payments.payment-refunds')->name('refunds.index');
-
+        Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
+        Route::get('refunds/export', [RefundController::class, 'export'])->name('refunds.export');
 
         Route::view('/product-reviews', 'admin.products.product-reviews')
             ->name('product-reviews.index');

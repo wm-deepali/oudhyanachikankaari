@@ -697,7 +697,7 @@
             $('#saveAddressBtn').on('click', function () {
 
                 $.ajax({
-                    url: "{{ route('user.address.store') }}",
+                    url: "{{ route('address.store') }}",
                     type: "POST",
 
                     data: {

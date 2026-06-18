@@ -15,8 +15,7 @@
         {{ $seo->meta_title ?? $general?->site_name ?? config('app.name') }}
     </title>
 
-    <meta name="description"
-      content="{{ $seo->meta_description ?? $general?->tagline }}">
+    <meta name="description" content="{{ $seo->meta_description ?? $general?->tagline }}">
 
     @if($seo && $seo->scripts)
         {!! $seo->scripts !!}
@@ -24,10 +23,9 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="icon"
-    href="{{ $general?->favicon
-        ? asset('storage/'.$general->favicon)
-        : asset('favicon.ico') }}">
+    <link rel="icon" href="{{ $general?->favicon
+    ? asset('storage/' . $general->favicon)
+    : asset('favicon.ico') }}">
 
     <!-- CSS here -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
@@ -421,9 +419,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     <div class="aq-login-wrapper">
                         <div class="aq-login-top text-center mb-30">
-                           <h3 class="aq-login-title">
-    Sign in to {{ $general?->site_name }}
-</h3>
+                            <h3 class="aq-login-title">
+                                Sign in to {{ $general?->site_name }}
+                            </h3>
                             <p>Please enter your details below to sign in.</p>
                         </div>
                         <div class="aq-login-option">
@@ -1048,7 +1046,7 @@
         <div class="aq-offcanvas-bottom">
             <div class="aq-offcanvas-btn-wrap d-flex justify-content-between align-items-center">
                 <a class="aq-offcanvas-btn" href="{{ route('user.login') }}">Login</a>
-                <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('user.wishlist') }}">Wishlist</a>
+                <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('wishlist.index') }}">Wishlist</a>
             </div>
 
         </div>
@@ -1111,7 +1109,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <a href="{{ route('user.wishlist') }}">
+                    <a href="{{ route('wishlist.index') }}">
                         <div class="aq-bottom-menu-item">
                             <button class="p-relative">
                                 <span class="count-box">3</span>
@@ -1249,7 +1247,10 @@
                                 <li class="aq-header-top-wishlist d-none d-md-inline-block">
                                     <button class="aq-wishlist-btn" aria-label="Wishlist"
                                         style="position: relative; background: transparent; border: none; padding: 0;">
-                                        <span class="count-box" style="background: #c98f9d; color: #fff;">2</span>
+                                        <span class="count-box wishlist-count"
+                                            style="background: #c98f9d; color: #fff;">
+                                            {{ \App\Models\Wishlist::current()->count() }}
+                                        </span>
                                         <i>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20"
                                                 viewBox="0 0 21 20" fill="none">
@@ -1270,7 +1271,7 @@
                                                 : \App\Models\Cart::where('session_id', session()->getId())->first();
                                         @endphp
 
-                                        <span class="count-box" style="background: #c98f9d; color: #fff;">
+                                        <span class="count-box cart-count" style="background: #c98f9d; color: #fff;">
                                             {{ $cart?->items()->sum('quantity') ?? 0 }}
                                         </span>
                                         <i>
@@ -1720,7 +1721,8 @@
                                 <div class="aq-footer-logo-luxury mb-35">
                                     <a href="{{ route('home') }}">
                                         @if(!empty($general?->logo))
-                                            <img src="{{ asset('storage/' . $general->logo) }}" alt="{{ $general?->site_name }}"
+                                            <img src="{{ asset('storage/' . $general->logo) }}"
+                                                alt="{{ $general?->site_name }}"
                                                 style="filter: brightness(0) invert(1); width: 180px;">
                                         @endif
                                     </a>
@@ -1731,25 +1733,25 @@
                                     </p>
                                 @endif
                                 <div class="aq-footer-social-luxury mt-40">
-                                    @if($general->facebook)
+                                    @if($general?->facebook)
                                         <a href="{{ $general->facebook }}" target="_blank" class="social-icon">
                                             <i class="fa-brands fa-facebook-f"></i>
                                         </a>
                                     @endif
 
-                                    @if($general->twitter)
+                                    @if($general?->twitter)
                                         <a href="{{ $general->twitter }}" target="_blank" class="social-icon">
                                             <i class="fa-brands fa-twitter"></i>
                                         </a>
                                     @endif
 
-                                    @if($general->linkedin)
+                                    @if($general?->linkedin)
                                         <a href="{{ $general->linkedin }}" target="_blank" class="social-icon">
                                             <i class="fa-brands fa-linkedin-in"></i>
                                         </a>
                                     @endif
 
-                                    @if($general->instagram)
+                                    @if($general?->instagram)
                                         <a href="{{ $general->instagram }}" target="_blank" class="social-icon">
                                             <i class="fa-brands fa-instagram"></i>
                                         </a>

@@ -51,6 +51,8 @@ class Order extends Model
         'razorpay_signature',
 
         'status',
+        'tracking_number',
+        'courier_id'
     ];
 
     public function customer()
@@ -95,4 +97,23 @@ class Order extends Model
             City::class
         );
     }
+
+    public function statusHistory()
+    {
+        return $this->hasMany(OrderStatusHistory::class)
+            ->latest();
+    }
+
+    public function courier()
+    {
+        return $this->belongsTo(Courier::class);
+    }
+
+    public function returns()
+    {
+      return $this->hasMany(
+            OrderReturn::class
+        );
+    }
+
 }

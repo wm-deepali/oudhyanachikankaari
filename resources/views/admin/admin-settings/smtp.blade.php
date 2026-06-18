@@ -136,16 +136,7 @@
        value="1"
        {{ old('order_delivered', $smtp->order_delivered ?? 1) ? 'checked' : '' }}><span class="toggle-track"></span></label>
             </div>
-            <div class="toggle-row">
-                <div>
-                    <div class="toggle-info-label">Password Reset</div>
-                    <div class="toggle-info-sub">Send password reset link when requested.</div>
-                </div>
-                <label class="toggle-switch"><input type="checkbox"
-       name="password_reset"
-       value="1"
-       {{ old('password_reset', $smtp->password_reset ?? 1) ? 'checked' : '' }}><span class="toggle-track"></span></label>
-            </div>
+           
             <div class="toggle-row">
                 <div>
                     <div class="toggle-info-label">New Order Alert (Admin)</div>
@@ -172,9 +163,6 @@
 </div>
 
 <div class="action-bar">
-    <button class="btn-test" onclick="testSmtp(this)">
-        <i class="fa fa-paper-plane"></i> Send Test Email
-    </button>
     <button class="btn-secondary-dash">Discard Changes</button>
     <button class="btn-primary-dash" type="submit">
         <i class="fa fa-save"></i> Save SMTP Settings

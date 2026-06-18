@@ -816,14 +816,20 @@
                         onclick="switchTab('general', this)">
                         <i class="fa-solid fa-sliders"></i> General Settings
                     </button>
-                    <button class="tab-btn {{ $activeTab == 'smtp' ? 'active' : '' }}" onclick="switchTab('smtp', this)">
+                    <button class="tab-btn {{ $activeTab == 'smtp' ? 'active' : '' }}"
+                        onclick="switchTab('smtp', this)">
                         <i class="fa-solid fa-envelope"></i> SMTP / Email
                     </button>
-                    <button class="tab-btn {{ $activeTab == 'payment' ? 'active' : '' }}" onclick="switchTab('payment', this)">
+                    <button class="tab-btn {{ $activeTab == 'payment' ? 'active' : '' }}"
+                        onclick="switchTab('payment', this)">
                         <i class="fa-solid fa-credit-card"></i> Payment Gateway
                     </button>
                     <button class="tab-btn {{ $activeTab == 'gst' ? 'active' : '' }}" onclick="switchTab('gst', this)">
                         <i class="fa-solid fa-file-invoice"></i> GST &amp; Invoice
+                    </button>
+                    <button class="tab-btn {{ $activeTab == 'couriers' ? 'active' : '' }}"
+                        onclick="switchTab('couriers', this)">
+                        <i class="fa-solid fa-truck"></i> Courier Management
                     </button>
                 </div>
 
@@ -858,6 +864,13 @@
                     @include('admin.admin-settings.invoice-gst')
                 </div><!-- /tab-gst -->
 
+                <div class="tab-panel {{ $activeTab == 'couriers' ? 'active' : '' }}"
+     id="tab-couriers">
+
+    @include('admin.admin-settings.couriers')
+
+</div>
+
             </div><!-- /tab-shell -->
 
         </div>
@@ -891,25 +904,7 @@
         }, 800);
     }
 
-    // ── SMTP test email ──
-    function testSmtp(btn) {
-        const orig = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending…';
-        setTimeout(() => {
-            btn.innerHTML = '<i class="fa fa-check"></i> Test sent!';
-            btn.style.background = '#007a5e';
-            btn.style.color = '#fff';
-            btn.style.borderColor = '#007a5e';
-            setTimeout(() => {
-                btn.innerHTML = orig;
-                btn.style.background = '';
-                btn.style.color = '';
-                btn.style.borderColor = '';
-                btn.disabled = false;
-            }, 2500);
-        }, 1000);
-    }
+   
 
     // ── Toggle password visibility ──
     function togglePass(id, btn) {
@@ -1023,7 +1018,7 @@
     }
 
 
-      // logo preview
+    // logo preview
     document.getElementById('logo').addEventListener('change', function () {
         const file = this.files[0];
         if (!file) return;
@@ -1040,8 +1035,8 @@
         document.getElementById('logoPreview').style.display = 'none';
     }
 
- // favicon preview
-      document.getElementById('favicon').addEventListener('change', function () {
+    // favicon preview
+    document.getElementById('favicon').addEventListener('change', function () {
         const file = this.files[0];
         if (!file) return;
         const reader = new FileReader();
