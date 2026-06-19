@@ -19,9 +19,16 @@ use App\Models\Invoice;
 use App\Models\PaymentSetting;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Helpers\MailHelper;
+use App\Services\StockAlertService;
 
 class CheckoutController extends Controller
 {
+
+    // Inject in constructor
+    public function __construct(protected StockAlertService $alertService)
+    {
+    }
+
     public function checkout()
     {
         $customer = auth('customer')->user();
@@ -381,6 +388,11 @@ class CheckoutController extends Controller
                 $cart->items()->delete();
                 $cart->delete();
 
+                // COD — deduct stock before committing
+                $this->deductOrderStock($order);
+                $this->alertService->sendAlertEmailIfNeeded(); // ← add this
+
+
                 DB::commit();
 
                 $this->sendOrderEmails($order);
@@ -666,6 +678,11 @@ class CheckoutController extends Controller
                 $cart->delete();
             }
 
+            // Razorpay — deduct stock after payment verified, before committing
+            $this->deductOrderStock($order);
+            $this->alertService->sendAlertEmailIfNeeded(); // ← add this
+
+
             DB::commit();
 
             $this->sendOrderEmails($order);
@@ -729,6 +746,35 @@ class CheckoutController extends Controller
             Mail::to($setting->admin_email)->send(
                 new NewOrderAdminMail($order)
             );
+        }
+    }
+
+
+    protected function deductOrderStock(Order $order): void
+    {
+        /** @var \App\Services\StockService $stockService */
+        $stockService = app(\App\Services\StockService::class);
+
+        foreach ($order->items as $item) {
+            $product = $item->product;
+
+            if (!$product)
+                continue;
+
+            try {
+                $stockService->debit(
+                    $product,
+                    $item->quantity,
+                    'order',
+                    $order,           // reference — links history entry to this order
+                    null,             // no admin user, this is a customer action
+                    null,             // no note
+                    true              // allowNegative: true so an order never fails due to stock race
+                );
+            } catch (\Exception $e) {
+                // Log but don't block the order — stock can be corrected manually
+                \Log::warning("Stock debit failed for product {$product->id} on order {$order->id}: " . $e->getMessage());
+            }
         }
     }
 

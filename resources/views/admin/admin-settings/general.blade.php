@@ -42,23 +42,22 @@
                     <div class="field-group">
                         <label class="field-label">Site Logo</label>
                         <div class="upload-area">
-                            <input type="file"  id="logo" name="logo" accept="image/*">
+                            <input type="file" id="logo" name="logo" accept="image/*">
                             <div class="upload-icon"><i class="fa fa-cloud-upload"></i></div>
                             <div class="upload-label">Upload Logo</div>
                             <div class="upload-sub">PNG, SVG · recommended 200×60px</div>
                         </div>
-                              @if(!empty($general->logo))
+                        @if(!empty($general->logo))
 
                             <div style="margin-top:15px;text-align:center">
 
-                                <img src="{{ asset('storage/' . $general->logo) }}" alt="Logo"
-                                    style="
-                                                                        max-width:100%;
-                                                                        max-height:120px;
-                                                                        border-radius:8px;
-                                                                        border:1px solid #ddd;
-                                                                        padding:5px;
-                                                                    ">
+                                <img src="{{ asset('storage/' . $general->logo) }}" alt="Logo" style="
+                                                                            max-width:100%;
+                                                                            max-height:120px;
+                                                                            border-radius:8px;
+                                                                            border:1px solid #ddd;
+                                                                            padding:5px;
+                                                                        ">
 
                             </div>
 
@@ -102,18 +101,17 @@
                             <div class="upload-label">Upload Favicon</div>
                             <div class="upload-sub">ICO, PNG · 32×32px</div>
                         </div>
-                             @if(!empty($general->favicon))
+                        @if(!empty($general->favicon))
 
                             <div style="margin-top:15px;text-align:center">
 
-                                <img src="{{ asset('storage/' . $general->favicon) }}" alt="Favicon"
-                                    style="
-                                                                        max-width:100%;
-                                                                        max-height:120px;
-                                                                        border-radius:8px;
-                                                                        border:1px solid #ddd;
-                                                                        padding:5px;
-                                                                    ">
+                                <img src="{{ asset('storage/' . $general->favicon) }}" alt="Favicon" style="
+                                                                            max-width:100%;
+                                                                            max-height:120px;
+                                                                            border-radius:8px;
+                                                                            border:1px solid #ddd;
+                                                                            padding:5px;
+                                                                        ">
 
                             </div>
 
@@ -289,10 +287,8 @@
                     </div>
                     <div class="field-group">
                         <label class="field-label">Timezone</label>
-                      <input type="text"
-       name="timezone"
-       class="field-input"
-       value="{{ old('timezone', $general?->timezone ?? 'Asia/Kolkata') }}" readonly>
+                        <input type="text" name="timezone" class="field-input"
+                            value="{{ old('timezone', $general?->timezone ?? 'Asia/Kolkata') }}" readonly>
                     </div>
                 </div>
             </div>
@@ -309,9 +305,8 @@
                         <div class="toggle-info-label">Maintenance Mode</div>
                         <div class="toggle-info-sub">Take the storefront offline for visitors while you work.</div>
                     </div>
-                    <label class="toggle-switch"><input type="checkbox"
-       name="maintenance_mode"
-       {{ old('maintenance_mode', $general?->maintenance_mode) ? 'checked' : '' }}><span class="toggle-track"></span></label>
+                    <label class="toggle-switch"><input type="checkbox" name="maintenance_mode" {{ old('maintenance_mode', $general?->maintenance_mode) ? 'checked' : '' }}><span
+                            class="toggle-track"></span></label>
                 </div>
                 <div class="toggle-row">
                     <div>
@@ -319,9 +314,9 @@
                         <div class="toggle-info-sub">Auto-logout after inactivity (minutes).</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px">
-                       <input type="number" class="field-input" 
-       name="admin_session_timeout"
-       value="{{ old('admin_session_timeout', $general?->admin_session_timeout ?? 60) }}"  style="width:80px;height:32px;font-size:13px">
+                        <input type="number" class="field-input" name="admin_session_timeout"
+                            value="{{ old('admin_session_timeout', $general?->admin_session_timeout ?? 60) }}"
+                            style="width:80px;height:32px;font-size:13px">
                         <span style="font-size:12.5px;color:var(--text-hint)">min</span>
                     </div>
                 </div>
@@ -340,29 +335,21 @@
                         <div class="toggle-info-label">Product Reviews</div>
                         <div class="toggle-info-sub">Show customer reviews on product pages.</div>
                     </div>
-                    <label class="toggle-switch"><input type="checkbox"
-       name="product_reviews"
-       {{ old('product_reviews', $general?->product_reviews) ? 'checked' : '' }}><span
-                            class="toggle-track"></span></label>
+                    <label class="toggle-switch"><input type="checkbox" name="product_reviews" {{ old('product_reviews', $general?->product_reviews) ? 'checked' : '' }}><span class="toggle-track"></span></label>
                 </div>
                 <div class="toggle-row">
                     <div>
                         <div class="toggle-info-label">Wishlist</div>
                         <div class="toggle-info-sub">Allow customers to save products to a wishlist.</div>
                     </div>
-                    <label class="toggle-switch"><input type="checkbox"
-       name="wishlist"
-       {{ old('wishlist', $general?->wishlist) ? 'checked' : '' }}><span
-                            class="toggle-track"></span></label>
+                    <label class="toggle-switch"><input type="checkbox" name="wishlist" {{ old('wishlist', $general?->wishlist) ? 'checked' : '' }}><span class="toggle-track"></span></label>
                 </div>
                 <div class="toggle-row">
                     <div>
                         <div class="toggle-info-label">Stock Alerts to Customers</div>
                         <div class="toggle-info-sub">Email customers when out-of-stock items are restocked.</div>
                     </div>
-                    <label class="toggle-switch"><input type="checkbox"
-       name="stock_alerts"
-       {{ old('stock_alerts', $general?->stock_alerts) ? 'checked' : '' }}><span class="toggle-track"></span></label>
+                    <label class="toggle-switch"><input type="checkbox" name="stock_alerts" {{ old('stock_alerts', $general?->stock_alerts) ? 'checked' : '' }}><span class="toggle-track"></span></label>
                 </div>
             </div>
 
@@ -371,10 +358,10 @@
 
     <div class="action-bar">
         <button class="btn-secondary-dash">Discard Changes</button>
-      <button type="submit" class="btn-primary-dash">
-    <i class="fa fa-save"></i>
-    Save General Settings
-</button>
+        <button type="submit" class="btn-primary-dash">
+            <i class="fa fa-save"></i>
+            Save General Settings
+        </button>
     </div>
 
 </form>

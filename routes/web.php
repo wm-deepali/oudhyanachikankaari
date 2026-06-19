@@ -51,7 +51,11 @@ use App\Http\Controllers\Admin\{
     VendorEnquiryController,
     VendorTypeController,
     OrderReturnController,
-    RefundController
+    RefundController,
+    StockManagementController,
+    StockAlertsController,
+    SalesReportController,
+    ProductReportController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -63,6 +67,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\User\WishlistController;
 use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\User\NotificationController;
+use App\Http\Controllers\User\ProductReviewController;
 
 
 Route::middleware('maintenance.mode')->group(function () {
@@ -192,6 +197,9 @@ Route::middleware('maintenance.mode')->group(function () {
             Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
             Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
             Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+
+            Route::post('/reviews/store', [ProductReviewController::class, 'store'])->name('reviews.store');
+            Route::delete('/reviews/{review}', [ProductReviewController::class, 'destroy'])->name('reviews.destroy');
 
             Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
 
@@ -421,15 +429,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('refunds', [RefundController::class, 'index'])->name('refunds.index');
         Route::get('refunds/export', [RefundController::class, 'export'])->name('refunds.export');
 
-        Route::view('/product-reviews', 'admin.products.product-reviews')
-            ->name('product-reviews.index');
-        Route::view('/stock-management', 'admin.products.stock-management')
-            ->name('stock-management.index');
 
-        Route::view('/stock-alerts', 'admin.products.stock-alerts')
-            ->name('stock-alerts.index');
+        Route::get('stock', [StockManagementController::class, 'index'])->name('stock.index');
+        Route::get('stock/export', [StockManagementController::class, 'export'])->name('stock.export');
+        Route::post('stock/bulk-update', [StockManagementController::class, 'bulkUpdate'])->name('stock.bulk-update');
+        Route::post('stock/add-entry', [StockManagementController::class, 'addStockEntry'])->name('stock.add-entry');
+        Route::post('stock/{product}/update', [StockManagementController::class, 'updateStock'])->name('stock.update');
+        Route::post('stock/{product}/restock', [StockManagementController::class, 'restock'])->name('stock.restock');
+        Route::get('stock/{product}/history', [StockManagementController::class, 'history'])->name('stock.history');
+        Route::get('stock/bulk-update/template', [StockManagementController::class, 'downloadTemplate'])->name('stock.bulk-update.template');
 
 
+        Route::get('stock/alerts', [StockAlertsController::class, 'index'])->name('stock.alerts');
+        Route::post('stock/alerts/{product}/restock', [StockAlertsController::class, 'restock'])->name('stock.alerts.restock');
+        Route::post('stock/alerts/settings/thresholds', [StockAlertsController::class, 'updateThresholds'])->name('stock.alerts.thresholds');
+        Route::post('stock/alerts/settings/notifications', [StockAlertsController::class, 'updateNotifications'])->name('stock.alerts.notifications');
+        Route::get('stock/alerts/export', [StockAlertsController::class, 'export'])->name('stock.alerts.export');
+        Route::post('stock/alerts/restock-all-critical', [StockAlertsController::class, 'restockAllCritical'])->name('stock.alerts.restock.all');
+
+
+        // Listing page
+        Route::get('/reviews', [App\Http\Controllers\Admin\ProductReviewController::class, 'index'])->name('reviews.index');
+        Route::get('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'show'])->name('reviews.show');
+        Route::patch('/reviews/{review}/approve', [App\Http\Controllers\Admin\ProductReviewController::class, 'approve'])->name('reviews.approve');
+        Route::patch('/reviews/{review}/reject', [App\Http\Controllers\Admin\ProductReviewController::class, 'reject'])->name('reviews.reject');
+        Route::delete('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'destroy'])->name('reviews.destroy');
+        Route::get('/reviews/export/csv', [App\Http\Controllers\Admin\ProductReviewController::class, 'export'])->name('reviews.export');
 
         Route::view('/sales-report', 'admin.reports.sales-report')
             ->name('sales-report.index');
@@ -437,6 +462,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('customer-report.index');
         Route::view('/product-report', 'admin.reports.product-report')
             ->name('product-report.index');
+
+        Route::view('/customer-report', 'admin.reports.customer-report')
+            ->name('customer-report.index');
+       
+            
 
     });
 });

@@ -82,10 +82,21 @@
                                             <span class="aq-size-badge">XXL</span>
                                         </div>
                                         <div class="aq-product-card-bottom">
-                                            <button class="aq-product-card-cta"  onclick="addToCart({{ $product->id }})">
-                                                <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-                                            </button>
-                                        </div>
+    @if($product->stock >= $product->min_qty)
+        <button class="aq-product-card-cta"
+                onclick="addToCart({{ $product->id }}, {{ $product->min_qty }})">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Add to Cart
+        </button>
+    @else
+        <button class="aq-product-card-cta"
+                disabled
+                style="background:#999;cursor:not-allowed;">
+            <i class="fa-solid fa-ban"></i>
+            Out of Stock
+        </button>
+    @endif
+</div>
                                     </div>
                                 </div>
 

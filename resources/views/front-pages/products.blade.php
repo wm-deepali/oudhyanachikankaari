@@ -551,55 +551,51 @@ document.querySelectorAll(
             }
         });
 
-             function addToCart(productId) {
-       
-            $.ajax({
-                url: "{{ route('cart.add') }}",
-                type: "POST",
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    product_id: productId,
-                    quantity: 1
-                },
-                success: function (response) {
+         function addToCart(productId, minQty) {
 
-                    if (response.status) {
+    $.ajax({
+        url: "{{ route('cart.add') }}",
+        type: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            product_id: productId,
+            quantity: minQty
+        },
+        success: function (response) {
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
+            if (response.status) {
 
-                        $('.cart-count').text(
-                            response.cart_count
-                        );
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
 
-                    } else {
+                $('.cart-count').text(response.cart_count);
 
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Unable to add product.'
-                        });
+            } else {
 
-                    }
-                },
-                error: function (xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to add product.'
+                });
 
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message ??
-                            'Something went wrong.'
-                    });
+            }
+        },
+        error: function (xhr) {
 
-                }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message ?? 'Something went wrong.'
             });
-        }
 
+        }
+    });
+}
 
     </script>
 

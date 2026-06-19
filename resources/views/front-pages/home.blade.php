@@ -402,18 +402,39 @@
                                                                     </div>
                                                                 @endif
                                                                 <div class="aq-product-action">
-                                                                    <button type="button"
-                                                                        onclick="addToCart({{ $product->id }})"
-                                                                        class="aq-product-action-btn aq-tooltip">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18"
-                                                                            height="18" viewBox="0 0 18 18" fill="none">
-                                                                            <path
-                                                                                d="M6.19751 0.75L3.30151 3.654M11.3015 0.75L14.1975 3.654M6.95776 10.3501V13.1901M10.6375 10.3501V13.1901M1.94997 7.14993L3.07797 14.0619C3.33397 15.6139 3.94997 16.7499 6.23796 16.7499H11.062C13.55 16.7499 13.918 15.6619 14.206 14.1579L15.55 7.14993M0.75 5.42996C0.75 3.94996 1.542 3.82996 2.526 3.82996H14.974C15.958 3.82996 16.75 3.94996 16.75 5.42996C16.75 7.14996 15.958 7.02996 14.974 7.02996H2.526C1.542 7.02996 0.75 7.14996 0.75 5.42996Z"
-                                                                                stroke="currentcolor" stroke-width="1.5"
-                                                                                stroke-linecap="round"></path>
-                                                                        </svg>
-                                                                        <span class="aq-tooltip-item">Add to Cart</span>
-                                                                    </button>
+                                                                    @if($product->stock >= $product->min_qty)
+                                                                        <button type="button"
+                                                                            onclick="addToCart({{ $product->id }}, {{ $product->min_qty }})"
+                                                                            class="aq-product-action-btn aq-tooltip">
+
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                                height="18" viewBox="0 0 18 18" fill="none">
+                                                                                <path
+                                                                                    d="M6.19751 0.75L3.30151 3.654M11.3015 0.75L14.1975 3.654M6.95776 10.3501V13.1901M10.6375 10.3501V13.1901M1.94997 7.14993L3.07797 14.0619C3.33397 15.6139 3.94997 16.7499 6.23796 16.7499H11.062C13.55 16.7499 13.918 15.6619 14.206 14.1579L15.55 7.14993M0.75 5.42996C0.75 3.94996 1.542 3.82996 2.526 3.82996H14.974C15.958 3.82996 16.75 3.94996 16.75 5.42996C16.75 7.14996 15.958 7.02996 14.974 7.02996H2.526C1.542 7.02996 0.75 7.14996 0.75 5.42996Z"
+                                                                                    stroke="currentcolor" stroke-width="1.5"
+                                                                                    stroke-linecap="round">
+                                                                                </path>
+                                                                            </svg>
+
+                                                                            <span class="aq-tooltip-item">Add to Cart</span>
+                                                                        </button>
+                                                                    @else
+                                                                        <button type="button" disabled
+                                                                            class="aq-product-action-btn aq-tooltip"
+                                                                            style="opacity:.6;cursor:not-allowed">
+
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18"
+                                                                                height="18" viewBox="0 0 18 18" fill="none">
+                                                                                <path
+                                                                                    d="M6.19751 0.75L3.30151 3.654M11.3015 0.75L14.1975 3.654M6.95776 10.3501V13.1901M10.6375 10.3501V13.1901M1.94997 7.14993L3.07797 14.0619C3.33397 15.6139 3.94997 16.7499 6.23796 16.7499H11.062C13.55 16.7499 13.918 15.6619 14.206 14.1579L15.55 7.14993M0.75 5.42996C0.75 3.94996 1.542 3.82996 2.526 3.82996H14.974C15.958 3.82996 16.75 3.94996 16.75 5.42996C16.75 7.14996 15.958 7.02996 14.974 7.02996H2.526C1.542 7.02996 0.75 7.14996 0.75 5.42996Z"
+                                                                                    stroke="currentcolor" stroke-width="1.5"
+                                                                                    stroke-linecap="round">
+                                                                                </path>
+                                                                            </svg>
+
+                                                                            <span class="aq-tooltip-item">Out of Stock</span>
+                                                                        </button>
+                                                                    @endif
                                                                     <button type="button"
                                                                         class="aq-product-action-btn aq-tooltip"
                                                                         data-bs-toggle="modal"
@@ -1812,7 +1833,7 @@
 
         <script>
 
-            function addToCart(productId) {
+            function addToCart(productId, quantity) {
 
                 $.ajax({
                     url: "{{ route('cart.add') }}",
@@ -1820,7 +1841,7 @@
                     data: {
                         _token: $('meta[name="csrf-token"]').attr('content'),
                         product_id: productId,
-                        quantity: 1
+                        quantity: quantity
                     },
                     success: function (response) {
 
@@ -1834,9 +1855,7 @@
                                 showConfirmButton: false
                             });
 
-                            $('.cart-count').text(
-                                response.cart_count
-                            );
+                            $('.cart-count').text(response.cart_count);
 
                         } else {
 
@@ -1860,8 +1879,6 @@
                     }
                 });
             }
-
-
             function addToWishlist(productId) {
 
                 $.ajax({

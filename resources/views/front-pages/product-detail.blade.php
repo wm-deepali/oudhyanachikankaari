@@ -155,13 +155,14 @@
                             <!-- Star reviews rating -->
                             <div class="aq-details-rating-wrap d-flex align-items-center gap-2 mt-10 mb-15">
                                 <div class="aq-details-stars">
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="fa-{{ $i <= round($avgRating) ? 'solid' : 'regular' }} fa-star"></i>
+                                    @endfor
                                 </div>
-                                <span class="aq-details-rating-text">(4.9 / 5 from 34 verified customer reviews)</span>
+                                <span class="aq-details-rating-text">
+                                    ({{ $avgRating }} / 5 from {{ $reviewsCount }} verified customer
+                                    {{ Str::plural('review', $reviewsCount) }})
+                                </span>
                             </div>
 
                             <!-- Pricing box -->
@@ -280,15 +281,33 @@
                                         <button type="button" class="qty-btn" onclick="adjustQty(1)"><i
                                                 class="fa-solid fa-plus"></i></button>
                                     </div>
-                                    <button type="button"
-                                        class="aq-btn-black flex-grow-1 aq-add-to-cart-btn luxury-btn-outline"
-                                        onclick="addToCart({{ $product->id }})">
-                                        <i class="fa-solid fa-bag-shopping"></i> Add to Cart
-                                    </button>
+                                    @if($product->stock >= $product->min_qty)
+
+                                        <button type="button"
+                                            class="aq-btn-black flex-grow-1 aq-add-to-cart-btn luxury-btn-outline"
+                                            onclick="addToCart({{ $product->id }})">
+                                            <i class="fa-solid fa-bag-shopping"></i>
+                                            Add to Cart
+                                        </button>
+                                    @else
+                                        <button type="button" class="aq-btn-black flex-grow-1 luxury-btn-outline" disabled
+                                            style="background:#999;cursor:not-allowed;">
+                                            <i class="fa-solid fa-ban"></i>
+                                            Out of Stock
+                                        </button>
+                                    @endif
                                 </div>
-                                <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid">
+                                @if($product->stock >= $product->min_qty)
+                                    <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid"
+                                        onclick="addToCart({{ $product->id }})"></button>
                                     Buy it Now
-                                </button>
+                                    </button>
+                                @else
+                                    <button class="aq-btn-black btn-red-bg w-100 mt-3 luxury-btn-solid" disabled
+                                        style="background:#999;cursor:not-allowed;">
+                                        Out of Stock
+                                    </button>
+                                @endif
                             </div>
                         </div>
 
@@ -314,6 +333,13 @@
                                 <button class="nav-link" id="faqs-tab" data-bs-toggle="tab" data-bs-target="#tab-faqs"
                                     type="button" role="tab">Stitching Services</button>
                             </li>
+                            @if($setting && $setting->product_reviews)
+
+                            <li class="nav-item">
+                                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"
+                                    type="button" role="tab">Reviews ({{ $reviewsCount }})</button>
+                            </li>
+                            @endif
                         </ul>
                         <div class="tab-content aq-details-tab-content p-4 mt-3">
 
@@ -419,6 +445,54 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tab-reviews" role="tabpanel">
+                                <h4 class="aq-tab-heading">Customer Reviews</h4>
+
+                                @if($reviews->isEmpty())
+                                    <p class="aq-tab-text">No reviews yet for this product.</p>
+                                @else
+                                    @foreach($reviews as $review)
+                                        <div class="aq-review-item mb-30 pb-3 border-bottom">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="aq-review-stars mb-1">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                                        @endfor
+                                                    </div>
+                                                    <strong class="aq-review-title">{{ $review->title }}</strong>
+                                                </div>
+                                                @if($review->verified_purchase)
+                                                    <span class="badge bg-success">Verified Purchase</span>
+                                                @endif
+                                            </div>
+
+                                            <p class="aq-review-body mt-2 mb-2">
+                                                {{ $review->review }}
+                                            </p>
+
+                                            @if($review->images->isNotEmpty())
+                                                <div class="aq-review-images d-flex gap-2 mb-2">
+                                                    @foreach($review->images as $image)
+                                                        <img src="{{ asset('storage/' . $image->image) }}" alt="Review image"
+                                                            style="width:70px;height:70px;object-fit:cover;border-radius:6px;" />
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            <span class="text-muted small">
+                                                {{ $review->customer->name ?? 'Anonymous' }} ·
+                                                {{ $review->created_at->format('d M Y') }}
+                                            </span>
+                                        </div>
+                                    @endforeach
+
+                                    <div class="mt-30">
+                                        {{ $reviews->links() }}
+                                    </div>
+                                @endif
                             </div>
 
                         </div>

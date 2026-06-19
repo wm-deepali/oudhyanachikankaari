@@ -22,7 +22,7 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        $quantity = $request->quantity ?? 1;
+        $quantity = $request->quantity ?? $product->min_qty;
         $variantId = $request->variant_id;
 
         /*
@@ -36,9 +36,7 @@ class CartController extends Controller
             $customer = auth('customer')->user();
 
             $cart = Cart::firstOrCreate(
-                [
-                    'user_id' => $customer->id
-                ],
+                ['user_id' => $customer->id],
                 [
                     'session_id' => session()->getId(),
                     'total_amount' => 0,
@@ -52,9 +50,7 @@ class CartController extends Controller
         } else {
 
             $cart = Cart::firstOrCreate(
-                [
-                    'session_id' => session()->getId()
-                ],
+                ['session_id' => session()->getId()],
                 [
                     'total_amount' => 0,
                     'subtotal' => 0,
@@ -67,24 +63,40 @@ class CartController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Product Price
+        | Price & Stock
         |--------------------------------------------------------------------------
         */
 
         $price = $product->price;
+        $stock = $product->stock;
 
         if ($variantId) {
 
-            $variant = ProductVariant::find($variantId);
+            $variant = ProductVariant::findOrFail($variantId);
 
-            if ($variant) {
-                $price = $variant->price;
-            }
+            $price = $variant->price;
+            $stock = $variant->stock;
+        }
+
+        if ($stock < $product->min_qty) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Product is out of stock.'
+            ], 422);
+        }
+
+        if ($quantity > $stock) {
+
+            return response()->json([
+                'status' => false,
+                'message' => "Only {$stock} units available."
+            ], 422);
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Check Existing Item
+        | Existing Item
         |--------------------------------------------------------------------------
         */
 
@@ -95,7 +107,17 @@ class CartController extends Controller
 
         if ($item) {
 
-            $item->quantity += $quantity;
+            $newQty = $item->quantity + $quantity;
+
+            if ($newQty > $stock) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => "Only {$stock} units available."
+                ], 422);
+            }
+
+            $item->quantity = $newQty;
             $item->total = $item->quantity * $item->price;
             $item->save();
 
@@ -113,7 +135,7 @@ class CartController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Update Cart Total
+        | Recalculate Cart
         |--------------------------------------------------------------------------
         */
 
@@ -220,13 +242,29 @@ class CartController extends Controller
             }
         }
 
+        $stock = $item->variant
+            ? $item->variant->stock
+            : $item->product->stock;
+
+        $minQty = $item->product->min_qty;
+
         if ($request->action == 'plus') {
+
+            if ($item->quantity + 1 > $stock) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Only ' . $stock . ' units available in stock.'
+                ], 422);
+            }
 
             $item->quantity++;
 
-        } elseif ($item->quantity > 1) {
+        } elseif ($request->action == 'minus') {
 
-            $item->quantity--;
+            if ($item->quantity - 1 >= $minQty) {
+                $item->quantity--;
+            }
         }
 
         $item->total = $item->quantity * $item->price;

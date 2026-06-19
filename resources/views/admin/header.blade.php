@@ -75,9 +75,9 @@
             <a href="#"><i class="fa-solid fa-box"></i> Product & Inventories</a>
             <ul>
                 <li><a href="{{ route('admin.products.index') }}">Manage Products</a></li>
-                <li><a href="{{ route('admin.product-reviews.index') }}">Product Reviews</a></li>
-                <li><a href="{{ route('admin.stock-management.index') }}">Stock Management</a></li>
-                <li><a href="{{ route('admin.stock-alerts.index') }}">Stock Alerts</a></li>
+                <li><a href="{{ route('admin.reviews.index') }}">Product Reviews</a></li>
+                <li><a href="{{ route('admin.stock.index') }}">Stock Management</a></li>
+                <li><a href="{{ route('admin.stock.alerts') }}">Stock Alerts</a></li>
             </ul>
         </li>
 
@@ -206,7 +206,7 @@
 ) ? 'active' : '' }}">
             <a href="#"><i class="fa-solid fa-chart-column"></i> Reports</a>
             <ul>
-                <li><a href="{{ route('admin.sales-report.index') }}">Sales Report</a></li>
+                <li><a href="{{ route('admin.reports.sales') }}">Sales Report</a></li>
                 <li><a href="{{ route('admin.product-report.index') }}">Product Report</a></li>
                 <li><a href="{{ route('admin.customer-report.index') }}">Customer Report</a></li>
             </ul>

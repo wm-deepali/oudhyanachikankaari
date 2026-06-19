@@ -41,4 +41,10 @@ class OrderItem extends Model
             ProductVariant::class
         );
     }
+
+    public function review()
+    {
+        return $this->hasOne(ProductReview::class);
+    }
+
 }

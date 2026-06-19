@@ -6,7 +6,6 @@ use App\Models\Award;
 use App\Models\Blog;
 use App\Models\Brand;
 use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\ContactBranch;
 use App\Models\ContactEnquiry;
@@ -21,7 +20,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Enquiry;
 use App\Models\EnquiryItem;
-use App\Models\State;
 use App\Models\Testimonial;
 use App\Models\Team;
 use App\Models\PackageEnquiry;
@@ -32,7 +30,6 @@ use App\Models\SupplierEnquiry;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Wishlist;
 use App\Models\HomeBrandSection;
-use Carbon\Carbon;
 use App\Models\GalleryImage;
 use App\Models\HomeDealBanner;
 use App\Models\HomeHeroSlide;
@@ -41,6 +38,7 @@ use App\Models\HomeWhy;
 use App\Models\HomeWhyCard;
 use App\Models\HomeFeatureCard;
 use App\Models\Collection;
+use App\Models\Setting;
 
 
 class FrontController extends Controller
@@ -73,7 +71,7 @@ class FrontController extends Controller
             ->get();
 
         $saleProducts = Product::with(['images'])
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(4)
             ->get();
@@ -81,7 +79,7 @@ class FrontController extends Controller
         $newArrivalProducts = Product::whereHas('collections', function ($query) {
             $query->where('code', 'new_arrival');
         })
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(4)
             ->get();
@@ -89,7 +87,7 @@ class FrontController extends Controller
         $bestSellers = Product::whereHas('collections', function ($q) {
             $q->where('code', 'best_seller');
         })
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(4)
             ->get();
@@ -97,7 +95,7 @@ class FrontController extends Controller
         $premiumCollections = Product::whereHas('collections', function ($q) {
             $q->where('code', 'premium_collection');
         })
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(4)
             ->get();
@@ -105,7 +103,7 @@ class FrontController extends Controller
         $exclusiveCollections = Product::whereHas('collections', function ($q) {
             $q->where('code', 'exclusive_collection');
         })
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(8)
             ->get();
@@ -226,7 +224,7 @@ class FrontController extends Controller
         }
 
         $products = Product::with('images')
-            ->where('status', 1)
+            ->visible()
             ->where('name', 'LIKE', "%{$query}%")
             ->take(5)
             ->get([
@@ -387,7 +385,7 @@ class FrontController extends Controller
             'collections',
             'occasions',
             'attributeValues'
-        ]);
+        ])->visible();
 
         // Category Products
         $products->where(function ($query) use ($category, $subcategories) {
@@ -512,7 +510,7 @@ class FrontController extends Controller
             'variants.values.attributeValue.attribute'
         ])
             ->where('slug', $slug)
-            ->where('status', 1)
+            ->visible()
             ->firstOrFail();
 
         $newArrivals = Product::with([
@@ -521,7 +519,7 @@ class FrontController extends Controller
             'subcategory',
             'collections'
         ])
-            ->where('status', 1)
+            ->visible()
             ->where('id', '!=', $product->id)
             ->latest()
             ->take(4)
@@ -533,7 +531,7 @@ class FrontController extends Controller
             'subcategory',
             'collections'
         ])
-            ->where('status', 1)
+            ->visible()
             ->where('id', '!=', $product->id)
             ->where(function ($query) use ($product) {
 
@@ -586,12 +584,26 @@ class FrontController extends Controller
             ];
         });
 
+        $reviews = $product->approvedReviews()
+            ->with(['customer', 'images'])
+            ->latest()
+            ->paginate(5);
+
+        $avgRating = round($product->approvedReviews()->avg('rating') ?? 0, 1);
+        $reviewsCount = $product->approvedReviews()->count();
+
+        $setting = Setting::first();
+
         return view('front-pages.product-detail', compact(
             'product',
             'newArrivals',
             'relatedProducts',
             'variantAttributes',
-            'variantsJson'
+            'variantsJson',
+            'reviews',
+            'avgRating',
+            'reviewsCount',
+            'setting'
         ));
     }
 
@@ -764,7 +776,7 @@ class FrontController extends Controller
     public function personalisedEngraving(Request $request)
     {
         $products = Product::where('is_personalized_engraving', 1)
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(6)
             ->get();
@@ -781,7 +793,7 @@ class FrontController extends Controller
     public function engravingGallery(Request $request)
     {
         $products = Product::where('is_engraving', 1)
-            ->where('status', 1)
+            ->visible()
             ->latest()
             ->take(6)
             ->get();

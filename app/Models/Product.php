@@ -121,4 +121,26 @@ class Product extends Model
             CartItem::class
         );
     }
+
+    public function scopeVisible($query)
+    {
+        $query->where('status', 1);
+
+        if (StockSetting::current()->auto_disable_out_of_stock) {
+            $query->where('stock', '>', 0);
+        }
+
+        return $query;
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('status', 'approved');
+    }
+
 }
