@@ -456,12 +456,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'destroy'])->name('reviews.destroy');
         Route::get('/reviews/export/csv', [App\Http\Controllers\Admin\ProductReviewController::class, 'export'])->name('reviews.export');
 
-        Route::view('/sales-report', 'admin.reports.sales-report')
-            ->name('sales-report.index');
-        Route::view('/customer-report', 'admin.reports.customer-report')
-            ->name('customer-report.index');
-        Route::view('/product-report', 'admin.reports.product-report')
-            ->name('product-report.index');
+        Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
+        Route::get('/reports/sales/export', [SalesReportController::class, 'export'])->name('reports.sales.export');
+
+        Route::get('/reports/products', [ProductReportController::class, 'index'])
+    ->name('reports.products');
+ 
+// Export (CSV / PDF)
+// GET /admin/reports/products/export?format=csv|pdf&...same filters...
+Route::get('/reports/products/export', [ProductReportController::class, 'export'])
+    ->name('reports.products.export');
 
         Route::view('/customer-report', 'admin.reports.customer-report')
             ->name('customer-report.index');
