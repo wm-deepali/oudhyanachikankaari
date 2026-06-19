@@ -14,7 +14,7 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">{{ $category->name ?? '' }}</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>Product Listing</span>
                 </div>
@@ -252,28 +252,21 @@
                     <div class="aq-footer-cat-group">
                         <span class="aq-footer-cat-label">Shop by Recipient</span>
                         <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Gifts for Employees</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Clients</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Executives</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Managers</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Vendors</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for New Joinees</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Leadership</a>
-                            <a href="#" class="aq-footer-cat-link">Corporate Bundles</a>
-                            <a href="#" class="aq-footer-cat-link">Team Kits</a>
+                            @foreach($menuCategories as $footerCategory)
+                                <a href="{{ route('products.listing', $footerCategory->slug) }}" class="aq-footer-cat-link">
+                                    {{ $footerCategory->name }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
                     <div class="aq-footer-cat-group">
                         <span class="aq-footer-cat-label">Shop by Occasion</span>
                         <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Employee Appreciation</a>
-                            <a href="#" class="aq-footer-cat-link">Company Milestones</a>
-                            <a href="#" class="aq-footer-cat-link">Product Launches</a>
-                            <a href="#" class="aq-footer-cat-link">Conferences & Events</a>
-                            <a href="#" class="aq-footer-cat-link">Retirement Gifts</a>
-                            <a href="#" class="aq-footer-cat-link">Festive Corporate Hampers</a>
-                            <a href="#" class="aq-footer-cat-link">Joining Kits</a>
-                            <a href="#" class="aq-footer-cat-link">Reward & Recognition</a>
+                             @foreach($headerOccasions->take(10) as $occasion)
+                                <a href="#" class="aq-footer-cat-link">
+                                    {{ $occasion->title }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
                 </div>

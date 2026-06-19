@@ -2,30 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Award;
 use App\Models\Blog;
 use App\Models\Brand;
-use App\Models\Cart;
 use App\Models\Category;
 use App\Models\ContactBranch;
 use App\Models\ContactEnquiry;
 use App\Models\Faq;
 use App\Models\GiftingOccasion;
-use App\Models\HomeEnquiry;
 use App\Models\HomeSlider;
 use App\Models\HomeTextSlider;
-use App\Models\Package;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\Enquiry;
-use App\Models\EnquiryItem;
 use App\Models\Testimonial;
 use App\Models\Team;
-use App\Models\PackageEnquiry;
 use App\Models\GeneralEnquiry;
-use App\Models\VendorType;
-use App\Models\VendorEnquiry;
 use App\Models\SupplierEnquiry;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Wishlist;
@@ -641,41 +632,41 @@ class FrontController extends Controller
 
     public function blogDetails(Request $request, $slug)
     {
-        // $blog = Blog::where('slug', $slug)
-        //     ->where('status', 1)
-        //     ->firstOrFail();
+        $blog = Blog::where('slug', $slug)
+            ->where('status', 1)
+            ->firstOrFail();
 
-        // $latestBlogs = Blog::where('status', 1)
-        //     ->where('id', '!=', $blog->id)
-        //     ->latest()
-        //     ->take(3)
-        //     ->get();
+        $latestBlogs = Blog::where('status', 1)
+            ->where('id', '!=', $blog->id)
+            ->latest()
+            ->take(3)
+            ->get();
 
-        // $searchResults = collect();
+        $searchResults = collect();
 
-        // if ($request->filled('search')) {
+        if ($request->filled('search')) {
 
-        //     $searchResults = Blog::where('status', 1)
-        //         ->where(function ($q) use ($request) {
+            $searchResults = Blog::where('status', 1)
+                ->where(function ($q) use ($request) {
 
-        //             $q->where('title', 'like', '%' . $request->search . '%')
-        //                 ->orWhere('short_description', 'like', '%' . $request->search . '%')
-        //                 ->orWhere('content', 'like', '%' . $request->search . '%');
+                    $q->where('title', 'like', '%' . $request->search . '%')
+                        ->orWhere('short_description', 'like', '%' . $request->search . '%')
+                        ->orWhere('content', 'like', '%' . $request->search . '%');
 
-        //         })
-        //         ->latest()
-        //         ->take(10)
-        //         ->get();
+                })
+                ->latest()
+                ->take(10)
+                ->get();
 
-        // }
+        }
 
         return view(
             'front-pages.blog-details',
-            // compact(
-            //     'blog',
-            //     'latestBlogs',
-            //     'searchResults'
-            // )
+            compact(
+                'blog',
+                'latestBlogs',
+                'searchResults'
+            )
         );
     }
 
@@ -683,33 +674,25 @@ class FrontController extends Controller
     {
         $branches = ContactBranch::where('status', 1)->get();
 
-        $inquiryTypes = [
-            'Bulk Corporate Order',
-            'Customization Inquiry',
-            'Sample Request',
-            'Partnership Opportunity',
-            'General Inquiry'
-        ];
-
-        return view('front-pages.contact-us', compact('branches', 'inquiryTypes'));
+        return view('front-pages.contact-us', compact('branches'));
     }
 
     public function dynamicPage($slug)
     {
         // match slug with page_name
-        // $page = DynamicPage::where('status', 1)
-        //     ->get()
-        //     ->first(function ($p) use ($slug) {
-        //         return Str::slug($p->page_name) === $slug;
-        //     });
+        $page = DynamicPage::where('status', 1)
+            ->get()
+            ->first(function ($p) use ($slug) {
+                return Str::slug($p->page_name) === $slug;
+            });
 
-        // if (!$page) {
-        //     abort(404);
-        // }
+        if (!$page) {
+            abort(404);
+        }
 
         return view(
             'front-pages.dynamic-page'
-            // , compact('page')
+            , compact('page')
         );
     }
 
@@ -719,23 +702,7 @@ class FrontController extends Controller
         return view('front-pages.why-us', compact('brands'));
     }
 
-    public function vendors(Request $request)
-    {
-        $vendorTypes = VendorType::where('status', 1)->get();
 
-        return view('front-pages.vendors', compact('vendorTypes'));
-    }
-
-    public function membership(Request $request)
-    {
-        $packages = Package::with('features')->get();
-        return view('front-pages.membership', compact('packages'));
-    }
-
-    public function jobOpenings(Request $request)
-    {
-        return view('front-pages.job-opening');
-    }
 
     public function gallery(Request $request)
     {
@@ -743,10 +710,6 @@ class FrontController extends Controller
     }
 
 
-    public function careers(Request $request)
-    {
-        return view('front-pages.careers');
-    }
 
     public function bulkEnquiry(Request $request)
     {
@@ -764,163 +727,78 @@ class FrontController extends Controller
         return view('front-pages.about', compact('teams'));
     }
 
-    public function awards(Request $request)
-    {
-        $awards = Award::where('status', 1)
-            ->latest()
-            ->get();
 
-        return view('front-pages.awards', compact('awards'));
-    }
-
-    public function personalisedEngraving(Request $request)
-    {
-        $products = Product::where('is_personalized_engraving', 1)
-            ->visible()
-            ->latest()
-            ->take(6)
-            ->get();
-
-        // dd($products->toArray());
-        return view('front-pages.personalised-engraving', compact('products'));
-    }
-
-    public function recyclingPledge(Request $request)
-    {
-        return view('front-pages.recycling-pledge');
-    }
-
-    public function engravingGallery(Request $request)
-    {
-        $products = Product::where('is_engraving', 1)
-            ->visible()
-            ->latest()
-            ->take(6)
-            ->get();
-
-        return view('front-pages.engraving-gallery', compact('products'));
-    }
-
-    public function storeEnquiry(Request $request)
-    {
-        try {
-
-            // ✅ VALIDATION (AJAX SAFE)
-            $validator = Validator::make($request->all(), [
-                'business_name' => 'required|string|max:255',
-                'owner_name' => 'required|string|max:255',
-                'email' => 'required|email:rfc,dns|max:255',
-                'mobile' => 'required|regex:/^[6-9]\d{9}$/',
-                'address' => 'required|string',
-                'state' => 'required|exists:states,id',
-                'city' => 'required|exists:cities,id',
-                'g-recaptcha-response' => 'required'
-            ], [
-                'mobile.regex' => 'Enter valid 10-digit mobile number',
-                'g-recaptcha-response.required' => 'Please verify captcha'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // ✅ CAPTCHA VERIFY
-            $captchaResponse = Http::asForm()->post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                [
-                    'secret' => env('RECAPTCHA_SECRET_KEY'),
-                    'response' => $request->input('g-recaptcha-response'),
-                    'remoteip' => $request->ip(),
-                ]
-            );
-
-            if (!($captchaResponse->json()['success'] ?? false)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Captcha verification failed'
-                ], 422);
-            }
-
-            // ✅ CART CHECK
-            $sessionId = session()->getId();
-
-            $cart = Cart::with('items')
-                ->where('session_id', $sessionId)
-                ->first();
-
-            if (!$cart || $cart->items->isEmpty()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Your cart is empty'
-                ], 400);
-            }
-
-            // ✅ SAVE ENQUIRY
-            $enquiry = Enquiry::create([
-                'business_name' => $request->business_name,
-                'owner_name' => $request->owner_name,
-                'email' => $request->email,
-                'mobile' => $request->mobile,
-                'address' => $request->address,
-                'state_id' => $request->state,
-                'city_id' => $request->city,
-                'session_id' => $sessionId,
-            ]);
-
-            foreach ($cart->items as $item) {
-
-                EnquiryItem::create([
-                    'enquiry_id' => $enquiry->id,
-                    'product_id' => $item->product_id,
-                    'customization_id' => $item->customization_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
-                    'total' => $item->total,
-                ]);
-
-            }
-
-            // ✅ CLEAR CART
-            $cart->items()->delete();
-            $cart->update(['total_amount' => 0]);
-
-            return response()->json([
-                'status' => true,
-                'redirect' => route('thank-you', $enquiry->id),
-                'message' => 'Enquiry submitted successfully!'
-            ]);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong',
-            ], 500);
-        }
-    }
 
     public function submitContact(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|max:255',
-            'mobile' => 'required|regex:/^[6-9]\d{9}$/',
-            'message' => 'required',
-            'g-recaptcha-response' => 'required',
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                'max:100',
+                'regex:/^[a-zA-Z\s]+$/'
+            ],
+
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'max:255'
+            ],
+
+            'mobile' => [
+                'required',
+                'digits:10',
+                'regex:/^[6-9]\d{9}$/'
+            ],
+
+            'company' => [
+                'nullable',
+                'string',
+                'max:100'
+            ],
+
+            'inquiry_type' => [
+                'required',
+                'string'
+            ],
+
+            'message' => [
+                'required',
+                'string',
+                'min:10',
+                'max:1000'
+            ],
+
+            'g-recaptcha-response' => [
+                'required'
+            ]
+
         ], [
-            'name.required' => 'Please enter your name',
-            'email.required' => 'Email is required',
-            'email.email' => 'Enter a valid email address',
-            'mobile.required' => 'Mobile number is required',
-            'mobile.regex' => 'Enter valid 10-digit mobile number',
-            'message.required' => 'Message cannot be empty',
-            'g-recaptcha-response.required' => 'Please verify captcha',
+            'name.required' => 'Please enter your name.',
+            'name.min' => 'Name must be at least 3 characters.',
+            'name.max' => 'Name cannot exceed 100 characters.',
+            'name.regex' => 'Name should contain only letters and spaces.',
+
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+
+            'mobile.required' => 'Mobile number is required.',
+            'mobile.digits' => 'Mobile number must be 10 digits.',
+            'mobile.regex' => 'Please enter a valid Indian mobile number.',
+
+            'company.max' => 'Company name cannot exceed 100 characters.',
+
+            'inquiry_type.required' => 'Please select an inquiry type.',
+
+            'message.required' => 'Message cannot be empty.',
+            'message.min' => 'Message must contain at least 10 characters.',
+            'message.max' => 'Message cannot exceed 1000 characters.',
+
+            'g-recaptcha-response.required' => 'Please verify captcha.',
         ]);
 
-        // ✅ CAPTCHA VERIFY
+        // Verify reCAPTCHA
         $captchaResponse = Http::asForm()->post(
             'https://www.google.com/recaptcha/api/siteverify',
             [
@@ -932,11 +810,13 @@ class FrontController extends Controller
 
         if (!($captchaResponse->json()['success'] ?? false)) {
             return back()
-                ->withErrors(['g-recaptcha-response' => 'Captcha verification failed'])
+                ->withErrors([
+                    'g-recaptcha-response' => 'Captcha verification failed. Please try again.'
+                ])
                 ->withInput();
         }
 
-        // ✅ SAVE
+        // Save enquiry
         ContactEnquiry::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -949,96 +829,6 @@ class FrontController extends Controller
         return back()->with('success', 'Enquiry sent successfully!');
     }
 
-    public function submitHomeEnquiry(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|max:255',
-            'phone' => 'required|regex:/^[6-9]\d{9}$/',
-            'message' => 'required',
-            'g-recaptcha-response' => 'required',
-        ], [
-            'name.required' => 'Please enter your name',
-            'email.required' => 'Email is required',
-            'email.email' => 'Enter a valid email address',
-            'phone.required' => 'Mobile number is required',
-            'phone.regex' => 'Enter valid 10-digit mobile number',
-            'message.required' => 'Message cannot be empty',
-            'g-recaptcha-response.required' => 'Please verify captcha',
-        ]);
-
-        // CAPTCHA
-        $response = Http::asForm()->post(
-            'https://www.google.com/recaptcha/api/siteverify',
-            [
-                'secret' => env('RECAPTCHA_SECRET_KEY'),
-                'response' => $request->input('g-recaptcha-response'),
-                'remoteip' => $request->ip()
-            ]
-        );
-
-        if (!($response->json()['success'] ?? false)) {
-            return back()
-                ->withErrors(['captcha' => 'Captcha verification failed'])
-                ->withInput();
-        }
-
-        HomeEnquiry::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'company' => $request->company,
-            'message' => $request->message,
-            'ip' => $request->ip(),
-            'user_agent' => $request->header('User-Agent'),
-        ]);
-
-        return back()->with('success', 'Thanks! We will contact you soon.');
-    }
-
-    public function submitPackageEnquiry(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'package_id' => 'required|exists:packages,id',
-            'name' => 'required|string|max:255',
-            'company' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|max:255',
-            'phone' => 'required|regex:/^[6-9]\d{9}$/',
-            'g-recaptcha-response' => 'required',
-        ], [
-            'name.required' => 'Please enter your name',
-            'company.required' => 'Company name is required',
-            'email.email' => 'Enter valid email address',
-            'phone.regex' => 'Enter valid 10-digit mobile number',
-            'g-recaptcha-response.required' => 'Please verify captcha',
-        ]);
-
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator, 'packageForm') // ✅ IMPORTANT
-                ->withInput();
-        }
-
-        // CAPTCHA
-        $response = Http::asForm()->post(
-            'https://www.google.com/recaptcha/api/siteverify',
-            [
-                'secret' => env('RECAPTCHA_SECRET_KEY'),
-                'response' => $request->input('g-recaptcha-response'),
-                'remoteip' => $request->ip()
-            ]
-        );
-
-        if (!($response->json()['success'] ?? false)) {
-            return back()
-                ->withErrors(['captcha' => 'Captcha verification failed'], 'packageForm')
-                ->withInput();
-        }
-
-        PackageEnquiry::create($request->all());
-
-        return back()->with('success_package', 'Enquiry submitted successfully');
-    }
 
     public function submitGeneralEnquiry(Request $request)
     {
@@ -1090,70 +880,19 @@ class FrontController extends Controller
         return back()->with('success_general', 'Enquiry submitted successfully!');
     }
 
-    public function submitVendorEnquiry(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'company' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|max:255',
-            'phone' => 'required|regex:/^[6-9]\d{9}$/',
-            'vendor_type_id' => 'required|exists:vendor_types,id',
-            'catalogue' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
-            'g-recaptcha-response' => 'required',
-        ], [
-            'name.required' => 'Please enter your name',
-            'company.required' => 'Company name is required',
-            'email.email' => 'Enter valid email address',
-            'phone.regex' => 'Enter valid 10-digit mobile number',
-            'vendor_type_id.required' => 'Please select business type',
-            'catalogue.mimes' => 'File must be PDF, DOC, JPG or PNG',
-            'catalogue.max' => 'File size must be under 2MB',
-            'g-recaptcha-response.required' => 'Please verify captcha',
-        ]);
-
-        // CAPTCHA
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => env('RECAPTCHA_SECRET_KEY'),
-            'response' => $request->input('g-recaptcha-response'),
-        ]);
-
-        if (!$response->json('success')) {
-            return back()
-                ->withErrors(['g-recaptcha-response' => 'Captcha verification failed'])
-                ->withInput();
-        }
-
-        // FILE UPLOAD
-        $filePath = null;
-        if ($request->hasFile('catalogue')) {
-            $filePath = $request->file('catalogue')->store('catalogues', 'public');
-        }
-
-        // SAVE
-        VendorEnquiry::create([
-            'name' => $request->name,
-            'company' => $request->company,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'vendor_type_id' => $request->vendor_type_id,
-            'description' => $request->description,
-            'capacity' => $request->capacity,
-            'city' => $request->city,
-            'catalogue' => $filePath,
-        ]);
-
-        return back()->with('success', 'Enquiry submitted successfully!');
-    }
-
 
     public function submitSupplierEnquiry(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'company' => 'required|string|max:255',
+            'name' => 'required|string|min:3|max:255',
+            'company' => 'required|string|min:2|max:255',
             'email' => 'required|email:rfc,dns|max:255',
-            'phone' => 'required|regex:/^[6-9]\d{9}$/',
+            'phone' => 'required|digits:10|regex:/^[6-9]\d{9}$/',
             'category_id' => 'required|exists:categories,id',
+            'quantity' => 'nullable|integer|min:1',
+            'delivery_date' => 'nullable|date|after_or_equal:today',
+            'city' => 'nullable|string|max:100',
+            'description' => 'nullable|string|max:1000',
             'catalogue' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
             'g-recaptcha-response' => 'required',
         ], [

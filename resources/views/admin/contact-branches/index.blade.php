@@ -68,7 +68,6 @@
 
                                         <td>
                                             <strong>{{ $branch->title }}</strong><br>
-                                            <small class="text-muted">{{ $branch->subtitle }}</small>
                                         </td>
 
                                         <td>{{ $branch->phone ?? '-' }}</td>

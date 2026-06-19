@@ -4,20 +4,6 @@
  <main class="aq-about-page">
 
 
-        <!-- Hero Section -->
-        <!-- <section class="about-hero text-center">
-            <div class="container">
-                <span class="about-hero-tagline">Empowering Businesses • Creating Memorable Experiences</span>
-                <h1 class="about-hero-title">Discover <span>B2B Gifts India</span></h1>
-                <p class="about-hero-desc">
-                    We create premium corporate gifting solutions that help businesses build stronger relationships,
-                    enhance brand value, and leave lasting impressions on clients, employees, and partners.
-                </p>
-                <a href="#bulk-enquiry" class="aq-about-btn-gold enquiry-btn">Speak With Our Expert</a>
-            </div>
-        </section> -->
-
-
         <!-- 1. Luxury Inner Banner / Hero Section -->
         <section class="aq-catpage-hero aq-apparel-hero">
             <div class="aq-hero-glow"></div>
@@ -30,23 +16,13 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">About </h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>About</span>
                 </div>
             </div>
         </section> <!-- collection area start -->
 
-        <!-- Breadcrumb Bar -->
-        <!-- <div class="aq-about-breadcrumb-wrap">
-            <div class="container">
-                <div class="aq-details-breadcrumbs">
-                    <a href="index.html">Home</a>
-                    <span class="divider">/</span>
-                    <span class="current">Our Heritage</span>
-                </div>
-            </div>
-        </div> -->
 
 
         <!-- Luxury Stats Overlap Wrap -->
@@ -114,7 +90,7 @@
                             needs for any occasion. We collaborate with skilled artisans to bring you authentic,
                             handcrafted elegance.
                         </p>
-                        <a href="#bulk-enquiry" class="aq-about-btn-gold mt-10 enquiry-btn">Get Started</a>
+                        <a href="javascript:void(0);" onclick="openGlobalDrawer('about_page')" class="aq-about-btn-gold mt-10 enquiry-btn">Get Started</a>
                     </div>
                     <div class="col-lg-6">
 
@@ -198,7 +174,7 @@
                         <p class="aq-reach-desc">Our design curators are ready to help you launch your next campaign.
                         </p>
                     </div>
-                    <a href="#bulk-enquiry" class="aq-about-btn-gold enquiry-btn"
+                    <a href="javascript:void(0);" onclick="openGlobalDrawer('about_page')" class="aq-about-btn-gold enquiry-btn"
                         style="background:#ffffff; color:#C98F9D !important; border-color:#ffffff; box-shadow:0 10px 20px rgba(0,0,0,0.1);">Get
                         a Custom Proposal</a>
                 </div>
@@ -296,104 +272,75 @@
                         India</p>
                 </div>
                 <div class="row g-4 justify-content-center">
-                    <!-- Leader 1 -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="aq-leader-card">
-                            <div class="aq-leader-img-wrapper">
-                                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=600"
-                                    alt="Rajesh Sharma" class="aq-leader-img" loading="lazy">
-                                <div class="aq-leader-socials">
-                                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                                    <a href="#"><i class="fa-regular fa-envelope"></i></a>
+
+                      @forelse($teams as $team)
+                        <div class="col-lg-4 col-md-6">
+                            <div class="aq-leader-card">
+                                <div class="aq-leader-img-wrapper">
+
+                                    <img src="{{ asset('storage/' . $team->image) }}" alt="{{ $team->name }}"
+                                        class="aq-leader-img" loading="lazy">
+
+                                    <div class="aq-leader-socials">
+                                        <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                                        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                                        <a href="#"><i class="fa-regular fa-envelope"></i></a>
+                                    </div>
+
                                 </div>
-                            </div>
-                            <div class="aq-leader-info">
-                                <h4 class="aq-leader-name">Rajesh Sharma</h4>
-                                <span class="aq-leader-designation">Founder & CEO</span>
-                                <p class="aq-leader-bio">With over 15 years in corporate procurement, Rajesh envisioned
-                                    a more personalized approach to B2B gifting.</p>
+
+                                <div class="aq-leader-info">
+                                    <h4 class="aq-leader-name">
+                                        {{ $team->name }}
+                                    </h4>
+
+                                    <span class="aq-leader-designation">
+                                        {{ $team->designation }}
+                                    </span>
+
+                                    <p class="aq-leader-bio">
+                                        {{ $team->description }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- Leader 2 -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="aq-leader-card">
-                            <div class="aq-leader-img-wrapper">
-                                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=600"
-                                    alt="Ananya Singh" class="aq-leader-img" loading="lazy">
-                                <div class="aq-leader-socials">
-                                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                                    <a href="#"><i class="fa-regular fa-envelope"></i></a>
-                                </div>
-                            </div>
-                            <div class="aq-leader-info">
-                                <h4 class="aq-leader-name">Ananya Singh</h4>
-                                <span class="aq-leader-designation">Creative Director</span>
-                                <p class="aq-leader-bio">Ananya brings a refined eye for design, ensuring every hamper
-                                    is a masterpiece of luxury and aesthetic appeal.</p>
-                            </div>
+                    @empty
+                        <div class="col-12 text-center">
+                            <p>No team members found.</p>
+                        </div>
+                    @endforelse
+
+                </div>
+            </div>
+        </section>
+
+         <section class="aq-footer-categories-section">
+            <div class="container">
+                <div class="aq-footer-cat-container">
+                    <div class="aq-footer-cat-group">
+                        <span class="aq-footer-cat-label">Shop by Recipient</span>
+                        <div class="aq-footer-cat-links">
+                            @foreach($menuCategories as $footerCategory)
+                                <a href="{{ route('products.listing', $footerCategory->slug) }}" class="aq-footer-cat-link">
+                                    {{ $footerCategory->name }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
-                    <!-- Leader 3 -->
-                    <div class="col-lg-4 col-md-6">
-                        <div class="aq-leader-card">
-                            <div class="aq-leader-img-wrapper">
-                                <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=600"
-                                    alt="Vikram Mehta" class="aq-leader-img" loading="lazy">
-                                <div class="aq-leader-socials">
-                                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-                                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
-                                    <a href="#"><i class="fa-regular fa-envelope"></i></a>
-                                </div>
-                            </div>
-                            <div class="aq-leader-info">
-                                <h4 class="aq-leader-name">Vikram Mehta</h4>
-                                <span class="aq-leader-designation">Head of Operations</span>
-                                <p class="aq-leader-bio">Vikram ensures flawless execution, managing our supply chain so
-                                    that bulk orders are delivered impeccably on time.</p>
-                            </div>
+                    <div class="aq-footer-cat-group">
+                        <span class="aq-footer-cat-label">Shop by Occasion</span>
+                        <div class="aq-footer-cat-links">
+                            @foreach($headerOccasions->take(10) as $occasion)
+                                <a href="#" class="aq-footer-cat-link">
+                                    {{ $occasion->title }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 6. Bottom Sticky Category Link Area (For SEO/Footer Links) -->
-        <section class="aq-footer-categories-section">
-            <div class="container">
-                <div class="aq-footer-cat-container">
-                    <div class="aq-footer-cat-group">
-                        <span class="aq-footer-cat-label">Shop by Recipient</span>
-                        <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Gifts for Employees</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Clients</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Executives</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Managers</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Vendors</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for New Joinees</a>
-                            <a href="#" class="aq-footer-cat-link">Gifts for Leadership</a>
-                            <a href="#" class="aq-footer-cat-link">Corporate Bundles</a>
-                            <a href="#" class="aq-footer-cat-link">Team Kits</a>
-                        </div>
-                    </div>
-                    <div class="aq-footer-cat-group">
-                        <span class="aq-footer-cat-label">Shop by Occasion</span>
-                        <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Employee Appreciation</a>
-                            <a href="#" class="aq-footer-cat-link">Company Milestones</a>
-                            <a href="#" class="aq-footer-cat-link">Product Launches</a>
-                            <a href="#" class="aq-footer-cat-link">Conferences & Events</a>
-                            <a href="#" class="aq-footer-cat-link">Retirement Gifts</a>
-                            <a href="#" class="aq-footer-cat-link">Festive Corporate Hampers</a>
-                            <a href="#" class="aq-footer-cat-link">Joining Kits</a>
-                            <a href="#" class="aq-footer-cat-link">Reward & Recognition</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
 @endsection

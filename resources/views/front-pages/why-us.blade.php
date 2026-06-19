@@ -14,7 +14,7 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">Why Choose Us</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>Why Choose Us</span>
                 </div>
@@ -145,7 +145,7 @@
                                 class="aq-cta-btn-primary d-inline-flex align-items-center justify-content-center">
                                 Shop New Arrivals
                             </a>
-                            <a href="shop.html"
+                            <a href="{{ route('categories') }}"
                                 class="aq-cta-btn-outline d-inline-flex align-items-center justify-content-center">
                                 Explore Collections <i class="fa-solid fa-arrow-right-long ml-10"></i>
                             </a>

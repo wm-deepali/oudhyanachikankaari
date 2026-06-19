@@ -60,8 +60,6 @@
                 <li><a href="{{ route('admin.category-attributes.index') }}">Attribute Mapping</a></li>
                 <li><a href="{{ route('admin.gifting-occasions.index') }}">Manage Occasions</a></li>
                 <li><a href="{{ route('admin.collections.index') }}">Manage Collections</a></li>
-                <!-- <li><a href="#">Manage Brands</a></li>
-                <li><a href="{{ route('admin.packages.index') }}">Manage Membership Packages</a></li> -->
             </ul>
         </li>
 
@@ -127,25 +125,23 @@
                 <li><a href="{{ route('admin.blogs.index') }}">Blog Management</a></li>
                 <li><a href="{{ route('admin.pages.index') }}">Dynamic Pages</a></li>
                 <li><a href="{{ route('admin.announcements.index') }}">Announcement Bar</a></li>
-                <!--  <li><a href="{{ route('admin.clients.index') }}">Manage Clients</a></li> -->
+                 <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li>
                 <li><a href="{{ route('admin.testimonials.index') }}">Testimonial & Feedback</a></li>
-                <!--  <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li> -->
+                 <li><a href="{{ route('admin.contact-branches.index') }}">Manage Office Branches</a></li>
             </ul>
         </li>
 
         {{-- ENQUIRIES --}}
         <li class="{{ request()->routeIs(
-    'admin.enquiries.*',
     'admin.contact-enquiries.*',
-    'admin.callback-enquiries.*',
+    'admin.other-enquiries.*',
     'admin.supplier-enquiries.*'
 ) ? 'active' : '' }}">
             <a href="#"><i class="fa-solid fa-envelope"></i> Enquiries</a>
             <ul>
-                <!--  <li><a href="{{ route('admin.enquiries.index') }}">Product Enquiries</a></li> -->
                 <li><a href="{{ route('admin.contact-enquiries.index') }}">Contact Us Enquiries</a></li>
-                <li><a href="#">Callback Enquiries</a></li>
                 <li><a href="{{ route('admin.supplier-enquiries.index') }}">Bulk Order Enquiries</a></li>
+                <li><a href="{{ route('admin.other-enquiries.index') }}">Other Enquiries</a></li>
             </ul>
         </li>
 
@@ -207,8 +203,8 @@
             <a href="#"><i class="fa-solid fa-chart-column"></i> Reports</a>
             <ul>
                 <li><a href="{{ route('admin.reports.sales') }}">Sales Report</a></li>
-                <li><a href="{{ route('admin.product-report.index') }}">Product Report</a></li>
-                <li><a href="{{ route('admin.customer-report.index') }}">Customer Report</a></li>
+                <li><a href="{{ route('admin.reports.products') }}">Product Report</a></li>
+                <li><a href="{{ route('admin.reports.customers') }}">Customer Report</a></li>
             </ul>
         </li>
 

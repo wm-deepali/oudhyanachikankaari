@@ -19,14 +19,12 @@ use App\Http\Controllers\Admin\{
     CustomizationController,
     DashboardController,
     DynamicPageController,
-    EnquiryController,
     FaqController,
     GalleryImageController,
     GiftingOccasionController,
     HomeBrandSectionController,
     HomeBrandSectionImageController,
     HomeDealBannerController,
-    HomeEnquiryController,
     HomeFeatureCardController,
     HomeHeroBannerController,
     HomeHeroSlideController,
@@ -37,8 +35,6 @@ use App\Http\Controllers\Admin\{
     LogoutController,
     OrderController,
     OtherEnquiryController,
-    PackageController,
-    PackageEnquiryController,
     PaymentController,
     ProductController,
     ProfileSettingController,
@@ -48,14 +44,14 @@ use App\Http\Controllers\Admin\{
     SupplierEnquiryController,
     TeamController,
     TestimonialController,
-    VendorEnquiryController,
     VendorTypeController,
     OrderReturnController,
     RefundController,
     StockManagementController,
     StockAlertsController,
     SalesReportController,
-    ProductReportController
+    ProductReportController,
+    CustomerReportController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -93,7 +89,11 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
         Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
         Route::get('/why-us', 'whyUs')->name('why-us');
+        Route::get('/gallery', 'gallery')->name('gallery');
 
+        Route::post('/contact-submit', 'submitContact')->name('contact.submit');
+        Route::post('/supplier-enquiry-submit', 'submitSupplierEnquiry')->name('supplier.enquiry.submit');
+        Route::post('/general-enquiry', 'submitGeneralEnquiry')->name('general.enquiry');
 
         Route::prefix('wishlist')->name('wishlist.')->group(function () {
 
@@ -133,29 +133,6 @@ Route::middleware('maintenance.mode')->group(function () {
 
         });
 
-
-
-
-        Route::get('/vendors', 'vendors')->name('vendors');
-        Route::get('/membership', 'membership')->name('membership');
-        Route::get('/job-openings', 'jobOpenings')->name('job-openings');
-        Route::get('/gallery', 'gallery')->name('gallery');
-        Route::get('/careers', 'careers')->name('careers');
-
-
-        Route::get('/awards', 'awards')->name('awards');
-        Route::get('/personalised-engraving', 'personalisedEngraving')->name('personalised-engraving');
-        Route::get('/recycling-pledge', 'recyclingPledge')->name('recycling-pledge');
-        Route::get('/engraving-gallery', 'engravingGallery')->name('engraving-gallery');
-
-        // enquiry routes
-        Route::post('/home-enquiry', 'submitHomeEnquiry')->name('home.enquiry');
-        Route::post('/enquiry/store', 'storeEnquiry')->name('enquiry.store');
-        Route::post('/contact-submit', 'submitContact')->name('contact.submit');
-        Route::post('/package-enquiry', 'submitPackageEnquiry')->name('package.enquiry');
-        Route::post('/general-enquiry', 'submitGeneralEnquiry')->name('general.enquiry');
-        Route::post('/vendor-enquiry', 'submitVendorEnquiry')->name('vendor.enquiry');
-        Route::post('/supplier-enquiry', 'submitSupplierEnquiry')->name('supplier.enquiry');
 
     });
 
@@ -270,20 +247,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('contact-branches', ContactBranchController::class);
 
-        Route::resource('enquiries', EnquiryController::class)->names('enquiries');
-
+        Route::get('contact-enquiries/export', [ContactEnquiryController::class, 'export'])->name('contact-enquiries.export');
+        Route::delete('contact-enquiries/bulk-delete', [ContactEnquiryController::class, 'bulkDelete'])->name('contact-enquiries.bulk-delete');
         Route::resource('contact-enquiries', ContactEnquiryController::class);
 
-        Route::resource('home-enquiries', HomeEnquiryController::class);
-
-        Route::resource('package-enquiries', PackageEnquiryController::class);
-
+        Route::get('other-enquiries/export', [OtherEnquiryController::class, 'export'])->name('other-enquiries.export');
+        Route::delete('other-enquiries/bulk-delete', [OtherEnquiryController::class, 'bulkDelete'])->name('other-enquiries.bulk-delete');
         Route::resource('other-enquiries', OtherEnquiryController::class);
 
-        Route::resource('packages', PackageController::class);
-
-        Route::resource('vendor-enquiries', VendorEnquiryController::class);
-
+        Route::get('supplier-enquiries/export', [SupplierEnquiryController::class, 'export'])->name('supplier-enquiries.export');
+        Route::delete('supplier-enquiries/bulk-delete', [SupplierEnquiryController::class, 'bulkDelete'])->name('supplier-enquiries.bulk-delete');
         Route::resource('supplier-enquiries', SupplierEnquiryController::class);
 
         Route::resource('awards', AwardController::class);
@@ -459,18 +432,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
         Route::get('/reports/sales/export', [SalesReportController::class, 'export'])->name('reports.sales.export');
 
-        Route::get('/reports/products', [ProductReportController::class, 'index'])
-    ->name('reports.products');
- 
-// Export (CSV / PDF)
-// GET /admin/reports/products/export?format=csv|pdf&...same filters...
-Route::get('/reports/products/export', [ProductReportController::class, 'export'])
-    ->name('reports.products.export');
+        Route::get('/reports/products', [ProductReportController::class, 'index'])->name('reports.products');
+        Route::get('reports/products/export/csv', [ProductReportController::class, 'exportCsv'])->name('reports.products.export.csv');
+        Route::get('reports/products/export/pdf', [ProductReportController::class, 'exportPdf'])->name('reports.products.export.pdf');
 
-        Route::view('/customer-report', 'admin.reports.customer-report')
-            ->name('customer-report.index');
-       
-            
+        Route::get('reports/customers', [CustomerReportController::class, 'index'])->name('reports.customers');
+        Route::get('reports/customers/export/excel', [CustomerReportController::class, 'exportExcel'])->name('reports.customers.export.excel');
+        Route::get('reports/customers/export/pdf', [CustomerReportController::class, 'exportPdf'])->name('reports.customers.export.pdf');
+
+
 
     });
 });

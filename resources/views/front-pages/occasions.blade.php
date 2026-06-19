@@ -13,7 +13,7 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">Shop by Occasion</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>Occasions</span>
                 </div>

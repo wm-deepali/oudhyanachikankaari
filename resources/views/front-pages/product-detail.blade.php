@@ -15,7 +15,7 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">{{ $product->name }}</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <a href="{{ route('products.listing', $product->category->slug) }}">
                         {{ $product->category->name }}
@@ -32,7 +32,7 @@
             <div class="container">
                 <!-- Elegant Breadcrumbs -->
                 <div class="aq-details-breadcrumbs mb-40">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span class="divider">/</span>
                     <a href="{{ route('products.listing', $product->category->slug) }}">
                         {{ $product->category->name }}
@@ -561,8 +561,7 @@
                                     </div>
 
                                     <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">
+                                        <button class="aq-product-action-btn" title="Quick Consultation" onclick="openGlobalDrawer('about_page')">
                                             <i class="fa-regular fa-envelope"></i>
                                         </button>
                                     </div>
@@ -682,8 +681,7 @@
                                     </div>
 
                                     <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">
+                                        <button class="aq-product-action-btn" title="Quick Consultation" onclick="openGlobalDrawer('about_page')"></button>
                                             <i class="fa-regular fa-envelope"></i>
                                         </button>
                                     </div>

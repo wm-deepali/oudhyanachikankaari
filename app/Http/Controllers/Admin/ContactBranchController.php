@@ -49,7 +49,6 @@ class ContactBranchController extends Controller
 
                 ContactBranch::create([
                     'title' => $title,
-                    'subtitle' => $request->subtitle[$key] ?? null,
                     'address' => $request->address[$key] ?? null,
                     'phone' => $request->phone[$key] ?? null,
                     'email' => $request->email[$key] ?? null,
@@ -99,7 +98,6 @@ class ContactBranchController extends Controller
 
         $branch->update([
             'title' => $request->title,
-            'subtitle' => $request->subtitle,
             'address' => $request->address,
             'phone' => $request->phone,
             'email' => $request->email,

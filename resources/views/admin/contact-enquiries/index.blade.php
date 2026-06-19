@@ -24,6 +24,10 @@
     .crumb span{margin:0 5px;}
     .btn-secondary-dash{display:inline-flex;align-items:center;gap:6px;background:var(--surface);color:var(--text-primary) !important;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none !important;font-family:var(--font);transition:background .15s;white-space:nowrap;}
     .btn-secondary-dash:hover{background:var(--bg);}
+    .btn-green{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff !important;border:1px solid var(--green);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none !important;font-family:var(--font);transition:opacity .15s;white-space:nowrap;}
+    .btn-green:hover{opacity:.88;}
+    .btn-danger-dash{display:inline-flex;align-items:center;gap:6px;background:var(--red);color:#fff !important;border:1px solid var(--red);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none !important;font-family:var(--font);transition:opacity .15s;white-space:nowrap;}
+    .btn-danger-dash:hover{opacity:.88;}
     .list-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-card);overflow:hidden;}
     .data-table{width:100%;border-collapse:collapse;}
     .data-table thead tr{background:#fafafa;border-bottom:1px solid var(--border);}
@@ -31,6 +35,7 @@
     .data-table tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
     .data-table tbody tr:last-child{border-bottom:none;}
     .data-table tbody tr:hover{background:#fafbfc;}
+    .data-table tbody tr.row-selected{background:#f0f1fc;}
     .data-table td{padding:13px 16px;font-size:13px;color:var(--text-primary);vertical-align:middle;}
     .id-chip{display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11.5px;font-family:'SF Mono','Fira Mono',monospace;color:var(--text-secondary);}
     .cust-cell{display:flex;align-items:center;gap:9px;}
@@ -52,6 +57,12 @@
     .pagination-bar .page-link{border-color:var(--border);color:var(--accent);font-size:13px;border-radius:var(--radius-sm) !important;margin:0 2px;}
     .pagination-bar .page-item.active .page-link{background:var(--accent);border-color:var(--accent);color:#fff;}
     .pagination-bar .page-item.disabled .page-link{color:var(--text-hint);}
+    /* Bulk action bar */
+    .bulk-bar{display:none;align-items:center;gap:10px;padding:10px 16px;background:var(--accent-light);border-bottom:1px solid rgba(48,61,137,.15);}
+    .bulk-bar.visible{display:flex;}
+    .bulk-bar-label{font-size:13px;font-weight:600;color:var(--accent);flex:1;}
+    /* Checkbox styling */
+    .row-check,.check-all{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
     @media(max-width:768px){.list-page{padding:16px;}}
     </style>
 
@@ -69,14 +80,35 @@
                     </div>
                 </div>
 
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <!-- Export Excel -->
+                    <a href="{{ route('admin.contact-enquiries.export') }}" class="btn-green">
+                        <i class="fa fa-file-excel-o"></i> Export Excel
+                    </a>
+                </div>
             </div>
 
             <!-- Main card -->
             <div class="list-card">
+
+                <!-- Bulk action bar (shown when rows are selected) -->
+                <div class="bulk-bar" id="bulkBar">
+                    <span class="bulk-bar-label"><span id="selectedCount">0</span> enquiries selected</span>
+                    <button class="btn-danger-dash" onclick="bulkDelete()">
+                        <i class="fa fa-trash"></i> Delete Selected
+                    </button>
+                    <button class="btn-secondary-dash" onclick="clearSelection()">
+                        Cancel
+                    </button>
+                </div>
+
                 <div style="overflow-x:auto">
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th style="width:40px">
+                                    <input type="checkbox" class="check-all" id="checkAll" title="Select all">
+                                </th>
                                 <th style="width:60px">#</th>
                                 <th style="min-width:180px">Customer</th>
                                 <th style="width:130px">Mobile</th>
@@ -90,6 +122,10 @@
                             @forelse($enquiries as $key => $item)
 
                                 <tr id="row{{ $item->id }}">
+
+                                    <td>
+                                        <input type="checkbox" class="row-check" value="{{ $item->id }}" onchange="onRowCheck()">
+                                    </td>
 
                                     <td><span class="id-chip">{{ $key + 1 }}</span></td>
 
@@ -142,7 +178,7 @@
                             @empty
 
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="7">
                                         <div class="empty-state">
                                             <div class="empty-icon-wrap"><i class="fa fa-envelope"></i></div>
                                             <h6>No Enquiries Found</h6>
@@ -172,6 +208,47 @@
 @include('admin.footer')
 
 <script>
+/* ── Checkbox logic ── */
+const checkAll = document.getElementById('checkAll');
+
+checkAll.addEventListener('change', function () {
+    document.querySelectorAll('.row-check').forEach(cb => {
+        cb.checked = this.checked;
+        cb.closest('tr').classList.toggle('row-selected', this.checked);
+    });
+    updateBulkBar();
+});
+
+function onRowCheck() {
+    const all  = document.querySelectorAll('.row-check');
+    const checked = document.querySelectorAll('.row-check:checked');
+    checkAll.indeterminate = checked.length > 0 && checked.length < all.length;
+    checkAll.checked = checked.length === all.length && all.length > 0;
+    event.target.closest('tr').classList.toggle('row-selected', event.target.checked);
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    const count = document.querySelectorAll('.row-check:checked').length;
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('bulkBar').classList.toggle('visible', count > 0);
+}
+
+function clearSelection() {
+    document.querySelectorAll('.row-check').forEach(cb => {
+        cb.checked = false;
+        cb.closest('tr').classList.remove('row-selected');
+    });
+    checkAll.checked = false;
+    checkAll.indeterminate = false;
+    updateBulkBar();
+}
+
+function getSelectedIds() {
+    return Array.from(document.querySelectorAll('.row-check:checked')).map(cb => cb.value);
+}
+
+/* ── Single delete ── */
 function deleteEnquiry(id) {
     Swal.fire({
         title: 'Delete Enquiry?',
@@ -189,6 +266,39 @@ function deleteEnquiry(id) {
                 success: function (res) {
                     Swal.fire('Deleted!', res.message, 'success');
                     $("#row" + id).fadeOut(400, function () { $(this).remove(); });
+                },
+                error: function () {
+                    Swal.fire('Error', 'Something went wrong', 'error');
+                }
+            });
+        }
+    });
+}
+
+/* ── Bulk delete ── */
+function bulkDelete() {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+
+    Swal.fire({
+        title: `Delete ${ids.length} Enquiries?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, Delete All'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "{{ route('admin.contact-enquiries.bulk-delete') }}",
+                type: "DELETE",
+                data: { _token: "{{ csrf_token() }}", ids: ids },
+                success: function (res) {
+                    Swal.fire('Deleted!', res.message, 'success');
+                    ids.forEach(id => {
+                        $("#row" + id).fadeOut(400, function () { $(this).remove(); });
+                    });
+                    clearSelection();
                 },
                 error: function () {
                     Swal.fire('Error', 'Something went wrong', 'error');

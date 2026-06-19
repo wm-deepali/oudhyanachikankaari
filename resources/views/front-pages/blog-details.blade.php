@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 
-<main class="aq-blog-details-page">
+    <main class="aq-blog-details-page">
 
         <section class="aq-catpage-hero aq-apparel-hero">
             <div class="aq-hero-glow"></div>
@@ -12,13 +12,13 @@
                 <i class="fa-regular fa-star"></i>
             </div>
             <div class="aq-catpage-hero-content">
-                <h1 class="aq-catpage-title">Blog Details</h1>
+                <h1 class="aq-catpage-title">{{ $blog->title }}</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
-                    <a href="blog.html">Blog</a>
+                    <a href="{{ route('blogs') }}">Blog</a>
                     <span>/</span>
-                    <span>Article</span>
+                    <span>{{ Str::limit($blog->title, 40) }}</span>
                 </div>
             </div>
         </section>
@@ -30,85 +30,60 @@
                     <div class="col-lg-8">
                         <div class="aq-blog-main-content aq-luxury-card">
                             <div class="aq-blog-featured-img-wrap position-relative">
-                                <img src="{{ asset('assets/img/corporate/gallery_bridal_lehenga.png') }}"
-                                    alt="Chikankari Bridal Fashion" class="aq-blog-featured-img">
+                                <img src="{{ asset('storage/' . $blog->image) }}" alt="{{ $blog->title }}"
+                                    class="aq-blog-featured-img">
                             </div>
                             <div class="aq-blog-content-inner">
-                                <h2 class="aq-blog-title display-5 fw-bold">The Ultimate Guide to Bridal Chikankari
-                                    Lehengas</h2>
+                                <h2 class="aq-blog-title display-5 fw-bold">{{ $blog->title }}</h2>
                                 <div
                                     class="aq-blog-meta d-flex align-items-center flex-wrap gap-4 mb-md-4 pb-md-4 border-bottom border-light">
                                     <div class="meta-item"><i class="fa-regular fa-calendar text-gold"></i> <span
-                                            class="ms-2">Oct 15, 2026</span></div>
+                                            class="ms-2">{{ $blog->created_at->format('M d, Y') }}</span></div>
                                     <div class="meta-item"><i class="fa-regular fa-user text-gold"></i> <span
                                             class="ms-2">By Oudhyana Edit</span></div>
+                                    @php
+                                        $readTime = max(
+                                            1,
+                                            ceil(str_word_count(strip_tags($blog->content)) / 200)
+                                        );
+                                    @endphp
+
                                     <div class="meta-item"><i class="fa-regular fa-clock text-gold"></i> <span
-                                            class="ms-2">5 Min Read</span></div>
+                                            class="ms-2">{{ $readTime }} Min Read</span></div>
                                 </div>
 
                                 <div class="aq-blog-body fs-5 text-secondary lh-lg">
-                                    <p class="lead fw-normal text-dark mb-4">Bridal fashion is evolving, and traditional
-                                        handcrafted elements like Chikankari are making a massive comeback. It is no
-                                        longer just about heavy embellishments; modern brides seek elegance, comfort,
-                                        and timeless beauty.</p>
-
-                                    <p>Whether you're looking for a pastel daydream or a rich, classic hue, Chikankari
-                                        lehengas offer unmatched grace. In this comprehensive guide, we delve into the
-                                        essential styling tips and fabric choices that will make your bridal ensemble
-                                        unforgettable, perfectly balancing heritage and contemporary aesthetics.</p>
-
-                                    <blockquote
-                                        class="aq-luxury-blockquote my-md-5 p-4 p-md-5 bg-light rounded-4 position-relative z-1">
-                                        <i
-                                            class="fa-solid fa-quote-left display-4 text-gold opacity-25 position-absolute top-0 start-0 ms-4 mt-3 z-n1"></i>
-                                        <p class="fs-4 fst-italic fw-medium text-dark mb-0">"The true essence of bridal
-                                            fashion lies in the stories woven into the fabric. Handcrafted Chikankari
-                                            carries the legacy of artisans in every thread."</p>
-                                    </blockquote>
-
-                                    <h3 class="fw-bold mt-5 mb-4 text-dark">Why Choose Chikankari for Your Big Day?</h3>
-                                    <p>A meticulously crafted Chikankari lehenga bridges the gap between traditional
-                                        grandeur and modern minimalism. It provides an ethereal look while keeping the
-                                        bride comfortable throughout her special moments.</p>
-
-                                    <div class="aq-blog-highlight-box bg-gold-light p-4 rounded-4 my-4">
-                                        <ul class="list-unstyled mb-0 ms-0">
-                                            <li class="mb-3 d-flex align-items-start"><i
-                                                    class="fa-solid fa-circle-check text-gold mt-1 me-3"></i>
-                                                <span><strong>Lightweight Elegance:</strong> Unlike heavy stone-studded
-                                                    outfits, Chikankari allows brides to move freely while radiating
-                                                    grace.</span>
-                                            </li>
-                                            <li class="mb-3 d-flex align-items-start"><i
-                                                    class="fa-solid fa-circle-check text-gold mt-1 me-3"></i>
-                                                <span><strong>Timeless Appeal:</strong> Handcrafted embroidery never
-                                                    goes out of style. Your bridal outfit becomes an heirloom
-                                                    piece.</span>
-                                            </li>
-                                            <li class="d-flex align-items-start"><i
-                                                    class="fa-solid fa-circle-check text-gold mt-1 me-3"></i>
-                                                <span><strong>Versatility:</strong> Whether it's a daytime mehendi or an
-                                                    evening reception, Chikankari outfits shine in every setting.</span>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                   {!! $blog->content !!}
                                 </div>
+  @php
+                                    $shareUrl = urlencode(request()->url());
+                                    $shareTitle = urlencode($blog->title);
+                                @endphp
+
 
                                 <div
                                     class="aq-blog-footer mt-5 pt-4 border-top border-light d-flex flex-column flex-md-row justify-content-end align-items-md-center gap-4">
                                     <div class="aq-blog-share d-flex align-items-center gap-3">
                                         <span class="fw-bold text-dark">Share:</span>
-                                        <a href="#"
+                                          <a href="https://wa.me/?text={{ $shareTitle }}%20{{ $shareUrl }}" target="_blank"
                                             class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
                                             style="width: 36px; height: 36px;"><i class="fa-brands fa-whatsapp"></i></a>
-                                        <a href="#"
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
+                                            target="_blank"
                                             class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
-                                            style="width: 36px; height: 36px;"><i
-                                                class="fa-brands fa-facebook-f"></i></a>
-                                        <a href="#"
+                                            style="width: 36px; height: 36px;"><i class="fa-brands fa-facebook-f"></i></a>
+                                        <a href="https://www.instagram.com/" target="_blank"
                                             class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
-                                            style="width: 36px; height: 36px;"><i
-                                                class="fa-brands fa-instagram"></i></a>
+                                            style="width: 36px; height: 36px;"><i class="fa-brands fa-instagram"></i></a>
+                                        <a href="https://twitter.com/intent/tweet?text={{ $shareTitle }}&url={{ $shareUrl }}"
+                                            target="_blank"
+                                            class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
+                                            style="width: 36px; height: 36px;"><i class="fa-brands fa-x"></i></a>
+                                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareUrl }}"
+                                            target="_blank"
+                                            class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
+                                            style="width: 36px; height: 36px;"><i class="fa-brands fa-linkedin-in"></i></a>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -122,8 +97,7 @@
                                 style="width: 120px; height: 120px; border: 4px solid #fdfbf9;">
                             <div class="aq-author-info text-center text-md-start">
                                 <h4 class="fw-bold text-dark mb-1">Ananya Singh</h4>
-                                <span
-                                    class="text-gold fw-medium small text-uppercase letter-spacing-1 d-block mb-3">Fashion
+                                <span class="text-gold fw-medium small text-uppercase letter-spacing-1 d-block mb-3">Fashion
                                     Curator</span>
                                 <p class="text-secondary mb-0">Ananya brings over a decade of fashion expertise,
                                     specializing in curating unforgettable ethnic looks that perfectly align with
@@ -132,7 +106,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4 mt-2">
-                        <div class="aq-blog-sidebar ">
+                        <div class="aq-blog-sidebar "> <!-- Search Widget -->
                             <div
                                 class="aq-sidebar-widget bg-white p-4 rounded-4 shadow-sm mb-4 transition-all hover-shadow">
                                 <h4 class="aq-sidebar-title fw-bold text-dark mb-4 position-relative pb-2">Search
@@ -140,8 +114,9 @@
                                     <span
                                         class="position-absolute bottom-0 start-0 w-25 border-bottom border-2 border-gold"></span>
                                 </h4>
-                                <form action="#" class="position-relative">
-                                    <input type="text"
+                                <form action="{{ route('blog.details', $blog->slug) }}" method="GET"
+                                    class="position-relative">
+                                    <input type="text" name="search" value="{{ request('search') }}"
                                         class="form-control bg-light border-0 py-3 ps-3 pe-5 rounded-3 shadow-none focus-ring focus-ring-gold"
                                         placeholder="Search...">
                                     <button type="submit"
@@ -150,6 +125,73 @@
                                 </form>
                             </div>
 
+                            @if(request()->filled('search'))
+
+                                <div
+                                    class="aq-sidebar-widget bg-white p-4 rounded-4 shadow-sm mb-4 transition-all hover-shadow">
+
+                                    <h4 class="aq-sidebar-title fw-bold text-dark mb-4 position-relative pb-2">
+
+                                        Search Results
+
+                                        <span
+                                            class="position-absolute bottom-0 start-0 w-25 border-bottom border-2 border-gold">
+                                        </span>
+
+                                    </h4>
+
+                                    <div class="aq-sidebar-blog-cards d-flex flex-column gap-3">
+
+                                        @forelse($searchResults as $result)
+
+                                            <div
+                                                class="aq-sidebar-blog-card d-flex align-items-center gap-3 transition-all cursor-pointer group">
+
+                                                <div class="aq-sidebar-blog-thumb-wrap rounded-3 overflow-hidden shadow-sm"
+                                                    style="width:85px;height:85px;flex-shrink:0;">
+
+                                                    <img src="{{ asset('storage/' . $result->image) }}" alt="{{ $result->title }}"
+                                                        class="w-100 h-100 object-fit-cover">
+
+                                                </div>
+
+                                                <div class="aq-sidebar-blog-info">
+
+                                                    <span class="aq-sidebar-blog-date small text-muted d-block mb-1">
+                                                        <i class="fa-regular fa-calendar text-gold me-1"></i>
+                                                        {{ $result->created_at->format('M d, Y') }}
+                                                    </span>
+
+                                                    <h5 class="aq-sidebar-blog-title fs-6 fw-bold mb-0 lh-sm">
+
+                                                        <a href="{{ route('blog.details', $result->slug) }}"
+                                                            class="text-dark text-decoration-none">
+
+                                                            {{ Str::limit($result->title, 55) }}
+
+                                                        </a>
+
+                                                    </h5>
+
+                                                </div>
+
+                                            </div>
+
+                                        @empty
+
+                                            <div class="text-center py-3">
+                                                No blogs found for "{{ request('search') }}"
+                                            </div>
+
+                                        @endforelse
+
+                                    </div>
+
+                                </div>
+
+                            @endif
+
+                            <!-- Latest Blogs Widget -->
                             <div
                                 class="aq-sidebar-widget bg-white p-4 rounded-4 shadow-sm mb-4 transition-all hover-shadow">
                                 <h4 class="aq-sidebar-title fw-bold text-dark mb-4 position-relative pb-2">Latest
@@ -159,67 +201,56 @@
                                 </h4>
                                 <div class="aq-sidebar-blog-cards d-flex flex-column gap-3">
 
-                                    <div
-                                        class="aq-sidebar-blog-card d-flex align-items-center gap-3 transition-all cursor-pointer group">
-                                        <div class="aq-sidebar-blog-thumb-wrap rounded-3 overflow-hidden shadow-sm"
-                                            style="width: 85px; height: 85px; flex-shrink: 0;">
-                                            <a href="blog-details.html"><img
-                                                    src="{{ asset('assets/img/corporate/meher_silk_dupatta.png') }}" alt="Blog Thumb"
-                                                    class="w-100 h-100 object-fit-cover transition-transform duration-500 group-hover-scale"></a>
-                                        </div>
-                                        <div class="aq-sidebar-blog-info">
-                                            <span class="aq-sidebar-blog-date small text-muted d-block mb-1"><i
-                                                    class="fa-regular fa-calendar text-gold me-1"></i> Oct 10,
-                                                2026</span>
-                                            <h5 class="aq-sidebar-blog-title fs-6 fw-bold mb-0 lh-sm"><a
-                                                    href="blog-details.html"
-                                                    class="text-dark text-decoration-none transition-colors group-hover-gold">How
-                                                    to Style a Silk Dupatta</a></h5>
-                                        </div>
-                                    </div>
+                                    @if(isset($latestBlogs) && $latestBlogs->count())
 
-                                    <div
-                                        class="aq-sidebar-blog-card d-flex align-items-center gap-3 transition-all cursor-pointer group">
-                                        <div class="aq-sidebar-blog-thumb-wrap rounded-3 overflow-hidden shadow-sm"
-                                            style="width: 85px; height: 85px; flex-shrink: 0;">
-                                            <a href="blog-details.html"><img
-                                                    src="{{ asset('assets/img/corporate/roohani_organza_saree.png') }}"
-                                                    alt="Blog Thumb"
-                                                    class="w-100 h-100 object-fit-cover transition-transform duration-500 group-hover-scale"></a>
-                                        </div>
-                                        <div class="aq-sidebar-blog-info">
-                                            <span class="aq-sidebar-blog-date small text-muted d-block mb-1"><i
-                                                    class="fa-regular fa-calendar text-gold me-1"></i> Oct 02,
-                                                2026</span>
-                                            <h5 class="aq-sidebar-blog-title fs-6 fw-bold mb-0 lh-sm"><a
-                                                    href="blog-details.html"
-                                                    class="text-dark text-decoration-none transition-colors group-hover-gold">Elegance
-                                                    of Organza Sarees</a></h5>
-                                        </div>
-                                    </div>
+                                        @foreach($latestBlogs as $latest)
 
-                                    <div
-                                        class="aq-sidebar-blog-card d-flex align-items-center gap-3 transition-all cursor-pointer group">
-                                        <div class="aq-sidebar-blog-thumb-wrap rounded-3 overflow-hidden shadow-sm"
-                                            style="width: 85px; height: 85px; flex-shrink: 0;">
-                                            <a href="blog-details.html"><img
-                                                    src="{{ asset('assets/img/corporate/naima_onion_pink_chikankari.png') }}"
-                                                    alt="Blog Thumb"
-                                                    class="w-100 h-100 object-fit-cover transition-transform duration-500 group-hover-scale"></a>
-                                        </div>
-                                        <div class="aq-sidebar-blog-info">
-                                            <span class="aq-sidebar-blog-date small text-muted d-block mb-1"><i
-                                                    class="fa-regular fa-calendar text-gold me-1"></i> Sep 15,
-                                                2026</span>
-                                            <h5 class="aq-sidebar-blog-title fs-6 fw-bold mb-0 lh-sm"><a
-                                                    href="blog-details.html"
-                                                    class="text-dark text-decoration-none transition-colors group-hover-gold">Modern
-                                                    Woman's Guide to Casuals</a></h5>
-                                        </div>
-                                    </div>
+                                            <div
+                                                class="aq-sidebar-blog-card d-flex align-items-center gap-3 transition-all cursor-pointer group">
+
+                                                <div class="aq-sidebar-blog-thumb-wrap rounded-3 overflow-hidden shadow-sm"
+                                                    style="width:85px;height:85px;flex-shrink:0;">
+
+                                                    <img src="{{ asset('storage/' . $latest->image) }}" alt="{{ $latest->title }}"
+                                                        class="w-100 h-100 object-fit-cover">
+
+                                                </div>
+
+                                                <div class="aq-sidebar-blog-info">
+
+                                                    <span class="aq-sidebar-blog-date small text-muted d-block mb-1">
+
+                                                        <i class="fa-regular fa-calendar text-gold me-1"></i>
+
+                                                        {{ $latest->created_at->format('M d, Y') }}
+
+                                                    </span>
+
+                                                    <h5 class="aq-sidebar-blog-title fs-6 fw-bold mb-0 lh-sm">
+
+                                                        <a href="{{ route('blog.details', $latest->slug) }}"
+                                                            class="text-dark text-decoration-none">
+
+                                                            {{ Str::limit($latest->title, 55) }}
+
+                                                        </a>
+
+                                                    </h5>
+
+                                                </div>
+
+                                            </div>
+
+                                        @endforeach
+
+                                    @else
+
+                                        {{-- Keep your existing 3 static cards here unchanged --}}
+
+                                    @endif
+
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>

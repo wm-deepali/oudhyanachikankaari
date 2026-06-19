@@ -102,6 +102,19 @@ class AppServiceProvider extends ServiceProvider
             $view->with('footerPages', $pages);
         });
 
+        View::composer('*', function ($view) {
+
+            $popularCategories = \App\Models\Category::where('status', 1)
+                ->where('is_popular', 1)
+                ->whereNull('parent_id')
+                ->take(4)->get();
+
+            $view->with(
+                'popularCategories',
+                $popularCategories
+            );
+
+        });
 
 
         View::composer('*', function ($view) {
@@ -116,6 +129,20 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        View::composer('*', function ($view) {
+
+            $recentProducts = \App\Models\Product::latest()
+                ->where('status', 1)
+                ->take(4)
+                ->get();
+
+
+            $view->with(
+                'recentProducts',
+                $recentProducts
+            );
+
+        });
 
     }
 }

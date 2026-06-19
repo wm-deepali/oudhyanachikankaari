@@ -83,27 +83,31 @@
     <!-- back to top end -->
 
     <!-- search area -->
-    <div class="aq-search-wrap aq-search-area">
-        <button class="aq-search-close" aria-label="Close Search">
+      <div class="aq-search-wrap aq-search-area">
+        <div class="aq-search-close">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M12.75 0.75L0.75 12.75M0.75 0.75L12.75 12.75" stroke="currentcolor" stroke-width="1.5"
                     stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
-        </button>
+        </div>
         <div class="aq-search-inner-wrap">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-12">
                         <div class="aq-search-input p-relative mb-60">
-                            <input type="text" placeholder="What are you looking for?" aria-label="Search query">
-                            <button type="submit" class="aq-search-input-btn" aria-label="Submit Search">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"
-                                    fill="none">
-                                    <path
-                                        d="M13.6792 12.6197C13.3863 12.3268 12.9114 12.3268 12.6185 12.6197C12.3256 12.9126 12.3256 13.3875 12.6185 13.6804L13.1489 13.15L13.6792 12.6197ZM13.1489 13.15L12.6185 13.6804L16.2185 17.2803L16.7489 16.75L17.2792 16.2197L13.6792 12.6197L13.1489 13.15ZM15.1499 7.94997H15.8999C15.8999 3.55932 12.3406 0 7.94997 0V0.75V1.5C11.5122 1.5 14.3999 4.38775 14.3999 7.94997H15.1499ZM7.94997 0.75V0C3.55932 0 0 3.55932 0 7.94997H0.75H1.5C1.5 4.38775 4.38775 1.5 7.94997 1.5V0.75ZM0.75 7.94997H0C0 12.3406 3.55932 15.8999 7.94997 15.8999V15.1499V14.3999C4.38775 14.3999 1.5 11.5122 1.5 7.94997H0.75ZM7.94997 15.1499V15.8999C12.3406 15.8999 15.8999 12.3406 15.8999 7.94997H15.1499H14.3999C14.3999 11.5122 11.5122 14.3999 7.94997 14.3999V15.1499Z"
-                                        fill="currentcolor"></path>
-                                </svg>
-                            </button>
+                            <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off">
+                                <div class="aq-search-input-wrap">
+                                    <input type="text" class="searchInput" name="q"
+                                        placeholder="Search premium gifts, corporate hampers, brands..." />
+
+                                    <button type="submit" class="aq-search-btn">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+
+                                    <div class="searchSuggestions search-suggestions"></div>
+                                </div>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -112,116 +116,64 @@
                         <div class="aq-search-cat-wrap mb-30">
                             <h4 class="aq-search-cat-title mb-35">Popular Searches</h4>
                             <div class="aq-search-cat">
-                                <a href="#">Kurta Sets</a>
-                                <a href="#">Anarkalis</a>
-                                <a href="#">Shipping Policy</a>
-                                <a href="#">Georgette Saree</a>
+                                @foreach($popularCategories as $category)
+                                    <a href="{{ route('products.listing', $category->slug) }}">
+                                        {{ $category->name }}
+                                    </a>
+                                @endforeach
                             </div>
                         </div>
                     </div>
                     <div class="col-xl-9">
                         <div class="aq-search-product mb-30">
-                            <h4 class="aq-search-cat-title mb-35">Recently Viewed Products</h4>
+
+                            <h4 class="aq-search-cat-title mb-35">
+                                Recently Viewed Products
+                            </h4>
+
                             <div class="row row-cols-xl-4 row-cols-lg-4 row-cols-md-2 row-cols-sm-2 row-cols-1">
-                                <div class="col">
-                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
-                                            <a href="product-details-default.html">
-                                                <img class="lazyload aq-product-img"
-                                                    src="{{ asset('assets/img/corporate/nazneen_georgette_kurti.png') }}"
-                                                    alt="Premium Kurti">
-                                                <img class="aq-img-hover lazyload"
-                                                    src="{{ asset('assets/img/corporate/shama_cotton_anarkali.png') }}"
-                                                    alt="Premium Kurti Hover">
-                                            </a>
-                                        </div>
-                                        <div class="aq-product-content">
-                                            <span class="aqf-product-3-category">Premium Kurtis</span>
-                                            <h4 class="aq-product-title mb-5"><a
-                                                    href="product-details-default.html">Nazneen Georgette Kurti</a>
-                                            </h4>
-                                            <div class="aq-product-price">
-                                                <ins><span class="aq-product-new-price">$85.00</span></ins>
-                                            </div>
 
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
-                                            <div class="aq-product-badge">
-                                                <span class="clr-sale">-10%</span>
-                                            </div>
-                                            <a href="product-details-default.html">
-                                                <img class="lazyload aq-product-img"
-                                                    src="{{ asset('assets/img/corporate/gallery_cotton_anarkali.png') }}"
-                                                    alt="Cotton Anarkali">
-                                                <img class="aq-img-hover lazyload"
-                                                    src="{{ asset('assets/img/corporate/media__1778668953904.webp') }}"
-                                                    alt="Cotton Anarkali Hover">
-                                            </a>
-                                        </div>
-                                        <div class="aq-product-content">
-                                            <span class="aqf-product-3-category">Luxury Chikankari</span>
-                                            <h4 class="aq-product-title mb-5"><a
-                                                    href="product-details-default.html">Elite Handcrafted Suite</a></h4>
-                                            <div class="aq-product-price">
-                                                <ins><span class="aq-product-new-price">$145.00</span></ins>
-                                            </div>
+                                @forelse($recentProducts as $product)
 
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
-                                            <a href="product-details-default.html">
-                                                <img class="lazyload aq-product-img"
-                                                    src="{{ asset('assets/img/corporate/gallery_chikan_kurta.png') }}"
-                                                    alt="Luxury Handcrafted Kurtis">
-                                                <img class="aq-img-hover lazyload"
-                                                    src="{{ asset('assets/img/corporate/media__1778668979144.png') }}"
-                                                    alt="Luxury Chanderi Gowns Hover">
-                                            </a>
-                                        </div>
-                                        <div class="aq-product-content">
-                                            <span class="aqf-product-3-category">Royal Court Wear</span>
-                                            <h4 class="aq-product-title mb-5"><a
-                                                    href="product-details-default.html">Premium Chikan Kurta</a></h4>
-                                            <div class="aq-product-price">
-                                                <ins><span class="aq-product-new-price">$30.00</span></ins>
+                                    <div class="col">
+                                        <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
+                                            <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
+                                                <a href="{{ route('product.details', $product->slug) }}">
+                                                    
+                                                    <img class="lazyload aq-product-img"
+                                                        src="{{ asset('storage/' . $product->display_image) }}"
+                                                        alt="{{ $product->name }}" loading="lazy" />
+
+                                                    <img class="aq-img-hover lazyload"
+                                                        src="{{ asset('storage/' . $product->display_image) }}"
+                                                        alt="{{ $product->name }}" loading="lazy" />
+                                                </a>
+                                            </div>
+                                            <div class="aq-product-content">
+                                                <span class="aqf-product-3-category">Premium Hampers</span>
+                                                <h4 class="aq-product-title mb-5">
+                                                    <a href="{{ route('product.details', $product->slug) }}">
+                                                        {{ $product->name }}</a>
+                                                </h4>
+                                                <div class="aq-product-price">
+                                                    <ins><span
+                                                            class="aq-product-new-price">${{ number_format($product->price, 2) }}</span></ins>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col">
-                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
-                                            <div class="aq-product-badge">
-                                                <span class="clr-new">New</span>
-                                            </div>
-                                            <a href="product-details-default.html">
-                                                <img class="lazyload aq-product-img"
-                                                    src="{{ asset('assets/img/corporate/gallery_georgette_saree.png') }}"
-                                                    alt="Georgette Saree">
-                                                <img class="aq-img-hover lazyload"
-                                                    src="{{ asset('assets/img/corporate/media__1778668962634.png') }}"
-                                                    alt="Georgette Saree Hover">
-                                            </a>
-                                        </div>
-                                        <div class="aq-product-content">
-                                            <span class="aqf-product-3-category">Travel</span>
-                                            <h4 class="aq-product-title mb-5"><a
-                                                    href="product-details-default.html">Executive Handcrafted Case</a>
-                                            </h4>
-                                            <div class="aq-product-price">
-                                                <ins><span class="aq-product-new-price">$44.00</span></ins>
-                                            </div>
-                                        </div>
+
+
+                                @empty
+
+                                    <div class="col-12">
+                                        <p>No recently viewed products found.</p>
                                     </div>
-                                </div>
+
+                                @endforelse
+
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -408,370 +360,6 @@
     <!-- wishlist popup -->
 
 
-    <!-- compare canvas -->
-
-    <!-- login modal -->
-    <div class="aq-login-modal-style">
-        <div class="modal fade" id="exampleModalToggle" role="dialog" aria-hidden="true"
-            aria-labelledby="exampleModalToggle" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div class="aq-login-wrapper">
-                        <div class="aq-login-top text-center mb-30">
-                            <h3 class="aq-login-title">
-                                Sign in to {{ $general?->site_name }}
-                            </h3>
-                            <p>Please enter your details below to sign in.</p>
-                        </div>
-                        <div class="aq-login-option">
-                            <div class="aq-login-input-wrapper">
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Your Email <span>*</span></label>
-                                    <input class="aq-form-control" type="email" placeholder="email@address.com">
-                                </div>
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Password <span>*</span></label>
-                                    <div class="aq-login-input p-relative">
-                                        <input class="aq_password aq-form-control" type="password"
-                                            placeholder="6+ characters required">
-                                        <div class="aq-login-input-eye password-show-toggle">
-                                            <span class="open-eye">
-                                                <svg width="18" height="14" viewBox="0 0 18 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M1 6.77778C1 6.77778 3.90909 1 9 1C14.0909 1 17 6.77778 17 6.77778C17 6.77778 14.0909 12.5556 9 12.5556C3.90909 12.5556 1 6.77778 1 6.77778Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                    <path
-                                                        d="M9.00018 8.94466C10.2052 8.94466 11.182 7.97461 11.182 6.77799C11.182 5.58138 10.2052 4.61133 9.00018 4.61133C7.79519 4.61133 6.81836 5.58138 6.81836 6.77799C6.81836 7.97461 7.79519 8.94466 9.00018 8.94466Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                </svg>
-                                            </span>
-                                            <span class="close-eye">
-                                                <svg width="19" height="18" viewBox="0 0 19 18" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M6.8822 11.7457C6.72311 11.7457 6.56402 11.6871 6.43842 11.5615C5.7518 10.8749 5.375 9.9622 5.375 8.99926C5.375 6.99803 6.99943 5.3736 9.00066 5.3736C9.9636 5.3736 10.8763 5.7504 11.5629 6.43701C11.6801 6.55424 11.7471 6.71333 11.7471 6.8808C11.7471 7.04827 11.6801 7.20736 11.5629 7.32459L7.32599 11.5615C7.20039 11.6871 7.0413 11.7457 6.8822 11.7457ZM9.00066 6.6296C7.69442 6.6296 6.631 7.69302 6.631 8.99926C6.631 9.41793 6.73986 9.81985 6.94082 10.1715L10.1729 6.93941C9.82125 6.73845 9.41933 6.6296 9.00066 6.6296Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M3.63816 14.4503C3.49582 14.4503 3.3451 14.4001 3.22787 14.2996C2.33192 13.5376 1.52808 12.5998 0.841463 11.5112C-0.0461127 10.1296 -0.0461127 7.87721 0.841463 6.48723C2.88456 3.28861 5.8571 1.44647 8.99711 1.44647C10.8393 1.44647 12.6563 2.08285 14.2472 3.28024C14.5235 3.48957 14.5821 3.88312 14.3728 4.15944C14.1635 4.43576 13.7699 4.49437 13.4936 4.28504C12.1204 3.24674 10.5629 2.70248 8.99711 2.70248C6.29252 2.70248 3.70515 4.32691 1.89651 7.16547C1.2685 8.14516 1.2685 9.85332 1.89651 10.833C2.52451 11.8127 3.24462 12.6584 4.04009 13.345C4.29966 13.5711 4.33315 13.9646 4.10707 14.2326C3.98984 14.3749 3.814 14.4503 3.63816 14.4503Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M9.00382 16.552C7.89017 16.552 6.80163 16.3259 5.75496 15.8821C5.43678 15.7482 5.28606 15.3797 5.42003 15.0616C5.554 14.7434 5.92243 14.5927 6.24062 14.7266C7.12819 15.1034 8.05764 15.296 8.99545 15.296C11.7 15.296 14.2874 13.6716 16.0961 10.833C16.7241 9.85333 16.7241 8.14517 16.0961 7.16548C15.8365 6.75519 15.5518 6.36164 15.2503 5.99321C15.0326 5.72527 15.0745 5.33172 15.3425 5.10564C15.6104 4.88793 16.0039 4.92142 16.23 5.19775C16.5566 5.59967 16.8748 6.03508 17.1595 6.48724C18.047 7.86885 18.047 10.1213 17.1595 11.5113C15.1164 14.7099 12.1438 16.552 9.00382 16.552Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M9.58061 12.5747C9.28754 12.5747 9.01959 12.3654 8.96098 12.0639C8.89399 11.7206 9.12007 11.3941 9.46338 11.3355C10.3845 11.168 11.1548 10.3976 11.3223 9.47657C11.3893 9.13327 11.7158 8.91556 12.0591 8.97417C12.4024 9.04116 12.6285 9.36772 12.5615 9.71103C12.2936 11.1596 11.1381 12.3068 9.69783 12.5747C9.65597 12.5663 9.62247 12.5747 9.58061 12.5747Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M0.625908 18.0007C0.466815 18.0007 0.307721 17.9421 0.18212 17.8165C-0.0607068 17.5736 -0.0607068 17.1717 0.18212 16.9289L6.43702 10.674C6.67984 10.4312 7.08177 10.4312 7.32459 10.674C7.56742 10.9168 7.56742 11.3188 7.32459 11.5616L1.0697 17.8165C0.944096 17.9421 0.785002 18.0007 0.625908 18.0007Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M11.122 7.50881C10.9629 7.50881 10.8038 7.45019 10.6782 7.32459C10.4354 7.08177 10.4354 6.67984 10.6782 6.43702L16.9331 0.182121C17.1759 -0.0607068 17.5779 -0.0607068 17.8207 0.182121C18.0635 0.424948 18.0635 0.826869 17.8207 1.0697L11.5658 7.32459C11.4402 7.45019 11.2811 7.50881 11.122 7.50881Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="aq-login-suggetions d-sm-flex align-items-center justify-content-between mb-20">
-                                <div class="aq-login-remeber">
-                                    <input class="aq-form-checkbox" id="remeber" type="checkbox">
-                                    <label class="aq-form-checkbox-label" for="remeber">Remember me</label>
-                                </div>
-                                <div class="aq-login-forgot">
-                                    <a data-bs-target="#exampleModalToggle3" data-bs-toggle="modal"
-                                        href="javascript:void(0);">Forgot Password?</a>
-                                </div>
-                            </div>
-                            <div class="aq-login-bottom-wrap mb-30">
-                                <button class="aq-login-btn w-100 mb-10">Login</button>
-                                <button data-bs-target="#exampleModalToggle2" data-bs-toggle="modal"
-                                    class="aq-login-btn btn-transparent w-100">Create Account</button>
-                            </div>
-                            <div class="aq-login-mail text-center mb-20">
-                                <p>Or continue with</p>
-                            </div>
-                            <div class="aq-login-social d-flex flex-wrap align-items-center justify-content-center">
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 20 20" fill="none">
-                                            <path
-                                                d="M19.25 9.83876C19.25 9.04738 19.1845 8.46988 19.0427 7.871H9.82144V11.4429H15.2341C15.125 12.3306 14.5357 13.6674 13.2262 14.5657L13.2078 14.6852L16.1234 16.8987L16.3254 16.9185C18.1805 15.2395 19.25 12.769 19.25 9.83876Z"
-                                                fill="#4285F4"></path>
-                                            <path
-                                                d="M9.82083 19.25C12.4726 19.25 14.6994 18.3943 16.3254 16.9185L13.2262 14.5657C12.3968 15.1325 11.2831 15.5282 9.82083 15.5282C7.22363 15.5282 5.01929 13.8493 4.23351 11.5285L4.11833 11.5381L1.08667 13.8375L1.04703 13.9455C2.66208 17.0896 5.97954 19.25 9.82083 19.25Z"
-                                                fill="#34A853"></path>
-                                            <path
-                                                d="M4.23351 11.5285C4.02617 10.9297 3.90675 10.288 3.90675 9.62497C3.90675 8.96188 4.02674 8.32023 4.22317 7.72135L4.21768 7.59381L1.14803 5.25756L1.04759 5.30438C0.381948 6.60912 0 8.07428 0 9.62497C0 11.1757 0.381383 12.6407 1.04703 13.9455L4.23351 11.5285Z"
-                                                fill="#FBBC05"></path>
-                                            <path
-                                                d="M9.82088 3.72164C11.6651 3.72164 12.9091 4.50233 13.6185 5.15474L16.3903 2.5025C14.688 0.951809 12.4726 0 9.82088 0C5.97957 0 2.66266 2.16024 1.04759 5.30438L4.22317 7.72135C5.01987 5.40066 7.22367 3.72164 9.82088 3.72164Z"
-                                                fill="#EB4335"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="20"
-                                            viewBox="0 0 17 20" fill="none">
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M15.4121 17.1597C15.9996 16.2597 16.2186 15.7997 16.6667 14.7897C13.361 13.5298 12.8333 8.79989 16.0991 6.98994C15.1034 5.72997 13.6995 5 12.3753 5C11.4194 5 10.7623 5.25 10.1748 5.48C9.67699 5.66999 9.22894 5.83997 8.67135 5.83997C8.07395 5.83997 7.54623 5.65 6.98865 5.45C6.38129 5.23001 5.74405 5 4.9475 5C3.46394 5 1.88081 5.90998 0.875176 7.46994C-0.53869 9.66988 -0.289768 13.7898 1.99034 17.3097C2.8068 18.5696 3.90205 19.9796 5.32587 19.9996C5.92328 20.0096 6.31159 19.8296 6.73973 19.6396C7.22762 19.4196 7.75532 19.1796 8.68131 19.1796C9.60729 19.1696 10.125 19.4196 10.6129 19.6396C11.0311 19.8296 11.4095 20.0096 11.9969 19.9996C13.4407 19.9796 14.5956 18.4196 15.4121 17.1597Z"
-                                                fill="#010F1C"></path>
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M12.1721 0C12.3314 1.09997 11.8833 2.18995 11.2959 2.94993C10.6686 3.76991 9.57333 4.40988 8.51791 4.36988C8.32873 3.30991 8.81661 2.21993 9.41402 1.48995C10.0811 0.689972 11.2062 0.0699982 12.1721 0Z"
-                                                fill="#010F1C"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 20 20" fill="none">
-                                            <path
-                                                d="M20 10C20 4.5 15.5 0 10 0C4.5 0 0 4.5 0 10C0 15 3.625 19.125 8.375 19.875V12.875H5.875V10H8.375V7.75C8.375 5.25 9.875 3.875 12.125 3.875C13.25 3.875 14.375 4.125 14.375 4.125V6.625H13.125C11.875 6.625 11.5 7.375 11.5 8.125V10H14.25L13.75 12.875H11.375V20C16.375 19.25 20 15 20 10Z"
-                                                fill="#2151F9"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15"
-                                            viewBox="0 0 16 15" fill="none">
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M5.04202 0H0L5.97809 8.15716L0.38242 15H2.96778L7.19998 9.82455L10.958 14.9525H16L9.84822 6.55824L9.85911 6.57272L15.1559 0.0952909H12.5705L8.63704 4.90552L5.04202 0ZM2.78311 1.42858H4.35275L13.2169 13.5238H11.6472L2.78311 1.42858Z"
-                                                fill="#B87333"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="exampleModalToggle2" role="dialog" aria-hidden="true"
-            aria-labelledby="exampleModalToggle2" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div class="aq-login-wrapper">
-                        <div class="aq-login-top text-center mb-30">
-                            <h3 class="aq-login-title">Create Account</h3>
-                            <p>Please register below to create an account.</p>
-                        </div>
-                        <div class="aq-login-option">
-                            <div class="aq-login-input-wrapper">
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Full Name <span>*</span></label>
-                                    <input class="aq-form-control" type="text" placeholder="your name">
-                                </div>
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Your Email <span>*</span></label>
-                                    <input class="aq-form-control" type="email" placeholder="email@address.com">
-                                </div>
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Password <span>*</span></label>
-                                    <div class="aq-login-input p-relative">
-                                        <input class="aq_password" type="password" placeholder="6+ characters required">
-                                        <div class="aq-login-input-eye password-show-toggle">
-                                            <span class="open-eye">
-                                                <svg width="18" height="14" viewBox="0 0 18 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M1 6.77778C1 6.77778 3.90909 1 9 1C14.0909 1 17 6.77778 17 6.77778C17 6.77778 14.0909 12.5556 9 12.5556C3.90909 12.5556 1 6.77778 1 6.77778Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                    <path
-                                                        d="M9.00018 8.94466C10.2052 8.94466 11.182 7.97461 11.182 6.77799C11.182 5.58138 10.2052 4.61133 9.00018 4.61133C7.79519 4.61133 6.81836 5.58138 6.81836 6.77799C6.81836 7.97461 7.79519 8.94466 9.00018 8.94466Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                </svg>
-                                            </span>
-                                            <span class="close-eye">
-                                                <svg width="19" height="18" viewBox="0 0 19 18" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M6.8822 11.7457C6.72311 11.7457 6.56402 11.6871 6.43842 11.5615C5.7518 10.8749 5.375 9.9622 5.375 8.99926C5.375 6.99803 6.99943 5.3736 9.00066 5.3736C9.9636 5.3736 10.8763 5.7504 11.5629 6.43701C11.6801 6.55424 11.7471 6.71333 11.7471 6.8808C11.7471 7.04827 11.6801 7.20736 11.5629 7.32459L7.32599 11.5615C7.20039 11.6871 7.0413 11.7457 6.8822 11.7457ZM9.00066 6.6296C7.69442 6.6296 6.631 7.69302 6.631 8.99926C6.631 9.41793 6.73986 9.81985 6.94082 10.1715L10.1729 6.93941C9.82125 6.73845 9.41933 6.6296 9.00066 6.6296Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M3.63816 14.4503C3.49582 14.4503 3.3451 14.4001 3.22787 14.2996C2.33192 13.5376 1.52808 12.5998 0.841463 11.5112C-0.0461127 10.1296 -0.0461127 7.87721 0.841463 6.48723C2.88456 3.28861 5.8571 1.44647 8.99711 1.44647C10.8393 1.44647 12.6563 2.08285 14.2472 3.28024C14.5235 3.48957 14.5821 3.88312 14.3728 4.15944C14.1635 4.43576 13.7699 4.49437 13.4936 4.28504C12.1204 3.24674 10.5629 2.70248 8.99711 2.70248C6.29252 2.70248 3.70515 4.32691 1.89651 7.16547C1.2685 8.14516 1.2685 9.85332 1.89651 10.833C2.52451 11.8127 3.24462 12.6584 4.04009 13.345C4.29966 13.5711 4.33315 13.9646 4.10707 14.2326C3.98984 14.3749 3.814 14.4503 3.63816 14.4503Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M9.00382 16.552C7.89017 16.552 6.80163 16.3259 5.75496 15.8821C5.43678 15.7482 5.28606 15.3797 5.42003 15.0616C5.554 14.7434 5.92243 14.5927 6.24062 14.7266C7.12819 15.1034 8.05764 15.296 8.99545 15.296C11.7 15.296 14.2874 13.6716 16.0961 10.833C16.7241 9.85333 16.7241 8.14517 16.0961 7.16548C15.8365 6.75519 15.5518 6.36164 15.2503 5.99321C15.0326 5.72527 15.0745 5.33172 15.3425 5.10564C15.6104 4.88793 16.0039 4.92142 16.23 5.19775C16.5566 5.59967 16.8748 6.03508 17.1595 6.48724C18.047 7.86885 18.047 10.1213 17.1595 11.5113C15.1164 14.7099 12.1438 16.552 9.00382 16.552Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M9.58061 12.5747C9.28754 12.5747 9.01959 12.3654 8.96098 12.0639C8.89399 11.7206 9.12007 11.3941 9.46338 11.3355C10.3845 11.168 11.1548 10.3976 11.3223 9.47657C11.3893 9.13327 11.7158 8.91556 12.0591 8.97417C12.4024 9.04116 12.6285 9.36772 12.5615 9.71103C12.2936 11.1596 11.1381 12.3068 9.69783 12.5747C9.65597 12.5663 9.62247 12.5747 9.58061 12.5747Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M0.625908 18.0007C0.466815 18.0007 0.307721 17.9421 0.18212 17.8165C-0.0607068 17.5736 -0.0607068 17.1717 0.18212 16.9289L6.43702 10.674C6.67984 10.4312 7.08177 10.4312 7.32459 10.674C7.56742 10.9168 7.56742 11.3188 7.32459 11.5616L1.0697 17.8165C0.944096 17.9421 0.785002 18.0007 0.625908 18.0007Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M11.122 7.50881C10.9629 7.50881 10.8038 7.45019 10.6782 7.32459C10.4354 7.08177 10.4354 6.67984 10.6782 6.43702L16.9331 0.182121C17.1759 -0.0607068 17.5779 -0.0607068 17.8207 0.182121C18.0635 0.424948 18.0635 0.826869 17.8207 1.0697L11.5658 7.32459C11.4402 7.45019 11.2811 7.50881 11.122 7.50881Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Password confirmation <span>*</span></label>
-                                    <div class="aq-login-input p-relative">
-                                        <input class="aq_password" type="password" placeholder="Password confirmation">
-                                        <div class="aq-login-input-eye password-show-toggle">
-                                            <span class="open-eye">
-                                                <svg width="18" height="14" viewBox="0 0 18 14" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M1 6.77778C1 6.77778 3.90909 1 9 1C14.0909 1 17 6.77778 17 6.77778C17 6.77778 14.0909 12.5556 9 12.5556C3.90909 12.5556 1 6.77778 1 6.77778Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                    <path
-                                                        d="M9.00018 8.94466C10.2052 8.94466 11.182 7.97461 11.182 6.77799C11.182 5.58138 10.2052 4.61133 9.00018 4.61133C7.79519 4.61133 6.81836 5.58138 6.81836 6.77799C6.81836 7.97461 7.79519 8.94466 9.00018 8.94466Z"
-                                                        stroke="currentColor" stroke-width="1.2" stroke-linecap="round"
-                                                        stroke-linejoin="round"></path>
-                                                </svg>
-                                            </span>
-                                            <span class="close-eye">
-                                                <svg width="19" height="18" viewBox="0 0 19 18" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M6.8822 11.7457C6.72311 11.7457 6.56402 11.6871 6.43842 11.5615C5.7518 10.8749 5.375 9.9622 5.375 8.99926C5.375 6.99803 6.99943 5.3736 9.00066 5.3736C9.9636 5.3736 10.8763 5.7504 11.5629 6.43701C11.6801 6.55424 11.7471 6.71333 11.7471 6.8808C11.7471 7.04827 11.6801 7.20736 11.5629 7.32459L7.32599 11.5615C7.20039 11.6871 7.0413 11.7457 6.8822 11.7457ZM9.00066 6.6296C7.69442 6.6296 6.631 7.69302 6.631 8.99926C6.631 9.41793 6.73986 9.81985 6.94082 10.1715L10.1729 6.93941C9.82125 6.73845 9.41933 6.6296 9.00066 6.6296Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M3.63816 14.4503C3.49582 14.4503 3.3451 14.4001 3.22787 14.2996C2.33192 13.5376 1.52808 12.5998 0.841463 11.5112C-0.0461127 10.1296 -0.0461127 7.87721 0.841463 6.48723C2.88456 3.28861 5.8571 1.44647 8.99711 1.44647C10.8393 1.44647 12.6563 2.08285 14.2472 3.28024C14.5235 3.48957 14.5821 3.88312 14.3728 4.15944C14.1635 4.43576 13.7699 4.49437 13.4936 4.28504C12.1204 3.24674 10.5629 2.70248 8.99711 2.70248C6.29252 2.70248 3.70515 4.32691 1.89651 7.16547C1.2685 8.14516 1.2685 9.85332 1.89651 10.833C2.52451 11.8127 3.24462 12.6584 4.04009 13.345C4.29966 13.5711 4.33315 13.9646 4.10707 14.2326C3.98984 14.3749 3.814 14.4503 3.63816 14.4503Z"
-                                                        fill="currentcolor"></path>
-                                                    <path opacity="0.5"
-                                                        d="M9.00382 16.552C7.89017 16.552 6.80163 16.3259 5.75496 15.8821C5.43678 15.7482 5.28606 15.3797 5.42003 15.0616C5.554 14.7434 5.92243 14.5927 6.24062 14.7266C7.12819 15.1034 8.05764 15.296 8.99545 15.296C11.7 15.296 14.2874 13.6716 16.0961 10.833C16.7241 9.85333 16.7241 8.14517 16.0961 7.16548C15.8365 6.75519 15.5518 6.36164 15.2503 5.99321C15.0326 5.72527 15.0745 5.33172 15.3425 5.10564C15.6104 4.88793 16.0039 4.92142 16.23 5.19775C16.5566 5.59967 16.8748 6.03508 17.1595 6.48724C18.047 7.86885 18.047 10.1213 17.1595 11.5113C15.1164 14.7099 12.1438 16.552 9.00382 16.552Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M9.58061 12.5747C9.28754 12.5747 9.01959 12.3654 8.96098 12.0639C8.89399 11.7206 9.12007 11.3941 9.46338 11.3355C10.3845 11.168 11.1548 10.3976 11.3223 9.47657C11.3893 9.13327 11.7158 8.91556 12.0591 8.97417C12.4024 9.04116 12.6285 9.36772 12.5615 9.71103C12.2936 11.1596 11.1381 12.3068 9.69783 12.5747C9.65597 12.5663 9.62247 12.5747 9.58061 12.5747Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M0.625908 18.0007C0.466815 18.0007 0.307721 17.9421 0.18212 17.8165C-0.0607068 17.5736 -0.0607068 17.1717 0.18212 16.9289L6.43702 10.674C6.67984 10.4312 7.08177 10.4312 7.32459 10.674C7.56742 10.9168 7.56742 11.3188 7.32459 11.5616L1.0697 17.8165C0.944096 17.9421 0.785002 18.0007 0.625908 18.0007Z"
-                                                        fill="currentcolor"></path>
-                                                    <path
-                                                        d="M11.122 7.50881C10.9629 7.50881 10.8038 7.45019 10.6782 7.32459C10.4354 7.08177 10.4354 6.67984 10.6782 6.43702L16.9331 0.182121C17.1759 -0.0607068 17.5779 -0.0607068 17.8207 0.182121C18.0635 0.424948 18.0635 0.826869 17.8207 1.0697L11.5658 7.32459C11.4402 7.45019 11.2811 7.50881 11.122 7.50881Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="aq-login-suggetions d-sm-flex align-items-center justify-content-between mb-20">
-                                <div class="aq-login-remeber">
-                                    <input class="aq-form-checkbox" id="remeber1" type="checkbox">
-                                    <label class="aq-form-checkbox-label" for="remeber1">Remember me</label>
-                                </div>
-                            </div>
-                            <div class="aq-login-bottom-wrap mb-30 text-center">
-                                <button class="aq-login-btn w-100 mb-15">Login</button>
-                                <span class="aq-login-account">Already have an account? <button
-                                        data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Login
-                                        here</button></span>
-                            </div>
-                            <div class="aq-login-mail text-center mb-20">
-                                <p>Or continue with</p>
-                            </div>
-                            <div class="aq-login-social d-flex flex-wrap align-items-center justify-content-center">
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 20 20" fill="none">
-                                            <path
-                                                d="M19.25 9.83876C19.25 9.04738 19.1845 8.46988 19.0427 7.871H9.82144V11.4429H15.2341C15.125 12.3306 14.5357 13.6674 13.2262 14.5657L13.2078 14.6852L16.1234 16.8987L16.3254 16.9185C18.1805 15.2395 19.25 12.769 19.25 9.83876Z"
-                                                fill="#4285F4"></path>
-                                            <path
-                                                d="M9.82083 19.25C12.4726 19.25 14.6994 18.3943 16.3254 16.9185L13.2262 14.5657C12.3968 15.1325 11.2831 15.5282 9.82083 15.5282C7.22363 15.5282 5.01929 13.8493 4.23351 11.5285L4.11833 11.5381L1.08667 13.8375L1.04703 13.9455C2.66208 17.0896 5.97954 19.25 9.82083 19.25Z"
-                                                fill="#34A853"></path>
-                                            <path
-                                                d="M4.23351 11.5285C4.02617 10.9297 3.90675 10.288 3.90675 9.62497C3.90675 8.96188 4.02674 8.32023 4.22317 7.72135L4.21768 7.59381L1.14803 5.25756L1.04759 5.30438C0.381948 6.60912 0 8.07428 0 9.62497C0 11.1757 0.381383 12.6407 1.04703 13.9455L4.23351 11.5285Z"
-                                                fill="#FBBC05"></path>
-                                            <path
-                                                d="M9.82088 3.72164C11.6651 3.72164 12.9091 4.50233 13.6185 5.15474L16.3903 2.5025C14.688 0.951809 12.4726 0 9.82088 0C5.97957 0 2.66266 2.16024 1.04759 5.30438L4.22317 7.72135C5.01987 5.40066 7.22367 3.72164 9.82088 3.72164Z"
-                                                fill="#EB4335"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="20"
-                                            viewBox="0 0 17 20" fill="none">
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M15.4121 17.1597C15.9996 16.2597 16.2186 15.7997 16.6667 14.7897C13.361 13.5298 12.8333 8.79989 16.0991 6.98994C15.1034 5.72997 13.6995 5 12.3753 5C11.4194 5 10.7623 5.25 10.1748 5.48C9.67699 5.66999 9.22894 5.83997 8.67135 5.83997C8.07395 5.83997 7.54623 5.65 6.98865 5.45C6.38129 5.23001 5.74405 5 4.9475 5C3.46394 5 1.88081 5.90998 0.875176 7.46994C-0.53869 9.66988 -0.289768 13.7898 1.99034 17.3097C2.8068 18.5696 3.90205 19.9796 5.32587 19.9996C5.92328 20.0096 6.31159 19.8296 6.73973 19.6396C7.22762 19.4196 7.75532 19.1796 8.68131 19.1796C9.60729 19.1696 10.125 19.4196 10.6129 19.6396C11.0311 19.8296 11.4095 20.0096 11.9969 19.9996C13.4407 19.9796 14.5956 18.4196 15.4121 17.1597Z"
-                                                fill="#010F1C"></path>
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M12.1721 0C12.3314 1.09997 11.8833 2.18995 11.2959 2.94993C10.6686 3.76991 9.57333 4.40988 8.51791 4.36988C8.32873 3.30991 8.81661 2.21993 9.41402 1.48995C10.0811 0.689972 11.2062 0.0699982 12.1721 0Z"
-                                                fill="#010F1C"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                            viewBox="0 0 20 20" fill="none">
-                                            <path
-                                                d="M20 10C20 4.5 15.5 0 10 0C4.5 0 0 4.5 0 10C0 15 3.625 19.125 8.375 19.875V12.875H5.875V10H8.375V7.75C8.375 5.25 9.875 3.875 12.125 3.875C13.25 3.875 14.375 4.125 14.375 4.125V6.625H13.125C11.875 6.625 11.5 7.375 11.5 8.125V10H14.25L13.75 12.875H11.375V20C16.375 19.25 20 15 20 10Z"
-                                                fill="#2151F9"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                                <div class="aq-login-option-item">
-                                    <a href="#">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15"
-                                            viewBox="0 0 16 15" fill="none">
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M5.04202 0H0L5.97809 8.15716L0.38242 15H2.96778L7.19998 9.82455L10.958 14.9525H16L9.84822 6.55824L9.85911 6.57272L15.1559 0.0952909H12.5705L8.63704 4.90552L5.04202 0ZM2.78311 1.42858H4.35275L13.2169 13.5238H11.6472L2.78311 1.42858Z"
-                                                fill="#B87333"></path>
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="exampleModalToggle3" role="dialog" aria-hidden="true"
-            aria-labelledby="exampleModalToggle3" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div class="aq-login-wrapper">
-                        <div class="aq-login-top text-center mb-30">
-                            <h3 class="aq-login-title">Forgot password</h3>
-                            <p>No worries, weâ€™ll send you reset instructions.</p>
-                        </div>
-                        <div class="aq-login-option">
-                            <div class="aq-login-input-wrapper">
-                                <div class="aq-login-input-box">
-                                    <label class="aq-form-label">Your Email <span>*</span></label>
-                                    <input class="aq-form-control" type="email" placeholder="email@address.com">
-                                </div>
-                            </div>
-                            <div class="aq-login-bottom-wrap text-center mb-20">
-                                <button class="aq-login-btn w-100 mb-10">Reset Password</button>
-                                <button class="aq-login-account color" data-bs-target="#exampleModalToggle"
-                                    data-bs-toggle="modal"><span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                            viewBox="0 0 12 12" fill="none">
-                                            <path d="M10.75 5.75H0.75M0.75 5.75L5.75 10.75M0.75 5.75L5.75 0.75"
-                                                stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round"></path>
-                                        </svg>
-                                    </span> Back to Log in</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- login modal -->
 
     <!-- Modal -->
     <div class="modal fade aq-product-modal" id="producQuickViewModal" role="dialog" tabindex="-1"
@@ -1603,103 +1191,135 @@
 
     @yield('content')
 
+     <!-- Premium Bespoke Bulk Enquiry Side Drawer Markup -->
     <div class="aq-drawer-parent-wrap" id="aqEnquiryDrawerWrap">
         <div class="aq-drawer-overlay" id="aqDrawerOverlay"></div>
         <div class="aq-drawer-card-body">
-            <button class="aq-drawer-close-btn" id="aqDrawerCloseBtn" aria-label="Close Enquiry Drawer"><i
-                    class="fa-solid fa-xmark"></i></button>
+            <!-- Close Button -->
+            <button class="aq-drawer-close-btn" id="aqDrawerCloseBtn" aria-label="Close Enquiry Drawer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Drawer Header -->
             <div class="aq-drawer-header">
-                <div class="aq-drawer-header-icon"><i class="fa-solid fa-gift"></i></div>
+                <div class="aq-drawer-header-icon">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
                 <h3 class="aq-drawer-title">Bespoke Corporate Curation</h3>
-                <p class="aq-drawer-subtitle">Premium custom branding packages. Receive tailored hampers & smart
-                    proposal catalogs in 2 business hours.</p>
+                <p class="aq-drawer-subtitle">Connect with our luxury design consultants. Receive curated hampers,
+                    custom branded tech & premium PDF proposals within 2 hours.</p>
             </div>
+
+            <!-- Scrollable Content -->
             <div class="aq-drawer-form-scrollable">
-                <form class="aq-drawer-form" id="aqDrawerForm" action="#">
+                <!-- Form State -->
+                <form class="aq-drawer-form" id="aqDrawerForm" method="POST" action="{{ route('general.enquiry') }}">
+                    @csrf
+
+                    <input type="hidden" name="source" id="global_source">
+
                     <div class="aq-drawer-form-row">
                         <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerFullName">Full Name *</label>
+                            <label class="aq-drawer-label">Full Name *</label>
                             <div class="aq-drawer-input-wrapper">
                                 <i class="fa-regular fa-user"></i>
-                                <input type="text" id="drawerFullName" class="aq-drawer-input"
-                                    placeholder="e.g. Rahul Sharma" required />
+                                <input type="text" name="name" value="{{ old('name') }}" class="aq-drawer-input"
+                                    placeholder="Enter your name" required>
                             </div>
                         </div>
                     </div>
+
                     <div class="aq-drawer-form-row">
                         <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerEmail">Corporate Email *</label>
-                            <div class="aq-drawer-input-wrapper">
-                                <i class="fa-regular fa-envelope"></i>
-                                <input type="email" id="drawerEmail" class="aq-drawer-input"
-                                    placeholder="e.g. rahul@company.com" required />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="aq-drawer-form-row">
-                        <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerPhone">Contact Number *</label>
-                            <div class="aq-drawer-input-wrapper">
-                                <i class="fa-solid fa-phone-flip"></i>
-                                <input type="tel" id="drawerPhone" class="aq-drawer-input"
-                                    placeholder="e.g. +91 0000 000 000" required />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="aq-drawer-form-row">
-                        <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerCompanyName">Company Name *</label>
+                            <label class="aq-drawer-label">Company Name *</label>
                             <div class="aq-drawer-input-wrapper">
                                 <i class="fa-solid fa-building"></i>
-                                <input type="text" id="drawerCompanyName" class="aq-drawer-input"
-                                    placeholder="e.g. Reliance" required />
+                                <input type="text" name="company" value="{{ old('company') }}" class="aq-drawer-input"
+                                    placeholder="Your Company Name" required>
                             </div>
                         </div>
                     </div>
-                    <div class="aq-drawer-form-row two-cols">
+
+                    <div class="aq-drawer-form-row">
                         <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerQuantity">Quantity Range *</label>
-                            <div class="aq-drawer-select-wrapper">
-                                <i class="fa-solid fa-cubes"></i>
-                                <select id="drawerQuantity" class="aq-drawer-select" required>
-                                    <option value="" disabled selected>Select Units</option>
-                                    <option value="10-50">10 to 50 pcs</option>
-                                    <option value="51-200">51 to 200 pcs</option>
-                                    <option value="201-500">201 to 500 pcs</option>
-                                    <option value="500+">500+ pcs</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label" for="drawerBudget">Budget per Gift *</label>
-                            <div class="aq-drawer-select-wrapper">
-                                <i class="fa-solid fa-indian-rupee-sign"></i>
-                                <select id="drawerBudget" class="aq-drawer-select" required>
-                                    <option value="" disabled selected>Select Budget</option>
-                                    <option value="Under 500">Under ₹500</option>
-                                    <option value="500-1500">₹500 - ₹1,500</option>
-                                    <option value="1500-3000">₹1,500 - ₹3,000</option>
-                                    <option value="3000+">Premium (₹3,000+)</option>
-                                </select>
+                            <label class="aq-drawer-label">Email Address *</label>
+                            <div class="aq-drawer-input-wrapper">
+                                <i class="fa-regular fa-envelope"></i>
+                                <input type="email" name="email" value="{{ old('email') }}" class="aq-drawer-input"
+                                    placeholder="you@company.com" required>
                             </div>
                         </div>
                     </div>
+
+                    <div class="aq-drawer-form-row">
+                        <div class="aq-drawer-form-group">
+                            <label class="aq-drawer-label">Mobile Number *</label>
+                            <div class="aq-drawer-input-wrapper">
+                                <i class="fa-solid fa-phone-flip"></i>
+                                <input type="tel" name="phone" value="{{ old('phone') }}" class="aq-drawer-input"
+                                    placeholder="+91 98765 43210" pattern="[6-9]{1}[0-9]{9}" maxlength="10" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="aq-drawer-form-row">
+                        <div class="aq-drawer-form-group">
+                            <label class="aq-drawer-label">
+                                Message / Special Requirement
+                            </label>
+
+                            <div class="aq-drawer-input-wrapper textarea-wrapper">
+                                <i class="fa-regular fa-comment-dots"></i>
+
+                                <textarea name="message" class="aq-drawer-textarea"
+                                    placeholder="Any specific requirement or customization needed?">{{ old('message') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}">
+                        </div>
+                    </div>
+
                     <div class="aq-drawer-form-footer">
+
                         <button type="submit" class="aq-drawer-submit-btn">
-                            <span>Request Proposals</span>
+
+                            <span>Submit Enquiry</span>
+
                             <i class="fa-solid fa-arrow-right-long"></i>
+
                         </button>
+
+                        <div class="aq-drawer-secure-note">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Corporate privacy guarantee. No spam.</span>
+                        </div>
+
                     </div>
+
                 </form>
+
+
+                <!-- Success State -->
                 <div class="aq-drawer-success-state" id="aqDrawerSuccess">
-                    <div class="aq-drawer-success-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="aq-drawer-success-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
                     <h4 class="aq-drawer-success-title">Proposal Initiated!</h4>
-                    <p class="aq-drawer-success-desc">Our curation experts will contact you with customized catalogs
-                        shortly.</p>
+                    <p class="aq-drawer-success-desc">
+                        Your inquiry was transmitted. A dedicated corporate curator will assemble custom gifting
+                        ideas and email you digital catalogs within <strong>2 business hours</strong>.
+                    </p>
+                    <button type="button" class="aq-drawer-success-close-btn" id="aqDrawerSuccessClose">
+                        Return to Site
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
 
     <footer>
 
@@ -1883,11 +1503,10 @@
 
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-policy-links text-center mb-20 mt-10">
-                                <a href="#">Terms & Conditions</a>
-                                <a href="#">Privacy Policy</a>
-                                <a href="#">Return & Warranties</a>
-                                <a href="#">Delivery</a>
-                                <a href="#">Cookies</a>
+                                 @foreach($footerPages as $page)
+                                    <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
+                                        {{ $page->page_name }}</a>
+                                @endforeach
                             </div>
                         </div>
 
@@ -1981,16 +1600,7 @@
     <!-- Floating Action Buttons -->
     <div class="floating-buttons"
         style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 15px;">
-        <!-- WhatsApp Button -->
-        <!-- <a href="https://wa.me/0000000000" target="_blank" class="whatsapp-btn"
-            style="background: #25D366; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; text-decoration: none;">
-            <i class="fa-brands fa-whatsapp" style="font-size: 30px;"></i>
-        </a> -->
-        <!-- Enquiry Button -->
-        <!-- <a href="#bulk-enquiry" class="enquiry-btn"
-            style="background: #800000; color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px;">
-            <i class="fa-regular fa-envelope"></i> Bulk Enquiry
-        </a> -->
+  
     </div>
 
     <style>
@@ -2199,10 +1809,162 @@
     <script src="{{ asset('assets/js/main.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
+
+    
+    @if(session('success_general'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
+                const drawerForm = document.getElementById("aqDrawerForm");
+                const drawerSuccess = document.getElementById("aqDrawerSuccess");
+
+                // Open drawer
+                if (drawerWrap) {
+                    drawerWrap.classList.add("active");
+                }
+
+                // Hide form
+                if (drawerForm) {
+                    drawerForm.classList.add("hidden");
+                }
+
+                // Show success state
+                setTimeout(() => {
+                    if (drawerSuccess) {
+                        drawerSuccess.classList.add("active");
+                    }
+                }, 250);
+
+            });
+        </script>
+    @endif
+
+    @if($errors->generalForm->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                const drawerWrap = document.getElementById('aqEnquiryDrawerWrap');
+
+                if (drawerWrap) {
+                    drawerWrap.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: `{!! implode('<br>', $errors->generalForm->all()) !!}`
+                });
+
+            });
+        </script>
+    @endif
+
+     <!-- Bulk Orders Submission Handler & Drawer Controller -->
+    <script>
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
+            const drawerOverlay = document.getElementById("aqDrawerOverlay");
+            const drawerCloseBtn = document.getElementById("aqDrawerCloseBtn");
+            const drawerForm = document.getElementById("aqDrawerForm");
+            const drawerSuccess = document.getElementById("aqDrawerSuccess");
+            const drawerSuccessClose = document.getElementById("aqDrawerSuccessClose");
+
+            window.openGlobalDrawer = function (source = 'general') {
+
+                const sourceField = document.getElementById('global_source');
+
+                if (sourceField) {
+                    sourceField.value = source;
+                }
+
+                // Hide any open bootstrap modal if present safely
+                const activeModal = document.querySelector('.modal.show');
+                if (activeModal) {
+                    try {
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                            const modalInstance = bootstrap.Modal.getInstance(activeModal);
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+                        } else if (typeof jQuery !== 'undefined' && jQuery.fn && jQuery.fn.modal) {
+                            jQuery(activeModal).modal('hide');
+                        } else if (typeof $ !== 'undefined' && $.fn && $.fn.modal) {
+                            $(activeModal).modal('hide');
+                        }
+                    } catch (err) {
+                        console.warn("Bootstrap modal close warning: ", err);
+                    }
+                }
+
+
+                drawerWrap.classList.add('active');
+                document.body.style.overflow = "hidden";
+            };
+
+            // Close Drawer Function
+            function closeEnquiryDrawer() {
+                drawerWrap.classList.remove("active");
+                document.body.style.overflow = ""; // Re-enable scroll
+
+                // Reset form state after transition completes
+                setTimeout(() => {
+                    drawerForm.classList.remove("hidden");
+                    drawerSuccess.classList.remove("active");
+                    drawerForm.reset();
+                    // Reset input focus wrappers
+                    document.querySelectorAll('.aq-drawer-input-wrapper, .aq-drawer-select-wrapper').forEach(wrap => {
+                        wrap.classList.remove("focus");
+                    });
+                }, 500);
+            }
+
+            // Setup input wrapper active state indicators
+            function setupInputEffects() {
+                const inputs = document.querySelectorAll(
+                    '.aq-drawer-input, .aq-drawer-select, .aq-drawer-textarea'
+                );
+
+                inputs.forEach(input => {
+                    const wrapper = input.closest('.aq-drawer-input-wrapper, .aq-drawer-select-wrapper');
+                    if (!wrapper) return;
+
+                    input.addEventListener("focus", () => {
+                        wrapper.classList.add("focus");
+                    });
+
+                    input.addEventListener("blur", () => {
+                        wrapper.classList.remove("focus");
+                    });
+                });
+            }
+
+            // Bind click events for closing
+            if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeEnquiryDrawer);
+            if (drawerOverlay) drawerOverlay.addEventListener("click", closeEnquiryDrawer);
+            if (drawerSuccessClose) drawerSuccessClose.addEventListener("click", closeEnquiryDrawer);
+
+            // ESC key closes drawer
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape" && drawerWrap.classList.contains("active")) {
+                    closeEnquiryDrawer();
+                }
+            });
+
+            // Initialize Setup
+            setupInputEffects();
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
 
     <!-- WhatsApp scroll behavior script -->
     <script>
+        
         document.addEventListener("DOMContentLoaded", function () {
             var whatsappBtn = document.querySelector(".footer_whatspp");
             if (whatsappBtn) {
@@ -2222,66 +1984,6 @@
                 }, { passive: true });
             }
         });
-
-        // Bind Side Consultation Drawer Controller
-        const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
-        const drawerOverlay = document.getElementById("aqDrawerOverlay");
-        const drawerCloseBtn = document.getElementById("aqDrawerCloseBtn");
-        const drawerForm = document.getElementById("aqDrawerForm");
-        const drawerSuccess = document.getElementById("aqDrawerSuccess");
-
-        // Open Drawer function
-        function openEnquiryDrawer() {
-            // Safely close Bootstrap quick-view modal if active
-            const activeModal = document.querySelector('.modal.show');
-            if (activeModal) {
-                try {
-                    const modalInstance = bootstrap.Modal.getInstance(activeModal);
-                    if (modalInstance) modalInstance.hide();
-                } catch (e) { }
-            }
-
-            drawerWrap.classList.add("active");
-            document.body.style.overflow = "hidden";
-        }
-
-        // Close Drawer function
-        function closeEnquiryDrawer() {
-            drawerWrap.classList.remove("active");
-            document.body.style.overflow = "";
-
-            setTimeout(() => {
-                if (drawerForm) drawerForm.classList.remove("hidden");
-                if (drawerSuccess) drawerSuccess.classList.remove("active");
-                if (drawerForm) drawerForm.reset();
-            }, 500);
-        }
-
-        if (drawerOverlay) drawerOverlay.addEventListener("click", closeEnquiryDrawer);
-        if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeEnquiryDrawer);
-
-        // Bind click to standard page buttons
-        const triggers = document.querySelectorAll(".aq-bulk-orders-btn, .enquiry-btn");
-        triggers.forEach(btn => {
-            btn.addEventListener("click", function (e) {
-                e.preventDefault();
-                // Don't trigger Bootstrap modal if drawer open is preferred
-                btn.removeAttribute("data-bs-toggle");
-                btn.removeAttribute("data-bs-target");
-                openEnquiryDrawer();
-            });
-        });
-
-        // Form Submit handler in drawer
-        if (drawerForm) {
-            drawerForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                drawerForm.classList.add("hidden");
-                setTimeout(() => {
-                    drawerSuccess.classList.add("active");
-                }, 250);
-            });
-        }
 
     </script>
 

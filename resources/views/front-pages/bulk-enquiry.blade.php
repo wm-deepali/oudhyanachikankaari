@@ -16,7 +16,7 @@
         <div class="aq-catpage-hero-content">
             <h1 class="aq-catpage-title">Bulk Enquiry </h1>
             <div class="aq-catpage-breadcrumbs">
-                <a href="index.html">Home</a>
+                <a href="{{ route('home') }}">Home</a>
                 <span>/</span>
                 <span>Bulk Enquiry</span>
             </div>
@@ -41,14 +41,22 @@
                             <i class="fa-solid fa-envelope"></i>
                             <div>
                                 <h6>Email Us</h6>
-                                <p>demo@oudhyana.com</p>
+                                <p>
+                                    @if(!empty($general?->support_email))
+                                        <p>{{ $general->support_email }}</p>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                         <div class="info-item">
                             <i class="fa-solid fa-phone"></i>
                             <div>
                                 <h6>Call Us</h6>
-                                <p>+91 0000 000 000</p>
+                                <p>
+                                    @if(!empty($general?->phone))
+                                        <p>{{ $general->phone }}</p>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -59,74 +67,193 @@
                         <p class="form-subtitle">Please provide your details below. Our procurement team will
                             contact you within 48 hours.</p>
 
-                        <form action="#" class="aq-luxury-form">
+
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('supplier.enquiry.submit') }}" method="POST" enctype="multipart/form-data"
+                            class="aq-luxury-form">
+                            @csrf
+
                             <div class="row g-4">
+
+                                <!-- Name -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Contact Person Name</label>
-                                        <input type="text" class="form-control" placeholder="Enter full name">
+                                        <label>Contact Person Name *</label>
+                                        <input type="text" name="name" value="{{ old('name') }}"
+                                            class="form-control @error('name') is-invalid @enderror"
+                                            placeholder="Enter full name">
+
+                                        @error('name')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Company -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Company / Firm Name</label>
-                                        <input type="text" class="form-control" placeholder="Your Company Name">
+                                        <label>Company / Firm Name *</label>
+                                        <input type="text" name="company" value="{{ old('company') }}"
+                                            class="form-control @error('company') is-invalid @enderror"
+                                            placeholder="Your Company Name">
+
+                                        @error('company')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Email -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Email Address</label>
-                                        <input type="email" class="form-control" placeholder="you@company.com">
+                                        <label>Email Address *</label>
+                                        <input type="email" name="email" value="{{ old('email') }}"
+                                            class="form-control @error('email') is-invalid @enderror"
+                                            placeholder="you@company.com">
+
+                                        @error('email')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Phone -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Mobile / WhatsApp Number</label>
-                                        <input type="text" class="form-control" placeholder="+91 0000 000 000">
+                                        <label>Mobile / WhatsApp Number *</label>
+                                        <input type="text" name="phone" value="{{ old('phone') }}"
+                                            class="form-control @error('phone') is-invalid @enderror"
+                                            placeholder="+91 9876543210">
+
+                                        @error('phone')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Category -->
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Product Category Interested In</label>
-                                        <select class="form-control">
-                                            <option value="">Select Main Category</option>
-                                            <option>Chikankari Kurtas & Anarkalis</option>
-                                            <option>Premium Sarees & Dupattas</option>
-                                            <option>Unstitched Luxury Suits</option>
-                                            <option>Corporate Gift Hampers</option>
-                                            <option>Bespoke Bridal Sets</option>
+                                        <label>Product Category Interested In *</label>
+
+                                        <select name="category_id"
+                                            class="form-control @error('category_id') is-invalid @enderror">
+
+                                            <option value="">Select Category</option>
+
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @endforeach
+
                                         </select>
+
+                                        @error('category_id')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Quantity -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Estimated Quantity Required</label>
-                                        <input type="text" class="form-control" placeholder="e.g. 500 - 1000 pieces">
+                                        <input type="number" min="1" name="quantity" value="{{ old('quantity') }}"
+                                            class="form-control @error('quantity') is-invalid @enderror" placeholder="500">
+
+                                        @error('quantity')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+
                                     </div>
                                 </div>
+
+                                <!-- Delivery Date -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Target Delivery Date</label>
-                                        <input type="text" class="form-control" placeholder="e.g. 15th Aug 2026">
+                                        <input type="date" name="delivery_date" value="{{ old('delivery_date') }}"
+                                            class="form-control @error('delivery_date') is-invalid @enderror">
+
+                                        @error('delivery_date')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+
                                     </div>
                                 </div>
+
+                                <!-- City -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Delivery City</label>
-                                        <input type="text" class="form-control" placeholder="e.g. Delhi, Mumbai, Pan-India">
+                                        <input type="text" name="city" value="{{ old('city') }}"
+                                            class="form-control @error('city') is-invalid @enderror"
+                                            placeholder="Delhi, Mumbai">
+
+                                        @error('city')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
                                     </div>
                                 </div>
+
+                                <!-- Catalogue -->
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Upload Reference Catalogue</label>
+                                        <input type="file" name="catalogue" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                            class="form-control @error('catalogue') is-invalid @enderror">
+
+
+                                        <small class="text-muted">
+                                            PDF, DOC, DOCX, JPG, PNG (Max 2MB)
+                                        </small>
+
+                                        @error('catalogue')
+                                            <small class="text-danger d-block">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Description -->
                                 <div class="col-12">
                                     <div class="form-group">
                                         <label>Design & Embroidery Preferences</label>
-                                        <textarea class="form-control" rows="3"
-                                            placeholder="Describe the Chikankari apparel styles, custom designs, embroidery preferences, or any other requirements..."></textarea>
+
+                                        <textarea name="description" rows="4"
+                                            class="form-control @error('description') is-invalid @enderror"
+                                            placeholder="Describe your requirements...">{{ old('description') }}</textarea>
+
+                                        @error('description')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+
                                     </div>
                                 </div>
-                                <div class="col-md-8 text-center mt-4 mx-auto">
-                                    <button type="submit" class="aq-bulk-submit-btn w-100 text-center">Request Bulk
-                                        Quote</button>
+
+                                <!-- Captcha -->
+                                <div class="col-12">
+                                    <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}">
+                                    </div>
+
+                                    @error('g-recaptcha-response')
+                                        <small class="text-danger d-block mt-2">
+                                            {{ $message }}
+                                        </small>
+                                    @enderror
                                 </div>
+
+                                <div class="col-md-8 mx-auto text-center mt-4">
+                                    <button type="submit" class="aq-bulk-submit-btn w-100">
+                                        Request Bulk Quote
+                                    </button>
+                                </div>
+
                             </div>
                         </form>
                     </div>

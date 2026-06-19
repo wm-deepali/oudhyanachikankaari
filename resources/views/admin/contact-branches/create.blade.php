@@ -53,11 +53,6 @@
 								</div>
 
 								<div class="form-group mt-3">
-									<label>Subtitle</label>
-									<input type="text" name="subtitle[]" class="form-control">
-								</div>
-
-								<div class="form-group mt-3">
 									<label>Address</label>
 									<textarea name="address[]" class="form-control"></textarea>
 								</div>
@@ -120,10 +115,6 @@
 <input type="text" name="title[]" class="form-control">
 </div>
 
-<div class="form-group mt-3">
-<label>Subtitle</label>
-<input type="text" name="subtitle[]" class="form-control">
-</div>
 
 <div class="form-group mt-3">
 <label>Address</label>

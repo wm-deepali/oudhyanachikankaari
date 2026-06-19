@@ -33,8 +33,10 @@
                                         <div class="col-xl-6 col-lg-7 col-md-8">
                                             <div class="aqf-slider-content">
                                                 <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
-                                                    <a class="aq-btn-black" href="#">Explore Products</a>
-                                                    <a class="aq-btn-black btn-red-bg" href="#bulk-enquiry">Get Bulk
+                                                    <a class="aq-btn-black" href="{{ route('categories') }}">Explore
+                                                        Products</a>
+                                                    <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
+                                                        onclick="openGlobalDrawer('home')">Get Bulk
                                                         Quote</a>
                                                 </div>
                                             </div>
@@ -61,8 +63,10 @@
                                         <div class="col-xl-6 col-lg-7 col-md-8">
                                             <div class="aqf-slider-content">
                                                 <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
-                                                    <a class="aq-btn-black" href="#">Explore Products</a>
-                                                    <a class="aq-btn-black btn-red-bg" href="#bulk-enquiry">Get Bulk
+                                                    <a class="aq-btn-black" href="{{ route('categories') }}">Explore
+                                                        Products</a>
+                                                    <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
+                                                        onclick="openGlobalDrawer('home')">Get Bulk
                                                         Quote</a>
                                                 </div>
                                             </div>
@@ -724,12 +728,6 @@
                                                     </button>
 
                                                 </div>
-                                                <a href="product-details-default.html">
-                                                    <img class="lazyload aq-product-img"
-                                                        src="assets/img/corporate/nazneen_georgette_kurti.png" alt="">
-                                                    <img class="aq-img-hover lazyload"
-                                                        src="assets/img/corporate/hazratganj_suit.png" alt="">
-                                                </a>
                                                 <a href="{{ route('product.details', $product->slug) }}">
 
                                                     <img class="lazyload aq-product-img"
@@ -1774,45 +1772,23 @@
                     <div class="aq-footer-cat-group">
                         <span class="aq-footer-cat-label">Shop Collections</span>
                         <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Women Kurtis</a>
-                            <a href="#" class="aq-footer-cat-link">Chikan Sarees</a>
-                            <a href="#" class="aq-footer-cat-link">Men Kurtas</a>
-                            <a href="#" class="aq-footer-cat-link">Kids Festive Wear</a>
-                            <a href="#" class="aq-footer-cat-link">Bridal Dupattas</a>
-                            <a href="#" class="aq-footer-cat-link">Unstitched Suits</a>
-                            <a href="#" class="aq-footer-cat-link">Semi-Stitched Sets</a>
-                            <a href="#" class="aq-footer-cat-link">Silk Organza Sarees</a>
-                            <a href="#" class="aq-footer-cat-link">Heavy Mukaish Couture</a>
+                            @foreach($menuCategories as $footerCategory)
+                                <a href="{{ route('products.listing', $footerCategory->slug) }}" class="aq-footer-cat-link">
+                                    {{ $footerCategory->name }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
 
                     <!-- Group 2: Occasion -->
                     <div class="aq-footer-cat-group">
-                        <span class="aq-footer-cat-label">Chikankari Artistry</span>
+                        <span class="aq-footer-cat-label">Shop by Occasion</span>
                         <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Employee Appreciation</a>
-                            <a href="#" class="aq-footer-cat-link">Phanda & Keel Kangan</a>
-                            <a href="#" class="aq-footer-cat-link">Tepchi Hand-Stitching</a>
-                            <a href="#" class="aq-footer-cat-link">Mukaish & Kamdani</a>
-                            <a href="#" class="aq-footer-cat-link">Zardozi Embroidery</a>
-                            <a href="#" class="aq-footer-cat-link">Jali (Net needlecraft)</a>
-                            <a href="#" class="aq-footer-cat-link">Hool Handcrafting</a>
-                            <a href="#" class="aq-footer-cat-link">Reward & Recognition</a>
-                        </div>
-                    </div>
-
-                    <!-- Group 3: Interest -->
-                    <div class="aq-footer-cat-group">
-                        <span class="aq-footer-cat-label">Customer Support</span>
-                        <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Cotton Anarkali</a>
-                            <a href="#" class="aq-footer-cat-link">Return & Exchange</a>
-                            <a href="#" class="aq-footer-cat-link">Privacy Policy</a>
-                            <a href="#" class="aq-footer-cat-link">Terms of Service</a>
-                            <a href="#" class="aq-footer-cat-link">Contact Us</a>
-                            <a href="#" class="aq-footer-cat-link">Size Guides</a>
-                            <a href="#" class="aq-footer-cat-link">Artisan Storytelling</a>
-                            <a href="#" class="aq-footer-cat-link">Custom Tailoring</a>
+                            @foreach($headerOccasions->take(10) as $occasion)
+                                <a href="#" class="aq-footer-cat-link">
+                                    {{ $occasion->title }}
+                                </a>
+                            @endforeach
                         </div>
                     </div>
 

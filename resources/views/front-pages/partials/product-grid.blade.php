@@ -41,7 +41,7 @@
                                         </div>
                                         <div class="aq-product-actions">
                                             <button class="aq-product-action-btn" title="Quick Consultation"
-                                                data-bs-toggle="modal" data-bs-target="#bulkOrderModal">
+                                                 onclick="openGlobalDrawer('products')">
                                                 <i class="fa-regular fa-envelope"></i>
                                             </button>
                                         </div>

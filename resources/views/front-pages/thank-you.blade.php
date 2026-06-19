@@ -14,7 +14,7 @@
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">Thank You</h1>
                 <div class="aq-catpage-breadcrumbs">
-                    <a href="index.html">Home</a>
+                    <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
                     <span>Thank You</span>
                 </div>
