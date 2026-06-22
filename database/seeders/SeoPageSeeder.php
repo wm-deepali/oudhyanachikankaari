@@ -17,29 +17,19 @@ class SeoPageSeeder extends Seeder
         $pages = [
             ['key' => 'home', 'name' => 'Home'],
 
-            ['key' => 'category', 'name' => 'Category Page'],            // /categories
+            ['key' => 'categories', 'name' => 'Categories Page'],
+            ['key' => 'occasions', 'name' => 'Occasions Page'],
 
-            ['key' => 'product_listing', 'name' => 'Product Listing Page'], // /products
+            ['key' => 'cart', 'name' => 'Cart Page'],
+            ['key' => 'checkout', 'name' => 'Checkout Page'],
 
-            ['key' => 'cart', 'name' => 'Cart Page'],                    // /shopping-cart
+            ['key' => 'about', 'name' => 'About Us'],
+            ['key' => 'why_choose_us', 'name' => 'Why Choose Us'],
+            ['key' => 'contact', 'name' => 'Contact Us'],
+            ['key' => 'bulk_enquiry', 'name' => 'Bulk Enquiry'],
 
-            ['key' => 'about', 'name' => 'About Us'],                    // /about-us
-            ['key' => 'why_choose_us', 'name' => 'Why Choose Us'],       // /why-us
-            ['key' => 'contact', 'name' => 'Contact Us'],                // /contact-us
-
-            ['key' => 'awards', 'name' => 'Awards & Recognitions'],      // /awards
-
-            ['key' => 'blog', 'name' => 'Blog Listing Page'],            // /blogs
-            ['key' => 'faq', 'name' => 'FAQ Page'],                      // /faqs
-
-            ['key' => 'recycling', 'name' => 'Recycling Pledge'],        // /recycling-pledge
-
-            ['key' => 'engraving', 'name' => 'Engraving Gallery'],       // /engraving-gallery
-            ['key' => 'personalised_engraving', 'name' => 'Personalised Engraving'], // /personalised-engraving
-
-            ['key' => 'b2b_membership', 'name' => 'B2B Membership'],     // /membership
-            ['key' => 'vendors', 'name' => 'Vendors'],                   // /vendors
-            ['key' => 'bulk_order', 'name' => 'Bulk Order'],             // /bulk-order
+            ['key' => 'blog', 'name' => 'Blog Listing Page'],
+            ['key' => 'faq', 'name' => 'FAQ Page'],
         ];
 
         foreach ($pages as $p) {

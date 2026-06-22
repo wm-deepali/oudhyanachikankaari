@@ -1,47 +1,87 @@
 <?php
 
 use App\Models\SeoPage;
+use App\Models\Blog;
+use App\Models\Product;
+use App\Models\Collection;
+use App\Models\Category;
+use App\Models\DynamicPage;
+use App\Models\GiftingOccasion;
+use App\Models\AttributeValue;
 
 function getSeo()
 {
-    // Safely get route name
     $route = optional(request()->route())->getName();
 
-    // Route → Page Key mapping
-    $map = [
+    switch ($route) {
 
-        'home' => 'home',
+        // Collection Page
+        case 'collections.listing':
+            return Collection::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'category' => 'category',
-        'subcategory' => 'sub_category',
+        // Attribute Page
+        case 'attribute.listing':
+            return AttributeValue::where(
+                'slug',
+                request()->route('valueSlug')
+            )->first();
 
-        'products' => 'product_listing',
-        'product.detail' => 'product_detail',
+        // Blog Detail
+        case 'blog.details':
+            return Blog::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'shopping-cart' => 'cart',
+        // Product Listing Page (Category/Subcategory)
+        case 'products.listing':
+            return Category::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'about-us' => 'about',
-        'why-us' => 'why_choose_us',
-        'contact-us' => 'contact',
+        // Product Detail Page
+        case 'product.details':
+            return Product::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'awards' => 'awards',
+        // Occasion Detail Page
+        case 'occasions.listing':
+            return GiftingOccasion::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'blogs' => 'blog',
-        'faqs' => 'faq',
+        // Dynamic Page
+        case 'dynamic.page':
+            return DynamicPage::where(
+                'slug',
+                request()->route('slug')
+            )->first();
 
-        'recycling-pledge' => 'recycling',
+        default:
 
-        'engraving-gallery' => 'engraving',
-        'personalised-engraving' => 'personalised_engraving',
+            $map = [
+                'home' => 'home',
+                'categories' => 'categories',
+                'occasions' => 'occasions',
+                'cart' => 'cart',
+                'checkout' => 'checkout',
+                'about-us' => 'about',
+                'why-us' => 'why_choose_us',
+                'contact-us' => 'contact',
+                'bulk-enquiry' => 'bulk_enquiry',
+                'blogs' => 'blog',
+                'faqs' => 'faq',
+            ];
 
-        'membership' => 'b2b_membership',
-        'vendors' => 'vendors',
-        'bulk-order' => 'bulk_order',
-    ];
+            $key = $map[$route] ?? 'home';
 
-    // Get mapped key (fallback = home)
-    $key = $map[$route] ?? 'home';
-
-    // Fetch SEO data
-    return SeoPage::where('page_key', $key)->first();
+            return SeoPage::where('page_key', $key)->first();
+    }
 }

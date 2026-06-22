@@ -9,6 +9,8 @@ class Collection extends Model
     protected $fillable = [
         'name',
         'slug',
+        'meta_title',
+        'meta_description',
         'code',
         'status',
         'sort_order',

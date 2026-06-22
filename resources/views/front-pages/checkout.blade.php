@@ -833,12 +833,28 @@
                     }
 
                 },
-                error: function () {
+               error: function (xhr) {
 
-                    btn.prop('disabled', false);
+    btn.prop('disabled', false);
 
-                    alert('Something went wrong.');
-                }
+    let message = 'Something went wrong.';
+
+    if (xhr.status === 422) {
+
+        let errors = xhr.responseJSON.errors;
+
+        message = Object.values(errors)
+            .map(error => error[0])
+            .join('<br>');
+    }
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        html: message,
+        confirmButtonColor: '#d49aa7'
+    });
+}
             });
 
         });

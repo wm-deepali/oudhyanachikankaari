@@ -11,6 +11,8 @@ class AttributeValue extends Model
         'attribute_id',
         'value',
         'slug',
+        'meta_title',
+        'meta_description',
         'sort_order',
         'status'
     ];

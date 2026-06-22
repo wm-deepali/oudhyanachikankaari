@@ -36,6 +36,8 @@ class CollectionController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
+            'meta_title' => 'nullable|max:255',
+            'meta_description' => 'nullable',
         ]);
 
         Collection::create([
@@ -50,6 +52,8 @@ class CollectionController extends Controller
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
+            'meta_title' => $request->meta_title,
+            'meta_description' => $request->meta_description,
         ]);
 
         return redirect()
@@ -74,6 +78,8 @@ class CollectionController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
+            'meta_title' => 'nullable|max:255',
+            'meta_description' => 'nullable',
         ]);
 
         $collection = Collection::findOrFail($id);
@@ -91,6 +97,8 @@ class CollectionController extends Controller
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
+            'meta_title' => $request->meta_title,
+            'meta_description' => $request->meta_description,
         ]);
 
         return redirect()

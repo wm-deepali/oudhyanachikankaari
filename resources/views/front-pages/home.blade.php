@@ -28,7 +28,7 @@
                                 <div class="aqf-slider-thumb include-bg"
                                     data-background="{{ asset('storage/' . $slider->image) }}">
                                 </div>
-                                <div class="container">
+                                <div class="container custom-fluid-container">
                                     <div class="row align-items-center">
                                         <div class="col-xl-6 col-lg-7 col-md-8">
                                             <div class="aqf-slider-content">
@@ -58,7 +58,7 @@
                                 <div class="aqf-slider-thumb include-bg"
                                     data-background="{{ asset('storage/' . $slider->image) }}">
                                 </div>
-                                <div class="container">
+                                <div class="container custom-fluid-container">
                                     <div class="row align-items-center">
                                         <div class="col-xl-6 col-lg-7 col-md-8">
                                             <div class="aqf-slider-content">
@@ -129,7 +129,7 @@
                     <path d="M12 8V21M3 13h18M12 8L7 2M12 8l5-6" />
                 </svg>
             </div>
-            <div class="container">
+            <div class="container custom-fluid-container">
                 <div class="row align-items-center mb-40">
                     <div class="col-xl-12 col-lg-12 col-md-12 col-12">
 
@@ -190,7 +190,7 @@
         <!-- Section 1: Premium Pastel Trust Cards Start -->
 
         <section class="aqf-pastel-features-section pt-40 pb-40">
-            <div class="container">
+            <div class="container custom-fluid-container">
                 <div class="row g-4">
 
                     @foreach($featureCards as $card)
@@ -238,7 +238,7 @@
         <!-- collection area start -->
         <section>
             <div class="aqf-collection-area fix ">
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="aqf-collection-top mb-40">
                         <div class="row align-items-end">
                             <div class="col-md-12">
@@ -312,7 +312,7 @@
         <section>
             <div class="aqf-deals-area  ">
                 <div class="aqf-deals-wrap py-3" data-bg-color="rgb(255 246 246 / 43%)">
-                    <div class="container">
+                    <div class="container custom-fluid-container">
                         <div class="row">
                             <div class="col-xl-5 col-lg-6">
                                 @foreach($dealBanners as $index => $banner)
@@ -531,7 +531,7 @@
         <!-- product area start -->
         <section>
             <div class="aq-product-area pt-20 pb-20 ">
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="aq-product-top mb-40">
                         <div class="row align-items-end">
                             <div class="col-md-12">
@@ -902,7 +902,7 @@
                     </svg>
                 </div>
 
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="row justify-content-center pt-20 pb-20">
                         <div class="col-xl-12">
 
@@ -926,7 +926,7 @@
 
                                             <div class="hero-single swiper-slide">
 
-                                                <div class="container">
+                                                <div class="container custom-fluid-container">
 
                                                     <div class="row align-items-center">
 
@@ -999,7 +999,7 @@
                         </div>
                         <div class="col-lg-4">
                             <div class="small-banner">
-                                <div class="container">
+                                <div class="container custom-fluid-container">
                                     <div class="row">
 
                                         @foreach($heroBanners as $banner)
@@ -1056,7 +1056,7 @@
                     </svg>
                 </div>
 
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="row justify-content-center">
                         <div class="col-xl-12">
                             <div class="aq-creative-title-box">
@@ -1122,7 +1122,7 @@
                                                 <div class="row g-4">
 
                                                     @foreach($category->products->take(6) as $product)
-                                                        <div class="col-md-4">
+                                                        <div class="col-md-6">
                                                             <div class="aq-luxury-item-card">
                                                                 <div class="aq-luxury-item-img">
                                                                     <img src="{{ asset($product->display_image) }}"
@@ -1171,7 +1171,7 @@
         <!-- saller area start -->
         <section>
             <div class="aqf-seller-area  fix pt-20 pb-20 ">
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="row justify-content-center">
                         <div class="col-xl-12">
                             <div class="aq-creative-title-box text-center">
@@ -1314,7 +1314,7 @@
                         <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" />
                     </svg>
                 </div>
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="aqf-summer-wrap" data-bg-color="#FAFAFA">
                         <div class="row align-items-center">
                             <div class="col-xl-5 col-lg-7 d-none d-lg-block">
@@ -1412,7 +1412,7 @@
         <!-- reels area start -->
         <section>
             <div class="aqf-reels-area fix pb-md-50 ">
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="aqf-collection-top mb-40">
                         <div class="row align-items-end">
                             <div class="col-md-12">
@@ -1518,7 +1518,7 @@
                 </div>
 
 
-                <div class="container">
+                <div class="container custom-fluid-container">
 
 
                     <div class="row justify-content-center">
@@ -1601,7 +1601,7 @@
         <!-- testimonial area start -->
         <section>
             <div class="aqf-testimonial-area-creative fix pt-20 pb-20">
-                <div class="container">
+                <div class="container custom-fluid-container">
                     <div class="row justify-content-center">
                         <div class="aq-creative-title-box">
                             <span class="aq-creative-subtitle">Client Testimonials</span>
@@ -1675,7 +1675,7 @@
         <!-- customer experience area start -->
         <section class="aqf-why-us-section" style="background-color: var(--aq-color-pink-light); ">
             <div class="aqf-why-us-accent-bar" style="background-color: var(--aq-color-gold);"></div>
-            <div class="container">
+            <div class="container custom-fluid-container">
                 <!-- Header -->
                 <div class="aqf-why-us-header text-center mb-60">
                     <h2 class="aqf-why-us-title"
@@ -1741,7 +1741,7 @@
 
         <!-- newsletter area start -->
         <section class="aq-newsletter-section" style="background-color: var(--aq-color-cream); padding: 80px 0;">
-            <div class="container">
+            <div class="container custom-fluid-container">
                 <div class="row justify-content-center">
                     <div class="col-xl-10">
                         <h2 class="aq-newsletter-title">Subscribe for exclusive Chikankari updates and premium heritage
@@ -1769,7 +1769,7 @@
 
         <!-- footer categories area start -->
         <section class="aq-footer-categories-section">
-            <div class="container">
+            <div class="container custom-fluid-container">
                 <div class="aq-footer-cat-container">
                     <!-- Group 1: Recipient -->
                     <div class="aq-footer-cat-group">

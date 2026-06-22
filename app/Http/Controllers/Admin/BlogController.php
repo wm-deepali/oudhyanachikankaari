@@ -30,7 +30,9 @@ class BlogController extends Controller
 
         $request->validate([
             'title' => 'required',
-            'content' => 'required'
+            'content' => 'required',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
         ]);
 
         $slug = Str::slug($request->title);
@@ -63,6 +65,10 @@ class BlogController extends Controller
 
             'content' => $request->content,
 
+            'meta_title' => $request->meta_title,
+
+            'meta_description' => $request->meta_description,
+
             'show_home' => $request->show_home ? 1 : 0,
 
             'status' => $request->status ? 1 : 0
@@ -86,6 +92,13 @@ class BlogController extends Controller
 
     public function update(Request $request, $id)
     {
+
+        $request->validate([
+            'title' => 'required',
+            'content' => 'required',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+        ]);
 
         $blog = Blog::findOrFail($id);
 

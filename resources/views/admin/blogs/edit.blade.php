@@ -294,6 +294,30 @@
                             </div>
                         </div>
 
+                        <div class="section-card">
+    <div class="section-card-header">
+        <h5>SEO Settings</h5>
+    </div>
+    <div class="section-card-body">
+
+        <div class="field-group">
+            <label class="field-label">Meta Title</label>
+            <input type="text"
+                   name="meta_title"
+                   class="field-input"
+                   value="{{ old('meta_title', $blog->meta_title) }}">
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">Meta Description</label>
+            <textarea name="meta_description"
+                      class="field-textarea"
+                      rows="4">{{ old('meta_description', $blog->meta_description) }}</textarea>
+        </div>
+
+    </div>
+</div>
+
                         <!-- Settings -->
                         <div class="section-card">
                             <div class="section-card-header"><h5>Settings</h5></div>
@@ -328,6 +352,8 @@
 
                     </div>
                 </div>
+
+
 
                 <!-- Action bar -->
                 <div class="action-bar">

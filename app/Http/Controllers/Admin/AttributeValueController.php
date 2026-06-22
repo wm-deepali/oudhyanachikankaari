@@ -36,6 +36,8 @@ class AttributeValueController extends Controller
             'value' => 'required|max:255',
             'sort_order' => 'nullable|integer',
             'status' => 'required|boolean',
+            'meta_title' => 'nullable|max:255',
+            'meta_description' => 'nullable',
         ]);
 
         AttributeValue::create([
@@ -43,6 +45,8 @@ class AttributeValueController extends Controller
             'value' => trim($request->value),
             'sort_order' => $request->sort_order ?? 0,
             'status' => $request->status,
+            'meta_title' => $request->meta_title,
+            'meta_description' => $request->meta_description,
         ]);
 
         return redirect()
@@ -70,6 +74,8 @@ class AttributeValueController extends Controller
             'value' => 'required|max:255',
             'sort_order' => 'nullable|integer',
             'status' => 'required|boolean',
+            'meta_title' => 'nullable|max:255',
+            'meta_description' => 'nullable',
         ]);
 
         $attributeValue->update([
@@ -77,6 +83,8 @@ class AttributeValueController extends Controller
             'value' => trim($request->value),
             'sort_order' => $request->sort_order ?? 0,
             'status' => $request->status,
+            'meta_title' => $request->meta_title,
+            'meta_description' => $request->meta_description,
         ]);
 
         return redirect()

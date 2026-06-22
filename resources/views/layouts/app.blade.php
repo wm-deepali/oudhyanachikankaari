@@ -843,28 +843,51 @@
                                             <div class="container">
                                                 <div class="aq-corp-megamenu-inner">
 
-                                                    <div class="aq-corp-megamenu-col">
-                                                        <h6 class="aq-corp-megamenu-heading">Shop By Fabrics</h6>
-                                                        <ul>
+                                                    @forelse($headerAttributes as $attribute)
 
-                                                            @forelse($headerFabrics as $fabric)
+                                                        <div class="aq-corp-megamenu-col">
+                                                            <h6 class="aq-corp-megamenu-heading">
+                                                                Shop By {{ $attribute->name }}
+                                                            </h6>
 
-                                                                <li><a
-                                                                        href="{{ route('attribute.listing', [$fabric->attribute->slug, $fabric->slug]) }}">{{ $fabric->value }}</a>
-                                                                </li>
+                                                            <ul>
+                                                                @forelse($attribute->values as $value)
 
-                                                            @empty
+                                                                    <li>
+                                                                        <a
+                                                                            href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">
+                                                                            {{ $value->value }}
+                                                                        </a>
+                                                                    </li>
 
+                                                                @empty
+
+                                                                    <li>
+                                                                        <a href="#">
+                                                                            No {{ $attribute->name }} Found
+                                                                        </a>
+                                                                    </li>
+
+                                                                @endforelse
+                                                            </ul>
+                                                        </div>
+
+                                                    @empty
+
+                                                        <div class="aq-corp-megamenu-col">
+                                                            <h6 class="aq-corp-megamenu-heading">
+                                                                Attributes
+                                                            </h6>
+                                                            <ul>
                                                                 <li>
                                                                     <a href="#">
-                                                                        No Fabrics Found
+                                                                        No Attributes Found
                                                                     </a>
                                                                 </li>
+                                                            </ul>
+                                                        </div>
 
-                                                            @endforelse
-
-                                                        </ul>
-                                                    </div>
+                                                    @endforelse
 
                                                     <div class="aq-corp-megamenu-col">
                                                         <h6 class="aq-corp-megamenu-heading">
@@ -1272,11 +1295,10 @@
                                             Heritage</a></li>
                                     <li><a href="{{ route('contact-us') }}"><i class="fa-solid fa-chevron-right"></i>
                                             Contact Us</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Chikankari
-                                            Craftsmanship</a></li>
                                     <li><a href="{{ route('blogs') }}"><i class="fa-solid fa-chevron-right"></i>
                                             Blogs</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Size Guide</a></li>
+                                    <li><a href="{{ route('faqs') }}"><i class="fa-solid fa-chevron-right"></i> FAQs</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -1288,16 +1310,15 @@
                                     Links</h4>
                                 <ul class="aq-footer-menu-luxury">
                                     <li><a href="{{ route('categories') }}"><i class="fa-solid fa-chevron-right"></i>
-                                            Shop All
-                                            Collections</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> New Arrivals</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Track Order</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Return & Exchange
-                                            Policy</a></li>
-                                    <li><a href="#"><i class="fa-solid fa-chevron-right"></i> Shipping
-                                            Information</a></li>
-                                    <li><a href="{{ route('faqs') }}"><i class="fa-solid fa-chevron-right"></i> FAQs</a>
-                                    </li>
+                                            Shop All Collections</a></li>
+                                    @foreach($headerCollections as $collection)
+
+                                        <li><a href="{{ route('collections.listing', $collection->slug) }}"><i
+                                                    class="fa-solid fa-chevron-right"></i>{{ $collection->name }}</a>
+                                        </li>
+
+                                    @endforeach
+
                                 </ul>
                             </div>
                         </div>
@@ -1381,7 +1402,7 @@
                             <div class="aq-footer-policy-links text-center mb-20 mt-10">
                                 @foreach($footerPages as $page)
                                     <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
-                                        {{ $page->page_name }}</a>
+                                        {{ $page->heading }}</a>
                                 @endforeach
                             </div>
                         </div>

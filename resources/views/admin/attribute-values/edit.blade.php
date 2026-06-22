@@ -68,7 +68,27 @@
         font-size: 13.5px; color: var(--text-primary); background: var(--surface);
         outline: none; transition: border-color .15s, box-shadow .15s; font-family: var(--font);
     }
+      .field-input,
+        .field-textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0 12px;
+            font-size: 13.5px;
+            color: var(--text-primary);
+            background: var(--surface);
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+            font-family: var(--font);
+        }
+
     .field-input:focus, .field-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12); }
+      .field-input:focus,
+        .field-textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(48, 61, 137, .12);
+        }
+
     .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 5px; line-height: 1.5; }
 
     /* Settings toggle rows */
@@ -193,29 +213,8 @@
 
                             </div>
                         </div>
-                    </div>
 
-                    <!-- ── RIGHT column ─────────────────── -->
-                    <div>
-                        <div class="section-card">
-                            <div class="section-card-header">
-                                <h5>Settings</h5>
-                            </div>
-                            <div class="section-card-body" style="padding:16px 20px">
-                                <div class="toggle-row" style="padding-top:0;padding-bottom:0;border:none">
-                                    <div>
-                                        <div class="toggle-label">Status</div>
-                                        <div class="toggle-sub">Visible on products</div>
-                                    </div>
-                                    <select name="status" class="field-select-sm">
-                                        <option value="1" {{ $attributeValue->status  ? 'selected' : '' }}>Active</option>
-                                        <option value="0" {{ !$attributeValue->status ? 'selected' : '' }}>Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Meta info card -->
+                            <!-- Meta info card -->
                         <div class="section-card">
                             <div class="section-card-header">
                                 <h5>Record Info</h5>
@@ -239,6 +238,56 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- ── RIGHT column ─────────────────── -->
+                    <div>
+
+                    <div class="section-card">
+    <div class="section-card-header">
+        <h5>SEO Settings</h5>
+    </div>
+
+    <div class="section-card-body">
+
+        <div class="field-group">
+            <label class="field-label">Meta Title</label>
+            <input type="text"
+                   name="meta_title"
+                   class="field-input"
+                   value="{{ old('meta_title', $attributeValue->meta_title ?? '') }}"
+                   placeholder="Enter meta title">
+        </div>
+
+        <div class="field-group">
+            <label class="field-label">Meta Description</label>
+            <textarea name="meta_description"
+                      class="field-textarea"
+                      rows="4"
+                      placeholder="Enter meta description">{{ old('meta_description', $attributeValue->meta_description ?? '') }}</textarea>
+        </div>
+
+    </div>
+</div>
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h5>Settings</h5>
+                            </div>
+                            <div class="section-card-body" style="padding:16px 20px">
+                                <div class="toggle-row" style="padding-top:0;padding-bottom:0;border:none">
+                                    <div>
+                                        <div class="toggle-label">Status</div>
+                                        <div class="toggle-sub">Visible on products</div>
+                                    </div>
+                                    <select name="status" class="field-select-sm">
+                                        <option value="1" {{ $attributeValue->status  ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ !$attributeValue->status ? 'selected' : '' }}>Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    
 
                     </div>
                 </div>

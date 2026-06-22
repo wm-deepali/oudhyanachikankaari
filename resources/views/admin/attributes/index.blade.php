@@ -172,6 +172,7 @@
                                 <th>Type</th>
                                 <th>Has Values</th>
                                 <th>Status</th>
+                                <th>Show in Navbar</th>
                                 <th style="width:90px">Actions</th>
                             </tr>
                         </thead>
@@ -219,6 +220,12 @@
                                     </td>
 
                                     <td>
+    {!! $attribute->show_in_navbar
+        ? '<span class="pill pill-yes">Yes</span>'
+        : '<span class="pill pill-no">No</span>' !!}
+</td>
+
+                                    <td>
                                         <div style="display:flex;gap:6px">
                                             <a href="{{ route('admin.attributes.edit', $attribute->id) }}"
                                                 class="action-btn" title="Edit">
@@ -234,7 +241,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7">
+                                    <td colspan="8">
                                         <div class="empty-state">
                                             <div class="empty-icon"><i class="fa fa-tags"></i></div>
                                             <strong style="font-size:14px;color:var(--text-primary)">No attributes found</strong>

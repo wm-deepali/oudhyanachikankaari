@@ -11,12 +11,14 @@ class Attribute extends Model
         'slug',
         'type',
         'has_values',
-        'status'
+        'status',
+        'show_in_navbar', // added
     ];
 
     protected $casts = [
-        'has_values' => 'boolean',
-        'status' => 'boolean',
+        'has_values'     => 'boolean',
+        'status'         => 'boolean',
+        'show_in_navbar' => 'boolean', // added
     ];
 
     public function values()

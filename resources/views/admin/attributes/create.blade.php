@@ -230,6 +230,17 @@
                                     </select>
                                 </div>
 
+                                <div class="toggle-row">
+    <div>
+        <div class="toggle-label">Show in Navbar</div>
+        <div class="toggle-sub">Display this attribute in the navbar menu</div>
+    </div>
+    <select name="show_in_navbar" class="field-select-sm">
+        <option value="1">Yes</option>
+        <option value="0" selected>No</option>
+    </select>
+</div>
+
                             </div>
                         </div>
 

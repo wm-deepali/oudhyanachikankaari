@@ -56,13 +56,10 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('sort_order')
                 ->get();
 
-            $fabricAttribute = Attribute::with('values')
-                ->where('name', 'Fabric')
-                ->first();
-
-            $headerFabrics = $fabricAttribute
-                ? $fabricAttribute->values
-                : collect();
+            $headerAttributes = Attribute::with('values')
+                ->where('show_in_navbar', 1)
+                ->where('status', 1)
+                ->get();
 
             $navbarCategories = Category::with([
                 'children' => function ($q) {
@@ -87,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
                     'headerCollections' => $collections,
                     'headerOccasions' => $headerOccasions,
                     'menuCategories' => $menuCategories,
-                    'headerFabrics' => $headerFabrics,
+                    'headerAttributes' => $headerAttributes,
                     'navbarCategories' => $navbarCategories,
                     'general' => $general
                 ]
