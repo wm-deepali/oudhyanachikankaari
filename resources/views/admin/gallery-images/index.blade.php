@@ -16,136 +16,165 @@
         --green-bg: #e3f1ec;
         --red: #b22222;
         --red-bg: #fce8e8;
-        --amber: #916a00;
-        --amber-bg: #fff5cc;
         --radius-sm: 8px;
         --radius-md: 12px;
         --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px var(--border);
         --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-    .list-page { 
-        background: var(--bg); 
-        padding: 24px 28px; 
-        min-height: 100vh; 
-        font-family: var(--font); 
-        color: var(--text-primary); 
+    .list-page {
+        background: var(--bg);
+        padding: 24px 28px;
+        min-height: 100vh;
+        font-family: var(--font);
+        color: var(--text-primary);
     }
     .list-page * { box-sizing: border-box; }
 
-    .list-page-header { 
-        display: flex; 
-        align-items: flex-start; 
-        justify-content: space-between; 
-        flex-wrap: wrap; 
-        gap: 12px; 
-        margin-bottom: 20px; 
+    .list-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 24px;
     }
-    .list-page-header h1 { 
-        font-size: 20px; 
-        font-weight: 650; 
-        color: var(--text-primary); 
-        margin: 0; 
+    .list-page-header h1 {
+        font-size: 20px;
+        font-weight: 650;
+        color: var(--text-primary);
+        margin: 0;
     }
-    .crumb { 
-        font-size: 12.5px; 
-        color: var(--text-hint); 
-        margin-top: 3px; 
+    .crumb {
+        font-size: 12.5px;
+        color: var(--text-hint);
+        margin-top: 3px;
     }
     .crumb a { color: var(--accent); text-decoration: none; }
     .crumb a:hover { text-decoration: underline; }
     .crumb span { margin: 0 5px; }
 
-    .list-card { 
-        background: var(--surface); 
-        border: 1px solid var(--border); 
-        border-radius: var(--radius-md); 
-        box-shadow: var(--shadow-card); 
-        overflow: hidden; 
+    .list-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
     }
-
-    .data-table { 
-        width: 100%; 
-        border-collapse: collapse; 
-        font-size: 13px; 
-        font-family: var(--font); 
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
     }
-    .data-table thead th { 
-        font-size: 11px; 
-        font-weight: 650; 
-        letter-spacing: .06em; 
-        text-transform: uppercase; 
-        color: var(--text-hint); 
-        padding: 12px 16px; 
-        border-bottom: 1px solid var(--border); 
-        background: #fafafa; 
-        text-align: left; 
+    .data-table thead th {
+        font-size: 11px;
+        font-weight: 650;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--text-hint);
+        padding: 14px 16px;
+        border-bottom: 2px solid var(--border);
+        background: #fafafa;
+        text-align: left;
     }
-    .data-table tbody tr { 
-        border-bottom: 1px solid var(--border); 
-        transition: background .1s; 
+    .data-table tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background .1s;
     }
     .data-table tbody tr:hover { background: #fafbfc; }
-    .data-table td { 
-        padding: 14px 16px; 
-        color: var(--text-primary); 
-        vertical-align: middle; 
+    .data-table td {
+        padding: 14px 16px;
+        vertical-align: middle;
     }
-
-    .pill { 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 4px; 
-        font-size: 11.5px; 
-        font-weight: 600; 
-        padding: 3px 9px; 
-        border-radius: 20px; 
-        white-space: nowrap; 
-    }
-    .pill::before { 
-        content: ''; 
-        width: 5px; 
-        height: 5px; 
-        border-radius: 50%; 
-        display: inline-block; 
-    }
-    .pill-active { background: var(--green-bg); color: var(--green); }
-    .pill-active::before { background: var(--green); }
-    .pill-inactive { background: var(--red-bg); color: var(--red); }
-    .pill-inactive::before { background: var(--red); }
 
     .gallery-img {
-        width: 90px; 
-        height: 55px; 
-        object-fit: cover; 
-        border-radius: var(--radius-sm); 
+        width: 85px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
         border: 1px solid var(--border);
     }
 
+    /* Sort Order Pill */
+    .sort-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f3f5;
+        color: #202223;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 10px;
+        border-radius: 9999px;
+        border: 1px solid #e3e5e8;
+    }
+
+    /* Status Pill */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        font-size: 12.5px;
+        font-weight: 600;
+    }
+    .status-active {
+        background: var(--green-bg);
+        color: var(--green);
+    }
+
+    /* Actions */
+    .action-group {
+        display: flex;
+        gap: 8px;
+    }
     .action-btn {
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 30px; height: 30px; border-radius: var(--radius-sm);
-        border: 1px solid var(--border); background: var(--surface);
-        color: var(--text-secondary); cursor: pointer; text-decoration: none;
-        transition: all .15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all 0.15s;
     }
-    .action-btn:hover { background: var(--bg); color: var(--text-primary); }
-
-    .pagination-bar { 
-        padding: 14px 20px; 
-        border-top: 1px solid var(--border); 
-        display: flex; 
-        justify-content: center; 
-        background: var(--surface); 
+    .action-btn:hover {
+        background: #f8f9fa;
+        color: var(--text-primary);
+    }
+    .action-btn.danger:hover {
+        background: #fce8e8;
+        color: var(--red);
+        border-color: var(--red);
     }
 
-    @media(max-width:768px) { 
-        .list-page { padding: 16px; } 
+    /* Compact Add Button */
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 38px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn-primary:hover {
+        background: #252f70;
     }
     </style>
 
     <div class="app-content content container-fluid">
         <div class="list-page">
-            <!-- Page header -->
             <div class="list-page-header">
                 <div>
                     <h1>Gallery Images</h1>
@@ -157,33 +186,30 @@
                         Gallery Images
                     </div>
                 </div>
-                <div>
-                    <a href="{{ route('admin.gallery-images.create') }}" class="btn-primary-dash">
-                        <i class="fa fa-plus"></i> Add Gallery Image
-                    </a>
-                </div>
+                <a href="{{ route('admin.gallery-images.create') }}" class="btn-primary">
+                    <i class="fa fa-plus"></i> Add Gallery Image
+                </a>
             </div>
 
-            <!-- Main card -->
             <div class="list-card">
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Image</th>
-                                <th>Title</th>
-                                <th>Column</th>
-                                <th>Height</th>
-                                <th>Sort Order</th>
-                                <th>Status</th>
-                                <th style="width:120px">Action</th>
+                                <th>IMAGE</th>
+                                <th>TITLE</th>
+                                <th>COLUMN</th>
+                                <th>HEIGHT</th>
+                                <th>SORT ORDER</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($galleryImages as $item)
                                 <tr id="row{{ $item->id }}">
-                                    <td><span class="id-chip">{{ $item->id }}</span></td>
+                                    <td>{{ $item->id }}</td>
                                     <td>
                                         @if($item->image)
                                             <img src="{{ asset('storage/' . $item->image) }}" 
@@ -192,29 +218,30 @@
                                             <span class="text-muted">No Image</span>
                                         @endif
                                     </td>
-                                    <td>{{ $item->title }}</td>
-                                    <td>Column {{ $item->column_no }}</td>
-                                    <td>{{ $item->height_class }}</td>
+                                    <td>{{ $item->title ?? '—' }}</td>
+                                    <td>Column {{ $item->column_no ?? '—' }}</td>
+                                    <td>{{ $item->height_class ?? '—' }}</td>
                                     <td>
-                                        <span style="font-size:13px;font-weight:600;color:var(--text-primary)">
-                                            {{ $item->sort_order }}
-                                        </span>
+                                        <span class="sort-pill">{{ $item->sort_order ?? 0 }}</span>
                                     </td>
                                     <td>
                                         @if($item->status)
-                                            <span class="pill pill-active">Active</span>
+                                            <span class="status-pill status-active">
+                                                <span style="display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;"></span>
+                                                Active
+                                            </span>
                                         @else
                                             <span class="pill pill-inactive">Inactive</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <div style="display:flex;gap:6px">
-                                            <a href="{{ route('admin.gallery-images.edit', $item->id) }}"
-                                                class="action-btn" title="Edit">
+                                        <div class="action-group">
+                                            <a href="{{ route('admin.gallery-images.edit', $item->id) }}" 
+                                               class="action-btn" title="Edit">
                                                 <i class="fa fa-pencil"></i>
                                             </a>
-                                            <button class="action-btn" style="color:var(--red)" 
-                                                onclick="deleteItem({{ $item->id }})" title="Delete">
+                                            <button onclick="deleteItem({{ $item->id }})" 
+                                                    class="action-btn danger" title="Delete">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </div>
@@ -231,7 +258,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="pagination-bar">
                     {{ $galleryImages->links('pagination::bootstrap-4') }}
                 </div>
@@ -252,15 +278,12 @@ function deleteItem(id) {
         confirmButtonColor: '#b22222',
         cancelButtonColor: '#6d7175',
         confirmButtonText: 'Yes, Delete'
-    })
-    .then((result) => {
+    }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
                 url: "{{ url('admin/gallery-images/delete') }}/" + id,
                 type: 'DELETE',
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
+                data: { _token: "{{ csrf_token() }}" },
                 success: function(res) {
                     Swal.fire('Deleted!', res.message, 'success');
                     $("#row" + id).fadeOut(300, function () { $(this).remove(); });

@@ -456,8 +456,35 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/customers', [CustomerReportController::class, 'index'])->name('reports.customers');
         Route::get('reports/customers/export/excel', [CustomerReportController::class, 'exportExcel'])->name('reports.customers.export.excel');
         Route::get('reports/customers/export/pdf', [CustomerReportController::class, 'exportPdf'])->name('reports.customers.export.pdf');
+        // Cleaner URL
+        Route::get('/notifications/', function () {
+    return view('admin.notifications.index');
+})->name('notifications.index');
 
 
+
+Route::prefix('roles-and-permission')->group(function () {
+
+    // Roles Category
+    Route::view('/roles-category', 'admin.roles-and-permission.roles-category.index')->name('roles-category.index');
+    Route::view('/roles-category/create', 'admin.roles-and-permission.roles-category.create')->name('roles-category.create');
+    Route::view('/roles-category/edit', 'admin.roles-and-permission.roles-category.edit')->name('roles-category.edit');
+
+    // Permission and Settings
+    Route::view('/permission-and-settings', 'admin.roles-and-permission.permission-and-settings.index')->name('permission-settings.index');
+    Route::view('/permission-and-settings/create', 'admin.roles-and-permission.permission-and-settings.create')->name('permission-settings.create');
+    Route::view('/permission-and-settings/edit', 'admin.roles-and-permission.permission-and-settings.edit')->name('permission-settings.edit');
+
+    // Team
+    Route::view('/team', 'admin.roles-and-permission.team.index')->name('team.index');
+    Route::view('/team/create', 'admin.roles-and-permission.team.create')->name('team.create');
+    Route::view('/team/edit', 'admin.roles-and-permission.team.edit')->name('team.edit');
+    Route::view('/team/customise-permission', 'admin.roles-and-permission.team.customise-permission')->name('team.customise-permission');
+    Route::view('/team/activity-logs', 'admin.roles-and-permission.team.activity-logs')->name('team.activity-logs');
+    Route::view('/team/login', 'admin.roles-and-permission.team.login')->name('team.login');
+    Route::view('/team/login-history', 'admin.roles-and-permission.team.login-history')->name('team.login-history');
+
+});
 
     });
 });
