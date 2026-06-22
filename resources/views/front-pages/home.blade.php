@@ -269,12 +269,14 @@
                                                 class="aqf-collection-content-wrap d-flex align-items-center justify-content-between">
                                                 <div class="aqf-collection-content">
                                                     <h4 class="aqf-collection-title">
-                                                        <a href="product-default.html">{{ $occasion->title }}</a>
+                                                        <a
+                                                            href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
                                                     </h4>
                                                     <span>{{ $occasion->sub_title }}</span>
                                                 </div>
                                                 <div class="aqf-collection-link-wrap">
-                                                    <a class="aqf-collection-link" href="product-default.html">
+                                                    <a class="aqf-collection-link"
+                                                        href="{{ route('occasions.listing', $occasion->slug) }}">
                                                         <span>
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                                                 viewBox="0 0 12 12" fill="none">
@@ -1231,7 +1233,8 @@
                                                 @endif
                                                 <div class="aq-product-action">
                                                     <button type="button" class="aq-product-action-btn aq-tooltip"
-                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal">
+                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
+                                                        onclick="loadQuickView({{ $product->id }})">
                                                         <i class="fa-regular fa-eye"></i>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
@@ -1785,7 +1788,7 @@
                         <span class="aq-footer-cat-label">Shop by Occasion</span>
                         <div class="aq-footer-cat-links">
                             @foreach($headerOccasions->take(10) as $occasion)
-                                <a href="#" class="aq-footer-cat-link">
+                                <a href="{{ route('occasions.listing', $occasion->slug) }}" class="aq-footer-cat-link">
                                     {{ $occasion->title }}
                                 </a>
                             @endforeach
@@ -1796,10 +1799,10 @@
                     <div class="aq-footer-cat-group">
                         <span class="aq-footer-cat-label">By Price</span>
                         <div class="aq-footer-cat-links">
-                            <a href="#" class="aq-footer-cat-link">Under ₹500</a>
-                            <a href="#" class="aq-footer-cat-link">₹500 to ₹1500</a>
-                            <a href="#" class="aq-footer-cat-link">₹1500 to ₹3000</a>
-                            <a href="#" class="aq-footer-cat-link">Premium (₹3000+)</a>
+                            @foreach(config('price_ranges') as $band)
+                                <a href="{{ route('price.listing', $band['slug']) }}"
+                                    class="aq-footer-cat-link">{{ $band['label'] }}</a>
+                            @endforeach
                         </div>
                     </div>
                 </div>

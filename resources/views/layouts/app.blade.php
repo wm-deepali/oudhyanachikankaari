@@ -83,7 +83,7 @@
     <!-- back to top end -->
 
     <!-- search area -->
-      <div class="aq-search-wrap aq-search-area">
+    <div class="aq-search-wrap aq-search-area">
         <div class="aq-search-close">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M12.75 0.75L0.75 12.75M0.75 0.75L12.75 12.75" stroke="currentcolor" stroke-width="1.5"
@@ -139,7 +139,7 @@
                                         <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
                                             <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
                                                 <a href="{{ route('product.details', $product->slug) }}">
-                                                    
+
                                                     <img class="lazyload aq-product-img"
                                                         src="{{ asset('storage/' . $product->display_image) }}"
                                                         alt="{{ $product->name }}" loading="lazy" />
@@ -367,182 +367,81 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="aq-product-modal-content">
-                    <button type="button" class="aq-product-modal-close-btn" data-bs-toggle="modal"
-                        data-bs-target="#producQuickViewModal"><i class="fa-regular fa-xmark"></i></button>
+                    <button type="button" class="aq-product-modal-close-btn" data-bs-dismiss="modal">
+                        <i class="fa-regular fa-xmark"></i>
+                    </button>
                 </div>
-                <div class="row justify-content-center">
+
+                <div id="quickViewLoader" class="text-center py-5">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+
+                <div id="quickViewContent" class="row justify-content-center" style="display:none;">
                     <div class="col-lg-6 col-md-10">
                         <div class="aq-modal-slider-wrap">
                             <div class="swiper aq-modal-slider-active p-relative">
-                                <div class="swiper-wrapper">
-                                    <div class="swiper-slide">
-                                        <div class="aq-modal-slider">
-                                            <img class="w-100"
-                                                src="{{ asset('assets/img/corporate/fashion1_product_product-1_front-img-1.webp') }}"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                    <div class="swiper-slide">
-                                        <div class="aq-modal-slider">
-                                            <img class="w-100"
-                                                src="{{ asset('assets/img/corporate/fashion1_product_product-2_front-img-1.webp') }}"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                    <div class="swiper-slide">
-                                        <div class="aq-modal-slider">
-                                            <img class="w-100"
-                                                src="{{ asset('assets/img/corporate/fashion1_product_product-3_front-img-1.webp') }}"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                    <div class="swiper-slide">
-                                        <div class="aq-modal-slider">
-                                            <img class="w-100"
-                                                src="{{ asset('assets/img/corporate/fashion1_product_product-4_front-img-1.webp') }}"
-                                                alt="">
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="swiper-wrapper" id="qvSwiperWrapper"></div>
                                 <div class="aq-modal-slider-arrow">
                                     <button class="aq-modal-prev">
-                                        <span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                        <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                                 viewBox="0 0 12 12" fill="none">
                                                 <path d="M10.75 5.75H0.75M0.75 5.75L5.75 10.75M0.75 5.75L5.75 0.75"
                                                     stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
                                                     stroke-linejoin="round"></path>
-                                            </svg>
-                                        </span>
+                                            </svg></span>
                                     </button>
                                     <button class="aq-modal-next">
-                                        <span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                                        <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
                                                 viewBox="0 0 12 12" fill="none">
                                                 <path d="M0.75 5.75H10.75M10.75 5.75L5.75 0.75M10.75 5.75L5.75 10.75"
                                                     stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
                                                     stroke-linejoin="round"></path>
-                                            </svg>
-                                        </span>
+                                            </svg></span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-lg-6">
                         <div class="aq-product-details-wrap pt-20">
 
-                            <!-- product info  -->
-                            <div class="aq-product-details-category"><span>Girls Clothes</span></div>
-                            <h3 class="aq-product-details-title mb-10">Osette backpack Bags</h3>
+                            <div class="aq-product-details-category"><span id="qvCategory"></span></div>
+                            <h3 class="aq-product-details-title mb-10" id="qvTitle"></h3>
 
-                            <!-- inventory details  -->
                             <div class="tp-product-details-inventory">
                                 <div class="aq-product-details-rating-wrapper d-flex align-items-center">
                                     <div class="aq-product-details-rating-box d-flex align-items-center mb-10">
-                                        <div class="aq-product-details-rating">
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13"
-                                                    viewBox="0 0 14 13" fill="none">
-                                                    <path
-                                                        d="M6.6574 0L8.50892 4.4516L13.3148 4.83688L9.65322 7.9734L10.7719 12.6631L6.6574 10.15L2.5429 12.6631L3.66157 7.9734L0 4.83688L4.80587 4.4516L6.6574 0Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13"
-                                                    viewBox="0 0 14 13" fill="none">
-                                                    <path
-                                                        d="M6.6574 0L8.50892 4.4516L13.3148 4.83688L9.65322 7.9734L10.7719 12.6631L6.6574 10.15L2.5429 12.6631L3.66157 7.9734L0 4.83688L4.80587 4.4516L6.6574 0Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13"
-                                                    viewBox="0 0 14 13" fill="none">
-                                                    <path
-                                                        d="M6.6574 0L8.50892 4.4516L13.3148 4.83688L9.65322 7.9734L10.7719 12.6631L6.6574 10.15L2.5429 12.6631L3.66157 7.9734L0 4.83688L4.80587 4.4516L6.6574 0Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13"
-                                                    viewBox="0 0 14 13" fill="none">
-                                                    <path
-                                                        d="M6.6574 0L8.50892 4.4516L13.3148 4.83688L9.65322 7.9734L10.7719 12.6631L6.6574 10.15L2.5429 12.6631L3.66157 7.9734L0 4.83688L4.80587 4.4516L6.6574 0Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                            <span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="13"
-                                                    viewBox="0 0 14 13" fill="none">
-                                                    <path
-                                                        d="M6.6574 0L8.50892 4.4516L13.3148 4.83688L9.65322 7.9734L10.7719 12.6631L6.6574 10.15L2.5429 12.6631L3.66157 7.9734L0 4.83688L4.80587 4.4516L6.6574 0Z"
-                                                        fill="currentcolor"></path>
-                                                </svg>
-                                            </span>
-                                        </div>
+                                        <div class="aq-product-details-rating" id="qvStars"></div>
                                         <div class="aq-product-details-reviews">
-                                            <span>( 1 review )</span>
+                                            <span id="qvReviewsCount"></span>
                                         </div>
                                     </div>
-                                    <div class="aq-product-details-fomo-mesg mb-10">
-                                        <span><i>ðŸ”¥</i> 41 sold in last 16 hours</span>
-                                    </div>
                                 </div>
                             </div>
 
-                            <!-- price info  -->
                             <div class="aq-product-details-price-wrap mb-30">
-                                <ins><span class="aq-product-details-price new-price">$160.00</span></ins>
+                                <ins><span class="aq-product-details-price new-price" id="qvPrice"></span></ins>
+                                <del><span class="aq-product-details-old-price" id="qvMrp"
+                                        style="margin-left:10px;display:none;"></span></del>
                             </div>
 
-                            <!-- product-variation -->
-                            <div class="aq-product-details-size mb-20">
-                                <h4 class="aq-product-details-title-sm mb-15"><label>Size:</label> M</h4>
-                                <div class="aq-product-details-size-list">
-                                    <button>XS</button>
-                                    <button>S</button>
-                                    <button>L</button>
-                                    <button>M</button>
-                                </div>
-                            </div>
+                            <div id="qvVariantsWrap"></div>
 
-                            <!-- product-variation -->
-                            <div class="aq-product-details-variation mb-30">
-                                <h4 class="aq-product-details-title-sm mb-15">
-                                    <label>Color:</label> Chestnut
-                                </h4>
-                                <div class="aq-product-details-variation-wrap d-flex align-items-center">
-                                    <div class="aq-product-details-variation-item active">
-                                        <img src="{{ asset('assets/img/corporate/fashion1_product_product-1_front-img-1.webp') }}"
-                                            alt="">
-                                    </div>
-                                    <div class="aq-product-details-variation-item">
-                                        <img src="{{ asset('assets/img/corporate/fashion1_product_product-1_front-img-2.webp') }}"
-                                            alt="">
-                                    </div>
-                                    <div class="aq-product-details-variation-item">
-                                        <img src="{{ asset('assets/img/corporate/fashion1_product_product-1_front-img-3.webp') }}"
-                                            alt="">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- product-action -->
                             <div class="aq-product-details-action-wrapper mb-20">
                                 <div class="aq-product-details-action-item-wrapper d-sm-flex align-items-center">
                                     <div class="aq-product-details-quantity">
                                         <div class="aq-product-quantity mb-10 mr-10">
-                                            <span class="aq-cart-minus">
+                                            <span class="aq-cart-minus" onclick="qvAdjustQty(-1)">
                                                 <svg width="11" height="2" viewBox="0 0 11 2" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1 1H10" stroke="currentColor" stroke-width="1.5"
                                                         stroke-linecap="round" stroke-linejoin="round"></path>
                                                 </svg>
                                             </span>
-                                            <input class="aq-cart-input" type="text" value="1" aria-label="Quantity">
-                                            <span class="aq-cart-plus">
+                                            <input class="aq-cart-input" type="text" id="qvQty" value="1"
+                                                aria-label="Quantity">
+                                            <span class="aq-cart-plus" onclick="qvAdjustQty(1)">
                                                 <svg width="11" height="12" viewBox="0 0 11 12" fill="none"
                                                     xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M1 6H10" stroke="currentColor" stroke-width="1.5"
@@ -555,11 +454,11 @@
                                     </div>
                                     <div
                                         class="aq-product-details-add-to-cart product-btn-style-2 d-flex align-items-center mb-10 w-100">
-                                        <button
-                                            class="aq-product-details-add-to-cart-btn aq-btn-black radius-30 w-100">Add
-                                            To Cart</button>
+                                        <button class="aq-product-details-add-to-cart-btn aq-btn-black radius-30 w-100"
+                                            id="qvAddToCartBtn" onclick="qvAddToCart(false)">Add To Cart</button>
                                         <button type="button"
-                                            class="aq-product-action-btn aq-wishlist-btn aq-tooltip-top">
+                                            class="aq-product-action-btn aq-wishlist-btn aq-tooltip-top"
+                                            id="qvWishlistBtn" onclick="qvAddToWishlist()">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16"
                                                 viewBox="0 0 18 16" fill="none">
                                                 <path
@@ -569,35 +468,20 @@
                                             </svg>
                                             <span class="aq-tooltip-item">Wishlist</span>
                                         </button>
-                                        <button type="button"
-                                            class="aq-product-action-btn aq-compare-btn aq-tooltip-top">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="14"
-                                                viewBox="0 0 16 14" fill="none">
-                                                <path
-                                                    d="M11.6755 5.91828L14.2612 3.33412M14.2612 3.33412L11.6755 0.75M14.2612 3.33412L1.74999 3.33374M3.33562 8.07153L0.75 10.6557L3.33562 13.2398M13.7724 10.75H1.26122"
-                                                    stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </svg>
-                                            <span class="aq-tooltip-item">Compare</span>
-                                        </button>
                                     </div>
                                 </div>
-                                <button
-                                    class="aq-product-details-buy-now-btn aq-btn-black btn-red-bg  radius-30 w-100">Buy
-                                    Now</button>
+                                <button class="aq-product-details-buy-now-btn aq-btn-black btn-red-bg radius-30 w-100"
+                                    id="qvBuyNowBtn" onclick="qvAddToCart(true)">Buy Now</button>
                             </div>
 
-                            <!-- product view details btn -->
-                            <a class="product-view-details-btn aq-line-anim" href="#">
+                            <a class="product-view-details-btn aq-line-anim" id="qvViewDetailsLink" href="#">
                                 View Full Details
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"
+                                <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"
                                         fill="none">
                                         <path d="M0.75 5.75H10.75M10.75 5.75L5.75 0.75M10.75 5.75L5.75 10.75"
                                             stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
                                             stroke-linejoin="round"></path>
-                                    </svg>
-                                </span>
+                                    </svg></span>
                             </a>
                         </div>
                     </div>
@@ -776,9 +660,6 @@
 
             </div>
 
-            <!-- <a href="#" class="track-order">
-                ðŸšš Track your order
-            </a> -->
 
         </div>
 
@@ -968,10 +849,8 @@
 
                                                             @forelse($headerFabrics as $fabric)
 
-                                                                <li>
-                                                                    <a href="#">
-                                                                        {{ $fabric->value }}
-                                                                    </a>
+                                                                <li><a
+                                                                        href="{{ route('attribute.listing', [$fabric->attribute->slug, $fabric->slug]) }}">{{ $fabric->value }}</a>
                                                                 </li>
 
                                                             @empty
@@ -996,10 +875,8 @@
 
                                                             @foreach($headerCollections as $collection)
 
-                                                                <li>
-                                                                    <a href="#">
-                                                                        {{ $collection->name }}
-                                                                    </a>
+                                                                <li><a
+                                                                        href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
                                                                 </li>
 
                                                             @endforeach
@@ -1010,11 +887,11 @@
                                                     <div class="aq-corp-megamenu-col">
                                                         <h6 class="aq-corp-megamenu-heading">Price Range</h6>
                                                         <ul>
-                                                            <li><a href="#">Under ₹2,999</a></li>
-                                                            <li><a href="#">₹3,000 - ₹5,999</a></li>
-                                                            <li><a href="#">₹6,000 - ₹9,999</a></li>
-                                                            <li><a href="#">₹10,000 - ₹14,999</a></li>
-                                                            <li><a href="#">₹15,000 and Above</a></li>
+                                                            @foreach(config('price_ranges') as $band)
+                                                                <li><a
+                                                                        href="{{ route('price.listing', $band['slug']) }}">{{ $band['label'] }}</a>
+                                                                </li>
+                                                            @endforeach
                                                         </ul>
                                                     </div>
                                                     <div class="aq-corp-megamenu-col">
@@ -1023,10 +900,8 @@
 
                                                             @forelse($headerOccasions as $occasion)
 
-                                                                <li>
-                                                                    <a href="#">
-                                                                        {{ $occasion->title }}
-                                                                    </a>
+                                                                <li><a
+                                                                        href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
                                                                 </li>
 
                                                             @empty
@@ -1055,7 +930,7 @@
                                                     @foreach($menuCategories as $category)
                                                         <div class="col">
                                                             <div class="aq-megamenu-img-item mb-20">
-                                                                <a href="#">
+                                                                <a href="{{ route('products.listing', $category->slug) }}">
                                                                     <div class="aq-megamenu-img">
                                                                         @if($category->image)
                                                                             <img src="{{ asset('storage/' . $category->image) }}"
@@ -1079,7 +954,7 @@
 
                                         <li class="has-dropdown">
 
-                                            <a href="#">
+                                            <a href="{{ route('products.listing', $category->slug) }}">
                                                 {{ $category->name }}
                                             </a>
 
@@ -1090,7 +965,8 @@
                                                     @foreach($category->children as $subcategory)
 
                                                         <li>
-                                                            <a href="#">
+                                                            <a
+                                                                href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
                                                                 {{ $subcategory->name }}
                                                             </a>
                                                         </li>
@@ -1191,7 +1067,7 @@
 
     @yield('content')
 
-     <!-- Premium Bespoke Bulk Enquiry Side Drawer Markup -->
+    <!-- Premium Bespoke Bulk Enquiry Side Drawer Markup -->
     <div class="aq-drawer-parent-wrap" id="aqEnquiryDrawerWrap">
         <div class="aq-drawer-overlay" id="aqDrawerOverlay"></div>
         <div class="aq-drawer-card-body">
@@ -1503,7 +1379,7 @@
 
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-policy-links text-center mb-20 mt-10">
-                                 @foreach($footerPages as $page)
+                                @foreach($footerPages as $page)
                                     <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
                                         {{ $page->page_name }}</a>
                                 @endforeach
@@ -1600,7 +1476,7 @@
     <!-- Floating Action Buttons -->
     <div class="floating-buttons"
         style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; display: flex; flex-direction: column; gap: 15px;">
-  
+
     </div>
 
     <style>
@@ -1812,7 +1688,7 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 
-    
+
     @if(session('success_general'))
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -1863,7 +1739,7 @@
         </script>
     @endif
 
-     <!-- Bulk Orders Submission Handler & Drawer Controller -->
+    <!-- Bulk Orders Submission Handler & Drawer Controller -->
     <script>
 
 
@@ -1964,7 +1840,7 @@
 
     <!-- WhatsApp scroll behavior script -->
     <script>
-        
+
         document.addEventListener("DOMContentLoaded", function () {
             var whatsappBtn = document.querySelector(".footer_whatspp");
             if (whatsappBtn) {
@@ -2223,6 +2099,185 @@
 
 
 
+    </script>
+
+    <script>
+        const quickViewBaseUrl = "{{ route('product.quickview', ['id' => '__ID__']) }}";
+
+        let qvCurrentProduct = null;
+        let qvVariants = [];
+        let qvSwiper = null;
+
+        function loadQuickView(productId) {
+            $('#quickViewContent').hide();
+            $('#quickViewLoader').show();
+
+            $.ajax({
+                url: quickViewBaseUrl.replace('__ID__', productId),
+                type: 'GET',
+                success: function (response) {
+                    if (response.status) {
+                        renderQuickView(response);
+                    }
+                },
+                error: function () {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to load product.' });
+                },
+                complete: function () {
+                    $('#quickViewLoader').hide();
+                    $('#quickViewContent').show();
+                }
+            });
+        }
+
+        function renderQuickView(data) {
+            qvCurrentProduct = data.product;
+            qvCurrentProduct.variant_id = null;
+            qvVariants = data.variants;
+
+            $('#qvCategory').text(data.product.category);
+            $('#qvTitle').text(data.product.name);
+            $('#qvViewDetailsLink').attr('href', data.product.url);
+
+            setQvPrice(data.product.price, data.product.mrp);
+
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += '<span><i class="fa-' + (i <= Math.round(data.avgRating) ? 'solid' : 'regular') + ' fa-star"></i></span>';
+            }
+            $('#qvStars').html(starsHtml);
+            $('#qvReviewsCount').text('(' + data.reviewsCount + ' review' + (data.reviewsCount === 1 ? '' : 's') + ')');
+
+            // slider
+            let slidesHtml = '';
+            data.product.images.forEach(function (img) {
+                slidesHtml += '<div class="swiper-slide"><div class="aq-modal-slider"><img class="w-100" src="' + img + '" alt="' + data.product.name + '"></div></div>';
+            });
+            $('#qvSwiperWrapper').html(slidesHtml);
+
+            if (qvSwiper) qvSwiper.destroy(true, true);
+            qvSwiper = new Swiper('.aq-modal-slider-active', {
+                loop: data.product.images.length > 1,
+                navigation: { nextEl: '.aq-modal-next', prevEl: '.aq-modal-prev' }
+            });
+
+            // variant buttons
+            let variantsHtml = '';
+            Object.keys(data.variantAttributes).forEach(function (attrId) {
+                const attr = data.variantAttributes[attrId];
+                variantsHtml += '<div class="aq-product-details-size mb-20"><h4 class="aq-product-details-title-sm mb-15">' + attr.name + '</h4><div class="aq-product-details-size-list">';
+                Object.keys(attr.values).forEach(function (valueId) {
+                    variantsHtml += '<button type="button" class="qv-variant-option" data-attribute-id="' + attrId + '" data-value-id="' + valueId + '">' + attr.values[valueId] + '</button>';
+                });
+                variantsHtml += '</div></div>';
+            });
+            $('#qvVariantsWrap').html(variantsHtml);
+
+            $('#qvQty').val(data.product.min_qty || 1).attr('max', data.product.stock);
+            updateQvStockState(data.product.stock);
+        }
+
+        function setQvPrice(price, mrp) {
+            $('#qvPrice').text('₹' + Number(price).toLocaleString('en-IN'));
+            if (mrp > price) {
+                $('#qvMrp').text('₹' + Number(mrp).toLocaleString('en-IN')).show();
+            } else {
+                $('#qvMrp').hide();
+            }
+        }
+
+        $(document).on('click', '.qv-variant-option', function () {
+            const attributeId = $(this).data('attribute-id');
+
+            $('.qv-variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
+            $(this).addClass('active');
+
+            const selectedValues = $('.qv-variant-option.active').map(function () {
+                return parseInt($(this).data('value-id'));
+            }).get();
+
+            const matchedVariant = qvVariants.find(function (variant) {
+                return selectedValues.every(value => variant.values.includes(value));
+            });
+
+            if (matchedVariant) {
+                qvCurrentProduct.variant_id = matchedVariant.id;
+                setQvPrice(matchedVariant.price, matchedVariant.mrp);
+                updateQvStockState(matchedVariant.stock);
+
+                if (matchedVariant.image) {
+                    $('#qvSwiperWrapper').prepend('<div class="swiper-slide"><div class="aq-modal-slider"><img class="w-100" src="/storage/' + matchedVariant.image + '"></div></div>');
+                    qvSwiper.update();
+                    qvSwiper.slideTo(0);
+                }
+            }
+        });
+
+        function updateQvStockState(stock) {
+            qvCurrentProduct.stock = stock;
+            $('#qvQty').attr('max', stock);
+
+            if (stock > 0) {
+                $('#qvAddToCartBtn').prop('disabled', false).text('Add To Cart');
+                $('#qvBuyNowBtn').prop('disabled', false).text('Buy Now');
+            } else {
+                $('#qvAddToCartBtn').prop('disabled', true).text('Out of Stock');
+                $('#qvBuyNowBtn').prop('disabled', true).text('Out of Stock');
+            }
+        }
+
+        function qvAdjustQty(amount) {
+            const input = document.getElementById('qvQty');
+            const max = parseInt(input.getAttribute('max')) || 9999;
+            let val = (parseInt(input.value) || 1) + amount;
+            if (val < 1) val = 1;
+            if (val > max) val = max;
+            input.value = val;
+        }
+
+        function qvAddToCart(buyNow) {
+            if (!qvCurrentProduct || qvCurrentProduct.stock <= 0) return;
+
+            const quantity = parseInt($('#qvQty').val()) || 1;
+
+            $.ajax({
+                url: "{{ route('cart.add') }}",
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    product_id: qvCurrentProduct.id,
+                    variant_id: qvCurrentProduct.variant_id,
+                    quantity: quantity
+                },
+                success: function (response) {
+                    if (response.status) {
+                        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                        $('.cart-count').text(response.cart_count);
+                        if (buyNow) {
+                            window.location.href = "{{ route('cart') }}";
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON?.message ?? 'Something went wrong.' });
+                }
+            });
+        }
+
+        function qvAddToWishlist() {
+            if (!qvCurrentProduct) return;
+            addToWishlist(qvCurrentProduct.id); // reuses the existing global wishlist function
+        }
+
+        // reset content when modal closes so old data doesn't flash next time
+        $('#producQuickViewModal').on('hidden.bs.modal', function () {
+            $('#quickViewContent').hide();
+            $('#qvSwiperWrapper').empty();
+            $('#qvVariantsWrap').empty();
+            qvCurrentProduct = null;
+        });
     </script>
 
     <style>

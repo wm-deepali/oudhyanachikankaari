@@ -139,6 +139,20 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name' => 'required|string|max:255',
+            'mrp' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|in:amount,percentage',
+            'price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'min_qty' => 'nullable|integer|min:1',
+            'sku' => 'nullable|string|max:255',
+            'product_code' => 'nullable|string|max:255',
+            'images.*' => 'nullable|image|max:2048',
+        ]);
+
         DB::beginTransaction();
 
         try {
@@ -151,15 +165,17 @@ class ProductController extends Controller
                 'short_description' => $request->short_description,
                 'description' => $request->description,
                 'delivery_returns' => $request->delivery_returns,
+                'fabric_care' => $request->fabric_care,
 
-                'mrp' => $request->mrp,
-                'discount_type' => $request->discount_type,
-                'discount' => $request->discount,
-                'price' => $request->price,
+                // ✅ blank MRP/Discount/Price never get inserted as '' into decimal columns
+                'mrp' => $request->mrp !== null && $request->mrp !== '' ? $request->mrp : 0,
+                'discount_type' => $request->discount_type ?: 'amount',
+                'discount' => $request->discount !== null && $request->discount !== '' ? $request->discount : 0,
+                'price' => $request->price !== null && $request->price !== '' ? $request->price : ($request->mrp ?: 0),
 
                 'sku' => $request->sku,
-                'stock' => $request->stock,
-                'min_qty' => $request->min_qty,
+                'stock' => $request->stock !== null && $request->stock !== '' ? $request->stock : 0,
+                'min_qty' => $request->min_qty !== null && $request->min_qty !== '' ? $request->min_qty : 1,
                 'product_code' => $request->product_code,
                 'delivery_time' => $request->delivery_time,
 
@@ -415,6 +431,20 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name' => 'required|string|max:255',
+            'mrp' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'discount_type' => 'nullable|in:amount,percentage',
+            'price' => 'nullable|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'min_qty' => 'nullable|integer|min:1',
+            'sku' => 'nullable|string|max:255',
+            'product_code' => 'nullable|string|max:255',
+            'images.*' => 'nullable|image|max:2048',
+        ]);
+
         DB::beginTransaction();
 
         try {
@@ -430,15 +460,17 @@ class ProductController extends Controller
                 'short_description' => $request->short_description,
                 'description' => $request->description,
                 'delivery_returns' => $request->delivery_returns,
+                'fabric_care' => $request->fabric_care,
 
-                'mrp' => $request->mrp,
-                'discount_type' => $request->discount_type,
-                'discount' => $request->discount,
-                'price' => $request->price,
+                // ✅ blank MRP/Discount/Price never get written as '' into decimal columns
+                'mrp' => $request->mrp !== null && $request->mrp !== '' ? $request->mrp : 0,
+                'discount_type' => $request->discount_type ?: 'amount',
+                'discount' => $request->discount !== null && $request->discount !== '' ? $request->discount : 0,
+                'price' => $request->price !== null && $request->price !== '' ? $request->price : ($request->mrp ?: 0),
 
                 'sku' => $request->sku,
-                'stock' => $request->stock,
-                'min_qty' => $request->min_qty,
+                'stock' => $request->stock !== null && $request->stock !== '' ? $request->stock : 0,
+                'min_qty' => $request->min_qty !== null && $request->min_qty !== '' ? $request->min_qty : 1,
                 'product_code' => $request->product_code,
                 'delivery_time' => $request->delivery_time,
 
@@ -809,6 +841,7 @@ class ProductController extends Controller
 
             'details',
             'delivery_returns',
+
 
             'meta_title',
             'meta_description',

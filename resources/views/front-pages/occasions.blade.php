@@ -60,7 +60,7 @@
                                         {{ Str::limit($occasion->short_description, 120) }}
                                     </p>
 
-                                    <a href="#" class="aq-btn-black" style="align-self:flex-start; background:transparent; color:#fff;
+                                    <a href="{{ route('occasions.listing', $occasion->slug) }}" class="aq-btn-black" style="align-self:flex-start; background:transparent; color:#fff;
                                 border:1px solid #fff; padding:8px 20px; border-radius:30px;">
                                         Explore Collection
                                     </a>

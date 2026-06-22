@@ -168,29 +168,44 @@
                             <!-- Pricing box -->
                             <div class="aq-details-price-box p-3 mb-25">
                                 <div class="d-flex flex-column gap-1">
-                                    <div class="aq-price-mrp-row d-flex align-items-center gap-2">
-                                        <span class="mrp-label">MRP:
-                                            <span class="mrp-value" id="productMrp">
-                                                ₹{{ number_format($product->mrp) }}
+                                    @php
+                                        $discount = ($product->mrp > 0)
+                                            ? round((($product->mrp - $product->price) / $product->mrp) * 100)
+                                            : 0;
+                                    @endphp
+
+                                    @if($discount > 0)
+                                        <div class="aq-price-mrp-row d-flex align-items-center gap-2 mb-2">
+                                            <span class="mrp-label">
+                                                MRP:
+                                                <span class="mrp-value" id="productMrp">
+                                                    ₹{{ number_format($product->mrp) }}
+                                                </span>
                                             </span>
-                                        </span>
-                                        <span class="discount-badge" id="productDiscount">DISCOUNT:
-                                            {{ round((($product->mrp - $product->price) / $product->mrp) * 100) }}%
-                                            OFF</span>
-                                    </div>
-                                    <div class="aq-price-offered-row d-flex align-items-baseline gap-2 mt-2">
+
+                                            <span class="discount-badge" id="productDiscount">
+                                                DISCOUNT: {{ $discount }}% OFF
+                                            </span>
+                                        </div>
+                                    @endif
+
+                                    <div class="aq-price-offered-row d-flex align-items-baseline gap-2">
                                         <span class="offered-label">Offered Price:</span>
-                                        <span class="aq-details-price"
-                                            id="productPrice">₹{{ number_format($product->price) }}
+
+                                        <span class="aq-details-price" id="productPrice">
+                                            ₹{{ number_format($product->price) }}
                                         </span>
-                                        <span class="aq-details-price-unit">/ unit (exclusive of GST)</span>
+
+                                        <span class="aq-details-price-unit">
+                                            / unit (exclusive of GST)
+                                        </span>
                                     </div>
                                 </div>
                                 <div class="aq-moq-info-list">
-                                    <p class="mb-2">
-                                        <i class="fa-solid fa-circle-info"></i> Minimum Order Quantity (MOQ):
-                                        <strong>{{ $product->min_qty }}</strong>
-                                    </p>
+                                    <!-- <p class="mb-2">
+                                                                        <i class="fa-solid fa-circle-info"></i> Minimum Order Quantity (MOQ):
+                                                                        <strong>{{ $product->min_qty }}</strong>
+                                                                    </p> -->
                                     <p class="mb-0">
                                         <i class="fa-solid fa-truck-fast"></i> Delivery Time:
                                         <strong>{{ $product->delivery_time }}</strong>
@@ -204,33 +219,26 @@
 
                             <div class="aq-creative-details-block mt-25 mb-30">
 
-                                @foreach($product->attributeValues as $item)
+                                @php
+                                    $groupedAttributes = $product->attributeValues
+                                        ->filter(function ($item) use ($variantAttributes) {
+                                            return $item->attribute
+                                                && $item->value
+                                                && !isset($variantAttributes[$item->attribute_id]);
+                                        })
+                                        ->groupBy('attribute_id');
+                                @endphp
 
-                                    @if(!$item->attribute || !$item->value)
-                                        @continue
-                                    @endif
-
-                                    @php
-
-                                        $isVariantAttribute =
-                                            isset($variantAttributes[$item->attribute_id]);
-
-                                    @endphp
-
-                                    @if($isVariantAttribute)
-                                        @continue
-                                    @endif
+                                @foreach($groupedAttributes as $items)
 
                                     <div class="aq-detail-item">
-
                                         <span class="detail-label">
-                                            {{ $item->attribute->name }}
+                                            {{ $items->first()->attribute->name }}
                                         </span>
 
                                         <span class="detail-value">
-                                            {{ $item->value->value }}
+                                            {{ $items->pluck('value.value')->implode(', ') }}
                                         </span>
-
                                     </div>
 
                                 @endforeach
@@ -299,8 +307,8 @@
                                 </div>
                                 @if($product->stock >= $product->min_qty)
                                     <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid"
-                                        onclick="addToCart({{ $product->id }})"></button>
-                                    Buy it Now
+                                        onclick="addToCart({{ $product->id }})">
+                                        Buy it Now
                                     </button>
                                 @else
                                     <button class="aq-btn-black btn-red-bg w-100 mt-3 luxury-btn-solid" disabled
@@ -329,16 +337,12 @@
                                 <button class="nav-link" id="shipping-tab" data-bs-toggle="tab"
                                     data-bs-target="#tab-shipping" type="button" role="tab">Shipping & Returns</button>
                             </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="faqs-tab" data-bs-toggle="tab" data-bs-target="#tab-faqs"
-                                    type="button" role="tab">Stitching Services</button>
-                            </li>
                             @if($setting && $setting->product_reviews)
 
-                            <li class="nav-item">
-                                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"
-                                    type="button" role="tab">Reviews ({{ $reviewsCount }})</button>
-                            </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"
+                                        type="button" role="tab">Reviews ({{ $reviewsCount }})</button>
+                                </li>
                             @endif
                         </ul>
                         <div class="tab-content aq-details-tab-content p-4 mt-3">
@@ -351,40 +355,7 @@
 
                             <!-- Branding Specs Tab -->
                             <div class="tab-pane fade" id="tab-brand" role="tabpanel">
-                                <h4 class="aq-tab-heading">Fabric & Care Instructions</h4>
-                                <p class="aq-tab-text">
-                                    To maintain the longevity and brilliance of the handcrafted Chikankari embroidery
-                                    and premium fabrics, please adhere strictly to these care instructions.
-                                </p>
-                                <div class="table-responsive mt-3">
-                                    <table class="table table-bordered align-middle aq-tab-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Feature</th>
-                                                <th>Detail</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><strong>Fabric Composition</strong></td>
-                                                <td>100% Pure Organza Silk</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Embroidery Type</strong></td>
-                                                <td>Authentic Handcrafted Lucknowi Chikankari</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Washing Instructions</strong></td>
-                                                <td>Dry Clean Only. Do not hand wash or machine wash.</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Ironing Instructions</strong></td>
-                                                <td>Steam iron only on low heat. Do not iron directly on the embroidery.
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                {!! $product->fabric_care !!}
                             </div>
 
                             <!-- Logistics Tab -->
@@ -393,59 +364,6 @@
 
                             </div>
 
-                            <!-- FAQs Tab -->
-                            <div class="tab-pane fade" id="tab-faqs" role="tabpanel">
-                                <h4 class="aq-tab-heading">Customization & Stitching Services</h4>
-                                <div class="accordion" id="aqDetailFaqAccordion">
-                                    <div class="accordion-item aq-faq-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed aq-faq-btn" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#detailFaq1">
-                                                Do you offer custom tailoring?
-                                            </button>
-                                        </h2>
-                                        <div id="detailFaq1" class="accordion-collapse collapse"
-                                            data-bs-parent="#aqDetailFaqAccordion">
-                                            <div class="accordion-body aq-faq-body">
-                                                Yes, our expert in-house tailors can stitch the included blouse piece to
-                                                your exact measurements. Once you place an order with the 'Custom
-                                                Stitching' option, our team will email you a measurement form.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="accordion-item aq-faq-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed aq-faq-btn" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#detailFaq2">
-                                                How much does custom stitching cost?
-                                            </button>
-                                        </h2>
-                                        <div id="detailFaq2" class="accordion-collapse collapse"
-                                            data-bs-parent="#aqDetailFaqAccordion">
-                                            <div class="accordion-body aq-faq-body">
-                                                Standard blouse stitching costs ₹1,500. Designer cuts, padded blouses,
-                                                or complex necklines may incur additional charges.
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="accordion-item aq-faq-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed aq-faq-btn" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#detailFaq3">
-                                                Can I request color customization?
-                                            </button>
-                                        </h2>
-                                        <div id="detailFaq3" class="accordion-collapse collapse"
-                                            data-bs-parent="#aqDetailFaqAccordion">
-                                            <div class="accordion-body aq-faq-body">
-                                                For bespoke creations and bridal orders, we offer complete color
-                                                customization and dyeing services. Please contact our bridal concierge
-                                                for more details.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                             <div class="tab-pane fade" id="tab-reviews" role="tabpanel">
                                 <h4 class="aq-tab-heading">Customer Reviews</h4>
@@ -507,7 +425,7 @@
                 <div class="row align-items-center mb-40">
                     <div class="col-12 text-center">
                         <div class="aq-creative-title-box">
-                            <span class="aq-creative-subtitle">Bespoke Collection Drawer</span>
+                            <span class="aq-creative-subtitle">Our Latest Collections</span>
                             <h2 class="aq-creative-title">New Arrivals</h2>
                             <div class="aq-creative-title-line"></div>
                         </div>
@@ -561,7 +479,8 @@
                                     </div>
 
                                     <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation" onclick="openGlobalDrawer('about_page')">
+                                        <button class="aq-product-action-btn" title="Quick Consultation"
+                                            onclick="openGlobalDrawer('about_page')">
                                             <i class="fa-regular fa-envelope"></i>
                                         </button>
                                     </div>
@@ -626,7 +545,7 @@
                 <div class="row align-items-center mb-40">
                     <div class="col-12 text-center">
                         <div class="aq-creative-title-box">
-                            <span class="aq-creative-subtitle">Bespoke Collection Drawer</span>
+                            <span class="aq-creative-subtitle">View Other Products</span>
                             <h2 class="aq-creative-title">Related Products</h2>
                             <div class="aq-creative-title-line"></div>
                         </div>
@@ -681,8 +600,9 @@
                                     </div>
 
                                     <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation" onclick="openGlobalDrawer('about_page')"></button>
-                                            <i class="fa-regular fa-envelope"></i>
+                                        <button class="aq-product-action-btn" title="Quick Consultation"
+                                            onclick="openGlobalDrawer('about_page')"></button>
+                                        <i class="fa-regular fa-envelope"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -740,166 +660,7 @@
             </div>
         </section>
 
-        <!-- 4. Complete Product Listing Catalog (Bottom Showcase) -->
-        <section class="aq-bottom-catalog-section pt-60 pb-80">
-            <div class="container">
-                <div class="row align-items-center mb-40">
-                    <div class="col-12 text-center">
-                        <div class="aq-creative-title-box">
-                            <span class="aq-creative-subtitle">Premium Corporate Catalog</span>
-                            <h2 class="aq-creative-title">Explore Our Complete Collection</h2>
-                            <div class="aq-creative-title-line"></div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row justify-content-center">
-                    <div class="col-xl-12">
-
-                        <!-- Header filter summary bar -->
-                        <div class="aq-layout-header mb-30">
-                            <span class="aq-layout-header-title">Corporate Gifting Premium Catalog</span>
-                            <div class="aq-layout-header-options">
-                                <span>Showing 4 Premium Collections</span>
-                                <select class="aq-sort-select">
-                                    <option value="popularity">Sort By: Popularity</option>
-                                    <option value="price-low">Price: Low to High</option>
-                                    <option value="price-high">Price: High to Low</option>
-                                    <option value="newest">Sort By: Newest</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Product Cards Grid -->
-                        <div class="aq-product-grid">
-
-                            <!-- Item 1 -->
-                            <div class="aq-product-card" data-category="onboarding" data-price="1899">
-                                <div class="aq-product-card-top">
-                                    <img src="{{ asset('assets/img/corporate/welcome_kit_1778668006890.webp') }}"
-                                        class="aq-product-card-img" alt="Elite Executive Gift Set" />
-                                    <div class="aq-product-badges">
-                                        <span class="aq-product-badge bestseller">Best Seller</span>
-                                    </div>
-                                    <div class="aq-product-brand-badge">
-                                        <img src="{{ asset('assets/img/corporate/google_logo.webp') }}"
-                                            alt="Google Premium" />
-                                    </div>
-                                    <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation"
-                                            data-bs-toggle="modal" data-bs-target="#bulkOrderModal">
-                                            <i class="fa-regular fa-envelope"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="aq-product-card-info">
-                                    <span class="aq-product-card-brand-name">Premium Curation</span>
-                                    <h4 class="aq-product-card-title"><a href="#">Elite Executive Onboarding Set</a>
-                                    </h4>
-                                    <p>Includes: Leatherette Journal, Matte Black Pen, Vacuum Flask & Keyring</p>
-                                    <div class="aq-product-card-bottom">
-                                        <div class="aq-product-card-price">₹1,899 <span>/ unit</span></div>
-                                        <button class="aq-product-card-cta aq-bulk-orders-btn" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">Enquire</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Item 2 -->
-                            <div class="aq-product-card" data-category="onboarding" data-price="2999">
-                                <div class="aq-product-card-top">
-                                    <img src="{{ asset('assets/img/corporate/stationery_gifts_1778668654881.webp') }}"
-                                        class="aq-product-card-img" alt="Bespoke Smart Welcome Kit" />
-                                    <div class="aq-product-badges">
-                                        <span class="aq-product-badge new">New</span>
-                                    </div>
-                                    <div class="aq-product-brand-badge">
-                                        <img src="{{ asset('assets/img/corporate/microsoft_logo.webp') }}"
-                                            alt="Microsoft Premium" />
-                                    </div>
-                                    <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation"
-                                            data-bs-toggle="modal" data-bs-target="#bulkOrderModal">
-                                            <i class="fa-regular fa-envelope"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="aq-product-card-info">
-                                    <span class="aq-product-card-brand-name">Swiss Military</span>
-                                    <h4 class="aq-product-card-title"><a href="#">Bespoke Smart Welcome Kit</a></h4>
-                                    <p>Includes: Tech Backpack, Temperature Smart Flask & Executive Planner</p>
-                                    <div class="aq-product-card-bottom">
-                                        <div class="aq-product-card-price">₹2,999 <span>/ unit</span></div>
-                                        <button class="aq-product-card-cta aq-bulk-orders-btn" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">Enquire</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Item 3 -->
-                            <div class="aq-product-card" data-category="onboarding" data-price="999">
-                                <div class="aq-product-card-top">
-                                    <img src="{{ asset('assets/img/corporate/card_imges3.webp') }}"
-                                        class="aq-product-card-img" alt="Starter Joining Box" />
-                                    <div class="aq-product-brand-badge">
-                                        <img src="{{ asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
-                                            alt="B2B Gifts" />
-                                    </div>
-                                    <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation"
-                                            data-bs-toggle="modal" data-bs-target="#bulkOrderModal">
-                                            <i class="fa-regular fa-envelope"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="aq-product-card-info">
-                                    <span class="aq-product-card-brand-name">Premium Curation</span>
-                                    <h4 class="aq-product-card-title"><a href="#">Starter Joining Box</a></h4>
-                                    <p>Includes: Minimalist Notepad, Metal Keychain, & Soft Touch Ball Pen</p>
-                                    <div class="aq-product-card-bottom">
-                                        <div class="aq-product-card-price">₹999 <span>/ unit</span></div>
-                                        <button class="aq-product-card-cta aq-bulk-orders-btn" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">Enquire</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Item 4 -->
-                            <div class="aq-product-card" data-category="onboarding" data-price="3999">
-                                <div class="aq-product-card-top">
-                                    <img src="{{ asset('assets/img/corporate/backpack_gifts_1778668040094.webp') }}"
-                                        class="aq-product-card-img" alt="Prestige Leadership Kit" />
-                                    <div class="aq-product-badges">
-                                        <span class="aq-product-badge bestseller">Best Seller</span>
-                                    </div>
-                                    <div class="aq-product-brand-badge">
-                                        <img src="{{ asset('assets/img/corporate/apple_logo.webp') }}"
-                                            alt="Apple Curation" />
-                                    </div>
-                                    <div class="aq-product-actions">
-                                        <button class="aq-product-action-btn" title="Quick Consultation"
-                                            data-bs-toggle="modal" data-bs-target="#bulkOrderModal">
-                                            <i class="fa-regular fa-envelope"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="aq-product-card-info">
-                                    <span class="aq-product-card-brand-name">Tiger Leather</span>
-                                    <h4 class="aq-product-card-title"><a href="#">Prestige Leadership Curation</a></h4>
-                                    <p>Includes: Leatherette Travel Tote, Cross Rollerball Pen & Smart Wallet</p>
-                                    <div class="aq-product-card-bottom">
-                                        <div class="aq-product-card-price">₹3,999 <span>/ unit</span></div>
-                                        <button class="aq-product-card-cta aq-bulk-orders-btn" data-bs-toggle="modal"
-                                            data-bs-target="#bulkOrderModal">Enquire</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
     </main>
 
@@ -966,14 +727,46 @@
 
                     updatePriceByQty();
 
-                    $('#currentStock').text(
-                        matchedVariant.stock
-                    );
+                    $('#currentStock').text(matchedVariant.stock);
 
-                    $('#aqDetailQty').attr(
-                        'max',
-                        matchedVariant.stock
-                    );
+                    if (matchedVariant.stock > 0) {
+                        $('#aqDetailQty')
+                            .attr('max', matchedVariant.stock)
+                            .val(
+                                Math.max(
+                                    parseInt($('#aqDetailQty').attr('min')) || 1,
+                                    Math.min(
+                                        parseInt($('#aqDetailQty').val()) || 1,
+                                        matchedVariant.stock
+                                    )
+                                )
+                            );
+                    } else {
+                        $('#aqDetailQty')
+                            .attr('max', 0)
+                            .val(0);
+                    }
+
+                    if (matchedVariant.stock < 1) {
+
+                        $('.aq-add-to-cart-btn')
+                            .prop('disabled', true)
+                            .html('<i class="fa-solid fa-ban"></i> Out of Stock');
+
+                        $('.aq-buy-now-btn')
+                            .prop('disabled', true)
+                            .text('Out of Stock');
+
+                    } else {
+
+                        $('.aq-add-to-cart-btn')
+                            .prop('disabled', false)
+                            .html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
+
+                        $('.aq-buy-now-btn')
+                            .prop('disabled', false)
+                            .text('Buy it Now');
+                    }
 
                     if (matchedVariant.image) {
 
@@ -1084,7 +877,19 @@
         });
 
         function addToCart(productId) {
-            let quantity = $('#aqDetailQty').val();
+            const stock = parseInt($('#currentStock').text()) || 0;
+            const quantity = parseInt($('#aqDetailQty').val());
+
+            if (stock <= 0 || quantity > stock) {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Out of Stock',
+                    text: 'Requested quantity is not available.'
+                });
+
+                return;
+            }
 
             let variantId = null;
 

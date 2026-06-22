@@ -23,6 +23,7 @@ class Product extends Model
         'short_description',
         'description',
         'delivery_returns',
+        'fabric_care',
 
         'mrp',
         'discount_type',

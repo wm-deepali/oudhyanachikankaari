@@ -75,9 +75,28 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::get('/search-suggestions', 'searchSuggestions')->name('search.suggestions');
         Route::get('/occasions', 'occasions')->name('occasions');
         Route::get('/categories', 'categories')->name('categories');
-        Route::get('/category/{slug}', 'productListing')->name('products.listing');
-        Route::post('/products/filter/{slug}', 'filterProducts')->name('products.filter');
+
+
+        // Category-based listing (unchanged)
+        Route::get('/products/{slug}', 'productListing')->name('products.listing');
+
+        // Collection-based listing (new)
+        Route::get('/collections/{slug}', 'collectionListing')->name('collections.listing');
+
+        // Occasion-based listing (new, same pattern)
+        Route::get('/occasions/{slug}', 'occasionListing')->name('occasions.listing');
+
+        Route::get('/price/{slug}', 'priceRangeListing')->name('price.listing');
+
+        // Attribute-value based listing (new) e.g. /attribute/fabric/cotton
+        Route::get('/attribute/{attributeSlug}/{valueSlug}', 'attributeListing')->name('attribute.listing');
+
+        // One shared AJAX endpoint used by all four pages above
+        Route::post('/products/filter', 'filterProducts')->name('products.filter');
+
+
         Route::get('/product/{slug}', 'productDetail')->name('product.details');
+        Route::get('/product/quick-view/{id}', 'quickView')->name('product.quickview');
 
         Route::get('/about-us', 'aboutUs')->name('about-us');
         Route::get('/blogs', 'blogs')->name('blogs');
@@ -85,11 +104,9 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::get('/bulk-enquiry', 'bulkEnquiry')->name('bulk-enquiry');
         Route::get('/contact-us', 'contactUs')->name('contact-us');
         Route::get('/faqs', 'faqs')->name('faqs');
-        Route::view('/partners', 'front-pages.partners')->name('partners');
         Route::get('/page/{slug}', 'dynamicPage')->name('dynamic.page');
         Route::get('/thank-you/{id}', 'thankYou')->name('thank-you');
         Route::get('/why-us', 'whyUs')->name('why-us');
-        Route::get('/gallery', 'gallery')->name('gallery');
 
         Route::post('/contact-submit', 'submitContact')->name('contact.submit');
         Route::post('/supplier-enquiry-submit', 'submitSupplierEnquiry')->name('supplier.enquiry.submit');

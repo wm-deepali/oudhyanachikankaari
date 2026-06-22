@@ -30,7 +30,8 @@ use App\Models\HomeWhyCard;
 use App\Models\HomeFeatureCard;
 use App\Models\Collection;
 use App\Models\Setting;
-
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 
 class FrontController extends Controller
 {
@@ -295,80 +296,174 @@ class FrontController extends Controller
         return view('front-pages.categories', compact('categories'));
     }
 
+    private function scopeByContext($query, string $type, $model)
+    {
+        switch ($type) {
+
+            case 'category':
+                $subIds = $model->children()->pluck('id');
+                $query->where(function ($q) use ($model, $subIds) {
+                    $q->where('category_id', $model->id)
+                        ->orWhereIn('subcategory_id', $subIds);
+                });
+                break;
+
+            case 'collection':
+                $query->whereHas('collections', function ($q) use ($model) {
+                    $q->where('collections.id', $model->id);
+                });
+                break;
+
+            case 'occasion':
+                $query->whereHas('occasions', function ($q) use ($model) {
+                    $q->where('gifting_occasions.id', $model->id);
+                });
+                break;
+
+
+            case 'attribute':
+                $query->whereHas('attributeValues', function ($q) use ($model) {
+                    $q->where('attribute_value_id', $model->id);
+                });
+                break;
+        }
+
+        return $query;
+    }
+
     public function productListing(Request $request, $slug)
     {
-        $category = Category::with([
-            'children',
-            'categoryAttributes.attribute.values'
-        ])
-            ->where('slug', $slug)
-            ->where('status', 1)
-            ->firstOrFail();
+        $category = Category::with(['children', 'categoryAttributes.attribute.values'])
+            ->where('slug', $slug)->where('status', 1)->firstOrFail();
 
-        $subcategories = $category->children()
-            ->withCount('subCategoryProducts')
-            ->get();
+        $subcategories = $category->children()->withCount('subCategoryProducts')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $collections = Collection::where('status', 1)
-            ->orderBy('sort_order')
-            ->get();
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $this->scopeByContext($products, 'category', $category);
+        $products = $products->latest()->paginate(12);
 
-        $occasions = GiftingOccasion::where('status', 1)
-            ->get();
-
-        $products = Product::with([
-            'images',
-            'category',
-            'subcategory',
-            'collections',
-            'occasions'
+        return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
+            'contextType' => 'category',
+            'contextModel' => $category,
+            'categories' => collect(), // not needed on category page
+            'pageTitle' => $category->name,
         ]);
+    }
 
-        if ($request->filled('subcategory')) {
+    public function collectionListing(Request $request, $slug)
+    {
+        $collection = Collection::where('slug', $slug)->where('status', 1)->firstOrFail();
 
-            $subcategory = Category::where(
-                'slug',
-                $request->subcategory
-            )->first();
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
 
-            if ($subcategory) {
-                $products->where('subcategory_id', $subcategory->id);
-            }
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $this->scopeByContext($products, 'collection', $collection);
+        $products = $products->latest()->paginate(12);
 
-        } else {
+        return view('front-pages.products', [
+            'category' => null,
+            'subcategories' => collect(),
+            'categories' => $categories,
+            'products' => $products,
+            'collections' => $collections,
+            'occasions' => $occasions,
+            'contextType' => 'collection',
+            'contextModel' => $collection,
+            'pageTitle' => $collection->name,
+        ]);
+    }
 
-            $products->where(function ($query) use ($category, $subcategories) {
-                $query->where('category_id', $category->id)
-                    ->orWhereIn(
-                        'subcategory_id',
-                        $subcategories->pluck('id')
-                    );
-            });
-        }
+    public function occasionListing(Request $request, $slug)
+    {
+        $occasion = GiftingOccasion::where('slug', $slug)->where('status', 1)->firstOrFail();
+
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
+
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $this->scopeByContext($products, 'occasion', $occasion);
+        $products = $products->latest()->paginate(12);
+
+        return view('front-pages.products', [
+            'category' => null,
+            'subcategories' => collect(),
+            'categories' => $categories,
+            'products' => $products,
+            'collections' => $collections,
+            'occasions' => $occasions,
+            'contextType' => 'occasion',
+            'contextModel' => $occasion,
+            'pageTitle' => $occasion->title,
+        ]);
+    }
+
+
+    public function priceRangeListing(Request $request, $slug)
+    {
+        $band = collect(config('price_ranges'))->firstWhere('slug', $slug);
+        abort_unless($band, 404);
+
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
+
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+
+        if (!is_null($band['min']))
+            $products->where('price', '>=', $band['min']);
+        if (!is_null($band['max']))
+            $products->where('price', '<=', $band['max']);
 
         $products = $products->latest()->paginate(12);
 
-        return view(
-            'front-pages.products',
-            compact(
-                'category',
-                'subcategories',
-                'products',
-                'collections',
-                'occasions'
-            )
-        );
+        return view('front-pages.products', [
+            'category' => null,
+            'subcategories' => collect(),
+            'categories' => $categories,
+            'products' => $products,
+            'collections' => $collections,
+            'occasions' => $occasions,
+            'contextType' => 'price',
+            'contextModel' => null,
+            'pageTitle' => $band['label'],
+            'priceBand' => $band,
+        ]);
     }
 
-    public function filterProducts(Request $request, $slug)
+    public function attributeListing(Request $request, $attributeSlug, $valueSlug)
     {
-        $category = Category::with('children')
-            ->where('slug', $slug)
-            ->where('status', 1)
-            ->firstOrFail();
+        $attribute = Attribute::where('slug', $attributeSlug)->firstOrFail();
+        $value = AttributeValue::where('attribute_id', $attribute->id)
+            ->where('slug', $valueSlug)->firstOrFail();
 
-        $subcategories = $category->children()->pluck('id');
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
 
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $this->scopeByContext($products, 'attribute', $value);
+        $products = $products->latest()->paginate(12);
+
+        return view('front-pages.products', [
+            'category' => null,
+            'subcategories' => collect(),
+            'categories' => $categories,
+            'products' => $products,
+            'collections' => $collections,
+            'occasions' => $occasions,
+            'contextType' => 'attribute',
+            'contextModel' => $value,
+            'pageTitle' => $attribute->name . ': ' . $value->value,
+        ]);
+    }
+
+    public function filterProducts(Request $request)
+    {
         $products = Product::with([
             'images',
             'category',
@@ -378,111 +473,100 @@ class FrontController extends Controller
             'attributeValues'
         ])->visible();
 
-        // Category Products
-        $products->where(function ($query) use ($category, $subcategories) {
-            $query->where('category_id', $category->id)
-                ->orWhereIn('subcategory_id', $subcategories);
-        });
+        // Lock to whatever the page represents
+        if ($request->context_type === 'price') {
 
-        // Subcategory Filter
+            // Price-band pages have no Eloquent model to resolve, so the
+            // band's min/max are sent up directly from the blade instead
+            // of going through scopeByContext().
+            if ($request->filled('context_price_min')) {
+                $products->where('price', '>=', $request->context_price_min);
+            }
+
+            if ($request->filled('context_price_max')) {
+                $products->where('price', '<=', $request->context_price_max);
+            }
+
+        } elseif ($request->filled('context_type') && $request->filled('context_id')) {
+
+            $model = match ($request->context_type) {
+                'category' => Category::find($request->context_id),
+                'collection' => Collection::find($request->context_id),
+                'occasion' => GiftingOccasion::find($request->context_id),
+                'attribute' => AttributeValue::find($request->context_id),
+                default => null,
+            };
+
+            if ($model) {
+                $this->scopeByContext($products, $request->context_type, $model);
+            }
+        }
+
+        // Used to narrow by category on collection/occasion/attribute/price pages
+        if (!empty($request->category_id)) {
+            $category = Category::find($request->category_id);
+            if ($category) {
+                $subIds = $category->children()->pluck('id');
+                $products->where(function ($q) use ($category, $subIds) {
+                    $q->where('category_id', $category->id)->orWhereIn('subcategory_id', $subIds);
+                });
+            }
+        }
+
         if (!empty($request->subcategory_id)) {
             $products->where('subcategory_id', $request->subcategory_id);
         }
 
-        // Collection Filter
         if (!empty($request->collections)) {
-
-            $products->whereHas('collections', function ($query) use ($request) {
-
-                $query->whereIn(
-                    'collections.id',
-                    $request->collections
-                );
-
-            });
+            $products->whereHas('collections', fn($q) => $q->whereIn('collections.id', $request->collections));
         }
 
-        // Occasion Filter
         if (!empty($request->occasions)) {
+            $products->whereHas('occasions', fn($q) => $q->whereIn('gifting_occasions.id', $request->occasions));
+        }
 
-            $products->whereHas('occasions', function ($query) use ($request) {
-
-                $query->whereIn(
-                    'gifting_occasions.id',
-                    $request->occasions
-                );
-
-            });
+        if (!empty($request->attribute_values)) {
+            $products->whereHas('attributeValues', fn($q) => $q->whereIn('attribute_value_id', $request->attribute_values));
         }
 
         if (!empty($request->search)) {
-
             $search = trim($request->search);
-
-            $products->where(function ($query) use ($search) {
-
-                $query->where('name', 'like', "%{$search}%")
+            $products->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                     ->orWhere('short_description', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
                     ->orWhere('sku', 'like', "%{$search}%");
-
             });
         }
 
-        if (!empty($request->min_price)) {
+        // Generic min/max sliders (only present on non-price pages; on the
+        // price page the band bounds above already do the work).
+        if (!empty($request->min_price))
             $products->where('price', '>=', $request->min_price);
-        }
-
-        if (!empty($request->max_price)) {
+        if (!empty($request->max_price))
             $products->where('price', '<=', $request->max_price);
-        }
 
         switch ($request->sort_by) {
-
             case 'price-low':
                 $products->orderBy('price', 'asc');
                 break;
-
             case 'price-high':
                 $products->orderBy('price', 'desc');
                 break;
-
-            case 'newest':
-                $products->latest();
-                break;
-
             case 'oldest':
                 $products->oldest();
                 break;
-
             default:
                 $products->latest();
                 break;
         }
 
-        if (!empty($request->attribute_values)) {
-
-            $products->whereHas('attributeValues', function ($query) use ($request) {
-
-                $query->whereIn(
-                    'attribute_value_id',
-                    $request->attribute_values
-                );
-
-            });
-        }
-
         $products = $products->paginate(12);
 
         return response()->json([
-            'html' => view(
-                'front-pages.partials.product-grid',
-                compact('products')
-            )->render(),
-
+            'html' => view('front-pages.partials.product-grid', compact('products'))->render(),
             'pagination' => $products->links()->render(),
-
-            'count' => $products->total()
+            'count' => $products->total(),
         ]);
     }
 
@@ -537,6 +621,7 @@ class FrontController extends Controller
             })
             ->take(4)
             ->get();
+
 
         $variantAttributes = [];
 
@@ -598,19 +683,74 @@ class FrontController extends Controller
         ));
     }
 
+    public function quickView($id)
+    {
+        $product = Product::with([
+            'images',
+            'category',
+            'subcategory',
+            'variants.values.attributeValue.attribute',
+        ])
+            ->visible()
+            ->findOrFail($id);
+
+        $variantAttributes = [];
+
+        foreach ($product->variants as $variant) {
+            foreach ($variant->values as $value) {
+                $attributeName = $value->attributeValue->attribute->name;
+                $attributeId = $value->attributeValue->attribute->id;
+
+                $variantAttributes[$attributeId]['name'] = $attributeName;
+                $variantAttributes[$attributeId]['values'][$value->attributeValue->id] = $value->attributeValue->value;
+            }
+        }
+
+        $variantsJson = $product->variants->map(function ($variant) {
+            return [
+                'id' => $variant->id,
+                'mrp' => $variant->mrp,
+                'price' => $variant->price,
+                'stock' => $variant->stock,
+                'image' => $variant->image,
+                'values' => $variant->values->pluck('attribute_value_id')->values()->toArray(),
+            ];
+        });
+
+        $images = $product->images->map(fn($image) => asset('storage/' . $image->image))->values();
+
+        if ($images->isEmpty()) {
+            $images = collect([$product->display_image]);
+        }
+
+        $avgRating = round($product->approvedReviews()->avg('rating') ?? 0, 1);
+        $reviewsCount = $product->approvedReviews()->count();
+
+        return response()->json([
+            'status' => true,
+            'product' => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'slug' => $product->slug,
+                'category' => $product->subcategory->name ?? $product->category->name,
+                'price' => $product->price,
+                'mrp' => $product->mrp,
+                'min_qty' => $product->min_qty,
+                'stock' => $product->stock,
+                'url' => route('product.details', $product->slug),
+                'images' => $images,
+            ],
+            'avgRating' => $avgRating,
+            'reviewsCount' => $reviewsCount,
+            'variantAttributes' => $variantAttributes,
+            'variants' => $variantsJson,
+        ]);
+    }
 
     public function thankYou($id)
     {
-        // $enquiry = Enquiry::with([
-        //     'state',
-        //     'city',
-        //     'items.product',
-        //     'items.customization'
-        // ])->findOrFail($id);
-
         return view(
-            'front-pages.thank-you',
-            // compact('enquiry')
+            'front-pages.thank-you'
         );
     }
 
@@ -692,7 +832,8 @@ class FrontController extends Controller
 
         return view(
             'front-pages.dynamic-page'
-            , compact('page')
+            ,
+            compact('page')
         );
     }
 

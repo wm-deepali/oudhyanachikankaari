@@ -23,7 +23,7 @@
         }),
         new Swiper(".aq-product-active", {
             slidesPerView: 4,
-            loop: !0,
+            loop: false,
             autoplay: !0,
             arrow: !1,
             spaceBetween: 25,
@@ -57,7 +57,7 @@
         }),
         new Swiper(".aqf-collection-active", {
             slidesPerView: 5,
-            loop: !0,
+            loop: false,
             autoplay: !0,
             arrow: !1,
             spaceBetween: 20,
@@ -120,7 +120,7 @@
         }),
         new Swiper(".aqf-deals-slider-active", {
             slidesPerView: 3,
-            loop: !0,
+            loop: false,
             autoplay: !0,
             arrow: !1,
             spaceBetween: 10,
@@ -359,7 +359,7 @@
         }),
         new Swiper(".aqf-categories-active", {
             slidesPerView: 6,
-            loop: !0,
+            loop: false,
             arrow: !1,
             spaceBetween: 25,
             speed: 1e3,

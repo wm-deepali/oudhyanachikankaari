@@ -243,6 +243,20 @@
                 </div>
             </div>
 
+            {{-- Validation errors summary --}}
+            @if ($errors->any())
+                <div class="section-card" style="border-color:#f3b9b9;">
+                    <div class="section-card-body" style="padding:14px 20px;">
+                        <strong style="color:var(--red);font-size:13px;">Please fix the following:</strong>
+                        <ul style="margin:8px 0 0 18px; padding:0; font-size:13px; color:var(--red);">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.products.update', $product->id) }}"
                   enctype="multipart/form-data" class="save-form" id="productForm">
                 @csrf
@@ -263,7 +277,7 @@
                                     <select name="category_id" id="category_id" class="field-select" required>
                                         <option value="">Select Category</option>
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
                                                 {{ $category->name }}
                                             </option>
                                         @endforeach
@@ -276,7 +290,7 @@
                                     <select name="subcategory_id" id="subcategory_id" class="field-select">
                                         <option value="">Select Sub Category</option>
                                         @foreach($subcategories as $subcategory)
-                                            <option value="{{ $subcategory->id }}" {{ $product->subcategory_id == $subcategory->id ? 'selected' : '' }}>
+                                            <option value="{{ $subcategory->id }}" {{ old('subcategory_id', $product->subcategory_id) == $subcategory->id ? 'selected' : '' }}>
                                                 {{ $subcategory->name }}
                                             </option>
                                         @endforeach
@@ -296,6 +310,7 @@
                                         <input type="text" name="slug" id="slug" class="field-input"
                                                value="{{ old('slug', $product->slug) }}">
                                     </div>
+                                    <div class="field-hint">Optional — auto-generated from product name if left blank</div>
                                 </div>
 
                                 <div class="field-group">
@@ -324,6 +339,12 @@
                                               style="min-height:100px">{{ old('delivery_returns', $product->delivery_returns) }}</textarea>
                                 </div>
 
+                                 <div class="field-group">
+                                    <label class="field-label">Fabric &amp; Care</label>
+                                    <textarea name="fabric_care" id="fabric_care" class="field-textarea"
+                                              style="min-height:100px">{{ old('fabric_care', $product->fabric_care) }}</textarea>
+                                </div>
+
                             </div>
                         </div>
 
@@ -332,10 +353,12 @@
                             <div class="section-card-header"><h5>Pricing</h5></div>
                             <div class="section-card-body">
 
+                                <div class="field-hint" style="margin-bottom:14px;">MRP and Discount are optional. Leave blank if not applicable — Final Price will simply equal MRP (or 0 if MRP is also blank).</div>
+
                                 <div class="price-grid">
                                     <div class="field-group" style="margin:0">
                                         <label class="field-label">MRP</label>
-                                        <input type="number" name="mrp" id="mrp" class="field-input"
+                                        <input type="number" step="0.01" name="mrp" id="mrp" class="field-input"
                                                value="{{ old('mrp', $product->mrp) }}">
                                     </div>
                                     <div class="field-group" style="margin:0">
@@ -347,7 +370,7 @@
                                     </div>
                                     <div class="field-group" style="margin:0">
                                         <label class="field-label">Discount</label>
-                                        <input type="number" name="discount" id="discount" class="field-input"
+                                        <input type="number" step="0.01" name="discount" id="discount" class="field-input"
                                                value="{{ old('discount', $product->discount) }}">
                                     </div>
                                 </div>
@@ -440,14 +463,14 @@
                                                value="{{ old('product_code', $product->product_code) }}">
                                     </div>
                                     <div class="field-group" style="margin:0">
-                                        <label class="field-label">Stock <span class="req">*</span></label>
+                                        <label class="field-label">Stock</label>
                                         <input type="number" name="stock" class="field-input"
-                                               value="{{ old('stock', $product->stock) }}" required>
+                                               value="{{ old('stock', $product->stock) }}">
                                     </div>
                                     <div class="field-group" style="margin:0">
-                                        <label class="field-label">Min Qty <span class="req">*</span></label>
+                                        <label class="field-label">Min Qty</label>
                                         <input type="number" name="min_qty" class="field-input"
-                                               value="{{ old('min_qty', $product->min_qty) }}" required>
+                                               value="{{ old('min_qty', $product->min_qty) }}">
                                     </div>
                                 </div>
 
@@ -493,7 +516,7 @@
                                 @foreach($collections as $collection)
                                     <label class="check-pill">
                                         <input type="checkbox" name="collections[]" value="{{ $collection->id }}"
-                                               {{ $product->collections->contains($collection->id) ? 'checked' : '' }}>
+                                               {{ in_array($collection->id, old('collections', $product->collections->pluck('id')->toArray())) ? 'checked' : '' }}>
                                         <span>{{ $collection->name }}</span>
                                     </label>
                                 @endforeach
@@ -552,15 +575,13 @@
 <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
 <script>
-/* ─────────────────────────────────────────────────────────────
-   ALL JS IS UNTOUCHED — only HTML structure above was changed
-   ───────────────────────────────────────────────────────────── */
 let selectedAttributeValues = @json($selectedAttributeValues);
 let existingVariants        = @json($existingVariants);
 
 CKEDITOR.config.versionCheck = false;
 CKEDITOR.replace('description');
 CKEDITOR.replace('delivery_returns');
+CKEDITOR.replace('fabric_care');
 
 $(document).ready(function () {
     let categoryId = $('#category_id').val();
@@ -568,6 +589,7 @@ $(document).ready(function () {
         loadAttributes(categoryId);
         if (existingVariants.length > 0) renderExistingVariants();
     }
+    calcPrice(); // ✅ keep hidden #price + display in sync on load, in case product had no MRP/discount saved
 });
 
 // Slug auto-gen
@@ -576,7 +598,7 @@ $(document).on('keyup', '#product_name', function () {
 });
 
 // Price calc — also updates the visible display span
-$('#mrp,#discount,#discount_type').on('keyup change', function () {
+function calcPrice() {
     let m = +$('#mrp').val() || 0;
     let d = +$('#discount').val() || 0;
     let t = $('#discount_type').val();
@@ -584,7 +606,8 @@ $('#mrp,#discount,#discount_type').on('keyup change', function () {
     if (p < 0) p = 0;
     $('#price').val(p.toFixed(2));
     $('#price-display').text(p.toFixed(2));
-});
+}
+$('#mrp,#discount,#discount_type').on('keyup change', calcPrice);
 
 // Submit spinner
 $(document).on('submit', '.save-form', function () {

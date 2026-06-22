@@ -74,15 +74,39 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <div class="aq-product-card-sizes">
-                                            <span class="aq-size-badge">S</span>
-                                            <span class="aq-size-badge">M</span>
-                                            <span class="aq-size-badge active">L</span>
-                                            <span class="aq-size-badge">XL</span>
-                                            <span class="aq-size-badge">XXL</span>
-                                        </div>
-                                        <div class="aq-product-card-bottom">
-    @if($product->stock >= $product->min_qty)
+                                       @php
+    $listingAttributes = \App\Models\CategoryAttribute::where('category_id', $product->category_id)
+        ->where('show_on_listing', 1)
+        ->pluck('attribute_id')
+        ->toArray();
+
+    $listingValues = $product->attributeValues
+        ->whereIn('attribute_id', $listingAttributes);
+
+    $groupedValues = $listingValues->groupBy('attribute_id');
+
+
+            $availableStock = $product->variants->count()
+        ? $product->variants->sum('stock')
+        : $product->stock;
+@endphp
+
+@if($groupedValues->count())
+    @foreach($groupedValues as $attributeValues)
+        <a href="{{ route('product.details', $product->slug) }}"
+           style="text-decoration:none;color:inherit;">
+            <div class="aq-product-card-sizes">
+                @foreach($attributeValues as $attributeValue)
+                    <span class="aq-size-badge">
+                        {{ $attributeValue->value->value }}
+                    </span>
+                @endforeach
+            </div>
+        </a>
+    @endforeach
+@endif
+<div class="aq-product-card-bottom">
+    @if($availableStock >= $product->min_qty)
         <button class="aq-product-card-cta"
                 onclick="addToCart({{ $product->id }}, {{ $product->min_qty }})">
             <i class="fa-solid fa-cart-shopping"></i>
@@ -97,6 +121,8 @@
         </button>
     @endif
 </div>
+
+                              
                                     </div>
                                 </div>
 

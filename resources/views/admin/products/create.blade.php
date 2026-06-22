@@ -189,6 +189,20 @@
                 </div>
             </div>
 
+            {{-- Validation errors summary --}}
+            @if ($errors->any())
+                <div class="section-card" style="border-color:#f3b9b9;">
+                    <div class="section-card-body" style="padding:14px 20px;">
+                        <strong style="color:var(--red);font-size:13px;">Please fix the following:</strong>
+                        <ul style="margin:8px 0 0 18px; padding:0; font-size:13px; color:var(--red);">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data" class="save-form">
                 @csrf
 
@@ -207,7 +221,7 @@
                                     <select name="category_id" id="category_id" class="field-select" required>
                                         <option value="">— Select Category —</option>
                                         @foreach($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -221,20 +235,21 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Product Name <span class="req">*</span></label>
-                                    <input type="text" name="name" id="product_name" class="field-input" required placeholder="e.g. Hand-Knotted Wool Rug">
+                                    <input type="text" name="name" id="product_name" class="field-input" required value="{{ old('name') }}" placeholder="e.g. Hand-Knotted Wool Rug">
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Slug</label>
                                     <div class="slug-wrap">
                                         <span class="slug-prefix">/p/</span>
-                                        <input type="text" name="slug" id="slug" class="field-input slug-input" placeholder="auto-generated">
+                                        <input type="text" name="slug" id="slug" class="field-input slug-input" value="{{ old('slug') }}" placeholder="auto-generated">
                                     </div>
+                                    <div class="field-hint">Optional — auto-generated from product name if left blank</div>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Short Description</label>
-                                    <textarea name="short_description" class="field-textarea" rows="3" placeholder="Brief summary shown on listing pages…"></textarea>
+                                    <textarea name="short_description" class="field-textarea" rows="3" placeholder="Brief summary shown on listing pages…">{{ old('short_description') }}</textarea>
                                 </div>
 
                             </div>
@@ -247,12 +262,17 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Product Details</label>
-                                    <textarea name="description" id="description" class="field-textarea"></textarea>
+                                    <textarea name="description" id="description" class="field-textarea">{{ old('description') }}</textarea>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Delivery &amp; Returns</label>
-                                    <textarea name="delivery_returns" id="delivery_returns" class="field-textarea"></textarea>
+                                    <textarea name="delivery_returns" id="delivery_returns" class="field-textarea">{{ old('delivery_returns') }}</textarea>
+                                </div>
+
+                                   <div class="field-group">
+                                    <label class="field-label">Fabric &amp; Care</label>
+                                    <textarea name="fabric_care" id="fabric_care" class="field-textarea">{{ old('fabric_care') }}</textarea>
                                 </div>
 
                             </div>
@@ -260,31 +280,35 @@
 
                         <!-- Pricing -->
                         <div class="section-card">
-                            <div class="section-card-header"><h5>Pricing</h5></div>
+                            <div class="section-card-header">
+                                <h5>Pricing</h5>
+                            </div>
                             <div class="section-card-body">
+
+                                <div class="field-hint" style="margin-bottom:14px;">MRP and Discount are optional. Leave blank if not applicable — Final Price will simply equal MRP (or 0 if MRP is also blank).</div>
 
                                 <div class="pricing-grid">
                                     <div class="field-group" style="margin:0">
                                         <label class="field-label">MRP</label>
-                                        <input type="number" name="mrp" id="mrp" class="field-input" placeholder="0.00">
+                                        <input type="number" step="0.01" name="mrp" id="mrp" class="field-input" value="{{ old('mrp') }}" placeholder="0.00">
                                     </div>
                                     <div class="field-group" style="margin:0">
                                         <label class="field-label">Discount Type</label>
                                         <select name="discount_type" id="discount_type" class="field-select">
-                                            <option value="amount">Amount (₹)</option>
-                                            <option value="percentage">Percentage (%)</option>
+                                            <option value="amount" {{ old('discount_type') == 'amount' ? 'selected' : '' }}>Amount (₹)</option>
+                                            <option value="percentage" {{ old('discount_type') == 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
                                         </select>
                                     </div>
                                     <div class="field-group" style="margin:0">
                                         <label class="field-label">Discount</label>
-                                        <input type="number" name="discount" id="discount" class="field-input" placeholder="0">
+                                        <input type="number" step="0.01" name="discount" id="discount" class="field-input" value="{{ old('discount') }}" placeholder="0">
                                     </div>
                                 </div>
 
                                 <div class="final-price-box">
                                     <span class="label">Final Price</span>
                                     <span class="value" id="price-display">₹0.00</span>
-                                    <input type="hidden" name="price" id="price" value="">
+                                    <input type="hidden" name="price" id="price" value="0">
                                 </div>
 
                             </div>
@@ -350,34 +374,34 @@
                                 <div class="inv-grid">
                                     <div class="field-group">
                                         <label class="field-label">SKU</label>
-                                        <input type="text" name="sku" class="field-input" placeholder="SKU-001">
+                                        <input type="text" name="sku" class="field-input" value="{{ old('sku') }}" placeholder="SKU-001">
                                     </div>
                                     <div class="field-group">
                                         <label class="field-label">Product Code</label>
-                                        <input type="text" name="product_code" class="field-input">
+                                        <input type="text" name="product_code" class="field-input" value="{{ old('product_code') }}">
                                     </div>
                                     <div class="field-group">
-                                        <label class="field-label">Stock <span class="req">*</span></label>
-                                        <input type="number" name="stock" class="field-input" required placeholder="0">
+                                        <label class="field-label">Stock</label>
+                                        <input type="number" name="stock" class="field-input" value="{{ old('stock') }}" placeholder="0">
                                     </div>
                                     <div class="field-group">
-                                        <label class="field-label">Min Qty <span class="req">*</span></label>
-                                        <input type="number" name="min_qty" class="field-input" required placeholder="1">
+                                        <label class="field-label">Min Qty</label>
+                                        <input type="number" name="min_qty" class="field-input" value="{{ old('min_qty') }}" placeholder="1">
                                     </div>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Delivery Time</label>
-                                    <input type="text" name="delivery_time" class="field-input" placeholder="e.g. 3–5 business days">
+                                    <input type="text" name="delivery_time" class="field-input" value="{{ old('delivery_time') }}" placeholder="e.g. 3–5 business days">
                                 </div>
 
                                 <div style="margin-top:4px">
                                     <label class="check-toggle">
-                                        <input type="checkbox" name="quality">
+                                        <input type="checkbox" name="quality" {{ old('quality') ? 'checked' : '' }}>
                                         <span>Quality Assurance</span>
                                     </label>
                                     <label class="check-toggle">
-                                        <input type="checkbox" name="pan_india">
+                                        <input type="checkbox" name="pan_india" {{ old('pan_india') ? 'checked' : '' }}>
                                         <span>PAN India Delivery</span>
                                     </label>
                                 </div>
@@ -391,7 +415,7 @@
                             <div class="section-card-body">
                                 @foreach($occasions as $o)
                                     <label class="check-toggle">
-                                        <input type="checkbox" name="occasions[]" value="{{ $o->id }}">
+                                        <input type="checkbox" name="occasions[]" value="{{ $o->id }}" {{ in_array($o->id, old('occasions', [])) ? 'checked' : '' }}>
                                         <span>{{ $o->title }}</span>
                                     </label>
                                 @endforeach
@@ -404,7 +428,7 @@
                             <div class="section-card-body">
                                 @foreach($collections as $collection)
                                     <label class="check-toggle">
-                                        <input type="checkbox" name="collections[]" value="{{ $collection->id }}">
+                                        <input type="checkbox" name="collections[]" value="{{ $collection->id }}" {{ in_array($collection->id, old('collections', [])) ? 'checked' : '' }}>
                                         <span>{{ $collection->name }}</span>
                                     </label>
                                 @endforeach
@@ -417,11 +441,11 @@
                             <div class="section-card-body">
                                 <div class="field-group">
                                     <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input">
+                                    <input type="text" name="meta_title" class="field-input" value="{{ old('meta_title') }}">
                                 </div>
                                 <div class="field-group">
                                     <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea"></textarea>
+                                    <textarea name="meta_description" class="field-textarea">{{ old('meta_description') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -450,6 +474,7 @@
 CKEDITOR.config.versionCheck = false;
 CKEDITOR.replace('description');
 CKEDITOR.replace('delivery_returns');
+CKEDITOR.replace('fabric_care');
 
 /* ── Slug auto-generate ─────────────────────────────────────── */
 $(document).on('keyup', '#product_name', function () {
@@ -468,6 +493,7 @@ function calcPrice() {
     $('#price-display').text('₹' + p.toFixed(2));
 }
 $('#mrp, #discount, #discount_type').on('keyup change', calcPrice);
+calcPrice(); // ✅ run once on load — keeps hidden #price populated even if MRP/Discount are never touched
 
 /* ── Submit spinner ─────────────────────────────────────────── */
 $(document).on('submit', '.save-form', function () {
