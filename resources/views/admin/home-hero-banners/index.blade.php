@@ -280,7 +280,8 @@ function deleteItem(id) {
     .then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: "{{ url('admin/home-hero-banners/delete') }}/" + id,
+                               url: "{{ url('admin/home-hero-banners') }}/" + id,
+
                 type: 'DELETE',
                 data: { _token: "{{ csrf_token() }}" },
                 success: function(res) {

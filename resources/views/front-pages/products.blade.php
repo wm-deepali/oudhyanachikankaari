@@ -206,47 +206,49 @@
                                 Reset All Filters
                             </button>
                         </div>
+                        
+                        
+           
 
-                        {{-- Visual subcategory card grid: only meaningful on a category landing page, --}}
-                        {{-- since $subcategories is the current category's own children. --}}
-                        @if($category)
-                            <div class="aq-category-grid-section-main">
+{{-- Visual subcategory list --}}
+@if($category)
+    <div class="aq-filter-widget aq-filter-sidebar mt-3 pb-3">
 
-                                <section class="aq-category-grid-section">
+        <button class="aq-filter-header" type="button">
+            <span>Category</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
 
-                                    <button class="aq-filter-header mb-20 px-4" type="button">
-                                        <span>Category</span>
+        <div class="aq-filter-content">
+            <ul class="aq-filter-list">
 
-                                    </button>
-                                    <div class="container">
+                @foreach($subcategories as $subcategory)
 
-                                        <div class="aq-category-grid">
-                                            @foreach($subcategories as $subcategory)
-                                                <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}"
-                                                    class="aq-category-card {{ $loop->first ? 'active' : '' }}">
+                    <li class="aq-filter-item {{ request('subcategory') == $subcategory->slug ? 'active' : '' }}">
 
-                                                    <div class="aq-category-card-thumb">
-                                                        <img src="{{ asset('storage/' . $subcategory->image) }}"
-                                                            alt="{{ $subcategory->name }}">
-                                                    </div>
+                        <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}"
+                            class="d-flex align-items-center justify-content-between w-100 text-decoration-none">
 
-                                                    <h4 class="aq-category-card-title">
-                                                        {{ $subcategory->name }}
-                                                    </h4>
-
-                                                    <span class="aq-category-card-count">
-                                                        {{ $subcategory->sub_category_products_count }} Products
-                                                    </span>
-                                                </a>
-                                            @endforeach
-
-                                        </div>
-
-                                    </div>
-                                </section>
-
+                            <div class="aq-filter-label">
+                                {{ $subcategory->name }}
+                                <span class="aq-category-count">
+                                    ({{ $subcategory->sub_category_products_count }})
+                                </span>
                             </div>
-                        @endif
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </a>
+
+                    </li>
+
+                @endforeach
+
+            </ul>
+        </div>
+
+    </div>
+@endif
                     </div>
 
                     <!-- Right Product Grid -->

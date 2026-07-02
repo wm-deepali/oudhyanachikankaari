@@ -236,6 +236,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('gifting-occasions', GiftingOccasionController::class);
 
         // product routes
+        Route::view('/products/media-library', 'admin.products.media-library')->name('products.media-library');
         Route::get('products/subcategories/{category}', [ProductController::class, 'subcategories'])->name('products.subcategories');
         Route::get('products/category-attributes/{category}', [ProductController::class, 'categoryAttributes'])->name('products.category-attributes');
         Route::post('/products/upload-images-zip', [ProductController::class, 'uploadImagesZip'])->name('products.images.upload');
@@ -371,6 +372,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('coupons', CouponController::class);
 
         // Admin Settings routes
+        Route::view('/admin-setting/whatsapp', 'admin.admin-setting.whatsapp')->name('admin-setting.whatsapp');
+        Route::view('/admin-setting/sms-api', 'admin.admin-setting.sms-api')->name('admin-setting.sms-api');
+        Route::view('/admin-setting/google-setting', 'admin.admin-setting.google-setting')->name('admin-setting.google-setting');
+        Route::view('/admin-setting/delivery-setting', 'admin.admin-setting.delivery-setting')->name('admin-setting.delivery-setting');
+        Route::view('/security/system-logs', 'admin.security.system-logs')->name('security.system-logs');
+        Route::view('/security/security-settings', 'admin.security.security-settings')->name('security.security-settings');
+        Route::view('/security/redirects', 'admin.security.redirects')->name('security.redirects');
+        
+        
         Route::get('/admin-setting', [AdminSettingController::class, 'index'])->name('admin-setting.index');
         Route::post('/invoice-settings', [AdminSettingController::class, 'invoiceSettingStore'])->name('invoice-settings.store');
         Route::post('/smtp-settings/store', [AdminSettingController::class, 'smtpSettingStore'])->name('smtp-settings.store');
@@ -397,6 +407,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('customers/addresses/export', [CustomerAddressController::class, 'export'])->name('customers.addresses.export');
 
         // Customers routes
+        Route::view('customers/customer-wishlist', 'admin.customers.customer-wishlist')->name('customers.customer-wishlist');
+        Route::view('customers/customer-wishlist-detail', 'admin.customers.customer-wishlist-detail')->name('customers.customer-wishlist-detail');
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
@@ -405,6 +417,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('stored-carts', [StoredCartController::class, 'index'])->name('stored-carts.index');
         Route::delete('stored-carts/{cart}', [StoredCartController::class, 'destroy'])->name('stored-carts.destroy');
         Route::get('stored-carts/export', [StoredCartController::class, 'export'])->name('stored-carts.export');
+        
+        
 
         Route::resource('return-reasons', ReturnReasonController::class)->names('return-reasons');
 
@@ -439,6 +453,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         // Listing page
+        
         Route::get('/reviews', [App\Http\Controllers\Admin\ProductReviewController::class, 'index'])->name('reviews.index');
         Route::get('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'show'])->name('reviews.show');
         Route::patch('/reviews/{review}/approve', [App\Http\Controllers\Admin\ProductReviewController::class, 'approve'])->name('reviews.approve');
@@ -446,6 +461,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'destroy'])->name('reviews.destroy');
         Route::get('/reviews/export/csv', [App\Http\Controllers\Admin\ProductReviewController::class, 'export'])->name('reviews.export');
 
+        Route::view('/reports/order-reports', 'admin.reports.order-reports')->name('reports.order-reports');
+        Route::view('/reports/coupon-reports', 'admin.reports.coupon-reports')->name('reports.coupon-reports');
+        Route::view('/reports/tax-reports', 'admin.reports.tax-reports')->name('reports.tax-reports');
         Route::get('/reports/sales', [SalesReportController::class, 'index'])->name('reports.sales');
         Route::get('/reports/sales/export', [SalesReportController::class, 'export'])->name('reports.sales.export');
 
@@ -462,6 +480,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 })->name('notifications.index');
 
 
+    Route::view('/templates-setting', 'admin.admin-settings.template-setting')->name('templates.template-setting');
 
 Route::prefix('roles-and-permission')->group(function () {
 
@@ -482,8 +501,10 @@ Route::prefix('roles-and-permission')->group(function () {
     Route::view('/team/customise-permission', 'admin.roles-and-permission.team.customise-permission')->name('team.customise-permission');
     Route::view('/team/activity-logs', 'admin.roles-and-permission.team.activity-logs')->name('team.activity-logs');
     Route::view('/team/login', 'admin.roles-and-permission.team.login')->name('team.login');
+    Route::view('/team/login-summary', 'admin.roles-and-permission.team.login-summary')->name('team.login-summary');
     Route::view('/team/login-history', 'admin.roles-and-permission.team.login-history')->name('team.login-history');
-
+    
+   
 });
 
     });

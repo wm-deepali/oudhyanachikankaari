@@ -98,7 +98,7 @@
                             <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off">
                                 <div class="aq-search-input-wrap">
                                     <input type="text" class="searchInput" name="q"
-                                        placeholder="Search premium gifts, corporate hampers, brands..." />
+                                        placeholder="Search Suites, Kurta, Ethnic wears..." />
 
                                     <button type="submit" class="aq-search-btn">
                                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -688,7 +688,7 @@
                             <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off"
                                 style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 30px; background: #fff; overflow: hidden; padding: 2px 2px 2px 20px;">
                                 <input class="searchInput" name="q" type="text"
-                                    placeholder="Search premium gifts, corporate hampers, brands..."
+                                    placeholder="Search Suits, Kurta, Ethnic Wears..."
                                     style="border: none; outline: none; width: 100%; padding: 10px 0; font-size: 14px; background: transparent;box-shadow: none;">
                                 <button type="submit"
                                     style="background: #c98f9d; color: #fff; border: none; border-radius: 50px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 10px; margin-right: 2px;"><i
@@ -836,7 +836,7 @@
                             <nav class="aq-mobile-menu-active">
                                 <ul>
                                     <li><a href="{{ route('home') }}">Home</a></li>
-                                    <li><a href="{{ route('about-us') }}">Our Heritage</a></li>
+                                    <li><a href="{{ route('about-us') }}">About Us</a></li>
                                     <li class="has-dropdown p-static">
                                         <a href="#">Chikankari Luxury Curation</a>
                                         <div class="aq-megamenu-wrap aq-corp-megamenu mega-menu">
@@ -944,7 +944,7 @@
                                         </div>
                                     </li>
 
-                                    <li class="has-dropdown p-static">
+                              <!--      <li class="has-dropdown p-static">
                                         <a href="#">Categories</a>
                                         <div class="aq-megamenu-wrap aq-megamenu-img-wrap mega-menu">
                                             <div class="container">
@@ -972,7 +972,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </li>
+                                    </li> -->
                                     @foreach($navbarCategories as $category)
 
                                         <li class="has-dropdown">
@@ -1004,7 +1004,7 @@
 
                                     @endforeach
 
-                                    <li><a href="{{ route('blogs') }}">Blogs</a></li>
+                                  <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
                                 </ul>
                             </nav>

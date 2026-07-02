@@ -4,7 +4,7 @@
     <main>
 
         <!-- 1. Luxury Inner Banner / Hero Section -->
-        <section class="aq-catpage-hero aq-apparel-hero">
+      <section class="aq-catpage-hero aq-apparel-hero">
             <div class="aq-hero-glow"></div>
             <div class="aq-floating-gift-box aq-floating-shape-1">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -14,6 +14,9 @@
             </div>
             <div class="aq-catpage-hero-content">
                 <h1 class="aq-catpage-title">{{ $product->name }}</h1>
+                
+                
+                
                 <div class="aq-catpage-breadcrumbs">
                     <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
@@ -21,17 +24,22 @@
                         {{ $product->category->name }}
                     </a>
                     <span>/</span>
-                    <span>Product Details</span>
+                    <span class="current">
+                        {{ $product->name }}
+                    </span>
                 </div>
+                
+                
+                
             </div>
-        </section>
+        </section> 
 
 
         <!-- 1. Luxury Product Details Container -->
         <section class="aq-product-details-area pt-50 pb-60">
             <div class="container">
                 <!-- Elegant Breadcrumbs -->
-                <div class="aq-details-breadcrumbs mb-40">
+             <!--   <div class="aq-details-breadcrumbs mb-40">
                     <a href="{{ route('home') }}">Home</a>
                     <span class="divider">/</span>
                     <a href="{{ route('products.listing', $product->category->slug) }}">
@@ -41,7 +49,7 @@
                     <span class="current">
                         {{ $product->name }}
                     </span>
-                </div>
+                </div> -->
 
                 <div class="row g-5 justify-content-between">
 
@@ -144,6 +152,9 @@
 
                     <!-- Right Column: Product Specs & Ordering Drawer Trigger -->
                     <div class="col-lg-6 col-md-12">
+                        
+                        
+                        
                         <div class="aq-product-details-summary">
                             <span class="aq-details-brand">
                                 {{ $product->subcategory->name ?? $product->category->name }}
@@ -216,8 +227,44 @@
                             <p class="aq-details-short-desc">
                                 {{ $product->short_description }}
                             </p>
-
+                            
+                            
                             <div class="aq-creative-details-block mt-25 mb-30">
+
+    @php
+        $groupedAttributes = $product->attributeValues
+            ->filter(function ($item) use ($variantAttributes) {
+                return $item->attribute
+                    && $item->value
+                    && !isset($variantAttributes[$item->attribute_id]);
+            })
+            ->groupBy('attribute_id');
+    @endphp
+
+    @foreach($groupedAttributes as $items)
+
+        <div class="aq-detail-item">
+
+            <div class="aq-detail-content">
+
+                <span class="aq-detail-label">
+                    {{ strtoupper($items->first()->attribute->name) }}
+                </span>
+
+                <span class="aq-detail-value">
+                    {{ $items->pluck('value.value')->implode(', ') }}
+                </span>
+
+            </div>
+
+        </div>
+
+    @endforeach
+
+</div>
+
+
+                     <!--<div class="aq-creative-details-block mt-25 mb-30">-->
 
                                 @php
                                     $groupedAttributes = $product->attributeValues
@@ -231,19 +278,21 @@
 
                                 @foreach($groupedAttributes as $items)
 
-                                    <div class="aq-detail-item">
-                                        <span class="detail-label">
-                                            {{ $items->first()->attribute->name }}
-                                        </span>
+                                    <!--<div class="aq-detail-item">-->
+                                    <!--    <span class="detail-label">-->
+                                    <!--        {{ $items->first()->attribute->name }}-->
+                                    <!--    </span>-->
 
-                                        <span class="detail-value">
-                                            {{ $items->pluck('value.value')->implode(', ') }}
-                                        </span>
-                                    </div>
+                                    <!--    <span class="detail-value">-->
+                                    <!--        {{ $items->pluck('value.value')->implode(', ') }}-->
+                                    <!--    </span>-->
+                                    <!--</div>-->
 
                                 @endforeach
 
-                            </div>
+                            <!--</div>-->
+                            
+                            
 
                             <!-- Co-Branding Customizer -->
                             <!-- Size Selection -->
@@ -274,10 +323,122 @@
 
                             @endforeach
 
+
+
+
+<div class="aq-stitching-box">
+
+    <div class="card aq-stitch-card">
+
+        <div class="card-body">
+
+            <h2 class="aq-title">
+                Want It Stitched?
+            </h2>
+
+            <p class="aq-subtitle">
+                Choose Your Style
+            </p>
+
+            <div class="row g-2">
+
+                <div class="col-lg-6">
+
+                    <label class="aq-option">
+
+                        <input type="checkbox">
+
+                        <span class="aq-checkbox"></span>
+
+                        <span class="aq-text">
+                            Kurta with Butter Crepe Lining
+                            <strong>(+₹1600.00)</strong>
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <label class="aq-option">
+
+                        <input type="checkbox">
+
+                        <span class="aq-checkbox"></span>
+
+                        <span class="aq-text">
+                            Churidaar
+                            <strong>(+₹1200.00)</strong>
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <label class="aq-option">
+
+                        <input type="checkbox">
+
+                        <span class="aq-checkbox"></span>
+
+                        <span class="aq-text">
+                            Palazzo
+                            <strong>(+₹1400.00)</strong>
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <label class="aq-option">
+
+                        <input type="checkbox">
+
+                        <span class="aq-checkbox"></span>
+
+                        <span class="aq-text">
+                            Straight Pants
+                            <strong>(+₹1400.00)</strong>
+                        </span>
+
+                    </label>
+
+                </div>
+
+                <div class="col-lg-6">
+
+                    <label class="aq-option">
+
+                        <input type="checkbox">
+
+                        <span class="aq-checkbox"></span>
+
+                        <span class="aq-text">
+                            Lace Trims
+                            <strong>(+₹1100.00)</strong>
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
                             <!-- Interactive Quantity and Action -->
                             <div class="aq-action-panel p-3 mb-30 mt-25">
                                 <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
-                                    <div class="aq-qty-selector luxury-qty">
+                                    <div class="aq-qty-selector luxury-qty ">
                                         <button type="button" class="qty-btn" onclick="adjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
                                         <input type="number" id="aqDetailQty" value="{{ $product->min_qty }}"
@@ -292,129 +453,306 @@
                                     @if($product->stock >= $product->min_qty)
 
                                         <button type="button"
-                                            class="aq-btn-black flex-grow-1 aq-add-to-cart-btn luxury-btn-outline"
+                                            class="aq-btn-black flex-grow-1 aq-add-to-cart-btn luxury-btn-outline w-100"
                                             onclick="addToCart({{ $product->id }})">
                                             <i class="fa-solid fa-bag-shopping"></i>
                                             Add to Cart
                                         </button>
                                     @else
-                                        <button type="button" class="aq-btn-black flex-grow-1 luxury-btn-outline" disabled
+                                        <button type="button" class="aq-btn-black flex-grow-1 luxury-btn-outline w-100" disabled
                                             style="background:#999;cursor:not-allowed;">
                                             <i class="fa-solid fa-ban"></i>
                                             Out of Stock
                                         </button>
                                     @endif
-                                </div>
-                                @if($product->stock >= $product->min_qty)
-                                    <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid"
+                                    
+                                    
+                                     @if($product->stock >= $product->min_qty)
+                                    <button class="aq-btn-black btn-red-bg  aq-buy-now-btn luxury-btn-solid w-100"
                                         onclick="addToCart({{ $product->id }})">
                                         Buy it Now
                                     </button>
                                 @else
-                                    <button class="aq-btn-black btn-red-bg w-100 mt-3 luxury-btn-solid" disabled
+                                    <button class="aq-btn-black btn-red-bg  luxury-btn-solid w-100" disabled
                                         style="background:#999;cursor:not-allowed;">
                                         Out of Stock
                                     </button>
                                 @endif
+                                </div>
+                                <!--@if($product->stock >= $product->min_qty)-->
+                                <!--    <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid"-->
+                                <!--        onclick="addToCart({{ $product->id }})">-->
+                                <!--        Buy it Now-->
+                                <!--    </button>-->
+                                <!--@else-->
+                                <!--    <button class="aq-btn-black btn-red-bg w-100 mt-3 luxury-btn-solid" disabled-->
+                                <!--        style="background:#999;cursor:not-allowed;">-->
+                                <!--        Out of Stock-->
+                                <!--    </button>-->
+                                <!--@endif-->
                             </div>
                         </div>
 
+                       <div class="aq-product-accordion " >
+                       <div class="accordion aq-details-accordion mt-30 " id="productAccordion">
 
+    <!-- Full Description -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDesc">
+            <button class="accordion-button" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseDesc"
+                aria-expanded="true"
+                aria-controls="collapseDesc">
+                Full Description
+            </button>
+        </h2>
+
+        <div id="collapseDesc"
+            class="accordion-collapse collapse show"
+            aria-labelledby="headingDesc"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+                {!! $product->description !!}
+            </div>
+        </div>
+    </div>
+
+    <!-- Fabric & Care -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingBrand">
+            <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseBrand"
+                aria-expanded="false"
+                aria-controls="collapseBrand">
+                Fabric & Care
+            </button>
+        </h2>
+
+        <div id="collapseBrand"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingBrand"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+                {!! $product->fabric_care !!}
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping & Returns -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingShipping">
+            <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseShipping"
+                aria-expanded="false"
+                aria-controls="collapseShipping">
+                Shipping & Returns
+            </button>
+        </h2>
+
+        <div id="collapseShipping"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingShipping"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+                {!! $product->delivery_returns !!}
+            </div>
+        </div>
+    </div>
+
+    @if($setting && $setting->product_reviews)
+    <!-- Reviews -->
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingReviews">
+            <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseReviews"
+                aria-expanded="false"
+                aria-controls="collapseReviews">
+                Reviews ({{ $reviewsCount }})
+            </button>
+        </h2>
+
+        <div id="collapseReviews"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingReviews"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+
+                <h4 class="aq-tab-heading">Customer Reviews</h4>
+
+                @if($reviews->isEmpty())
+                    <p class="aq-tab-text">No reviews yet for this product.</p>
+                @else
+
+                    @foreach($reviews as $review)
+
+                        <div class="aq-review-item mb-30 pb-3 border-bottom">
+
+                            <div class="d-flex justify-content-between align-items-start">
+
+                                <div>
+                                    <div class="aq-review-stars mb-1">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                        @endfor
+                                    </div>
+
+                                    <strong class="aq-review-title">
+                                        {{ $review->title }}
+                                    </strong>
+                                </div>
+
+                                @if($review->verified_purchase)
+                                    <span class="badge bg-success">
+                                        Verified Purchase
+                                    </span>
+                                @endif
+
+                            </div>
+
+                            <p class="aq-review-body mt-2 mb-2">
+                                {{ $review->review }}
+                            </p>
+
+                            @if($review->images->isNotEmpty())
+
+                                <div class="aq-review-images d-flex gap-2 mb-2">
+
+                                    @foreach($review->images as $image)
+
+                                        <img src="{{ asset('storage/' . $image->image) }}"
+                                            alt="Review image"
+                                            style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
+
+                                    @endforeach
+
+                                </div>
+
+                            @endif
+
+                            <span class="text-muted small">
+                                {{ $review->customer->name ?? 'Anonymous' }} ·
+                                {{ $review->created_at->format('d M Y') }}
+                            </span>
+
+                        </div>
+
+                    @endforeach
+
+                    <div class="mt-30">
+                        {{ $reviews->links() }}
+                    </div>
+
+                @endif
+
+            </div>
+        </div>
+    </div>
+    @endif
+
+</div>
+                    </div>
                     </div>
 
                     <!-- 2. Product Specification Tabs -->
-                    <div class="aq-details-tabs-wrapper mt-60">
-                        <ul class="nav nav-tabs justify-content-center aq-details-nav-tabs" role="tablist">
-                            <li class="nav-item">
-                                <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-desc" type="button" role="tab">Full Description</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="brand-tab" data-bs-toggle="tab" data-bs-target="#tab-brand"
-                                    type="button" role="tab">Fabric & Care</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="shipping-tab" data-bs-toggle="tab"
-                                    data-bs-target="#tab-shipping" type="button" role="tab">Shipping & Returns</button>
-                            </li>
-                            @if($setting && $setting->product_reviews)
+                    <!--<div class="aq-details-tabs-wrapper mt-60">-->
+                    <!--    <ul class="nav nav-tabs justify-content-center aq-details-nav-tabs" role="tablist">-->
+                    <!--        <li class="nav-item">-->
+                    <!--            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"-->
+                    <!--                data-bs-target="#tab-desc" type="button" role="tab">Full Description</button>-->
+                    <!--        </li>-->
+                    <!--        <li class="nav-item">-->
+                    <!--            <button class="nav-link" id="brand-tab" data-bs-toggle="tab" data-bs-target="#tab-brand"-->
+                    <!--                type="button" role="tab">Fabric & Care</button>-->
+                    <!--        </li>-->
+                    <!--        <li class="nav-item">-->
+                    <!--            <button class="nav-link" id="shipping-tab" data-bs-toggle="tab"-->
+                    <!--                data-bs-target="#tab-shipping" type="button" role="tab">Shipping & Returns</button>-->
+                    <!--        </li>-->
+                    <!--        @if($setting && $setting->product_reviews)-->
 
-                                <li class="nav-item">
-                                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"
-                                        type="button" role="tab">Reviews ({{ $reviewsCount }})</button>
-                                </li>
-                            @endif
-                        </ul>
-                        <div class="tab-content aq-details-tab-content p-4 mt-3">
+                    <!--            <li class="nav-item">-->
+                    <!--                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"-->
+                    <!--                    type="button" role="tab">Reviews ({{ $reviewsCount }})</button>-->
+                    <!--            </li>-->
+                    <!--        @endif-->
+                    <!--    </ul>-->
+                    <!--    <div class="tab-content aq-details-tab-content p-4 mt-3">-->
 
                             <!-- Description Tab -->
-                            <div class="tab-pane fade show active" id="tab-desc" role="tabpanel">
-                                {!! $product->description !!}
+                    <!--        <div class="tab-pane fade show active" id="tab-desc" role="tabpanel">-->
+                    <!--            {!! $product->description !!}-->
 
-                            </div>
+                    <!--        </div>-->
 
                             <!-- Branding Specs Tab -->
-                            <div class="tab-pane fade" id="tab-brand" role="tabpanel">
-                                {!! $product->fabric_care !!}
-                            </div>
+                    <!--        <div class="tab-pane fade" id="tab-brand" role="tabpanel">-->
+                    <!--            {!! $product->fabric_care !!}-->
+                    <!--        </div>-->
 
                             <!-- Logistics Tab -->
-                            <div class="tab-pane fade" id="tab-shipping" role="tabpanel">
-                                {!! $product->delivery_returns !!}
+                    <!--        <div class="tab-pane fade" id="tab-shipping" role="tabpanel">-->
+                    <!--            {!! $product->delivery_returns !!}-->
 
-                            </div>
+                    <!--        </div>-->
 
 
-                            <div class="tab-pane fade" id="tab-reviews" role="tabpanel">
-                                <h4 class="aq-tab-heading">Customer Reviews</h4>
+                    <!--        <div class="tab-pane fade" id="tab-reviews" role="tabpanel">-->
+                    <!--            <h4 class="aq-tab-heading">Customer Reviews</h4>-->
 
-                                @if($reviews->isEmpty())
-                                    <p class="aq-tab-text">No reviews yet for this product.</p>
-                                @else
-                                    @foreach($reviews as $review)
-                                        <div class="aq-review-item mb-30 pb-3 border-bottom">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <div class="aq-review-stars mb-1">
-                                                        @for($i = 1; $i <= 5; $i++)
-                                                            <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
-                                                        @endfor
-                                                    </div>
-                                                    <strong class="aq-review-title">{{ $review->title }}</strong>
-                                                </div>
-                                                @if($review->verified_purchase)
-                                                    <span class="badge bg-success">Verified Purchase</span>
-                                                @endif
-                                            </div>
+                    <!--            @if($reviews->isEmpty())-->
+                    <!--                <p class="aq-tab-text">No reviews yet for this product.</p>-->
+                    <!--            @else-->
+                    <!--                @foreach($reviews as $review)-->
+                    <!--                    <div class="aq-review-item mb-30 pb-3 border-bottom">-->
+                    <!--                        <div class="d-flex justify-content-between align-items-start">-->
+                    <!--                            <div>-->
+                    <!--                                <div class="aq-review-stars mb-1">-->
+                    <!--                                    @for($i = 1; $i <= 5; $i++)-->
+                    <!--                                        <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>-->
+                    <!--                                    @endfor-->
+                    <!--                                </div>-->
+                    <!--                                <strong class="aq-review-title">{{ $review->title }}</strong>-->
+                    <!--                            </div>-->
+                    <!--                            @if($review->verified_purchase)-->
+                    <!--                                <span class="badge bg-success">Verified Purchase</span>-->
+                    <!--                            @endif-->
+                    <!--                        </div>-->
 
-                                            <p class="aq-review-body mt-2 mb-2">
-                                                {{ $review->review }}
-                                            </p>
+                    <!--                        <p class="aq-review-body mt-2 mb-2">-->
+                    <!--                            {{ $review->review }}-->
+                    <!--                        </p>-->
 
-                                            @if($review->images->isNotEmpty())
-                                                <div class="aq-review-images d-flex gap-2 mb-2">
-                                                    @foreach($review->images as $image)
-                                                        <img src="{{ asset('storage/' . $image->image) }}" alt="Review image"
-                                                            style="width:70px;height:70px;object-fit:cover;border-radius:6px;" />
-                                                    @endforeach
-                                                </div>
-                                            @endif
+                    <!--                        @if($review->images->isNotEmpty())-->
+                    <!--                            <div class="aq-review-images d-flex gap-2 mb-2">-->
+                    <!--                                @foreach($review->images as $image)-->
+                    <!--                                    <img src="{{ asset('storage/' . $image->image) }}" alt="Review image"-->
+                    <!--                                        style="width:70px;height:70px;object-fit:cover;border-radius:6px;" />-->
+                    <!--                                @endforeach-->
+                    <!--                            </div>-->
+                    <!--                        @endif-->
 
-                                            <span class="text-muted small">
-                                                {{ $review->customer->name ?? 'Anonymous' }} ·
-                                                {{ $review->created_at->format('d M Y') }}
-                                            </span>
-                                        </div>
-                                    @endforeach
+                    <!--                        <span class="text-muted small">-->
+                    <!--                            {{ $review->customer->name ?? 'Anonymous' }} ·-->
+                    <!--                            {{ $review->created_at->format('d M Y') }}-->
+                    <!--                        </span>-->
+                    <!--                    </div>-->
+                    <!--                @endforeach-->
 
-                                    <div class="mt-30">
-                                        {{ $reviews->links() }}
-                                    </div>
-                                @endif
-                            </div>
+                    <!--                <div class="mt-30">-->
+                    <!--                    {{ $reviews->links() }}-->
+                    <!--                </div>-->
+                    <!--            @endif-->
+                    <!--        </div>-->
 
-                        </div>
-                    </div>
+                    <!--    </div>-->
+                    <!--</div>-->
 
                 </div>
         </section>

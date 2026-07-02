@@ -831,6 +831,23 @@
                         onclick="switchTab('couriers', this)">
                         <i class="fa-solid fa-truck"></i> Courier Management
                     </button>
+               <!--   <button class="tab-btn {{ $activeTab == 'whatsapp' ? 'active' : '' }}"
+                        onclick="switchTab('whatsapp', this)">
+                        <i class="fa-solid fa-truck"></i> WhatsApp Setting
+                    </button>
+                    <button class="tab-btn {{ $activeTab == 'google-setting' ? 'active' : '' }}"
+                        onclick="switchTab('google-setting', this)">
+                        <i class="fa-solid fa-truck"></i> Google Setting
+                    </button>  -->
+              {{--        <button class="tab-btn {{ $activeTab == 'delivery-setting' ? 'active' : '' }}"
+                        onclick="switchTab('delivery-setting', this)">
+                        <i class="fa-solid fa-truck"></i> Delivery Setting
+                    </button> --}}
+                    
+                   {{--   <button class="tab-btn {{ $activeTab == 'sme-api' ? 'active' : '' }}"
+                        onclick="switchTab('sms-api', this)">
+                        <i class="fa-solid fa-truck"></i> SMS API
+                    </button> --}}
                 </div>
 
                 <!-- ══════════════════════════════════
@@ -844,7 +861,7 @@
                 <!-- ══════════════════════════════════
                      TAB 2 — SMTP / EMAIL
                 ══════════════════════════════════ -->
-                <div class="tab-panel{{ $activeTab == 'smtp' ? 'active' : '' }}" id="tab-smtp">
+                <div class="tab-panel {{ $activeTab == 'smtp' ? 'active' : '' }}" id="tab-smtp">
                     @include('admin.admin-settings.smtp')
 
                 </div><!-- /tab-smtp -->
@@ -862,16 +879,39 @@
                 <div class="tab-panel {{ $activeTab == 'gst' ? 'active' : '' }}" id="tab-gst">
 
                     @include('admin.admin-settings.invoice-gst')
-                </div><!-- /tab-gst -->
+                </div> <!-- /tab-gst -->
 
-                <div class="tab-panel {{ $activeTab == 'couriers' ? 'active' : '' }}"
-     id="tab-couriers">
+                <!-- ══════════════════════════════════
+                     TAB 5 —COURIER
+                ══════════════════════════════════ -->
+                <div class="tab-panel {{ $activeTab == 'couriers' ? 'active' : '' }}" id="tab-couriers">
+                @include('admin.admin-settings.couriers') </div>
 
-    @include('admin.admin-settings.couriers')
-
-</div>
-
-            </div><!-- /tab-shell -->
+                <!-- ══════════════════════════════════
+                     TAB 6 — WHATSAPP
+                ══════════════════════════════════ -->
+        {{-- <div class="tab-panel {{ $activeTab == 'whatsapp' ? 'active' : '' }}" id="tab-whatsapp">
+                    @include('admin.admin-settings.whatsapp') </div> --}}
+                    
+                     <!-- ══════════════════════════════════
+                     TAB 7 — GOOGLE SETTING
+                ══════════════════════════════════ -->
+   {{--     <div class="tab-panel {{ $activeTab == 'google-setting' ? 'active' : '' }}" id="tab-google-setting">
+                    @include('admin.admin-settings.google-setting') </div> --}}
+                    
+               <!-- ══════════════════════════════════
+                     TAB 8 — DELIVERY SETTING
+                ══════════════════════════════════ -->
+             {{--     <div class="tab-panel {{ $activeTab == 'delivery-setting' ? 'active' : '' }}" id="tab-delivery-setting">
+                    @include('admin.admin-settings.delivery-setting') </div>--}}
+                    
+                     <!-- ══════════════════════════════════
+                     TAB 9 — SMS API SETTING
+                ══════════════════════════════════ -->
+                {{--     <div class="tab-panel {{ $activeTab == 'sms-api' ? 'active' : '' }}" id="tab-sms-api">
+                    @include('admin.admin-settings.sms-api') </div> --}}
+            </div>
+            <!-- /tab-shell -->
 
         </div>
     </div>
