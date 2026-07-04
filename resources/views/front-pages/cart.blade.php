@@ -47,19 +47,33 @@
                                                     {{ $item->product->name }}
                                                 </a>
                                             </h4>
-                                            @if($item->variant && $item->variant->values->count())
+
+                                            @if(!empty($item->selected_attributes))
 
                                                 <div class="aq-cart-customization-badges">
 
-                                                    @foreach($item->variant->values as $variantValue)
+                                                    @foreach($item->selected_attributes as $attr)
 
                                                         <span class="aq-cart-badge">
+                                                            {{ $attr['attribute'] }} : {{ $attr['value'] }}
+                                                        </span>
 
-                                                            {{ $variantValue->attributeValue->attribute->name }}
-                                                            :
+                                                    @endforeach
 
-                                                            {{ $variantValue->attributeValue->value }}
+                                                </div>
 
+                                            @endif
+
+                                            @if($item->addons->count())
+
+                                                <div class="aq-cart-addon-badges mt-1">
+
+                                                    @foreach($item->addons as $addon)
+
+                                                        <span class="aq-cart-badge aq-cart-addon-badge">
+                                                            <i class="fa-solid fa-plus"></i>
+                                                            {{ $addon->detail }}
+                                                            (+₹{{ number_format($addon->price, 2) }})
                                                         </span>
 
                                                     @endforeach
@@ -82,12 +96,16 @@
                                             </div>
 
                                             @php
-                                                $mrp = $item->variant->mrp ?? $item->product->mrp;
-                                                $totalMrp = $mrp * $item->quantity;
+                                                // Addons carry no MRP/discount of their own — their price counts
+                                                // toward both the "MRP" (strikethrough) and the actual total, so
+                                                // only the base product/variant portion ever shows a discount.
+                                                $addonUnitTotal = $item->addons->sum('price');
+                                                $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
+                                                $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
 
                                                 $discountPercentage = 0;
 
-                                                if ($totalMrp > 0) {
+                                                if ($totalMrp > 0 && $item->total < $totalMrp) {
                                                     $discountPercentage = round(
                                                         (($totalMrp - $item->total) / $totalMrp) * 100
                                                     );
@@ -243,7 +261,8 @@
 
                             @else
 
-                                <a href="{{ route('user.login') }}" class="aq-btn-final-quote"
+                                <a href="{{ route('user.login', ['redirect' => route('checkout')]) }}"
+                                    class="aq-btn-final-quote"
                                     style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
                                     <span>Login To Checkout</span>
                                     <i class="fa-solid fa-arrow-right-long"></i>
@@ -308,10 +327,10 @@
                         if ($('.aq-cart-item-row').length === 0) {
 
                             $('#aqCartItemsList').html(`
-                                                                            <div class="text-center py-5">
-                                                                                <h4>Your cart is empty.</h4>
-                                                                            </div>
-                                                                        `);
+                                                                                    <div class="text-center py-5">
+                                                                                        <h4>Your cart is empty.</h4>
+                                                                                    </div>
+                                                                                `);
                         }
                     }
                 },

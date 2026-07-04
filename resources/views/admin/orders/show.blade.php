@@ -730,29 +730,36 @@
                                 <tbody>
                                     @foreach($order->items as $item)
                                         @php
-                                            // Thumbnail: variant image > product default image > null
+                                            // Thumbnail: image variant > product default image > null
                                             $thumb = null;
-                                            if ($item->variant && $item->variant->image) {
-                                                $thumb = asset('storage/' . $item->variant->image);
+                                            if ($item->imageVariant && $item->imageVariant->image) {
+                                                $thumb = asset('storage/' . $item->imageVariant->image);
                                             } elseif ($item->product) {
                                                 $thumb = $item->product->display_image;
                                             }
 
-                                            // Variant label: "Size: L · Color: Red"
+                                            // Variant label from the selected_attributes snapshot (array: attribute => value)
                                             $variantLabel = null;
-                                            if ($item->variant && $item->variant->values->isNotEmpty()) {
-                                                $variantLabel = $item->variant->values
-                                                    ->map(function ($v) {
-
-                                                        return optional($v->attributeValue?->attribute)->name .
-                                                            ': ' .
-                                                            ($v->attributeValue->value ?? '');
-
+                                            if (!empty($item->selected_attributes)) {
+                                                $variantLabel = collect($item->selected_attributes)
+                                                    ->map(function ($value, $key) {
+                                                        // Shape A: nested assoc array like ['attribute' => 'Size', 'value' => 'L']
+                                                        if (is_array($value)) {
+                                                            $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                                                            $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                                                            return $attrName . ': ' . $attrVal;
+                                                        }
+                                                        // Shape B: flat ['Size' => 'L']
+                                                        return $key . ': ' . $value;
                                                     })
                                                     ->join(' · ');
                                             }
 
-                                            $lineTotal = $item->price * $item->quantity;
+                                            // SKU: sku variant > snapshot sku column > product sku
+                                            $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
+
+                                            $addonsTotal = $item->addons->sum('price');
+                                            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
                                         @endphp
                                         <tr>
                                             <td>
@@ -767,12 +774,21 @@
                                                         <div class="product-name-cell">
                                                             {{ $item->product_name ?? ($item->product->name ?? 'Product') }}
                                                         </div>
+
                                                         @if($variantLabel)
                                                             <div class="product-variant">{{ $variantLabel }}</div>
                                                         @endif
-                                                        @if($item->sku ?? ($item->product->sku ?? null))
-                                                            <div class="product-sku">
-                                                                SKU: {{ $item->sku ?? $item->product->sku }}
+
+                                                        @if($sku)
+                                                            <div class="product-sku">SKU: {{ $sku }}</div>
+                                                        @endif
+                                                        
+                                                        @if($item->addons->isNotEmpty())
+                                                            <div class="product-variant" style="margin-top:4px">
+                                                                @foreach($item->addons as $addon)
+                                                                    <div>+ {{ $addon->detail }}
+                                                                        (₹{{ number_format($addon->price, 2) }})</div>
+                                                                @endforeach
                                                             </div>
                                                         @endif
                                                     </div>
@@ -975,46 +991,42 @@
                                         </select>
                                     </div>
                                     <div id="shipping-details"
-     style="{{ in_array($order->status, ['shipped','delivered']) ? '' : 'display:none' }}">
+                                        style="{{ in_array($order->status, ['shipped', 'delivered']) ? '' : 'display:none' }}">
 
-    <div style="margin-bottom:12px">
-        <label class="field-label">
-            Courier
-        </label>
+                                        <div style="margin-bottom:12px">
+                                            <label class="field-label">
+                                                Courier
+                                            </label>
 
-        <select name="courier_id" class="field-select-full">
+                                            <select name="courier_id" class="field-select-full">
 
-            <option value="">
-                Select Courier
-            </option>
+                                                <option value="">
+                                                    Select Courier
+                                                </option>
 
-            @foreach($couriers as $courier)
+                                                @foreach($couriers as $courier)
 
-                <option value="{{ $courier->id }}"
-                    {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
-                    {{ $courier->name }}
-                </option>
+                                                    <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
+                                                        {{ $courier->name }}
+                                                    </option>
 
-            @endforeach
+                                                @endforeach
 
-        </select>
-    </div>
+                                            </select>
+                                        </div>
 
-    <div style="margin-bottom:12px">
-        <label class="field-label">
-            Tracking Number
-        </label>
+                                        <div style="margin-bottom:12px">
+                                            <label class="field-label">
+                                                Tracking Number
+                                            </label>
 
-        <input type="text"
-               name="tracking_number"
-               class="field-input-full"
-               value="{{ $order->tracking_number }}"
-               placeholder="Enter tracking number">
-    </div>
+                                            <input type="text" name="tracking_number" class="field-input-full"
+                                                value="{{ $order->tracking_number }}" placeholder="Enter tracking number">
+                                        </div>
 
-</div>
+                                    </div>
 
-                                  
+
                                     <div style="margin-bottom:14px">
                                         <label class="field-label">Note (optional)</label>
                                         <textarea name="note" class="field-textarea"
@@ -1185,28 +1197,28 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const statusSelect = document.querySelector('[name="status"]');
-    const shippingBlock = document.getElementById('shipping-details');
+        const statusSelect = document.querySelector('[name="status"]');
+        const shippingBlock = document.getElementById('shipping-details');
 
-    function toggleShippingFields() {
+        function toggleShippingFields() {
 
-        if (
-            statusSelect.value === 'shipped' ||
-            statusSelect.value === 'delivered'
-        ) {
-            shippingBlock.style.display = 'block';
-        } else {
-            shippingBlock.style.display = 'none';
+            if (
+                statusSelect.value === 'shipped' ||
+                statusSelect.value === 'delivered'
+            ) {
+                shippingBlock.style.display = 'block';
+            } else {
+                shippingBlock.style.display = 'none';
+            }
         }
-    }
 
-    toggleShippingFields();
+        toggleShippingFields();
 
-    statusSelect.addEventListener('change', toggleShippingFields);
+        statusSelect.addEventListener('change', toggleShippingFields);
 
-});
+    });
 </script>
 
 @include('admin.footer')

@@ -15,11 +15,23 @@ class CustomerAuthController extends Controller
 {
     public function registerForm()
     {
+        if (Auth::guard('customer')->check()) {
+            return redirect()->route('user.dashboard.index');
+        }
+
         return view('user.register');
     }
 
-    public function loginForm()
+    public function loginForm(Request $request)
     {
+        if (Auth::guard('customer')->check()) {
+            return redirect()->route('user.dashboard.index');
+        }
+
+        if ($request->filled('redirect')) {
+            session(['url.intended' => $request->redirect]);
+        }
+
         return view('user.login');
     }
 
@@ -62,13 +74,15 @@ class CustomerAuthController extends Controller
 
             $customer = Auth::guard('customer')->user();
 
-            $this->mergeGuestCart($customer);
-            $this->mergeGuestWishlist($customer);
+            $guestSessionId = session()->getId();
+
+            $this->mergeGuestCart($customer, $guestSessionId);
+            $this->mergeGuestWishlist($customer, $guestSessionId);
 
             $request->session()->regenerate();
 
             return redirect()
-                ->route('user.dashboard.index')
+                ->intended(route('user.dashboard.index'))
                 ->with('success', 'Login successful.');
         }
 
@@ -105,10 +119,12 @@ class CustomerAuthController extends Controller
 
         Auth::guard('customer')->login($customer);
 
-        $this->mergeGuestCart($customer);
-        $this->mergeGuestWishlist($customer);
+        $guestSessionId = session()->getId();
 
-        return redirect()->route('home');
+        $this->mergeGuestCart($customer, $guestSessionId);
+        $this->mergeGuestWishlist($customer, $guestSessionId);
+
+        return redirect()->intended(route('home'));
     }
 
     public function logout(Request $request)
@@ -121,12 +137,11 @@ class CustomerAuthController extends Controller
         return redirect()->route('user.login');
     }
 
-    private function mergeGuestCart(Customer $customer)
+    private function mergeGuestCart(Customer $customer, $guestSessionId)
     {
-        $guestCart = Cart::where(
-            'session_id',
-            session()->getId()
-        )->first();
+        $guestCart = Cart::with('items.addons')
+            ->where('session_id', $guestSessionId)
+            ->first();
 
         if (!$guestCart) {
             return;
@@ -137,7 +152,7 @@ class CustomerAuthController extends Controller
                 'user_id' => $customer->id
             ],
             [
-                'session_id' => session()->getId(),
+                'session_id' => $guestSessionId,
                 'total_amount' => 0
             ]
         );
@@ -153,10 +168,19 @@ class CustomerAuthController extends Controller
 
         foreach ($guestCart->items as $item) {
 
+            // Two line items only count as "the same" if product + every
+            // variant reference + the selected attribute snapshot all match.
+            // Otherwise different size/color combos would collapse into one row.
             $existingItem = CartItem::where('cart_id', $userCart->id)
                 ->where('product_id', $item->product_id)
-                ->where('variant_id', $item->variant_id)
-                ->first();
+                ->where('price_variant_id', $item->price_variant_id)
+                ->where('image_variant_id', $item->image_variant_id)
+                ->where('stock_variant_id', $item->stock_variant_id)
+                ->where('sku_variant_id', $item->sku_variant_id)
+                ->get()
+                ->first(function ($candidate) use ($item) {
+                    return $candidate->selected_attributes === $item->selected_attributes;
+                });
 
             if ($existingItem) {
 
@@ -168,14 +192,27 @@ class CustomerAuthController extends Controller
 
             } else {
 
-                CartItem::create([
+                $newItem = CartItem::create([
                     'cart_id' => $userCart->id,
                     'product_id' => $item->product_id,
-                    'variant_id' => $item->variant_id,
+                    'price_variant_id' => $item->price_variant_id,
+                    'image_variant_id' => $item->image_variant_id,
+                    'stock_variant_id' => $item->stock_variant_id,
+                    'sku_variant_id' => $item->sku_variant_id,
+                    'selected_attributes' => $item->selected_attributes,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                     'total' => $item->total,
                 ]);
+
+                // Carry over addons attached to the guest's line item
+                foreach ($item->addons as $addon) {
+                    $newItem->addons()->create([
+                        'addon_id' => $addon->addon_id,
+                        'detail' => $addon->detail,
+                        'price' => $addon->price,
+                    ]);
+                }
             }
         }
 
@@ -183,15 +220,18 @@ class CustomerAuthController extends Controller
             'total_amount' => $userCart->items()->sum('total')
         ]);
 
+        $guestCart->items()->each(function ($item) {
+            $item->addons()->delete();
+        });
         $guestCart->items()->delete();
         $guestCart->delete();
     }
 
-    private function mergeGuestWishlist(Customer $customer)
+    private function mergeGuestWishlist(Customer $customer, $guestSessionId)
     {
         $guestWishlistItems = Wishlist::where(
             'session_id',
-            session()->getId()
+            $guestSessionId
         )->get();
 
         if ($guestWishlistItems->isEmpty()) {

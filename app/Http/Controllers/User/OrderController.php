@@ -13,21 +13,21 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
-    /**
-     * Authenticated customer shorthand.
-     */
     private function customer()
     {
         return Auth::guard('customer')->user();
     }
 
-    /**
-     * Guard: make sure the order belongs to this customer.
-     */
     private function findOrder(int $id): Order
     {
         return Order::with([
             'items.product.images',
+            'items.priceVariant',
+            'items.imageVariant',
+            'items.stockVariant',
+            'items.skuVariant',
+            'items.addons',
+            'items.review.images',
             'invoice',
             'city',
             'state',
@@ -36,20 +36,21 @@ class OrderController extends Controller
             ->findOrFail($id);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // LIST
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /user/orders
-     */
     public function index()
     {
         $customer = $this->customer();
 
-        // All orders eager-loaded; tabs filter client-side via JS
         $orders = $customer->orders()
-            ->with(['items.product.images', 'invoice', 'statusHistory'])
+            ->with([
+                'items.product.images',
+                'items.priceVariant',
+                'items.imageVariant',
+                'items.stockVariant',
+                'items.skuVariant',
+                'items.addons',
+                'invoice',
+                'statusHistory',
+            ])
             ->latest()
             ->get();
 
@@ -58,13 +59,6 @@ class OrderController extends Controller
         return view('user.orders.index', compact('orders', 'returnReasons'));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // DETAIL
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /user/orders/{order}
-     */
     public function show(int $id)
     {
         $order = $this->findOrder($id);
@@ -74,36 +68,21 @@ class OrderController extends Controller
         return view('user.orders.show', compact('order', 'returnReasons'));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // INVOICE
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /user/orders/{order}/invoice
-     * Streams a PDF invoice to the browser.
-     * Requires: barryvdh/laravel-dompdf  (composer require barryvdh/laravel-dompdf)
-     */
     public function invoice(int $id)
     {
         $order = $this->findOrder($id);
 
-        // Only allow invoice download when one exists
         if (!$order->invoice) {
             return back()->with('error', 'Invoice is not available for this order yet.');
         }
 
-        $order->load([
-            'items.product',
-            'items.variant.values.attributeValue.attribute',
-            'state',
-            'city',
-        ]);
+        // findOrder() already eager-loads everything the invoice view needs
+        // (product, all four variant types, addons) — no extra load() call required.
 
         $setting = InvoiceSetting::with([
             'state',
             'city'
         ])->first();
-
 
         $logo_64 = null;
 
@@ -118,12 +97,11 @@ class OrderController extends Controller
             }
         }
 
-
         $pdf = Pdf::loadView('user.orders.invoice', [
             'order' => $order,
             'invoice' => $order->invoice,
             'setting' => $setting,
-            'isPdf' => true,   // hides the print bar in the view
+            'isPdf' => true,
             'logo_64' => $logo_64,
         ])
             ->setPaper('a4', 'portrait')
@@ -139,29 +117,18 @@ class OrderController extends Controller
         return $pdf->download($filename);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // RETURN / EXCHANGE
-    // ─────────────────────────────────────────────────────────────────────────
-
     public function submitReturn(Request $request)
     {
+        // ... unchanged, no variant references here
         $request->validate([
             'order_id' => 'required|integer',
             'order_item_id' => 'required|integer',
             'return_reason_id' => 'required|exists:return_reasons,id',
             'type' => 'required|in:return,exchange',
             'details' => 'nullable|string|max:1000',
-
-            // Refund method
             'refund_method' => 'required|in:upi,qr,bank',
-
-            // UPI
             'upi_id' => 'required_if:refund_method,upi|nullable|string|max:100',
-
-            // QR
             'qr_image' => 'required_if:refund_method,qr|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-
-            // Bank
             'bank_name' => 'required_if:refund_method,bank|nullable|string|max:100',
             'account_name' => 'required_if:refund_method,bank|nullable|string|max:100',
             'account_number' => 'required_if:refund_method,bank|nullable|string|max:30',
@@ -171,21 +138,15 @@ class OrderController extends Controller
         ]);
 
         $customer = Auth::guard('customer')->user();
-
-        // Verify the order belongs to this customer
         $order = $customer->orders()->findOrFail($request->order_id);
-
-        // Verify the item belongs to this order
         $item = $order->items()->findOrFail($request->order_item_id);
 
-        // Enforce 7-day window
         abort_if(
             $order->created_at->diffInDays(now()) > 7,
             403,
             'Return window has expired.'
         );
 
-        // Prevent duplicate requests for the same item
         $already = OrderReturn::where('order_item_id', $item->id)
             ->whereIn('status', ['pending', 'approved'])
             ->exists();
@@ -194,7 +155,6 @@ class OrderController extends Controller
             return back()->with('error', 'A return request for this item is already in progress.');
         }
 
-        // Handle QR upload
         $qrPath = null;
         if ($request->refund_method === 'qr' && $request->hasFile('qr_image')) {
             $qrPath = $request->file('qr_image')->store('returns/qr', 'public');
@@ -208,7 +168,6 @@ class OrderController extends Controller
             'type' => $request->type,
             'details' => $request->details,
             'status' => 'pending',
-            // Refund info
             'refund_method' => $request->refund_method,
             'upi_id' => $request->refund_method === 'upi' ? $request->upi_id : null,
             'qr_image' => $request->refund_method === 'qr' ? $qrPath : null,
@@ -223,15 +182,6 @@ class OrderController extends Controller
         return back()->with('success', 'Return request submitted. We\'ll process your refund within 3–5 business days.');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // REORDER
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * GET /user/orders/{order}/reorder
-     * Adds all in-stock items from a previous order back into the cart,
-     * then redirects to cart.
-     */
     public function reorder(int $id)
     {
         $order = $this->findOrder($id);
@@ -243,27 +193,52 @@ class OrderController extends Controller
         foreach ($order->items as $item) {
             $product = $item->product;
 
-            // Skip if product was deleted or is out of stock
             if (!$product || $product->stock < 1) {
                 $skipped[] = $item->product_name;
                 continue;
             }
 
-            // Upsert into cart (assumes a Cart / CartItem model)
             $cart = $customer->cart()->firstOrCreate([]);
 
-            $cartItem = $cart->items()->where('product_id', $product->id)->first();
+            // Match on product + all four variant refs, so different
+            // size/color combos of the same product don't collapse together.
+            $cartItem = $cart->items()
+                ->where('product_id', $product->id)
+                ->where('price_variant_id', $item->price_variant_id)
+                ->where('image_variant_id', $item->image_variant_id)
+                ->where('stock_variant_id', $item->stock_variant_id)
+                ->where('sku_variant_id', $item->sku_variant_id)
+                ->get()
+                ->first(fn ($ci) => $ci->selected_attributes === $item->selected_attributes);
 
             if ($cartItem) {
-                // Clamp qty to available stock
                 $newQty = min($cartItem->quantity + $item->quantity, $product->stock);
-                $cartItem->update(['quantity' => $newQty]);
-            } else {
-                $cart->items()->create([
-                    'product_id' => $product->id,
-                    'quantity' => min($item->quantity, $product->stock),
-                    'price' => $product->price,
+                $cartItem->update([
+                    'quantity' => $newQty,
+                    'total' => $newQty * $cartItem->price,
                 ]);
+            } else {
+                $qty = min($item->quantity, $product->stock);
+
+                $newCartItem = $cart->items()->create([
+                    'product_id' => $product->id,
+                    'price_variant_id' => $item->price_variant_id,
+                    'image_variant_id' => $item->image_variant_id,
+                    'stock_variant_id' => $item->stock_variant_id,
+                    'sku_variant_id' => $item->sku_variant_id,
+                    'selected_attributes' => $item->selected_attributes,
+                    'quantity' => $qty,
+                    'price' => $item->price,
+                    'total' => $qty * $item->price,
+                ]);
+
+                foreach ($item->addons as $addon) {
+                    $newCartItem->addons()->create([
+                        'addon_id' => $addon->addon_id,
+                        'detail' => $addon->detail,
+                        'price' => $addon->price,
+                    ]);
+                }
             }
 
             $added++;

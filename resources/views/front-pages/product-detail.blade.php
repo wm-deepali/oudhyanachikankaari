@@ -48,6 +48,155 @@
         .aq-radio-option.active { border-color: #b5904a; background: rgba(181,144,74,.08); }
 
         .aq-size-dropdown { max-width: 260px; }
+
+        /* ── Desktop Gallery Layout & Sticky column ────────────────── */
+        .aq-sticky-column {
+            position: sticky;
+            top: 120px;
+            align-self: flex-start;
+        }
+        .aq-gallery-thumbs {
+            display: flex;
+            gap: 12px;
+            overflow: auto;
+            scrollbar-width: none;
+        }
+        .aq-gallery-thumbs::-webkit-scrollbar { display: none; }
+        
+        .aq-gallery-thumb-item {
+            flex-shrink: 0;
+            width: 70px;
+            height: 90px;
+            border: 1px solid #e5e5e5;
+            cursor: pointer;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .aq-gallery-thumb-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .aq-gallery-thumb-item.active {
+            border-color: #b5904a;
+            box-shadow: 0 0 0 2px rgba(181,144,74,.25);
+        }
+
+        /* ── Typography & Clean Design (Right Column) ─────────────── */
+        .design-brand {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #777;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .design-title {
+            font-family: 'Times New Roman', Times, serif; /* Elegant serif fallback */
+            font-size: 22px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #333;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        .design-tax-info {
+            font-size: 13px;
+            color: #777;
+            margin-bottom: 25px;
+            display: block;
+        }
+        .design-size-chart {
+            font-size: 13px;
+            color: #333;
+            text-decoration: underline;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+        .design-size-chart i {
+            font-size: 16px;
+        }
+        
+        /* ── Button Styles ────────────────────────────────────────── */
+        .btn-design-primary {
+            background-color: #4a4a4a;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-design-primary:hover {
+            background-color: #333;
+        }
+        .btn-design-secondary {
+            background-color: #f5f5f5;
+            color: #555;
+            border: 1px solid #ddd;
+            padding: 15px;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .btn-design-secondary:hover {
+            background-color: #eee;
+        }
+
+        /* ── Accordion Clean Design ───────────────────────────────── */
+        .design-accordion .accordion-item {
+            border: none;
+            border-bottom: 1px solid #e0e0e0;
+            background: transparent;
+            border-radius: 0 !important;
+        }
+        .design-accordion .accordion-button {
+            background: transparent !important;
+            color: #333;
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 20px 0;
+            box-shadow: none !important;
+        }
+        .design-accordion .accordion-button::after {
+            content: '+';
+            background-image: none;
+            font-size: 18px;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: none !important;
+        }
+        .design-accordion .accordion-button:not(.collapsed)::after {
+            content: '-';
+        }
+        .design-accordion .accordion-body {
+            padding: 0 0 20px 0;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
     </style>
 
     <main>
@@ -102,58 +251,70 @@
 
                 <div class="row g-5 justify-content-between">
 
-                    <!-- Left Column: Image Gallery -->
-                    <div class="col-lg-6 col-md-12">
-                        <div class="aq-product-gallery">
-                            <div class="aq-gallery-badge-wrap">
+                    <!-- Left Column: Thumbnails (Sticky) -->
+                    <div class="col-lg-1 d-none d-lg-block">
+                        <div class="aq-sticky-column">
+                            <div class="aq-gallery-thumbs d-flex flex-column h-100" style="max-height: calc(100vh - 150px);">
+                                @foreach($product->images as $index => $image)
+                                    <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                                        <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
+                                    </div>
+                                @endforeach
 
+                                @foreach($product->videos as $index => $video)
+                                    <div class="aq-gallery-thumb-item aq-gallery-thumb-video" onclick="document.getElementById('main-video-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                                        <img src="{{ $product->display_image }}" alt="{{ $product->name }} video" />
+                                        <span class="aq-thumb-play-icon"><i class="fa-solid fa-play"></i></span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Middle Column: Main Images Stacked (Scrollable) -->
+                    <div class="col-lg-7 col-md-12">
+                        <div class="aq-product-gallery position-relative d-flex flex-column gap-4">
+                            <div class="aq-gallery-badge-wrap position-absolute" style="top: 10px; left: 10px; z-index: 10;">
                                 @foreach($product->collections->take(2) as $index => $collection)
-
                                     <span class="aq-gallery-badge {{ $index == 0 ? 'bestseller' : 'logo-branding' }}">
                                         {{ $collection->name }}
                                     </span>
-
                                 @endforeach
-
                             </div>
-                            <div class="aq-gallery-main-img-wrap">
-                                <img id="aqMainProductImg" src="{{ $product->display_image }}" alt="{{ $product->name }}"
-                                    class="aq-gallery-main-img" />
-                                <video id="aqMainProductVideo" style="display:none" controls playsinline></video>
-                                <div class="aq-gallery-zoom-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Roll
-                                    over image to zoom</div>
-                            </div>
-                            <!-- Gallery Thumbnails -->
-                            <div class="aq-gallery-thumbs mt-25">
 
+                            <!-- All Images Stacked -->
+                            @foreach($product->images as $index => $image)
+                                <div class="aq-gallery-main-img-wrap" id="main-img-{{ $index }}">
+                                    <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}"
+                                        class="aq-gallery-main-img" style="width: 100%; border-radius: 8px; object-fit: cover;" />
+                                </div>
+                            @endforeach
+
+                            <!-- All Videos Stacked -->
+                            @foreach($product->videos as $index => $video)
+                                <div class="aq-gallery-main-img-wrap" id="main-video-{{ $index }}">
+                                    <video src="{{ asset('storage/' . $video->video) }}" style="width: 100%; border-radius: 8px; object-fit: cover;" controls playsinline></video>
+                                </div>
+                            @endforeach
+                            
+                            <!-- Mobile Thumbnails -->
+                            <div class="d-lg-none aq-gallery-thumbs d-flex flex-row overflow-auto mt-3">
                                 @foreach($product->images as $index => $image)
-
-                                    <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}"
-                                        onclick="updateMainMedia(this, '{{ asset('storage/' . $image->image) }}', 'image')">
-
+                                    <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
-
                                     </div>
-
                                 @endforeach
-
-                                @foreach($product->videos as $video)
-
-                                    <div class="aq-gallery-thumb-item aq-gallery-thumb-video"
-                                        onclick="updateMainMedia(this, '{{ asset('storage/' . $video->video) }}', 'video')">
-
+                                @foreach($product->videos as $index => $video)
+                                    <div class="aq-gallery-thumb-item aq-gallery-thumb-video" onclick="document.getElementById('main-video-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ $product->display_image }}" alt="{{ $product->name }} video" />
                                         <span class="aq-thumb-play-icon"><i class="fa-solid fa-play"></i></span>
-
                                     </div>
-
                                 @endforeach
-
                             </div>
                         </div>
 
                         <!-- SUITABLE FOR SELECTIONS -->
-                        <div class="aq-details-suitable-wrap mt-30 mb-20">
+                        <div class="aq-details-suitable-wrap mt-40 mb-20">
                             <h5 class="aq-details-suitable-title">
                                 <i class="fa-solid fa-check-double"></i> Perfectly Suited For
                             </h5>
@@ -161,33 +322,26 @@
                             <!-- Occasions Grid -->
                             <div class="aq-details-suitable-grid">
                                 @foreach($product->occasions as $occasion)
-
                                     <div class="aq-details-suitable-item">
                                         <div class="aq-details-suitable-icon">
                                             <i class="fa-solid fa-gift"></i>
                                         </div>
-
                                         <span>{{ $occasion->title }}</span>
                                     </div>
-
                                 @endforeach
                             </div>
                         </div>
+                        
                         <!-- Trust Badges Section -->
                         <div class="aq-luxury-trust-badges">
-
                             @if($product->pan_india)
                                 <div class="aq-trust-badge-item">
                                     <span class="aq-trust-badge-icon">
                                         <i class="fa-solid fa-truck-fast"></i>
                                     </span>
                                     <div class="aq-trust-badge-content">
-                                        <span class="aq-trust-badge-text">
-                                            PAN India Delivery
-                                        </span>
-                                        <span class="aq-trust-badge-sub">
-                                            {{ $product->delivery_time ?: 'Express Shipping Available' }}
-                                        </span>
+                                        <span class="aq-trust-badge-text">PAN India Delivery</span>
+                                        <span class="aq-trust-badge-sub">{{ $product->delivery_time ?: 'Express Shipping Available' }}</span>
                                     </div>
                                 </div>
                             @endif
@@ -198,57 +352,52 @@
                                         <i class="fa-solid fa-circle-check"></i>
                                     </span>
                                     <div class="aq-trust-badge-content">
-                                        <span class="aq-trust-badge-text">
-                                            100% Quality Audited
-                                        </span>
-                                        <span class="aq-trust-badge-sub">
-                                            Strict Assurance Audit
-                                        </span>
+                                        <span class="aq-trust-badge-text">100% Quality Audited</span>
+                                        <span class="aq-trust-badge-sub">Strict Assurance Audit</span>
                                     </div>
                                 </div>
                             @endif
-
                         </div>
-
                     </div>
 
                     <!-- Right Column: Product Specs & Ordering Drawer Trigger -->
-                    <div class="col-lg-6 col-md-12">
+                    <div class="col-lg-4 col-12">
+                        <div class="aq-sticky-column" style="max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 10px;">
                         
                         
                         
                         <div class="aq-product-details-summary">
-                            <span class="aq-details-brand">
+                            <span class="design-brand">
                                 {{ $product->subcategory->name ?? $product->category->name }}
                             </span>
-                            <h2 class="aq-details-title">
+                            <h2 class="design-title">
                                 {{ $product->name }}
                             </h2>
+                            <span class="design-tax-info">Inclusive of all taxes.</span>
 
                           
 
                             <!-- Pricing box -->
-                            <div class="aq-details-price-box p-3 mb-25">
+                             <div class="aq-details-price-box p-3 mb-25">
                                 <div class="d-flex flex-column gap-1">
                                     @php
-                                        $discount = ($product->mrp > 0)
+                                        $discount = ($product->mrp > 0 && $product->mrp > $product->price)
                                             ? round((($product->mrp - $product->price) / $product->mrp) * 100)
                                             : 0;
                                     @endphp
 
-                                    @if($discount > 0)
-                                        <div class="aq-price-mrp-row d-flex align-items-center gap-2 mb-2">
-                                            <span class="mrp-label">
-                                                <span class="mrp-value" id="productMrp">
-                                                    ₹{{ number_format($product->mrp) }}
-                                                </span>
+                                    <div class="aq-price-mrp-row d-flex align-items-center gap-2 mb-2"
+                                         id="priceMrpRow"
+                                         style="{{ $discount > 0 ? '' : 'display:none' }}">
+                                        <span class="mrp-label">
+                                            <span class="mrp-value" id="productMrp">
+                                                ₹{{ number_format($product->mrp) }}
                                             </span>
-
-                                            <span class="discount-badge" id="productDiscount">
-                                               {{ $discount }}% OFF
-                                            </span>
-                                        </div>
-                                    @endif
+                                        </span>
+                                        <span class="discount-badge" id="productDiscount">
+                                            {{ $discount }}% OFF
+                                        </span>
+                                    </div>
 
                                     <div class="aq-price-offered-row d-flex align-items-baseline gap-2">
                                         <span class="aq-details-price" id="productPrice">
@@ -263,7 +412,6 @@
                                     </p>
                                 </div>
                             </div>
-
                             <p class="aq-details-short-desc">
                                 {{ $product->short_description }}
                             </p>
@@ -483,9 +631,9 @@
 @endif
 
                             <!-- Interactive Quantity and Action -->
-                            <div class="aq-action-panel p-3 mb-30 mt-25">
-                                <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
-                                    <div class="aq-qty-selector luxury-qty ">
+                            <div class="p-0 mb-30 mt-30">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="aq-qty-selector luxury-qty d-none">
                                         <button type="button" class="qty-btn" onclick="adjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
                                         <input type="number" id="aqDetailQty" value="{{ $product->min_qty }}"
@@ -500,48 +648,35 @@
                                     @if($product->stock >= $product->min_qty)
 
                                         <button type="button"
-                                            class="aq-btn-black flex-grow-1 aq-add-to-cart-btn luxury-btn-outline w-100"
+                                            class="btn-design-primary aq-add-to-cart-btn"
                                             onclick="addToCart({{ $product->id }})">
-                                            <i class="fa-solid fa-bag-shopping"></i>
                                             Add to Cart
                                         </button>
                                     @else
-                                        <button type="button" class="aq-btn-black flex-grow-1 luxury-btn-outline w-100" disabled
+                                        <button type="button" class="btn-design-primary" disabled
                                             style="background:#999;cursor:not-allowed;">
-                                            <i class="fa-solid fa-ban"></i>
                                             Out of Stock
                                         </button>
                                     @endif
                                     
                                     
                                      @if($product->stock >= $product->min_qty)
-                                    <button class="aq-btn-black btn-red-bg  aq-buy-now-btn luxury-btn-solid w-100"
+                                    <button class="btn-design-secondary aq-buy-now-btn"
                                         onclick="addToCart({{ $product->id }})">
-                                        Buy it Now
+                                        <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Buy it Now
                                     </button>
                                 @else
-                                    <button class="aq-btn-black btn-red-bg  luxury-btn-solid w-100" disabled
-                                        style="background:#999;cursor:not-allowed;">
+                                    <button class="btn-design-secondary" disabled
+                                        style="cursor:not-allowed;">
                                         Out of Stock
                                     </button>
                                 @endif
                                 </div>
-                                <!--@if($product->stock >= $product->min_qty)-->
-                                <!--    <button class="aq-btn-black btn-red-bg w-100 mt-3 aq-buy-now-btn luxury-btn-solid"-->
-                                <!--        onclick="addToCart({{ $product->id }})">-->
-                                <!--        Buy it Now-->
-                                <!--    </button>-->
-                                <!--@else-->
-                                <!--    <button class="aq-btn-black btn-red-bg w-100 mt-3 luxury-btn-solid" disabled-->
-                                <!--        style="background:#999;cursor:not-allowed;">-->
-                                <!--        Out of Stock-->
-                                <!--    </button>-->
-                                <!--@endif-->
                             </div>
                         </div>
 
                        <div class="aq-product-accordion " >
-                       <div class="accordion aq-details-accordion mt-30 " id="productAccordion">
+                       <div class="accordion design-accordion mt-30 " id="productAccordion">
 
     <!-- Full Description -->
     <div class="accordion-item">
@@ -757,7 +892,7 @@
     @endif
 
 </div>
-                    </div>
+                        </div> <!-- End Right Column Sticky -->
                     </div>
 
                 </div>
@@ -1025,34 +1160,21 @@
     </div>
     @endif
 
-    <input type="hidden" id="currentUnitPrice" value="{{ $product->price }}">
-
-    <input type="hidden" id="currentUnitMrp" value="{{ $product->mrp }}">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Product Details Custom Interactive Logic Scripts -->
-
     <script>
 
-        /*
-        |----------------------------------------------------------------
-        | variantsByType — matches the admin's 4 independent variant sets.
-        |----------------------------------------------------------------
-        | Expected shape (supplied by the controller):
-        |   { price: [...], image: [...], stock: [...], sku: [...] }
-        | Each entry: { id, values: [attributeValueId, ...], price, mrp,
-        |               stock, image, sku }
-        | A variant "matches" the current selection for a given type when
-        | its `values` array equals the set of selected value ids whose
-        | attribute is flagged *-dependent for that type (see the
-        | data-price-dependent / data-image-dependent / data-stock-dependent
-        | / data-sku-dependent attributes on .variant-option elements above).
-        */
         const variantsByType = @json($variantsByType);
 
         let selectedValues = [];
         let selectedAddonIds = [];
         let selectedAddonTotal = 0;
+
+        // Single source of truth for the currently active unit price/mrp.
+        // Always a plain number — updated by the variant click handler,
+        // read by updatePriceDisplay(). Never read stale DOM state.
+        let currentUnitPrice = {{ (float) $product->price }};
+        let currentUnitMrp = {{ (float) $product->mrp }};
 
         function findVariantForType(type) {
             const relevantIds = $('.variant-option.active')
@@ -1068,116 +1190,76 @@
             }) || null;
         }
 
-        $(document).on(
-            'click',
-            '.variant-option',
-            function () {
+        $(document).on('click', '.variant-option', function () {
 
-                const attributeId =
-                    $(this).data('attribute-id');
+            const attributeId = $(this).data('attribute-id');
 
-                $('.variant-option[data-attribute-id="' +
-                    attributeId +
-                    '"]')
-                    .removeClass('active');
+            $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
+            $(this).addClass('active');
 
-                $(this).addClass('active');
+            selectedValues = $('.variant-option.active')
+                .map(function () { return parseInt($(this).data('value-id')); })
+                .get();
 
-                selectedValues =
-                    $('.variant-option.active')
-                        .map(function () {
+            const priceVariant = findVariantForType('price');
+            const imageVariant = findVariantForType('image');
+            const stockVariant = findVariantForType('stock');
+            const skuVariant   = findVariantForType('sku');
 
-                            return parseInt(
-                                $(this).data('value-id')
-                            );
+            window.currentVariantIds = {
+                price: priceVariant ? priceVariant.id : null,
+                image: imageVariant ? imageVariant.id : null,
+                stock: stockVariant ? stockVariant.id : null,
+                sku:   skuVariant   ? skuVariant.id   : null,
+            };
 
-                        }).get();
-
-                const priceVariant = findVariantForType('price');
-                const imageVariant = findVariantForType('image');
-                const stockVariant = findVariantForType('stock');
-                const skuVariant   = findVariantForType('sku');
-
-                window.currentVariantIds = {
-                    price: priceVariant ? priceVariant.id : null,
-                    image: imageVariant ? imageVariant.id : null,
-                    stock: stockVariant ? stockVariant.id : null,
-                    sku:   skuVariant   ? skuVariant.id   : null,
-                };
-
-                if (priceVariant) {
-                    $('#currentUnitPrice').val(priceVariant.price);
-                    $('#currentUnitMrp').val(priceVariant.mrp);
-                }
-
-                updatePriceByQty();
-
-                const stockValue = stockVariant ? stockVariant.stock : {{ (int) $product->stock }};
-                $('#currentStock').text(stockValue);
-
-                if (stockValue > 0) {
-                    $('#aqDetailQty')
-                        .attr('max', stockValue)
-                        .val(
-                            Math.max(
-                                parseInt($('#aqDetailQty').attr('min')) || 1,
-                                Math.min(
-                                    parseInt($('#aqDetailQty').val()) || 1,
-                                    stockValue
-                                )
-                            )
-                        );
-                } else {
-                    $('#aqDetailQty')
-                        .attr('max', 0)
-                        .val(0);
-                }
-
-                if (stockValue < 1) {
-
-                    $('.aq-add-to-cart-btn')
-                        .prop('disabled', true)
-                        .html('<i class="fa-solid fa-ban"></i> Out of Stock');
-
-                    $('.aq-buy-now-btn')
-                        .prop('disabled', true)
-                        .text('Out of Stock');
-
-                } else {
-
-                    $('.aq-add-to-cart-btn')
-                        .prop('disabled', false)
-                        .html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
-
-                    $('.aq-buy-now-btn')
-                        .prop('disabled', false)
-                        .text('Buy it Now');
-                }
-
-                if (imageVariant && imageVariant.image) {
-
-                    $('#aqMainProductImg').attr(
-                        'src',
-                        '/storage/' + imageVariant.image
-                    );
-                    showMainImage();
-                }
-
+            // Always resolve to a real number — fall back to the base
+            // product's price/mrp when no price-variant matches this
+            // combination, or when the matched variant has a null mrp.
+            if (priceVariant) {
+                currentUnitPrice = parseFloat(priceVariant.price) || 0;
+                currentUnitMrp   = parseFloat(priceVariant.mrp)   || 0;
+            } else {
+                currentUnitPrice = {{ (float) $product->price }};
+                currentUnitMrp   = {{ (float) $product->mrp }};
             }
-        );
 
-        // ── Dropdown-type attributes: proxy to the hidden .variant-option
-        //    button so the click handler above stays the single source
-        //    of truth for selection state, no matter the control type.
+            updatePriceDisplay();
+
+            const stockValue = stockVariant ? stockVariant.stock : {{ (int) $product->stock }};
+            $('#currentStock').text(stockValue);
+
+            if (stockValue > 0) {
+                $('#aqDetailQty')
+                    .attr('max', stockValue)
+                    .val(Math.max(
+                        parseInt($('#aqDetailQty').attr('min')) || 1,
+                        Math.min(parseInt($('#aqDetailQty').val()) || 1, stockValue)
+                    ));
+            } else {
+                $('#aqDetailQty').attr('max', 0).val(0);
+            }
+
+            if (stockValue < 1) {
+                $('.aq-add-to-cart-btn').prop('disabled', true).html('<i class="fa-solid fa-ban"></i> Out of Stock');
+                $('.aq-buy-now-btn').prop('disabled', true).text('Out of Stock');
+            } else {
+                $('.aq-add-to-cart-btn').prop('disabled', false).html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
+                $('.aq-buy-now-btn').prop('disabled', false).text('Buy it Now');
+            }
+
+            if (imageVariant && imageVariant.image) {
+                $('#aqMainProductImg').attr('src', '/storage/' + imageVariant.image);
+                showMainImage();
+            }
+        });
+
         $(document).on('change', '.aq-size-dropdown', function () {
             const attributeId = $(this).data('attribute-id');
             const valueId = $(this).val();
-
-            $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]')
-                .trigger('click');
+            $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]').trigger('click');
         });
 
-        // ── Addon selection (Choose Your Style) ─────────────────────
         $(document).on('change', '.aq-addon-option', function () {
             selectedAddonIds = $('.aq-addon-option:checked')
                 .map(function () { return parseInt($(this).data('addon-id')); })
@@ -1186,10 +1268,9 @@
             selectedAddonTotal = $('.aq-addon-option:checked').toArray()
                 .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
 
-            updatePriceByQty();
+            updatePriceDisplay();
         });
 
-        // ── Gallery: image + video thumbs ────────────────────────────
         function showMainImage() {
             $('#aqMainProductVideo').get(0).pause();
             $('#aqMainProductVideo').hide();
@@ -1211,98 +1292,76 @@
                 document.getElementById('aqMainProductImg').src = src;
                 showMainImage();
             }
-
             document.querySelectorAll('.aq-gallery-thumb-item').forEach(t => t.classList.remove('active'));
             thumb.classList.add('active');
         }
 
-        // Backward-compatible alias (in case other scripts on the page still call updateMainImage)
         function updateMainImage(thumb, imgSrc) {
             updateMainMedia(thumb, imgSrc, 'image');
         }
 
         function adjustQty(amount) {
-
             const qtyInput = document.getElementById('aqDetailQty');
-
             if (!qtyInput) return;
 
             const minQty = parseInt(qtyInput.min) || 1;
             const maxQty = parseInt(qtyInput.max) || 0;
 
             let newVal = parseInt(qtyInput.value || minQty) + amount;
-
-            if (newVal < minQty) {
-                newVal = minQty;
-            }
-
-            if (maxQty > 0 && newVal > maxQty) {
-                newVal = maxQty;
-            }
+            if (newVal < minQty) newVal = minQty;
+            if (maxQty > 0 && newVal > maxQty) newVal = maxQty;
 
             qtyInput.value = newVal;
-            updatePriceByQty();
+            updatePriceDisplay();
         }
 
-        function updatePriceByQty() {
+        /*
+        |--------------------------------------------------------------------
+        | Single function that owns all price/mrp/discount DOM updates.
+        | - Addons are added to BOTH price and mrp equally, so they never
+        |   shift the discount % — only the variant's own price vs mrp does.
+        | - Everything is rounded to whole rupees with Math.round BEFORE
+        |   formatting, so displayed price/mrp/discount can never disagree
+        |   due to separate rounding of price vs mrp vs their difference.
+        |--------------------------------------------------------------------
+        */
+        function updatePriceDisplay() {
 
-            const qty =
-                parseInt($('#aqDetailQty').val()) || 1;
+            const qty = parseInt($('#aqDetailQty').val()) || 1;
 
-            const unitPrice =
-                parseFloat($('#currentUnitPrice').val()) || 0;
+            const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
+            const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
 
-            const unitMrp =
-                parseFloat(
-                    $('#currentUnitMrp').val()
-                ) || 0;
+            const totalPrice = Math.round(qty * unitPriceWithAddons);
+            const totalMrp   = Math.round(qty * unitMrpWithAddons);
 
-            const totalPrice =
-                qty * (unitPrice + selectedAddonTotal);
-
-            const totalMrp =
-                qty * unitMrp;
-
-            $('#productPrice').text(
-                '₹' + totalPrice.toLocaleString('en-IN')
-            );
-
-            $('#productMrp').text(
-                '₹' + totalMrp.toLocaleString('en-IN')
-            );
+            $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
 
             let discount = 0;
 
-            if (
-                totalMrp > 0 &&
-                totalPrice < totalMrp
-            ) {
-                discount = Math.round(
-                    ((totalMrp - totalPrice) / totalMrp) * 100
-                );
+            if (totalMrp > 0 && totalPrice < totalMrp) {
+                discount = Math.round(((totalMrp - totalPrice) / totalMrp) * 100);
             }
 
-            $('#productDiscount').text(
-                'DISCOUNT: ' + discount + '% OFF'
-            );
+            if (discount > 0) {
+                $('#productMrp').text('₹' + totalMrp.toLocaleString('en-IN'));
+                $('#productDiscount').text(discount + '% OFF');
+                $('#priceMrpRow').show();
+            } else {
+                $('#priceMrpRow').hide();
+            }
         }
-        document.getElementById('aqDetailQty')?.addEventListener('change', function () {
 
+        document.getElementById('aqDetailQty')?.addEventListener('change', function () {
             const minQty = parseInt(this.min) || 1;
             const maxQty = parseInt(this.max) || 0;
 
             let value = parseInt(this.value) || minQty;
-
-            if (value < minQty) {
-                value = minQty;
-            }
-
-            if (maxQty > 0 && value > maxQty) {
-                value = maxQty;
-            }
+            if (value < minQty) value = minQty;
+            if (maxQty > 0 && value > maxQty) value = maxQty;
 
             this.value = value;
-            updatePriceByQty();
+            updatePriceDisplay();
         });
 
         function addToCart(productId) {
@@ -1310,13 +1369,7 @@
             const quantity = parseInt($('#aqDetailQty').val());
 
             if (stock <= 0 || quantity > stock) {
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Out of Stock',
-                    text: 'Requested quantity is not available.'
-                });
-
+                Swal.fire({ icon: 'error', title: 'Out of Stock', text: 'Requested quantity is not available.' });
                 return;
             }
 
@@ -1328,54 +1381,52 @@
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     product_id: productId,
-                    // ── Type-aware variant ids (replaces the old single variant_id) ──
                     price_variant_id: variantIds.price,
                     image_variant_id: variantIds.image,
                     stock_variant_id: variantIds.stock,
                     sku_variant_id:   variantIds.sku,
-                    // ── Selected addon options ──
+                    selected_values: selectedValues,
                     addon_ids: selectedAddonIds,
                     quantity: quantity
                 },
                 success: function (response) {
-
                     if (response.status) {
-
                         Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
+                            icon: 'success', title: 'Success', text: response.message,
+                            timer: 1500, showConfirmButton: false
                         });
 
-                        $('.cart-count').text(
-                            response.cart_count
-                        );
+                        $('.cart-count').text(response.cart_count);
 
+                        if (response.mini_cart_html) {
+                            $('.aq-cartmini-body').html(response.mini_cart_html);
+                        }
+                        if (response.cart_subtotal) {
+                            $('#miniCartSubtotal').text('₹' + response.cart_subtotal);
+                        }
+
+                        markAddedToCart();
                     } else {
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Unable to add product.'
-                        });
-
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
                     }
                 },
                 error: function (xhr) {
-
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message ??
-                            'Something went wrong.'
+                        icon: 'error', title: 'Error',
+                        text: xhr.responseJSON?.message ?? 'Something went wrong.'
                     });
-
                 }
             });
         }
 
-    </script>
+        function markAddedToCart() {
+            const addBtn = document.querySelector('.aq-add-to-cart-btn');
+            if (!addBtn) return;
 
-@endsection
+            addBtn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> View Cart';
+            addBtn.onclick = function () {
+                window.location.href = "{{ route('cart') }}";
+            };
+        }
+
+    </script>

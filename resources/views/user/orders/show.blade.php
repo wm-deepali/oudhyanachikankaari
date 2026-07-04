@@ -493,46 +493,63 @@ $paymentIcon = $paymentIcons[$paymentKey] ?? 'fa-solid fa-credit-card';
                 </div>
                 <div class="aq-card-body p-0">
 
-                    @foreach($order->items as $item)
-                        @php
-                            $variantLabel = $item->variant && $item->variant->values->isNotEmpty()
-                                ? $item->variant->values
-                                    ->map(fn($v) =>
-                                        optional($v->attributeValue?->attribute)->name
-                                        . ': ' .
-                                        ($v->attributeValue->value ?? ''))
-                                    ->join(' | ')
-                                : null;
-                        @endphp
+                  @foreach($order->items as $item)
+    @php
+        $thumb = null;
+        if ($item->imageVariant && $item->imageVariant->image) {
+            $thumb = asset('storage/' . $item->imageVariant->image);
+        } elseif ($item->product) {
+            $thumb = $item->product->display_image;
+        } else {
+            $thumb = asset('assets/img/corporate/placeholder.png');
+        }
 
-                        <div style="border-bottom:1px solid var(--aq-border);">
+        $variantLabel = null;
+        if (!empty($item->selected_attributes)) {
+            $variantLabel = collect($item->selected_attributes)
+                ->map(function ($value, $key) {
+                    if (is_array($value)) {
+                        $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                        $attrVal  = $value['value'] ?? $value['label'] ?? reset($value);
+                        return $attrName . ': ' . $attrVal;
+                    }
+                    return $key . ': ' . $value;
+                })
+                ->join(' | ');
+        }
 
-                            {{-- Item row --}}
-                            <div class="aq-order-item" style="padding:16px 20px;">
-                                <img
-                                    src="{{ $item->product?->display_image ?? asset('assets/img/corporate/placeholder.png') }}"
-                                    alt="{{ $item->product_name }}"
-                                    style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;"
-                                >
-                                <div class="aq-order-item-details" style="flex:1;">
-                                    <h4 style="margin-bottom:4px;">{{ $item->product_name }}</h4>
-                                    <p style="color:#888;font-size:13px;margin:0;">
-                                        @if($variantLabel){{ $variantLabel }} | @endif
-                                        Qty: {{ $item->quantity }}
-                                    </p>
-                                    @if($item->sku)
-                                        <p style="color:#aaa;font-size:12px;margin:2px 0 0;">SKU: {{ $item->sku }}</p>
-                                    @endif
-                                </div>
-                                <div style="text-align:right;flex-shrink:0;">
-                                    <div class="aq-order-item-price">₹ {{ number_format($item->price) }}</div>
-                                    @if($item->quantity > 1)
-                                        <small style="color:#aaa;">
-                                            × {{ $item->quantity }} = ₹ {{ number_format($item->price * $item->quantity) }}
-                                        </small>
-                                    @endif
-                                </div>
-                            </div>
+        $sku = optional($item->skuVariant)->sku ?? $item->sku ?? optional($item->product)->sku;
+    @endphp
+
+    <div style="border-bottom:1px solid var(--aq-border);">
+
+        <div class="aq-order-item" style="padding:16px 20px;">
+            <img src="{{ $thumb }}" alt="{{ $item->product_name }}"
+                style="width:72px;height:72px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+            <div class="aq-order-item-details" style="flex:1;">
+                <h4 style="margin-bottom:4px;">{{ $item->product_name }}</h4>
+                <p style="color:#888;font-size:13px;margin:0;">
+                    @if($variantLabel){{ $variantLabel }} | @endif
+                    Qty: {{ $item->quantity }}
+                </p>
+                @if($sku)
+                    <p style="color:#aaa;font-size:12px;margin:2px 0 0;">SKU: {{ $sku }}</p>
+                @endif
+                @if($item->addons->isNotEmpty())
+                    <p style="color:#aaa;font-size:12px;margin:2px 0 0;">
+                        {{ $item->addons->pluck('detail')->implode(', ') }}
+                    </p>
+                @endif
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+                <div class="aq-order-item-price">₹ {{ number_format($item->price) }}</div>
+                @if($item->quantity > 1)
+                    <small style="color:#aaa;">
+                        × {{ $item->quantity }} = ₹ {{ number_format($item->price * $item->quantity) }}
+                    </small>
+                @endif
+            </div>
+        </div>
 
                             {{-- ── Review zone (delivered orders only) ── --}}
                             @if($isDelivered)

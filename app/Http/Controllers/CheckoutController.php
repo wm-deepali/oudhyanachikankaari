@@ -36,7 +36,8 @@ class CheckoutController extends Controller
         $cart = Cart::with([
             'items.product.images',
             'items.product.category',
-            'items.variant.values.attributeValue.attribute',
+            'items.priceVariant',
+            'items.addons',
         ])
             ->where('user_id', $customer->id)
             ->first();
@@ -238,7 +239,8 @@ class CheckoutController extends Controller
         }
 
         $cart = Cart::with([
-            'items.product'
+            'items.product',
+            'items.addons',
         ])
             ->where('user_id', $customer->id)
             ->first();
@@ -321,12 +323,18 @@ class CheckoutController extends Controller
 
             foreach ($cart->items as $item) {
 
-                OrderItem::create([
+                $orderItem = OrderItem::create([
 
                     'order_id' => $order->id,
 
                     'product_id' => $item->product_id,
-                    'variant_id' => $item->variant_id,
+
+                    'price_variant_id' => $item->price_variant_id,
+                    'image_variant_id' => $item->image_variant_id,
+                    'stock_variant_id' => $item->stock_variant_id,
+                    'sku_variant_id' => $item->sku_variant_id,
+
+                    'selected_attributes' => $item->selected_attributes,
 
                     'product_name' =>
                         $item->product->name ?? 'Product',
@@ -337,6 +345,15 @@ class CheckoutController extends Controller
 
                     'total' => $item->total,
                 ]);
+
+                // Carry the cart item's addon snapshot over to the order item.
+                foreach ($item->addons as $addon) {
+                    $orderItem->addons()->create([
+                        'addon_id' => $addon->addon_id,
+                        'detail' => $addon->detail,
+                        'price' => $addon->price,
+                    ]);
+                }
             }
 
             /*
@@ -390,12 +407,12 @@ class CheckoutController extends Controller
 
                 // COD — deduct stock before committing
                 $this->deductOrderStock($order);
-                $this->alertService->sendAlertEmailIfNeeded(); // ← add this
+                // $this->alertService->sendAlertEmailIfNeeded(); // ← add this
 
 
                 DB::commit();
 
-                $this->sendOrderEmails($order);
+                // $this->sendOrderEmails($order);
 
                 return response()->json([
                     'success' => true,
@@ -680,12 +697,12 @@ class CheckoutController extends Controller
 
             // Razorpay — deduct stock after payment verified, before committing
             $this->deductOrderStock($order);
-            $this->alertService->sendAlertEmailIfNeeded(); // ← add this
+            // $this->alertService->sendAlertEmailIfNeeded(); // ← add this
 
 
             DB::commit();
 
-            $this->sendOrderEmails($order);
+            // $this->sendOrderEmails($order);
 
             return response()->json([
 

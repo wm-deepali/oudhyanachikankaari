@@ -190,84 +190,13 @@
             <h4 class="aq-cartmini-title">Shopping Cart</h4>
         </div>
         <div class="aq-cartmini-body">
-            @if($miniCart && $miniCart->items->count())
-
-                @foreach($miniCart->items as $item)
-
-                    <div class="aq-cartmini-product-item mb-15 item-delete d-flex align-items-center">
-                        <div class="aq-cartmini-product-thumbnail">
-                            <a href="{{ route('product.details', $item->product->slug) }}">
-                                <img src="{{ asset($item->product->display_image) }}" alt="{{ $item->product->name }}">
-                            </a>
-                        </div>
-                        <div class="aq-cartmini-product-summary">
-                            <h4 class="aq-product-title">
-                                <a href="{{ route('product.details', $item->product->slug) }}">
-                                    {{ $item->product->name }}
-                                </a>
-                            </h4>
-                            <span class="aq-cartmini-product-size"><label>Size:</label> M</span>
-                            <span class="aq-cartmini-product-price">
-                                ₹{{ number_format($item->price, 2) }}
-                            </span>
-                            <div class="aq-product-details-quantity d-flex align-items-center">
-
-                                <div class="aq-product-quantity">
-
-                                    <span class="aq-cart-minus update-cart-qty" data-id="{{ $item->id }}" data-action="minus">
-                                        <svg width="11" height="2" viewBox="0 0 11 2" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1 1H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round"></path>
-                                        </svg>
-                                    </span>
-
-                                    <input class="aq-cart-input" type="text" value="{{ $item->quantity }}" readonly>
-
-                                    <span class="aq-cart-plus update-cart-qty" data-id="{{ $item->id }}" data-action="plus">
-                                        <svg width="11" height="12" viewBox="0 0 11 12" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M1 6H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                                stroke-linejoin="round"></path>
-                                            <path d="M5.5 10.5V1.5" stroke="currentColor" stroke-width="1.5"
-                                                stroke-linecap="round" stroke-linejoin="round"></path>
-                                        </svg>
-                                    </span>
-
-                                </div>
-
-                                <button class="aq-line-anim aq-cartmini-remove remove-cart-item" data-id="{{ $item->id }}">
-                                    Remove
-                                </button>
-
-                            </div>
-                        </div>
-                    </div>
-
-                @endforeach
-
-            @else
-
-                <div class="cartmini-empty text-center">
-
-                    <img src="{{ asset('assets/img/corporate/empty-cart.webp') }}" alt="Empty Cart" loading="lazy">
-
-                    <p>Your Cart is empty</p>
-
-                    <a href="{{ route('categories') }}" class="aq-btn-black border-btn">
-                        Continue Shopping
-                    </a>
-
-                </div>
-
-            @endif
-
+             @include('layouts.mini-cart')
         </div>
 
         <div class="aq-cartmini-footer">
-            <div class="aq-cartmini-total d-flex justify-content-between align-items-center">
+                        <div class="aq-cartmini-total d-flex justify-content-between align-items-center">
                 <span class="aq-cartmini-total-title">Subtotal</span>
-                <span class="aq-cartmini-total-value">
+                <span class="aq-cartmini-total-value" id="miniCartSubtotal">
                     ₹{{ number_format($miniCart->total_amount ?? 0, 2) }}
                 </span>
             </div>
@@ -1102,11 +1031,11 @@
             <!-- Drawer Header -->
             <div class="aq-drawer-header">
                 <div class="aq-drawer-header-icon">
-                    <i class="fa-solid fa-gift"></i>
+                    <i class="fa-solid fa-bag-shopping"></i>
                 </div>
-                <h3 class="aq-drawer-title">Bespoke Corporate Curation</h3>
-                <p class="aq-drawer-subtitle">Connect with our luxury design consultants. Receive curated hampers,
-                    custom branded tech & premium PDF proposals within 2 hours.</p>
+                <h3 class="aq-drawer-title">Bulk Order Enquiry</h3>
+                <p class="aq-drawer-subtitle">Send enquiry for Bulk orders for Chikankari suits, sarees, kurtis, and women's ethnic 
+                wear with competitive pricing, premium quality, and timely delivery.</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -1130,11 +1059,11 @@
 
                     <div class="aq-drawer-form-row">
                         <div class="aq-drawer-form-group">
-                            <label class="aq-drawer-label">Company Name *</label>
+                            <label class="aq-drawer-label">Brand Name *</label>
                             <div class="aq-drawer-input-wrapper">
                                 <i class="fa-solid fa-building"></i>
                                 <input type="text" name="company" value="{{ old('company') }}" class="aq-drawer-input"
-                                    placeholder="Your Company Name" required>
+                                    placeholder="Your Brand Name" required>
                             </div>
                         </div>
                     </div>
@@ -1145,7 +1074,7 @@
                             <div class="aq-drawer-input-wrapper">
                                 <i class="fa-regular fa-envelope"></i>
                                 <input type="email" name="email" value="{{ old('email') }}" class="aq-drawer-input"
-                                    placeholder="you@company.com" required>
+                                    placeholder="xyz@gmail.com" required>
                             </div>
                         </div>
                     </div>
@@ -1193,7 +1122,7 @@
 
                         <div class="aq-drawer-secure-note">
                             <i class="fa-solid fa-shield-halved"></i>
-                            <span>Corporate privacy guarantee. No spam.</span>
+                            <span>Bulk pricing available. Quick response guaranteed.<span>
                         </div>
 
                     </div>
@@ -1206,11 +1135,12 @@
                     <div class="aq-drawer-success-icon">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
-                    <h4 class="aq-drawer-success-title">Proposal Initiated!</h4>
-                    <p class="aq-drawer-success-desc">
-                        Your inquiry was transmitted. A dedicated corporate curator will assemble custom gifting
-                        ideas and email you digital catalogs within <strong>2 business hours</strong>.
-                    </p>
+                    <h4 class="aq-drawer-success-title">Request Submitted!</h4>
+<p class="aq-drawer-success-desc">
+    Thank you for your bulk order inquiry. Our team will contact you shortly with wholesale 
+    pricing, product catalogs, and customization options within <strong>2 business hours</strong>.
+</p>
+
                     <button type="button" class="aq-drawer-success-close-btn" id="aqDrawerSuccessClose">
                         Return to Site
                     </button>

@@ -142,24 +142,41 @@
                         <!-- Order Items -->
                         <div class="aq-order-items">
                             @foreach ($order->items as $item)
+                                @php
+                                    $thumb = null;
+                                    if ($item->imageVariant && $item->imageVariant->image) {
+                                        $thumb = asset('storage/' . $item->imageVariant->image);
+                                    } elseif ($item->product) {
+                                        $thumb = $item->product->display_image;
+                                    } else {
+                                        $thumb = asset('assets/img/corporate/placeholder.png');
+                                    }
+
+                                    $variantLabel = null;
+                                    if (!empty($item->selected_attributes)) {
+                                        $variantLabel = collect($item->selected_attributes)
+                                            ->map(function ($value, $key) {
+                                                if (is_array($value)) {
+                                                    $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                                                    $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                                                    return $attrName . ': ' . $attrVal;
+                                                }
+                                                return $key . ': ' . $value;
+                                            })
+                                            ->join(' | ');
+                                    }
+                                @endphp
                                 <div class="aq-order-item">
-                                    <img src="{{ $item->product?->display_image ?? asset('assets/img/corporate/placeholder.png') }}"
-                                        alt="{{ $item->product_name }}">
+                                    <img src="{{ $thumb }}" alt="{{ $item->product_name }}">
                                     <div class="aq-order-item-details">
                                         <h4>{{ $item->product_name }}</h4>
                                         <p>
-                                            @php
-                                                $variants = $item->variant?->values
-                                                        ?->map(function ($value) {
-                                                            return $value->attributeValue->attribute->name
-                                                                . ': '
-                                                                . $value->attributeValue->value;
-                                                        })
-                                                    ->implode(' | ');
-                                            @endphp
+                                            @if($variantLabel)
+                                                {{ $variantLabel }} |
+                                            @endif
 
-                                            @if($variants)
-                                                {{ $variants }} |
+                                            @if($item->addons->isNotEmpty())
+                                                {{ $item->addons->pluck('detail')->implode(', ') }} |
                                             @endif
 
                                             Qty: {{ $item->quantity }}
@@ -245,7 +262,7 @@
                                         @if ($existingReturn)
                                             <span class="aq-btn-invoice" style="opacity:.55;cursor:not-allowed;">
                                                 <i class="fa-solid fa-arrow-rotate-left"></i>
-                                                Return {{ ucfirst($existingReturn->status) }} 
+                                                Return {{ ucfirst($existingReturn->status) }}
                                             </span>
                                         @else
                                             <a href="#" class="aq-btn-invoice" data-bs-toggle="modal" data-bs-target="#returnModal"
@@ -495,8 +512,7 @@
 
 
 
-    <style>
-
+<style>
     /* Return modal fields */
     .rtn-field-group {
         margin-bottom: 14px;
@@ -686,145 +702,145 @@
 
 
 @push('scripts')
-<script>
-    // ── Tab Filter ──────────────────────────────────────────────────────────
-    function filterOrders(status, btn) {
-        document.querySelectorAll('.aq-order-tabs button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.aq-order-card').forEach(card => {
-            const match = status === 'all' || card.dataset.status === status;
-            card.style.display = match ? '' : 'none';
-        });
-    }
-
-    // ── Track Order Modal ───────────────────────────────────────────────────
-    document.getElementById('trackOrderModal').addEventListener('show.bs.modal', function (e) {
-        const trigger = e.relatedTarget;
-        const number = trigger.dataset.orderNumber;
-        const status = trigger.dataset.orderStatus;
-        const date = trigger.dataset.orderDate;
-
-        document.getElementById('trackOrderMeta').textContent =
-            `Order #${number} • Placed ${date}`;
-
-        const steps = this.querySelectorAll('.track-modal-step');
-        const statusMap = { pending: 0, processing: 1, shipped: 2, delivered: 3 };
-        const active = statusMap[status.toLowerCase()] ?? 0;
-
-        steps.forEach((step, i) => {
-            step.classList.remove('completed', 'active');
-            if (i < active) step.classList.add('completed');
-            else if (i === active) step.classList.add('active');
-        });
-
-        const trackingNo = trigger.dataset.trackingNumber;
-
-        if (trackingNo) {
-            document.getElementById('trackingInfo').style.display = 'block';
-            document.getElementById('trackingNumber').textContent = trackingNo;
-        } else {
-            document.getElementById('trackingInfo').style.display = 'none';
+    <script>
+        // ── Tab Filter ──────────────────────────────────────────────────────────
+        function filterOrders(status, btn) {
+            document.querySelectorAll('.aq-order-tabs button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.aq-order-card').forEach(card => {
+                const match = status === 'all' || card.dataset.status === status;
+                card.style.display = match ? '' : 'none';
+            });
         }
 
-        const history = JSON.parse(
-            trigger.dataset.statusHistory || '[]'
-        );
+        // ── Track Order Modal ───────────────────────────────────────────────────
+        document.getElementById('trackOrderModal').addEventListener('show.bs.modal', function (e) {
+            const trigger = e.relatedTarget;
+            const number = trigger.dataset.orderNumber;
+            const status = trigger.dataset.orderStatus;
+            const date = trigger.dataset.orderDate;
 
-        const times = this.querySelectorAll('.track-modal-time');
+            document.getElementById('trackOrderMeta').textContent =
+                `Order #${number} • Placed ${date}`;
 
-        times.forEach(el => el.textContent = '—');
+            const steps = this.querySelectorAll('.track-modal-step');
+            const statusMap = { pending: 0, processing: 1, shipped: 2, delivered: 3 };
+            const active = statusMap[status.toLowerCase()] ?? 0;
 
-        const map = {
-            pending: 0,
-            processing: 1,
-            shipped: 2,
-            delivered: 3
-        };
+            steps.forEach((step, i) => {
+                step.classList.remove('completed', 'active');
+                if (i < active) step.classList.add('completed');
+                else if (i === active) step.classList.add('active');
+            });
 
-        history.forEach(item => {
-            const idx = map[item.status];
+            const trackingNo = trigger.dataset.trackingNumber;
 
-            if (idx !== undefined && times[idx]) {
-                times[idx].textContent = item.time;
+            if (trackingNo) {
+                document.getElementById('trackingInfo').style.display = 'block';
+                document.getElementById('trackingNumber').textContent = trackingNo;
+            } else {
+                document.getElementById('trackingInfo').style.display = 'none';
             }
+
+            const history = JSON.parse(
+                trigger.dataset.statusHistory || '[]'
+            );
+
+            const times = this.querySelectorAll('.track-modal-time');
+
+            times.forEach(el => el.textContent = '—');
+
+            const map = {
+                pending: 0,
+                processing: 1,
+                shipped: 2,
+                delivered: 3
+            };
+
+            history.forEach(item => {
+                const idx = map[item.status];
+
+                if (idx !== undefined && times[idx]) {
+                    times[idx].textContent = item.time;
+                }
+            });
+
         });
 
-    });
 
+    </script>
 
-</script>
+    <script>
+        // ── Return Modal open ────────────────────────────────────────────
+        document.getElementById('returnModal').addEventListener('show.bs.modal', function (e) {
+            const trigger = e.relatedTarget;
+            const orderId = trigger.dataset.orderId;
+            const number = trigger.dataset.orderNumber;
+            const items = JSON.parse(trigger.dataset.orderItems || '{}');
 
-<script>
-    // ── Return Modal open ────────────────────────────────────────────
-    document.getElementById('returnModal').addEventListener('show.bs.modal', function (e) {
-        const trigger = e.relatedTarget;
-        const orderId = trigger.dataset.orderId;
-        const number = trigger.dataset.orderNumber;
-        const items = JSON.parse(trigger.dataset.orderItems || '{}');
+            document.getElementById('returnOrderId').value = orderId;
+            document.getElementById('returnOrderMeta').textContent =
+                `Requesting a return for Order #${number}.`;
 
-        document.getElementById('returnOrderId').value = orderId;
-        document.getElementById('returnOrderMeta').textContent =
-            `Requesting a return for Order #${number}.`;
+            // Populate item select
+            const select = document.getElementById('returnItemSelect');
+            select.innerHTML = '<option value="" disabled selected>Select an item</option>';
+            Object.entries(items).forEach(([id, name]) => {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = name;
+                select.appendChild(opt);
+            });
 
-        // Populate item select
-        const select = document.getElementById('returnItemSelect');
-        select.innerHTML = '<option value="" disabled selected>Select an item</option>';
-        Object.entries(items).forEach(([id, name]) => {
-            const opt = document.createElement('option');
-            opt.value = id;
-            opt.textContent = name;
-            select.appendChild(opt);
+            // Reset type toggle
+            document.querySelectorAll('.rtn-type-opt input[type=radio]').forEach(r => {
+                r.checked = r.value === 'return';
+            });
+
+            // Reset refund section
+            document.getElementById('refundMethod').value = '';
+            switchRefundMethod('');
+
+            // Clear QR
+            clearQr();
         });
 
-        // Reset type toggle
-        document.querySelectorAll('.rtn-type-opt input[type=radio]').forEach(r => {
-            r.checked = r.value === 'return';
-        });
+        // ── Refund method switcher ──────────────────────────────────────
+        function switchRefundMethod(val) {
+            ['upi', 'qr', 'bank'].forEach(k => {
+                const panel = document.getElementById('rtnPanel' + k.charAt(0).toUpperCase() + k.slice(1));
+                if (panel) panel.style.display = val === k ? 'block' : 'none';
+            });
+            // Toggle required on UPI input
+            const upiField = document.getElementById('upiIdField');
+            if (upiField) upiField.required = val === 'upi';
+            // Toggle required on QR file
+            const qrFile = document.getElementById('qrFile');
+            if (qrFile) qrFile.required = val === 'qr';
+        }
 
-        // Reset refund section
-        document.getElementById('refundMethod').value = '';
-        switchRefundMethod('');
+        // ── QR preview ─────────────────────────────────────────────────
+        function previewQr(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('qrPreviewImg').src = e.target.result;
+                document.getElementById('qrPreview').style.display = 'block';
+                document.getElementById('qrPlaceholder').style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
 
-        // Clear QR
-        clearQr();
-    });
-
-    // ── Refund method switcher ──────────────────────────────────────
-    function switchRefundMethod(val) {
-        ['upi', 'qr', 'bank'].forEach(k => {
-            const panel = document.getElementById('rtnPanel' + k.charAt(0).toUpperCase() + k.slice(1));
-            if (panel) panel.style.display = val === k ? 'block' : 'none';
-        });
-        // Toggle required on UPI input
-        const upiField = document.getElementById('upiIdField');
-        if (upiField) upiField.required = val === 'upi';
-        // Toggle required on QR file
-        const qrFile = document.getElementById('qrFile');
-        if (qrFile) qrFile.required = val === 'qr';
-    }
-
-    // ── QR preview ─────────────────────────────────────────────────
-    function previewQr(input) {
-        if (!input.files || !input.files[0]) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('qrPreviewImg').src = e.target.result;
-            document.getElementById('qrPreview').style.display = 'block';
-            document.getElementById('qrPlaceholder').style.display = 'none';
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-
-    function clearQr(e) {
-        if (e) e.stopPropagation();
-        const qrFile = document.getElementById('qrFile');
-        if (qrFile) qrFile.value = '';
-        const preview = document.getElementById('qrPreview');
-        const placeholder = document.getElementById('qrPlaceholder');
-        if (preview) preview.style.display = 'none';
-        if (placeholder) placeholder.style.display = 'block';
-    }
-</script>
+        function clearQr(e) {
+            if (e) e.stopPropagation();
+            const qrFile = document.getElementById('qrFile');
+            if (qrFile) qrFile.value = '';
+            const preview = document.getElementById('qrPreview');
+            const placeholder = document.getElementById('qrPlaceholder');
+            if (preview) preview.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'block';
+        }
+    </script>
 
 
 @endpush

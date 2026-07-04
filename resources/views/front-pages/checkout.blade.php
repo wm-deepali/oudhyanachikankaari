@@ -337,16 +337,32 @@
                                                         Qty : {{ $item->quantity }}
                                                     </small>
 
-                                                    @if($item->variant && $item->variant->values->count())
+                                                    @if(!empty($item->selected_attributes))
 
                                                         <div class="mt-1">
 
-                                                            @foreach($item->variant->values as $variantValue)
+                                                            @foreach($item->selected_attributes as $attr)
 
                                                                 <small class="d-block text-muted">
-                                                                    {{ $variantValue->attributeValue->attribute->name }}
-                                                                    :
-                                                                    {{ $variantValue->attributeValue->value }}
+                                                                    {{ $attr['attribute'] }} : {{ $attr['value'] }}
+                                                                </small>
+
+                                                            @endforeach
+
+                                                        </div>
+
+                                                    @endif
+
+                                                    @if($item->addons->count())
+
+                                                        <div class="mt-1">
+
+                                                            @foreach($item->addons as $addon)
+
+                                                                <small class="d-block text-muted">
+                                                                    <i class="fa-solid fa-plus"></i>
+                                                                    {{ $addon->detail }}
+                                                                    (+₹{{ number_format($addon->price, 2) }})
                                                                 </small>
 
                                                             @endforeach
@@ -588,9 +604,40 @@
         </div>
         </div>
 
-
-
     </main>
+
+
+     <div id="payment-overlay" style="display:none;">
+        <div class="payment-loader">
+            <div class="spinner-border text-light" role="status"></div>
+            <p>Please wait, processing your payment...</p>
+        </div>
+    </div>
+
+    <style>
+        #payment-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(5px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-loader {
+            text-align: center;
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .payment-loader p {
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+    </style>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -797,6 +844,8 @@
 
                             handler: function (razorpayResponse) {
 
+                              document.getElementById('payment-overlay').style.display = 'flex';
+                              
                                 $.ajax({
                                     url: "{{ route('checkout.razorpay.success') }}",
                                     type: "POST",

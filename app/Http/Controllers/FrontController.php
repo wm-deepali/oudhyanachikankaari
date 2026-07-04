@@ -715,9 +715,9 @@ class FrontController extends Controller
 
         // ── variantsByType — the shape the product-detail JS actually reads ──
         // For each dependency type, find which attribute ids are flagged for
-        // it in this category, reduce every variant down to just those
-        // attribute-values, and dedupe. That reduced value-set is what the
-        // front-end matches against the currently-selected badges.
+        // it in this category, reduce every variant of THAT type down to just
+        // those attribute-values, and dedupe. That reduced value-set is what
+        // the front-end matches against the currently-selected badges.
         $variantsByType = [];
 
         foreach ($dependencyFields as $type) {
@@ -736,7 +736,9 @@ class FrontController extends Controller
             $seenCombinations = [];
             $bucket = [];
 
-            foreach ($product->variants as $variant) {
+            // FIX: only look at variant rows that actually belong to this type
+            // (price/image/stock/sku are separate rows in the same table).
+            foreach ($product->variants->where('type', $type) as $variant) {
 
                 $relevantValueIds = $variant->values
                     ->filter(

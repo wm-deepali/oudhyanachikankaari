@@ -49,12 +49,24 @@ class ProductVariant extends Model
         return $this->hasMany(ProductVariantValue::class, 'variant_id');
     }
 
-    public function cartItems()
+    public function priceCartItems()
     {
-        return $this->hasMany(
-            CartItem::class,
-            'variant_id'
-        );
+        return $this->hasMany(CartItem::class, 'price_variant_id');
+    }
+
+    public function imageCartItems()
+    {
+        return $this->hasMany(CartItem::class, 'image_variant_id');
+    }
+
+    public function stockCartItems()
+    {
+        return $this->hasMany(CartItem::class, 'stock_variant_id');
+    }
+
+    public function skuCartItems()
+    {
+        return $this->hasMany(CartItem::class, 'sku_variant_id');
     }
 
     public function scopeOfType($query, string $type)

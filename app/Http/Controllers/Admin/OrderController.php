@@ -155,7 +155,9 @@ class OrderController extends Controller
     {
         $order->load([
             'items.product.images',   // product thumbnail
-            'items.variant.values',   // variant label (Size: L · Color: Red)
+            'items.imageVariant',  
+            'items.skuVariant',     // variant image (falls back to product thumb)
+            'items.addons',           // selected addons
             'customer',               // customer profile info
             'state',
             'city',
@@ -163,6 +165,7 @@ class OrderController extends Controller
             'statusHistory',
 
         ]);
+        
 
         // Customer's total order count (for sidebar)
         $customerOrderCount = $order->customer_id
@@ -379,7 +382,7 @@ class OrderController extends Controller
 
         $order->load([
             'items.product',
-            'items.variant.values.attributeValue.attribute',
+            'items.addons',
             'state',
             'city',
         ]);
@@ -412,7 +415,7 @@ class OrderController extends Controller
 
         $order->load([
             'items.product',
-            'items.variant.values.attributeValue.attribute',
+            'items.addons',
             'state',
             'city',
         ]);

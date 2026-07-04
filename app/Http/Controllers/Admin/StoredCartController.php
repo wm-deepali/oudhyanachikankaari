@@ -16,12 +16,12 @@ class StoredCartController extends Controller
         $this->applyFilters($query, $request);
 
         // Stats — always unfiltered
-        $totalCarts     = Cart::whereNotNull('user_id')->count();
+        $totalCarts = Cart::whereNotNull('user_id')->count();
         $totalCartValue = Cart::whereNotNull('user_id')->sum('grand_total');
-        $avgCartValue   = $totalCarts > 0 ? $totalCartValue / $totalCarts : 0;
+        $avgCartValue = $totalCarts > 0 ? $totalCartValue / $totalCarts : 0;
         $abandonedToday = Cart::whereNotNull('user_id')
-                              ->whereDate('updated_at', today())
-                              ->count();
+            ->whereDate('updated_at', today())
+            ->count();
 
         $carts = $query->paginate(25)->withQueryString();
 
@@ -70,11 +70,11 @@ class StoredCartController extends Controller
             // Stream in chunks of 200 to avoid memory issues
             $query->chunk(200, function ($carts) use ($handle) {
                 foreach ($carts as $cart) {
-                    $items      = $cart->items;
-                    $totalQty   = $items->sum('quantity');
-                    $itemCount  = $items->count();
+                    $items = $cart->items;
+                    $totalQty = $items->sum('quantity');
+                    $itemCount = $items->count();
                     $productNames = $items
-                        ->map(fn ($i) => optional($i->product)->name ?? 'Unknown')
+                        ->map(fn($i) => optional($i->product)->name ?? 'Unknown')
                         ->implode(' | ');
 
                     fputcsv($handle, [
@@ -100,10 +100,10 @@ class StoredCartController extends Controller
             fclose($handle);
 
         }, $filename, [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control'       => 'no-store, no-cache',
-            'Pragma'              => 'no-cache',
+            'Cache-Control' => 'no-store, no-cache',
+            'Pragma' => 'no-cache',
         ]);
     }
 
@@ -113,34 +113,36 @@ class StoredCartController extends Controller
         $cart->delete();
 
         return redirect()->route('admin.stored-carts.index')
-                         ->with('success', 'Cart cleared successfully.');
+            ->with('success', 'Cart cleared successfully.');
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
 
     private function baseQuery()
     {
-        return Cart::with(['user', 'items.product', 'items.variant'])
+        return Cart::with(['user', 'items.product', 'items.imageVariant', 'items.skuVariant', 'items.addons'])
             ->whereNotNull('user_id')
-            ->where(fn ($q) => $q->where('grand_total', '>', 0)
-                                  ->orWhere('total_amount', '>', 0));
+            ->where(fn($q) => $q->where('grand_total', '>', 0)
+                ->orWhere('total_amount', '>', 0));
     }
 
     private function applyFilters($query, Request $request): void
     {
         if ($search = $request->input('search')) {
-            $query->whereHas('user', fn ($q) =>
+            $query->whereHas(
+                'user',
+                fn($q) =>
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
             );
         }
 
         if ($age = $request->input('cart_age')) {
             $query->where('updated_at', '>=', match ($age) {
-                'today'  => now()->startOfDay(),
-                '2days'  => now()->subDays(2),
-                'week'   => now()->subDays(7),
-                default  => now()->subYears(10),
+                'today' => now()->startOfDay(),
+                '2days' => now()->subDays(2),
+                'week' => now()->subDays(7),
+                default => now()->subYears(10),
             });
         }
 

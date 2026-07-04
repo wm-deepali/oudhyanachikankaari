@@ -499,9 +499,7 @@ class ProductController extends Controller
                 'subcategory_id' => $request->subcategory_id,
 
                 'name' => $request->name,
-                'slug' => $request->slug
-                    ? $this->generateUniqueSlug($request->slug)
-                    : $this->generateUniqueSlug($request->name),
+                'slug' => $this->resolveSlugOnUpdate($product, $request->slug, $request->name),
 
                 'short_description' => $request->short_description,
                 'description' => $request->description,
@@ -1306,4 +1304,19 @@ class ProductController extends Controller
 
         return $slug;
     }
+    
+    private function resolveSlugOnUpdate(Product $product, ?string $requestedSlug, string $name): string
+    {
+        $source = $requestedSlug ?: $name;
+        $candidateSlug = Str::slug($source);
+
+        // If the slug would be the same as what's already saved, don't touch it.
+        if ($candidateSlug === $product->slug) {
+            return $product->slug;
+        }
+
+        // Only regenerate + check uniqueness if it actually changed.
+        return $this->generateUniqueSlug($source, $product->id);
+    }
+
 }

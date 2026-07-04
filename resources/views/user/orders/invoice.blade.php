@@ -630,19 +630,23 @@
                     @foreach($order->items as $i => $item)
                         @php
                             $variantLabel = null;
-                            if ($item->variant && $item->variant->values->isNotEmpty()) {
-                                $variantLabel = $item->variant->values
-                                    ->map(function ($v) {
-
-                                        return optional($v->attributeValue?->attribute)->name .
-                                            ': ' .
-                                            ($v->attributeValue->value ?? '');
-
+                            if (!empty($item->selected_attributes)) {
+                                $variantLabel = collect($item->selected_attributes)
+                                    ->map(function ($value, $key) {
+                                        if (is_array($value)) {
+                                            $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                                            $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                                            return $attrName . ': ' . $attrVal;
+                                        }
+                                        return $key . ': ' . $value;
                                     })
                                     ->join(' · ');
                             }
 
-                            $lineTotal = $item->price * $item->quantity;
+                            $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
+
+                            $addonsTotal = $item->addons->sum('price');
+                            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
                         @endphp
                         <tr>
                             <td style="color:#8c9196;font-size:12px">{{ $i + 1 }}</td>
@@ -653,9 +657,14 @@
                                 @if($variantLabel)
                                     <div class="item-variant">{{ $variantLabel }}</div>
                                 @endif
-                                @if($item->sku ?? ($item->product->sku ?? null))
-                                    <div class="item-sku">
-                                        SKU: {{ $item->sku ?? $item->product->sku }}
+                                @if($sku)
+                                    <div class="item-sku">SKU: {{ $sku }}</div>
+                                @endif
+                                @if($item->addons->isNotEmpty())
+                                    <div class="item-variant" style="margin-top:3px">
+                                        @foreach($item->addons as $addon)
+                                            + {{ $addon->detail }} (&#8377;{{ number_format($addon->price, 2) }})<br>
+                                        @endforeach
                                     </div>
                                 @endif
                             </td>

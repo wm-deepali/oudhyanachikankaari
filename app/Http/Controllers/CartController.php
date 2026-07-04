@@ -8,22 +8,93 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\ProductVariant;
 use App\Models\Coupon;
-
+use App\Models\AttributeValue;
+use App\Models\ProductAddon;
 
 class CartController extends Controller
 {
+
     public function add(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'variant_id' => 'nullable|exists:product_variants,id',
+
+            'price_variant_id' => 'nullable|exists:product_variants,id',
+            'image_variant_id' => 'nullable|exists:product_variants,id',
+            'stock_variant_id' => 'nullable|exists:product_variants,id',
+            'sku_variant_id' => 'nullable|exists:product_variants,id',
+
+            'selected_values' => 'nullable|array',
+            'selected_values.*' => 'integer|exists:attribute_values,id',
+
+            'addon_ids' => 'nullable|array',
+            'addon_ids.*' => 'integer|exists:product_addons,id',
+
             'quantity' => 'nullable|integer|min:1',
         ]);
 
         $product = Product::findOrFail($request->product_id);
-
         $quantity = $request->quantity ?? $product->min_qty;
-        $variantId = $request->variant_id;
+
+        $priceVariant = $request->price_variant_id ? ProductVariant::find($request->price_variant_id) : null;
+        $imageVariant = $request->image_variant_id ? ProductVariant::find($request->image_variant_id) : null;
+        $stockVariant = $request->stock_variant_id ? ProductVariant::find($request->stock_variant_id) : null;
+        $skuVariant = $request->sku_variant_id ? ProductVariant::find($request->sku_variant_id) : null;
+
+        $price = $priceVariant->price ?? $product->price;
+        $stock = $stockVariant->stock ?? $product->stock;
+
+        if ($stock < $product->min_qty) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Product is out of stock.'
+            ], 422);
+        }
+
+        if ($quantity > $stock) {
+            return response()->json([
+                'status' => false,
+                'message' => "Only {$stock} units available."
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Selected attribute values — snapshot for display (Size: L, Color: Red)
+        | Independent of the 4 variant ids above, since a selectable attribute
+        | may not be price/image/stock/sku-dependent at all.
+        |--------------------------------------------------------------------------
+        */
+        $selectedAttributes = [];
+
+        if ($request->filled('selected_values')) {
+            $selectedAttributes = AttributeValue::with('attribute')
+                ->whereIn('id', $request->selected_values)
+                ->get()
+                ->map(fn($av) => [
+                    'attribute_id' => $av->attribute_id,
+                    'attribute' => $av->attribute->name ?? null,
+                    'value_id' => $av->id,
+                    'value' => $av->value,
+                ])
+                ->values()
+                ->toArray();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Selected addons — snapshot detail + price (per unit)
+        |--------------------------------------------------------------------------
+        */
+        $selectedAddons = collect();
+
+        if ($request->filled('addon_ids')) {
+            $selectedAddons = ProductAddon::where('product_id', $product->id)
+                ->whereIn('id', $request->addon_ids)
+                ->get();
+        }
+
+        $addonUnitTotal = $selectedAddons->sum('price');
 
         /*
         |--------------------------------------------------------------------------
@@ -63,54 +134,30 @@ class CartController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Price & Stock
+        | Existing Item — customized lines (with addons) always create a new
+        | line rather than merging, so each customization stays distinct.
+        | Plain lines (no addons) still merge on identical variant selection,
+        | same as before.
         |--------------------------------------------------------------------------
         */
+        $item = null;
 
-        $price = $product->price;
-        $stock = $product->stock;
-
-        if ($variantId) {
-
-            $variant = ProductVariant::findOrFail($variantId);
-
-            $price = $variant->price;
-            $stock = $variant->stock;
+        if ($selectedAddons->isEmpty()) {
+            $item = CartItem::where('cart_id', $cart->id)
+                ->where('product_id', $product->id)
+                ->where('price_variant_id', $priceVariant->id ?? null)
+                ->where('image_variant_id', $imageVariant->id ?? null)
+                ->where('stock_variant_id', $stockVariant->id ?? null)
+                ->where('sku_variant_id', $skuVariant->id ?? null)
+                ->doesntHave('addons')
+                ->first();
         }
-
-        if ($stock < $product->min_qty) {
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Product is out of stock.'
-            ], 422);
-        }
-
-        if ($quantity > $stock) {
-
-            return response()->json([
-                'status' => false,
-                'message' => "Only {$stock} units available."
-            ], 422);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Existing Item
-        |--------------------------------------------------------------------------
-        */
-
-        $item = CartItem::where('cart_id', $cart->id)
-            ->where('product_id', $product->id)
-            ->where('variant_id', $variantId)
-            ->first();
 
         if ($item) {
 
             $newQty = $item->quantity + $quantity;
 
             if ($newQty > $stock) {
-
                 return response()->json([
                     'status' => false,
                     'message' => "Only {$stock} units available."
@@ -118,19 +165,34 @@ class CartController extends Controller
             }
 
             $item->quantity = $newQty;
-            $item->total = $item->quantity * $item->price;
+            $item->total = $item->quantity * ($item->price + $addonUnitTotal);
             $item->save();
 
         } else {
 
-            CartItem::create([
+            $item = CartItem::create([
                 'cart_id' => $cart->id,
                 'product_id' => $product->id,
-                'variant_id' => $variantId,
+
+                'price_variant_id' => $priceVariant->id ?? null,
+                'image_variant_id' => $imageVariant->id ?? null,
+                'stock_variant_id' => $stockVariant->id ?? null,
+                'sku_variant_id' => $skuVariant->id ?? null,
+
+                'selected_attributes' => $selectedAttributes,
+
                 'quantity' => $quantity,
                 'price' => $price,
-                'total' => $price * $quantity,
+                'total' => $quantity * ($price + $addonUnitTotal),
             ]);
+
+            foreach ($selectedAddons as $addon) {
+                $item->addons()->create([
+                    'addon_id' => $addon->id,
+                    'detail' => $addon->detail,
+                    'price' => $addon->price,
+                ]);
+            }
         }
 
         /*
@@ -142,35 +204,49 @@ class CartController extends Controller
         $cart->recalculateTotals();
         $cart->refresh();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Render mini cart partial — lets the frontend swap the sidebar in
+        | without a full page reload.
+        |--------------------------------------------------------------------------
+        */
+        $cart->load([
+            'items.product',
+            'items.imageVariant',
+            'items.addons',
+        ]);
+
+        $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();
+
         return response()->json([
             'status' => true,
             'message' => 'Product added to cart successfully.',
             'cart_count' => $cart->items()->sum('quantity'),
             'cart_total' => $cart->grand_total,
+            'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
+            'mini_cart_html' => $miniCartHtml,
         ]);
     }
 
     public function cart()
     {
+        $with = [
+            'items.product.images',
+            'items.product.category',
+            'items.product.subcategory',
+            'items.priceVariant',
+            'items.addons',
+        ];
+
         if (auth('customer')->check()) {
 
-            $cart = Cart::with([
-                'items.product.images',
-                'items.product.category',
-                'items.product.subcategory',
-                'items.variant.values.attributeValue.attribute',
-            ])
+            $cart = Cart::with($with)
                 ->where('user_id', auth('customer')->id())
                 ->first();
 
         } else {
 
-            $cart = Cart::with([
-                'items.product.images',
-                'items.product.category',
-                'items.product.subcategory',
-                'items.variant.values.attributeValue.attribute',
-            ])
+            $cart = Cart::with($with)
                 ->where('session_id', session()->getId())
                 ->first();
         }
@@ -186,7 +262,6 @@ class CartController extends Controller
             compact('cart')
         );
     }
-
 
     public function remove($id)
     {
@@ -242,8 +317,10 @@ class CartController extends Controller
             }
         }
 
-        $stock = $item->variant
-            ? $item->variant->stock
+        // Stock now comes from the item's stock-variant (if any), else the
+        // base product — same idea as before, just repointed to the new column.
+        $stock = $item->stockVariant
+            ? $item->stockVariant->stock
             : $item->product->stock;
 
         $minQty = $item->product->min_qty;
@@ -267,7 +344,11 @@ class CartController extends Controller
             }
         }
 
-        $item->total = $item->quantity * $item->price;
+        // Addon prices are per-unit, so they scale with quantity too — same
+        // rule as the "Add to Cart" price computation.
+        $addonUnitTotal = $item->addons->sum('price');
+
+        $item->total = $item->quantity * ($item->price + $addonUnitTotal);
         $item->save();
 
         $cart = $item->cart;
@@ -275,8 +356,11 @@ class CartController extends Controller
         $cart->recalculateTotals();
         $cart->refresh();
 
-        $mrp = $item->variant->mrp ?? $item->product->mrp;
-        $totalMrp = $mrp * $item->quantity;
+        // Addons carry no MRP/discount of their own — their price counts
+        // toward both the "MRP" (strikethrough) and the actual total, so
+        // that only the base product/variant portion ever shows a discount.
+        $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
+        $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
 
         return response()->json([
             'status' => true,
