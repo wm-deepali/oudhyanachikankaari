@@ -126,6 +126,11 @@
     /* Action bar */
     .action-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 14px 20px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
+    .upload-area img {
+    max-width: 100%;
+    display: block;
+}
+
     @media(max-width:768px) { .test-edit { padding: 16px; } }
     </style>
 
@@ -262,26 +267,60 @@
                         </div>
 
                         <!-- Photo -->
-                        <div class="section-card">
-                            <div class="section-card-header"><h5>Customer Photo</h5></div>
-                            <div class="section-card-body">
-                                @if($testimonial->photo)
-                                    <div class="current-wrap">
-                                        <img src="{{ asset('storage/'.$testimonial->photo) }}" alt="{{ $testimonial->name }}">
-                                        <div class="current-info">
-                                            <strong>Current photo</strong>
-                                            Upload a new file to replace it.
-                                        </div>
-                                    </div>
-                                @endif
-                                <div class="upload-area">
-                                    <input type="file" name="photo" accept="image/*">
-                                    <div class="up-icon"><i class="fa fa-user-circle-o"></i></div>
-                                    <p>{{ $testimonial->photo ? 'Replace photo' : 'Upload photo (optional)' }}</p>
-                                    <small>PNG, JPG — max 2 MB</small>
-                                </div>
-                            </div>
-                        </div>
+                       <!-- Photo -->
+<div class="section-card">
+    <div class="section-card-header">
+        <h5>Customer Photo</h5>
+    </div>
+
+    <div class="section-card-body">
+
+        @if($testimonial->photo)
+            <div class="current-wrap" id="currentPhotoWrap">
+                <img src="{{ asset('storage/'.$testimonial->photo) }}"
+                     alt="{{ $testimonial->name }}">
+                <div class="current-info">
+                    <strong>Current photo</strong>
+                    Upload a new file to replace it.
+                </div>
+            </div>
+        @endif
+
+        <div class="upload-area">
+
+            <input type="file"
+                   name="photo"
+                   accept="image/*"
+                   id="photoInput">
+
+            <div id="photoPlaceholder">
+                <div class="up-icon">
+                    <i class="fa fa-user-circle-o"></i>
+                </div>
+
+                <p id="photoText">
+                    {{ $testimonial->photo ? 'Replace photo' : 'Upload photo (optional)' }}
+                </p>
+
+                <small>PNG, JPG, JPEG, WEBP — max 2 MB</small>
+            </div>
+
+            <img id="photoPreview"
+                 src=""
+                 alt="Preview"
+                 style="
+                    display:none;
+                    width:150px;
+                    height:150px;
+                    object-fit:cover;
+                    border-radius:10px;
+                    border:1px solid #ddd;
+                    margin:10px auto;
+                 ">
+        </div>
+
+    </div>
+</div>
 
                     </div>
 
@@ -371,5 +410,32 @@ document.getElementById('saveBtn').closest('form').addEventListener('submit', fu
     var btn = document.getElementById('saveBtn');
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+});
+
+// Photo Preview
+document.getElementById('photoInput').addEventListener('change', function (e) {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    document.getElementById('photoText').innerText = file.name;
+
+    const reader = new FileReader();
+
+    reader.onload = function (event) {
+
+        document.getElementById('photoPreview').src = event.target.result;
+        document.getElementById('photoPreview').style.display = 'block';
+
+        document.getElementById('photoPlaceholder').style.display = 'none';
+
+        let currentWrap = document.getElementById('currentPhotoWrap');
+        if (currentWrap) {
+            currentWrap.style.display = 'none';
+        }
+    };
+
+    reader.readAsDataURL(file);
 });
 </script>

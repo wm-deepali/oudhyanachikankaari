@@ -19,13 +19,11 @@ class AttributeController extends Controller
     public function create()
     {
         $types = [
-            'select',
+            'button',
+            'dropdown',
+            'image',
+            'color_swatch',
             'radio',
-            'checkbox',
-            'text',
-            'number',
-            'textarea',
-            'color',
         ];
 
         return view('admin.attributes.create', compact('types'));
@@ -35,7 +33,7 @@ class AttributeController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
-            'type' => 'required',
+            'type' => 'required|in:button,dropdown,image,color_swatch,radio',
             'has_values' => 'required|boolean',
             'status' => 'required|boolean',
             'show_in_navbar' => 'required|boolean',
@@ -58,14 +56,13 @@ class AttributeController extends Controller
     public function edit(Attribute $attribute)
     {
         $types = [
-            'select',
+            'button',
+            'dropdown',
+            'image',
+            'color_swatch',
             'radio',
-            'checkbox',
-            'text',
-            'number',
-            'textarea',
-            'color',
         ];
+
         return view('admin.attributes.edit', compact('attribute', 'types'));
     }
 
@@ -73,7 +70,7 @@ class AttributeController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
-            'type' => 'required',
+            'type' => 'required|in:button,dropdown,image,color_swatch,radio',
             'has_values' => 'required|boolean',
             'status' => 'required|boolean',
             'show_in_navbar' => 'required|boolean',

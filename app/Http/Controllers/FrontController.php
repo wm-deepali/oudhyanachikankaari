@@ -32,6 +32,7 @@ use App\Models\Collection;
 use App\Models\Setting;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\CategoryAttribute;
 
 class FrontController extends Controller
 {
@@ -622,6 +623,16 @@ class FrontController extends Controller
             ->take(4)
             ->get();
 
+        // ── Category-level dependency flags (price/image/stock/sku) ──────────
+        // Variant attribute-values only exist per attribute, but whether an
+        // attribute *drives* price/image/stock/sku is defined per category
+        // via CategoryAttribute, so we need to look it up once and key it
+        // by attribute_id for fast lookups below.
+        $categoryAttributes = CategoryAttribute::where('category_id', $product->category_id)
+            ->get()
+            ->keyBy('attribute_id');
+
+        $dependencyFields = ['price', 'image', 'stock', 'sku'];
 
         $variantAttributes = [];
 
@@ -629,36 +640,140 @@ class FrontController extends Controller
 
             foreach ($variant->values as $value) {
 
-                $attributeName =
-                    $value->attributeValue->attribute->name;
+                $attribute = $value->attributeValue->attribute;
+                $attributeId = $attribute->id;
+                $attributeValue = $value->attributeValue;
 
-                $attributeId =
-                    $value->attributeValue->attribute->id;
+                $categoryAttribute = $categoryAttributes->get($attributeId);
 
-                $variantAttributes[$attributeId]['name']
-                    = $attributeName;
+                $variantAttributes[$attributeId]['name'] = $attribute->name;
+                $variantAttributes[$attributeId]['type'] = $attribute->type ?? 'button';
+                $variantAttributes[$attributeId]['is_selectable'] = $categoryAttribute?->is_selectable ?? true;
+                $variantAttributes[$attributeId]['has_variant'] = true;
 
-                $variantAttributes[$attributeId]['values'][
-                    $value->attributeValue->id
-                ] = $value->attributeValue->value;
+                $variantAttributes[$attributeId]['values'][$attributeValue->id] = [
+                    'value' => $attributeValue->value,
+                    'hex_code' => $attributeValue->hex_code,
+                    'image' => $attributeValue->image,
+                    'slug' => $attributeValue->slug,
+                ];
+
+                // First variant wins as the "default" — used when the attribute
+                // isn't customer-selectable, so we still have something to
+                // pre-select and display.
+                if (!isset($variantAttributes[$attributeId]['default_value_id'])) {
+                    $variantAttributes[$attributeId]['default_value_id'] = $attributeValue->id;
+                }
+
+                foreach ($dependencyFields as $field) {
+                    $variantAttributes[$attributeId][$field . '_dependent'] =
+                        $categoryAttribute?->{$field . '_dependent'} ?? false;
+                }
             }
         }
 
-        $variantsJson = $product->variants->map(function ($variant) {
-            return [
-                'id' => $variant->id,
-                'sku' => $variant->sku,
-                'mrp' => $variant->mrp,
-                'price' => $variant->price,
-                'stock' => $variant->stock,
-                'image' => $variant->image,
+        // ── Merge in attributes that have NO product variants but still need to
+        // participate in the same info/selectable UI, driven by the same
+        // CategoryAttribute config (is_selectable/type). These never carry
+        // price/image/stock/sku dependency since there's no variant to match
+        // against — selecting a value here is purely visual/informational
+        // (active state only, no functional effect).
+        $nonVariantGrouped = $product->attributeValues
+            ->filter(fn($item) => $item->attribute
+                && $item->value
+                && !isset($variantAttributes[$item->attribute_id]))
+            ->groupBy('attribute_id');
 
-                'values' => $variant->values
-                    ->pluck('attribute_value_id')
-                    ->values()
-                    ->toArray(),
+        foreach ($nonVariantGrouped as $attributeId => $items) {
+
+            $attribute = $items->first()->attribute;
+            $categoryAttribute = $categoryAttributes->get($attributeId);
+
+            $values = [];
+            foreach ($items as $item) {
+                $values[$item->value->id] = [
+                    'value' => $item->value->value,
+                    'hex_code' => $item->value->hex_code ?? null,
+                    'image' => $item->value->image ?? null,
+                    'slug' => $item->value->slug ?? null,
+                ];
+            }
+
+            $variantAttributes[$attributeId] = [
+                'name' => $attribute->name,
+                'type' => $attribute->type ?? 'button',
+                'is_selectable' => $categoryAttribute?->is_selectable ?? false,
+                'has_variant' => false,
+                'values' => $values,
+                'default_value_id' => $items->first()->value->id,
+                'price_dependent' => false,
+                'image_dependent' => false,
+                'stock_dependent' => false,
+                'sku_dependent' => false,
             ];
-        });
+        }
+
+        // ── variantsByType — the shape the product-detail JS actually reads ──
+        // For each dependency type, find which attribute ids are flagged for
+        // it in this category, reduce every variant down to just those
+        // attribute-values, and dedupe. That reduced value-set is what the
+        // front-end matches against the currently-selected badges.
+        $variantsByType = [];
+
+        foreach ($dependencyFields as $type) {
+
+            $relevantAttributeIds = $categoryAttributes
+                ->filter(fn($ca) => $ca->{$type . '_dependent'})
+                ->pluck('attribute_id')
+                ->values()
+                ->toArray();
+
+            if (empty($relevantAttributeIds)) {
+                $variantsByType[$type] = [];
+                continue;
+            }
+
+            $seenCombinations = [];
+            $bucket = [];
+
+            foreach ($product->variants as $variant) {
+
+                $relevantValueIds = $variant->values
+                    ->filter(
+                        fn($v) => in_array(
+                            $v->attributeValue->attribute_id,
+                            $relevantAttributeIds
+                        )
+                    )
+                    ->pluck('attribute_value_id')
+                    ->sort()
+                    ->values()
+                    ->toArray();
+
+                if (empty($relevantValueIds)) {
+                    continue;
+                }
+
+                $key = implode('-', $relevantValueIds);
+
+                if (isset($seenCombinations[$key])) {
+                    continue;
+                }
+                $seenCombinations[$key] = true;
+
+                $bucket[] = [
+                    'id' => $variant->id,
+                    'values' => $relevantValueIds,
+                    'price' => $variant->price,
+                    'mrp' => $variant->mrp,
+                    'stock' => $variant->stock,
+                    'image' => $variant->image,
+                    'sku' => $variant->sku,
+                ];
+            }
+
+            $variantsByType[$type] = $bucket;
+        }
 
         $reviews = $product->approvedReviews()
             ->with(['customer', 'images'])
@@ -675,7 +790,7 @@ class FrontController extends Controller
             'newArrivals',
             'relatedProducts',
             'variantAttributes',
-            'variantsJson',
+            'variantsByType',
             'reviews',
             'avgRating',
             'reviewsCount',

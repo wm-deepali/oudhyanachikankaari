@@ -79,6 +79,10 @@
     /* Sort chip */
     .sort-chip { display: inline-block; background: var(--bg); color: var(--text-secondary); font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
 
+    /* Dependents chip (list of active dependency fields) */
+    .deps-chip { display: inline-block; background: var(--blue-bg); color: var(--blue); font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+    .deps-none { display: inline-block; color: var(--text-hint); font-size: 12px; }
+
     /* Status pills */
     .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
     .pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
@@ -132,101 +136,150 @@
             <div class="cam-card">
                 <div class="cam-table-wrap">
                     <table class="cam-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Category</th>
-                                <th>Attribute</th>
-                                <th title="Required">Req.</th>
-                                <th title="Used for Variant">Variant</th>
-                                <th title="Show in Filter">Filter</th>
-                                <th title="Show on Listing">Listing</th>
-                                <th>Sort</th>
-                                <th>Status</th>
-                                <th style="width:90px">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($categoryAttributes as $item)
-                                <tr id="row{{ $item->id }}">
+                   <thead>
+    <tr>
+        <th>ID</th>
+        <th>Category</th>
+        <th>Attribute</th>
+        <th>Required</th>
+        <th>Variant</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Image</th>
+        <th>SKU</th>
+        <th>Filter</th>
+        <th>Listing</th>
+        <th>Sort</th>
+        <th>Status</th>
+        <th style="width:90px">Actions</th>
+    </tr>
+</thead>
 
-                                    <td><span class="id-chip">{{ $item->id }}</span></td>
+<tbody>
+    @forelse($categoryAttributes as $item)
+        <tr id="row{{ $item->id }}">
 
-                                    <td>
-                                        <span class="cat-tag">
-                                            <i class="fa fa-folder-o"></i>
-                                            {{ $item->category->name ?? '—' }}
-                                        </span>
-                                    </td>
+            <td>
+                <span class="id-chip">{{ $item->id }}</span>
+            </td>
 
-                                    <td>
-                                        <span class="attr-tag">
-                                            <i class="fa fa-tag"></i>
-                                            {{ $item->attribute->name ?? '—' }}
-                                        </span>
-                                    </td>
+            <td>
+                <span class="cat-tag">
+                    <i class="fa fa-folder-o"></i>
+                    {{ $item->category->name ?? '—' }}
+                </span>
+            </td>
 
-                                    <td>
-                                        {!! $item->is_required
-                                            ? '<span class="bool-yes">Yes</span>'
-                                            : '<span class="bool-no">No</span>' !!}
-                                    </td>
+            <td>
+                <span class="attr-tag">
+                    <i class="fa fa-tag"></i>
+                    {{ $item->attribute->name ?? '—' }}
+                </span>
+            </td>
 
-                                    <td>
-                                        {!! $item->used_for_variant
-                                            ? '<span class="bool-yes">Yes</span>'
-                                            : '<span class="bool-no">No</span>' !!}
-                                    </td>
+            <td>
+                {!! $item->is_required
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                    <td>
-                                        {!! $item->show_in_filter
-                                            ? '<span class="bool-yes">Yes</span>'
-                                            : '<span class="bool-no">No</span>' !!}
-                                    </td>
+            <td>
+                {!! $item->used_for_variant
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                    <td>
-                                        {!! $item->show_on_listing
-                                            ? '<span class="bool-yes">Yes</span>'
-                                            : '<span class="bool-no">No</span>' !!}
-                                    </td>
+            <td>
+                {!! $item->price_dependent
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                    <td><span class="sort-chip">{{ $item->sort_order }}</span></td>
+            <td>
+                {!! $item->stock_dependent
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                    <td>
-                                        {!! $item->status
-                                            ? '<span class="pill pill-active">Active</span>'
-                                            : '<span class="pill pill-inactive">Inactive</span>' !!}
-                                    </td>
+            <td>
+                {!! $item->image_dependent
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                    <td>
-                                        <div style="display:flex;gap:6px">
-                                            <a href="{{ route('admin.category-attributes.edit', $item->id) }}"
-                                                class="action-btn" title="Edit">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                            <button type="button" class="action-btn action-btn-danger"
-                                                onclick="deleteMapping({{ $item->id }})" title="Delete">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+            <td>
+                {!! $item->sku_dependent
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
 
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="10">
-                                        <div class="empty-state">
-                                            <div class="empty-icon"><i class="fa fa-sitemap"></i></div>
-                                            <strong style="font-size:14px;color:var(--text-primary)">No mappings found</strong>
-                                            <p>Map attributes to categories to control filters, variants and listing fields.</p>
-                                            <a href="{{ route('admin.category-attributes.create') }}" class="btn-primary-dash">
-                                                <i class="fa fa-plus"></i> Add Mapping
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
+            <td>
+                {!! $item->show_in_filter
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
+
+            <td>
+                {!! $item->show_on_listing
+                    ? '<span class="bool-yes">Yes</span>'
+                    : '<span class="bool-no">No</span>' !!}
+            </td>
+
+            <td>
+                <span class="sort-chip">{{ $item->sort_order }}</span>
+            </td>
+
+            <td>
+                {!! $item->status
+                    ? '<span class="pill pill-active">Active</span>'
+                    : '<span class="pill pill-inactive">Inactive</span>' !!}
+            </td>
+
+            <td>
+                <div style="display:flex;gap:6px">
+                    <a href="{{ route('admin.category-attributes.edit', $item->id) }}"
+                        class="action-btn"
+                        title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+
+                    <button type="button"
+                        class="action-btn action-btn-danger"
+                        onclick="deleteMapping({{ $item->id }})"
+                        title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+
+        </tr>
+    @empty
+        <tr>
+            <td colspan="14">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fa fa-sitemap"></i>
+                    </div>
+
+                    <strong style="font-size:14px;color:var(--text-primary)">
+                        No mappings found
+                    </strong>
+
+                    <p>
+                        Map attributes to categories to control variants,
+                        pricing, stock, images and SKU behaviour.
+                    </p>
+
+                    <a href="{{ route('admin.category-attributes.create') }}"
+                        class="btn-primary-dash">
+                        <i class="fa fa-plus"></i>
+                        Add Mapping
+                    </a>
+                </div>
+            </td>
+        </tr>
+    @endforelse
+</tbody>
                     </table>
                 </div>
 

@@ -25,6 +25,11 @@ class Product extends Model
         'delivery_returns',
         'fabric_care',
 
+        // ✅ new Content-tab fields
+        'shipping_delivery',
+        'exchange_policy',
+        'customization_assistance',
+
         'mrp',
         'discount_type',
         'discount',
@@ -93,6 +98,18 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    // ✅ new: product videos (Media → Video)
+    public function videos()
+    {
+        return $this->hasMany(ProductVideo::class);
+    }
+
+    // ✅ new: addon options (Addon Options section)
+    public function addons()
+    {
+        return $this->hasMany(ProductAddon::class);
     }
 
     // OCCASIONS

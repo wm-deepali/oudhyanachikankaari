@@ -325,7 +325,8 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('admin.attribute-values.store') }}" class="save-form">
+            <form method="POST" action="{{ route('admin.attribute-values.store') }}" enctype="multipart/form-data"
+                class="save-form">
                 @csrf
 
                 <div class="cav-layout">
@@ -340,13 +341,19 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Attribute <span class="req">*</span></label>
-                                    <select name="attribute_id" class="field-select" required>
+
+                                    <select name="attribute_id" class="field-select" required id="attributeSelect">
                                         <option value="">— Select an attribute —</option>
+
                                         @foreach($attributes as $attribute)
-                                            <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
+                                            <option value="{{ $attribute->id }}" data-type="{{ $attribute->type }}">
+                                                {{ $attribute->name }}
+                                            </option>
                                         @endforeach
                                     </select>
-                                    <div class="field-hint">The attribute this value belongs to, e.g. Colour, Size.
+
+                                    <div class="field-hint">
+                                        The attribute this value belongs to.
                                     </div>
                                 </div>
 
@@ -354,6 +361,29 @@
                                     <label class="field-label">Value <span class="req">*</span></label>
                                     <input type="text" name="value" class="field-input" required
                                         placeholder="e.g. Red, XL, Cotton">
+                                </div>
+
+                                <div class="field-group" id="imageWrapper" style="display:none;">
+                                    <label class="field-label">Image</label>
+
+                                    <input type="file" name="image" class="field-input" accept="image/*">
+
+                                    <div class="field-hint">
+                                        Upload image for Image type attributes.
+                                    </div>
+                                </div>
+
+                                <div class="field-group" id="hexCodeWrapper" style="display:none;">
+                                    <label class="field-label">
+                                        Hexa Code <span class="req">*</span>
+                                    </label>
+
+                                    <input type="color" name="hex_code" value="#000000" class="field-input"
+                                        style="padding:4px;height:45px;">
+
+                                    <div class="field-hint">
+                                        Required for Colour Swatch attributes.
+                                    </div>
                                 </div>
 
                                 <div class="field-group">
@@ -366,7 +396,7 @@
                             </div>
                         </div>
 
-                         <!-- Help card -->
+                        <!-- Help card -->
                         <div class="section-card">
                             <div class="section-card-header">
                                 <h5>Examples</h5>
@@ -438,7 +468,7 @@
                             </div>
                         </div>
 
-                       
+
                     </div>
 
                 </div>
@@ -462,9 +492,34 @@
 @include('admin.footer')
 
 <script>
-    $(document).on('submit', '.save-form', function () {
-        const btn = $(this).find('.save-btn');
-        btn.prop('disabled', true);
-        btn.html('<i class="fa fa-spinner fa-spin"></i> Processing…');
+$(document).on('submit', '.save-form', function () {
+    const btn = $(this).find('.save-btn');
+    btn.prop('disabled', true);
+    btn.html('<i class="fa fa-spinner fa-spin"></i> Processing…');
+});
+
+function handleAttributeType() {
+
+    let type = $('#attributeSelect option:selected').data('type');
+
+    $('#imageWrapper').hide();
+    $('#hexCodeWrapper').hide();
+
+    if (type === 'image') {
+        $('#imageWrapper').show();
+    }
+
+    if (type === 'color_swatch') {
+        $('#hexCodeWrapper').show();
+    }
+}
+
+$(document).ready(function () {
+
+    $('#attributeSelect').on('change', function () {
+        handleAttributeType();
     });
+
+    handleAttributeType();
+});
 </script>

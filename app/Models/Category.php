@@ -17,6 +17,7 @@ class Category extends Model
         'meta_title',
         'meta_description',
         'image',
+        'size_chart_image',
         'sort_order',
 
         'is_popular',

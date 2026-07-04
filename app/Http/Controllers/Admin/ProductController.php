@@ -17,6 +17,8 @@ use ZipArchive;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\ProductImage;
+use App\Models\ProductVideo;
+use App\Models\ProductAddon;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
@@ -24,6 +26,14 @@ use App\Models\Collection;
 
 class ProductController extends Controller
 {
+    /**
+     * The four independent variant "types". Each is generated from a
+     * different subset of category attributes (whichever attributes have
+     * the matching *_dependent flag turned on), and stored as its own
+     * set of ProductVariant rows tagged with this type.
+     */
+    protected const VARIANT_TYPES = ['price', 'image', 'stock', 'sku'];
+
     public function index(Request $request)
     {
         $query = Product::with('images');
@@ -151,7 +161,13 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'images.*' => 'nullable|image|max:2048',
+
+            // ✅ new: videos + addon options
+            'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
+            'addons.*.detail' => 'nullable|string|max:255',
+            'addons.*.price' => 'nullable|numeric|min:0',
         ]);
+
 
         DB::beginTransaction();
 
@@ -161,11 +177,18 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'subcategory_id' => $request->subcategory_id,
                 'name' => $request->name,
-                'slug' => $request->slug ?: Str::slug($request->name),
+                'slug' => $request->slug
+                    ? $this->generateUniqueSlug($request->slug)
+                    : $this->generateUniqueSlug($request->name),
                 'short_description' => $request->short_description,
                 'description' => $request->description,
                 'delivery_returns' => $request->delivery_returns,
                 'fabric_care' => $request->fabric_care,
+
+                // ✅ new Content-tab fields
+                'shipping_delivery' => $request->shipping_delivery,
+                'exchange_policy' => $request->exchange_policy,
+                'customization_assistance' => $request->customization_assistance,
 
                 // ✅ blank MRP/Discount/Price never get inserted as '' into decimal columns
                 'mrp' => $request->mrp !== null && $request->mrp !== '' ? $request->mrp : 0,
@@ -213,6 +236,50 @@ class ProductController extends Controller
 
             /*
             |--------------------------------------------------------------------------
+            | Product Videos
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->hasFile('videos')) {
+
+                foreach ($request->file('videos') as $video) {
+
+                    $path = $video->store(
+                        'product-videos',
+                        'public'
+                    );
+
+                    ProductVideo::create([
+                        'product_id' => $product->id,
+                        'video' => $path,
+                    ]);
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Addon Options
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->filled('addons')) {
+
+                foreach ($request->addons as $addon) {
+
+                    if (empty($addon['detail'])) {
+                        continue;
+                    }
+
+                    ProductAddon::create([
+                        'product_id' => $product->id,
+                        'detail' => $addon['detail'],
+                        'price' => $addon['price'] !== null && $addon['price'] !== '' ? $addon['price'] : 0,
+                    ]);
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
             | Product Attributes
             |--------------------------------------------------------------------------
             */
@@ -234,58 +301,16 @@ class ProductController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Variants
+            | Variants — one independent combination set per type
             |--------------------------------------------------------------------------
+            | The form submits up to 4 separate arrays: variants_price,
+            | variants_image, variants_stock, variants_sku. Each is a plain
+            | numeric array of combinations for that type only (built in the
+            | browser from whichever attributes carry that *_dependent flag).
             */
 
-            if ($request->filled('variants')) {
-
-                foreach ($request->variants as $variantData) {
-
-                    $variantImage = null;
-
-                    if (
-                        isset($variantData['image']) &&
-                        $variantData['image'] instanceof \Illuminate\Http\UploadedFile
-                    ) {
-
-                        $variantImage = $variantData['image']->store(
-                            'product-variants',
-                            'public'
-                        );
-                    }
-
-                    $variant = ProductVariant::create([
-
-                        'product_id' => $product->id,
-
-                        'sku' => $variantData['sku'] ?? null,
-
-                        'mrp' => $variantData['mrp'] ?? 0,
-
-                        'discount_type' => $variantData['discount_type'] ?? 'amount',
-
-                        'discount' => $variantData['discount'] ?? 0,
-
-                        'price' => $variantData['price'] ?? 0,
-
-                        'stock' => $variantData['stock'] ?? 0,
-
-                        'image' => $variantImage,
-
-                    ]);
-
-                    if (!empty($variantData['values'])) {
-
-                        foreach ($variantData['values'] as $valueId) {
-
-                            ProductVariantValue::create([
-                                'variant_id' => $variant->id,
-                                'attribute_value_id' => $valueId,
-                            ]);
-                        }
-                    }
-                }
+            foreach (self::VARIANT_TYPES as $type) {
+                $this->createVariantsForType($request, $product, $type);
             }
 
             /*
@@ -335,6 +360,8 @@ class ProductController extends Controller
         $product->load([
 
             'images',
+            'videos',
+            'addons',
 
             'attributeValues.attribute',
             'attributeValues.value',
@@ -377,37 +404,49 @@ class ProductController extends Controller
             ->pluck('id')
             ->toArray();
 
+        // ✅ Existing variants grouped by type, so the edit form can
+        // rebuild each of the (up to) 4 independent tables separately.
+        $existingVariantsByType = [];
 
-        $existingVariants = $product->variants
-            ->map(function ($variant) {
+        foreach (self::VARIANT_TYPES as $type) {
 
-                return [
+            $existingVariantsByType[$type] = $product->variants
+                ->where('type', $type)
+                ->map(function ($variant) {
 
-                    'id' => $variant->id,
+                    return [
 
-                    'sku' => $variant->sku,
+                        'id' => $variant->id,
 
-                    'mrp' => $variant->mrp,
+                        'sku' => $variant->sku,
 
-                    'discount_type' => $variant->discount_type,
+                        'mrp' => $variant->mrp,
 
-                    'discount' => $variant->discount,
+                        'discount_type' => $variant->discount_type,
 
-                    'price' => $variant->price,
+                        'discount' => $variant->discount,
 
-                    'stock' => $variant->stock,
+                        'price' => $variant->price,
 
-                    'image' => $variant->image,
-                    'variant_name' => $variant->values
-                        ->map(function ($v) {
-                            return $v->attributeValue->value;
-                        })
-                        ->implode(' / '),
+                        'stock' => $variant->stock,
 
-                ];
+                        'image' => $variant->image,
 
-            })
-            ->values();
+                        'variant_name' => $variant->values
+                            ->map(function ($v) {
+                                return $v->attributeValue->value;
+                            })
+                            ->implode(' / '),
+
+                        'attribute_value_ids' => $variant->values
+                            ->pluck('attribute_value_id')
+                            ->toArray(),
+
+                    ];
+
+                })
+                ->values();
+        }
 
         $collections = Collection::where('status', 1)
             ->orderBy('sort_order')
@@ -423,7 +462,7 @@ class ProductController extends Controller
                 'selectedAttributeValues',
                 'selectedOccasions',
                 'occasions',
-                'existingVariants',
+                'existingVariantsByType',
                 'collections'
             )
         );
@@ -443,6 +482,11 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'images.*' => 'nullable|image|max:2048',
+
+            // ✅ new: videos + addon options
+            'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
+            'addons.*.detail' => 'nullable|string|max:255',
+            'addons.*.price' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -455,12 +499,19 @@ class ProductController extends Controller
                 'subcategory_id' => $request->subcategory_id,
 
                 'name' => $request->name,
-                'slug' => $request->slug ?: Str::slug($request->name),
+                'slug' => $request->slug
+                    ? $this->generateUniqueSlug($request->slug)
+                    : $this->generateUniqueSlug($request->name),
 
                 'short_description' => $request->short_description,
                 'description' => $request->description,
                 'delivery_returns' => $request->delivery_returns,
                 'fabric_care' => $request->fabric_care,
+
+                // ✅ new Content-tab fields
+                'shipping_delivery' => $request->shipping_delivery,
+                'exchange_policy' => $request->exchange_policy,
+                'customization_assistance' => $request->customization_assistance,
 
                 // ✅ blank MRP/Discount/Price never get written as '' into decimal columns
                 'mrp' => $request->mrp !== null && $request->mrp !== '' ? $request->mrp : 0,
@@ -534,12 +585,70 @@ class ProductController extends Controller
                 }
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Product Videos (ADD NEW, KEEP OLD — same safe approach as images)
+            |--------------------------------------------------------------------------
+            */
+
+            if ($request->hasFile('videos')) {
+                foreach ($request->file('videos') as $video) {
+
+                    $path = $video->store('product-videos', 'public');
+
+                    ProductVideo::create([
+                        'product_id' => $product->id,
+                        'video' => $path,
+                    ]);
+                }
+            }
+
+            // DELETE SELECTED VIDEOS
+            if ($request->delete_videos) {
+                foreach ($request->delete_videos as $videoId) {
+
+                    $vid = ProductVideo::find($videoId);
+
+                    if ($vid) {
+                        if (Storage::disk('public')->exists($vid->video)) {
+                            Storage::disk('public')->delete($vid->video);
+                        }
+                        $vid->delete();
+                    }
+                }
+            }
 
             /*
-|--------------------------------------------------------------------------
-| Product Attributes (SYNC)
-|--------------------------------------------------------------------------
-*/
+            |--------------------------------------------------------------------------
+            | Addon Options (SYNC — replace the full set each save, since rows
+            | have no stable identity of their own beyond detail/price)
+            |--------------------------------------------------------------------------
+            */
+
+            $product->addons()->delete();
+
+            if ($request->filled('addons')) {
+
+                foreach ($request->addons as $addon) {
+
+                    if (empty($addon['detail'])) {
+                        continue;
+                    }
+
+                    ProductAddon::create([
+                        'product_id' => $product->id,
+                        'detail' => $addon['detail'],
+                        'price' => $addon['price'] !== null && $addon['price'] !== '' ? $addon['price'] : 0,
+                    ]);
+                }
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Product Attributes (SYNC)
+            |--------------------------------------------------------------------------
+            */
 
             $currentAttributes = ProductAttributeValue::where(
                 'product_id',
@@ -580,140 +689,12 @@ class ProductController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Variants
+            | Variants — sync each type independently
             |--------------------------------------------------------------------------
             */
 
-            $existingVariantIds = [];
-
-            if ($request->filled('variants')) {
-
-                foreach ($request->variants as $variantData) {
-
-                    if (!empty($variantData['id'])) {
-
-                        $variant = ProductVariant::where(
-                            'product_id',
-                            $product->id
-                        )->where(
-                                'id',
-                                $variantData['id']
-                            )->first();
-
-                        if (!$variant) {
-                            continue;
-                        }
-
-                        $existingVariantIds[] = $variant->id;
-
-                    } else {
-
-                        $variant = new ProductVariant();
-
-                        $variant->product_id = $product->id;
-                    }
-
-                    $variantImage = $variant->image;
-
-                    if (
-                        isset($variantData['image']) &&
-                        $variantData['image'] instanceof \Illuminate\Http\UploadedFile
-                    ) {
-
-                        if ($variant->image) {
-
-                            Storage::disk('public')->delete(
-                                $variant->image
-                            );
-                        }
-
-                        $variantImage = $variantData['image']->store(
-                            'product-variants',
-                            'public'
-                        );
-                    }
-
-                    $variant->fill([
-
-                        'sku' => $variantData['sku'] ?? null,
-
-                        'mrp' => $variantData['mrp'] ?? 0,
-
-                        'discount_type' => $variantData['discount_type'] ?? 'amount',
-
-                        'discount' => $variantData['discount'] ?? 0,
-
-                        'price' => $variantData['price'] ?? 0,
-
-                        'stock' => $variantData['stock'] ?? 0,
-
-                        'image' => $variantImage,
-
-                    ]);
-
-                    $variant->save();
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | New Variant Only
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if (
-                        empty($variantData['id']) &&
-                        !empty($variantData['values'])
-                    ) {
-
-                        foreach ($variantData['values'] as $valueId) {
-
-                            ProductVariantValue::create([
-
-                                'variant_id' => $variant->id,
-
-                                'attribute_value_id' => $valueId,
-
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Delete Removed Variants
-            |--------------------------------------------------------------------------
-            */
-
-            $variantsToDelete = ProductVariant::where(
-                'product_id',
-                $product->id
-            );
-
-            if (!empty($existingVariantIds)) {
-
-                $variantsToDelete->whereNotIn(
-                    'id',
-                    $existingVariantIds
-                );
-            }
-
-            $variantsToDelete = $variantsToDelete->get();
-
-            foreach ($variantsToDelete as $variant) {
-
-                if ($variant->image) {
-
-                    Storage::disk('public')->delete(
-                        $variant->image
-                    );
-                }
-
-                ProductVariantValue::where(
-                    'variant_id',
-                    $variant->id
-                )->delete();
-
-                $variant->delete();
+            foreach (self::VARIANT_TYPES as $type) {
+                $this->syncVariantsForType($request, $product, $type);
             }
 
             /*
@@ -765,6 +746,177 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Product Deleted Successfully'
         ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Variant helpers (type-aware)
+    |--------------------------------------------------------------------------
+    | The request carries up to 4 arrays: variants_price, variants_image,
+    | variants_stock, variants_sku — each a plain (non-associative) list of
+    | combinations belonging ONLY to that dependency type. Every combination
+    | entry looks like:
+    |   [ 'id' => (existing variant id, edit only), 'values' => [attrValueId, ...], ...type-specific fields ]
+    */
+
+    protected function inputKeyForType(string $type): string
+    {
+        return 'variants_' . $type;
+    }
+
+    protected function fillVariantFieldsForType(ProductVariant $variant, string $type, array $data, Request $request, int $index): void
+    {
+        switch ($type) {
+
+            case ProductVariant::TYPE_PRICE:
+                $variant->fill([
+                    'mrp' => $data['mrp'] ?? 0,
+                    'discount_type' => $data['discount_type'] ?? 'amount',
+                    'discount' => $data['discount'] ?? 0,
+                    'price' => $data['price'] ?? 0,
+                ]);
+                break;
+
+            case ProductVariant::TYPE_STOCK:
+                $variant->fill([
+                    'stock' => $data['stock'] ?? 0,
+                ]);
+                break;
+
+            case ProductVariant::TYPE_SKU:
+                $variant->fill([
+                    'sku' => $data['sku'] ?? null,
+                ]);
+                break;
+
+            case ProductVariant::TYPE_IMAGE:
+                $uploaded = $request->file("variants_image.$index.image");
+
+                if ($uploaded instanceof \Illuminate\Http\UploadedFile) {
+
+                    if ($variant->image) {
+                        Storage::disk('public')->delete($variant->image);
+                    }
+
+                    $variant->image = $uploaded->store('product-variants', 'public');
+                }
+                break;
+        }
+    }
+
+    /**
+     * Create-only path (used by store()) — no existing rows to reconcile.
+     */
+    protected function createVariantsForType(Request $request, Product $product, string $type): void
+    {
+        $inputKey = $this->inputKeyForType($type);
+
+        if (!$request->filled($inputKey)) {
+            return;
+        }
+
+        foreach ($request->$inputKey as $index => $data) {
+
+            $variant = new ProductVariant();
+            $variant->product_id = $product->id;
+            $variant->type = $type;
+
+            $this->fillVariantFieldsForType($variant, $type, $data, $request, $index);
+
+            $variant->save();
+
+            foreach ($data['values'] ?? [] as $valueId) {
+                ProductVariantValue::create([
+                    'variant_id' => $variant->id,
+                    'attribute_value_id' => $valueId,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Create/update/delete path (used by update()) — reconciles submitted
+     * combinations for this type against what already exists in the DB,
+     * scoped to this type only so other types are left untouched.
+     */
+    protected function syncVariantsForType(Request $request, Product $product, string $type): void
+    {
+        $inputKey = $this->inputKeyForType($type);
+
+        $existingIds = [];
+
+        foreach ($request->$inputKey ?? [] as $index => $data) {
+
+            if (!empty($data['id'])) {
+
+                $variant = ProductVariant::where('product_id', $product->id)
+                    ->where('type', $type)
+                    ->where('id', $data['id'])
+                    ->first();
+
+                if (!$variant) {
+                    continue;
+                }
+
+                $existingIds[] = $variant->id;
+
+            } else {
+
+                $variant = new ProductVariant();
+                $variant->product_id = $product->id;
+                $variant->type = $type;
+            }
+
+            $this->fillVariantFieldsForType($variant, $type, $data, $request, $index);
+
+            $variant->save();
+
+            if (empty($data['id'])) {
+
+                $existingIds[] = $variant->id;
+
+                foreach ($data['values'] ?? [] as $valueId) {
+                    ProductVariantValue::create([
+                        'variant_id' => $variant->id,
+                        'attribute_value_id' => $valueId,
+                    ]);
+                }
+
+            } else {
+
+                // Re-sync value pivots for existing combinations in case
+                // the admin regenerated the table with different values.
+                ProductVariantValue::where('variant_id', $variant->id)->delete();
+
+                foreach ($data['values'] ?? [] as $valueId) {
+                    ProductVariantValue::create([
+                        'variant_id' => $variant->id,
+                        'attribute_value_id' => $valueId,
+                    ]);
+                }
+            }
+        }
+
+        // Delete variants of this type that were removed on the form.
+        $toDelete = ProductVariant::where('product_id', $product->id)
+            ->where('type', $type);
+
+        if (!empty($existingIds)) {
+            $toDelete->whereNotIn('id', $existingIds);
+        }
+
+        $toDelete = $toDelete->get();
+
+        foreach ($toDelete as $variant) {
+
+            if ($variant->image) {
+                Storage::disk('public')->delete($variant->image);
+            }
+
+            ProductVariantValue::where('variant_id', $variant->id)->delete();
+
+            $variant->delete();
+        }
     }
 
     public function import()
@@ -1134,4 +1286,24 @@ class ProductController extends Controller
         return $response;
     }
 
+    private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $slug = Str::slug($name);
+        $originalSlug = $slug;
+
+        $count = 1;
+
+        while (
+            Product::where('slug', $slug)
+                ->when($ignoreId, function ($q) use ($ignoreId) {
+                    $q->where('id', '!=', $ignoreId);
+                })
+                ->exists()
+        ) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
 }

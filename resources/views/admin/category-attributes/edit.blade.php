@@ -49,7 +49,7 @@
         color: var(--accent); font-size: 18px; flex-shrink: 0;
     }
     .attr-identity-name { font-size: 14px; font-weight: 650; color: var(--text-primary); }
-    .attr-identity-id   { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
+    .attr-identity-id { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
 
     /* ── Buttons ────────────────────────────────────────────── */
     .btn-primary-dash {
@@ -127,6 +127,28 @@
         background-repeat: no-repeat; background-position: right 9px center;
     }
     .field-select-sm:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12); }
+
+    /* ── Dependency checkbox group ──────────────────────────── */
+    .dependency-group {
+        margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bg);
+    }
+    .dependency-group.is-hidden { display: none; }
+    .dependency-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: .03em; text-transform: uppercase; margin-bottom: 2px; }
+    .dependency-hint { font-size: 11.5px; color: var(--text-hint); margin-bottom: 10px; }
+
+    .check-toggle {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 12px; border: 1.5px solid var(--border);
+        border-radius: var(--radius-sm); cursor: pointer;
+        transition: all .15s; background: var(--surface); margin-bottom: 8px;
+    }
+    .check-toggle:last-child { margin-bottom: 0; }
+    .check-toggle:hover { border-color: var(--accent); background: var(--accent-light); }
+    .check-toggle input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; margin: 0; }
+    .check-toggle:has(input:checked) { border-color: var(--accent); background: var(--accent-light); }
+    .check-toggle span { font-size: 12.5px; color: var(--text-primary); line-height: 1.35; }
+    .dep-name { font-weight: 600; }
+    .dep-sub { color: var(--text-hint); font-size: 11.5px; display: block; margin-top: 1px; }
 
     /* ── Action bar ─────────────────────────────────────────── */
     .action-bar {
@@ -280,15 +302,68 @@
                                     </select>
                                 </div>
 
-                                <div class="toggle-row">
+                                <div class="toggle-row" style="border-bottom:none">
                                     <div>
-                                        <div class="toggle-label">Used For Variant</div>
-                                        <div class="toggle-sub">e.g. Color, Size, RAM</div>
+                                        <div class="toggle-label">Selectable</div>
+                                        <div class="toggle-sub">Customer picks a value (e.g. Color, Size)</div>
                                     </div>
-                                    <select name="used_for_variant" class="field-select-sm">
+                                    <select name="is_selectable" id="isSelectable" class="field-select-sm">
+                                        <option value="1" {{ $categoryAttribute->is_selectable  ? 'selected' : '' }}>Yes</option>
+                                        <option value="0" {{ !$categoryAttribute->is_selectable ? 'selected' : '' }}>No</option>
+                                    </select>
+                                </div>
+
+                                
+                                <div class="toggle-row" style="border-bottom:none">
+                                    <div>
+                                        <div class="toggle-label">Used for Variants</div>
+                                        <div class="toggle-sub">Attribute is used to create product variants</div>
+                                    </div>
+                                    <select name="used_for_variant" id="usedForVariant" class="field-select-sm">
                                         <option value="1" {{ $categoryAttribute->used_for_variant  ? 'selected' : '' }}>Yes</option>
                                         <option value="0" {{ !$categoryAttribute->used_for_variant ? 'selected' : '' }}>No</option>
                                     </select>
+                                </div>
+
+                                <div class="dependency-group {{ !$categoryAttribute->used_for_variant ? 'is-hidden' : '' }}" id="dependencyGroup">
+                                    <div class="dependency-title">Dependency</div>
+                                    <div class="dependency-hint">Choose what changes when a customer selects this attribute's value.</div>
+
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="price_dependent" value="1"
+                                            {{ $categoryAttribute->price_dependent ? 'checked' : '' }}>
+                                        <span>
+                                            <span class="dep-name">Price</span>
+                                            <span class="dep-sub">Selected value changes the product price</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="image_dependent" value="1"
+                                            {{ $categoryAttribute->image_dependent ? 'checked' : '' }}>
+                                        <span>
+                                            <span class="dep-name">Image</span>
+                                            <span class="dep-sub">Selected value changes the product image</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="stock_dependent" value="1"
+                                            {{ $categoryAttribute->stock_dependent ? 'checked' : '' }}>
+                                        <span>
+                                            <span class="dep-name">Stock</span>
+                                            <span class="dep-sub">Selected value tracks its own stock</span>
+                                        </span>
+                                    </label>
+
+                                    <label class="check-toggle">
+                                        <input type="checkbox" name="sku_dependent" value="1"
+                                            {{ $categoryAttribute->sku_dependent ? 'checked' : '' }}>
+                                        <span>
+                                            <span class="dep-name">SKU</span>
+                                            <span class="dep-sub">Selected value changes the variant SKU</span>
+                                        </span>
+                                    </label>
                                 </div>
 
                             </div>
@@ -321,4 +396,15 @@ $(document).on('submit', '.save-form', function () {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating…';
 });
+
+// Dependency checkbox group visibility is driven ONLY by is_selectable.
+// When hidden, uncheck everything so nothing stale gets submitted.
+function syncDependencyGroup() {
+    const isVariant = $('#usedForVariant').val() === '1';
+    $('#dependencyGroup').toggleClass('is-hidden', !isVariant);
+    if (!isVariant) {
+        $('#dependencyGroup input[type="checkbox"]').prop('checked', false);
+    }
+}
+$('#usedForVariant').on('change', syncDependencyGroup);
 </script>

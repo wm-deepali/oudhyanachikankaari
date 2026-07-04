@@ -10,6 +10,8 @@ class AttributeValue extends Model
     protected $fillable = [
         'attribute_id',
         'value',
+        'image',
+        'hex_code',
         'slug',
         'meta_title',
         'meta_description',

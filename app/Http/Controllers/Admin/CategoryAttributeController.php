@@ -51,7 +51,15 @@ class CategoryAttributeController extends Controller
             'attribute_id'     => 'required|exists:attributes,id',
 
             'is_required'      => 'required|boolean',
+            'is_selectable'    => 'required|boolean',
             'used_for_variant' => 'required|boolean',
+
+            // Checkboxes — simply absent from the request when unchecked
+            'price_dependent'  => 'nullable|boolean',
+            'image_dependent'  => 'nullable|boolean',
+            'stock_dependent'  => 'nullable|boolean',
+            'sku_dependent'    => 'nullable|boolean',
+
             'show_in_filter'   => 'required|boolean',
             'show_on_listing'  => 'required|boolean',
 
@@ -79,6 +87,8 @@ class CategoryAttributeController extends Controller
                 );
         }
 
+        $isVariant = $request->boolean('used_for_variant');
+
         CategoryAttribute::create([
 
             'category_id'      => $request->category_id,
@@ -87,7 +97,13 @@ class CategoryAttributeController extends Controller
 
             'is_required'      => $request->is_required,
 
-            'used_for_variant' => $request->used_for_variant,
+            'is_selectable'    => $request->is_selectable,
+            
+            'used_for_variant' => $isVariant,
+            'price_dependent'  => $isVariant && $request->boolean('price_dependent'),
+            'image_dependent'  => $isVariant && $request->boolean('image_dependent'),
+            'stock_dependent'  => $isVariant && $request->boolean('stock_dependent'),
+            'sku_dependent'    => $isVariant && $request->boolean('sku_dependent'),
 
             'show_in_filter'   => $request->show_in_filter,
 
@@ -137,7 +153,13 @@ class CategoryAttributeController extends Controller
             'attribute_id'     => 'required|exists:attributes,id',
 
             'is_required'      => 'required|boolean',
+            'is_selectable'    => 'required|boolean',
             'used_for_variant' => 'required|boolean',
+            'price_dependent'  => 'nullable|boolean',
+            'image_dependent'  => 'nullable|boolean',
+            'stock_dependent'  => 'nullable|boolean',
+            'sku_dependent'    => 'nullable|boolean',
+
             'show_in_filter'   => 'required|boolean',
             'show_on_listing'  => 'required|boolean',
 
@@ -170,6 +192,9 @@ class CategoryAttributeController extends Controller
                 );
         }
 
+        // ✅ A non-selectable attribute cannot drive price/image/stock/sku
+        $isVariant = $request->boolean('used_for_variant');
+
         $categoryAttribute->update([
 
             'category_id'      => $request->category_id,
@@ -178,7 +203,13 @@ class CategoryAttributeController extends Controller
 
             'is_required'      => $request->is_required,
 
-            'used_for_variant' => $request->used_for_variant,
+            'is_selectable'    => $request->is_selectable,
+            
+            'used_for_variant' => $isVariant,
+            'price_dependent'  => $isVariant && $request->boolean('price_dependent'),
+            'image_dependent'  => $isVariant && $request->boolean('image_dependent'),
+            'stock_dependent'  => $isVariant && $request->boolean('stock_dependent'),
+            'sku_dependent'    => $isVariant && $request->boolean('sku_dependent'),
 
             'show_in_filter'   => $request->show_in_filter,
 

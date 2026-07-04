@@ -155,6 +155,11 @@
     #newPreviewWrap img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); }
     #newPreviewWrap button { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; padding: 0; margin-top: 6px; }
 
+
+       #sizeChartPreviewWrap { display: none; margin-top: 12px; text-align: center; }
+    #sizeChartPreviewWrap img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    #sizeChartPreviewWrap button { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; padding: 0; margin-top: 6px; }
+
     /* ── Settings toggle rows ───────────────────────────────── */
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg); }
     .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
@@ -340,6 +345,51 @@
                                     </div>
                                 </div>
 
+                                <hr style="margin:20px 0">
+
+<h6 style="font-size:13px;font-weight:600;margin-bottom:12px">
+    Size Chart Image
+</h6>
+
+@if($category->size_chart_image)
+    <div class="current-image-wrap" id="currentSizeChartWrap">
+        <img src="{{ asset('storage/'.$category->size_chart_image) }}">
+        <div class="current-image-info">
+            <strong>Current Size Chart</strong>
+            Upload a new image below to replace it.
+        </div>
+    </div>
+@endif
+
+<div class="file-upload-area" id="sizeChartUploadArea">
+    <input type="file"
+           name="size_chart_image"
+           accept="image/*"
+           id="sizeChartInput">
+
+    <div class="upload-icon">
+        <i class="fa fa-table"></i>
+    </div>
+
+    <p>
+        {{ $category->size_chart_image ? 'Replace Size Chart' : 'Upload Size Chart' }}
+    </p>
+
+    <small>PNG, JPG, WEBP</small>
+</div>
+
+<div id="sizeChartPreviewWrap" style="display:none;margin-top:12px;text-align:center">
+    <img id="sizeChartPreviewImg"
+         src=""
+         style="max-width:100%;border-radius:8px;border:1px solid #ddd;">
+
+    <div>
+        <button type="button" onclick="clearSizeChart()">
+            <i class="fa fa-times"></i> Remove
+        </button>
+    </div>
+</div>
+
                             </div>
                         </div>
 
@@ -465,5 +515,46 @@ function clearNewImage() {
     document.getElementById('uploadArea').style.display = 'block';
     const cur = document.getElementById('currentImageWrap');
     if (cur) cur.style.display = 'flex';
+}
+
+document.getElementById('sizeChartInput')?.addEventListener('change', function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        document.getElementById('sizeChartPreviewImg').src = e.target.result;
+
+        document.getElementById('sizeChartPreviewWrap').style.display = 'block';
+
+        document.getElementById('sizeChartUploadArea').style.display = 'none';
+
+        const current = document.getElementById('currentSizeChartWrap');
+
+        if (current) {
+            current.style.display = 'none';
+        }
+    };
+
+    reader.readAsDataURL(file);
+});
+
+function clearSizeChart() {
+
+    document.getElementById('sizeChartInput').value = '';
+
+    document.getElementById('sizeChartPreviewWrap').style.display = 'none';
+
+    document.getElementById('sizeChartUploadArea').style.display = 'block';
+
+    const current = document.getElementById('currentSizeChartWrap');
+
+    if (current) {
+        current.style.display = 'flex';
+    }
 }
 </script>

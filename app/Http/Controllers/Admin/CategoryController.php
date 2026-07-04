@@ -90,6 +90,13 @@ class CategoryController extends Controller
             $image = $request->file('image')->store('categories', 'public');
         }
 
+        $sizeChartImage = null;
+
+        if ($request->hasFile('size_chart_image')) {
+            $sizeChartImage = $request->file('size_chart_image')
+                ->store('categories/size-charts', 'public');
+        }
+
         Category::create([
             'name' => $request->name,
             'sub_title' => $request->sub_title,
@@ -102,6 +109,7 @@ class CategoryController extends Controller
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'image' => $image,
+            'size_chart_image' => $sizeChartImage,
 
             // ✅ FIXED
             'parent_id' => $request->parent_id ?: null,
@@ -159,6 +167,21 @@ class CategoryController extends Controller
             $image = $request->file('image')->store('categories', 'public');
         }
 
+        $sizeChartImage = $category->size_chart_image;
+
+        if ($request->hasFile('size_chart_image')) {
+
+            if (
+                $category->size_chart_image &&
+                Storage::disk('public')->exists($category->size_chart_image)
+            ) {
+                Storage::disk('public')->delete($category->size_chart_image);
+            }
+
+            $sizeChartImage = $request->file('size_chart_image')
+                ->store('categories/size-charts', 'public');
+        }
+
         $category->update([
             'name' => $request->name,
             'sub_title' => $request->sub_title,
@@ -171,6 +194,7 @@ class CategoryController extends Controller
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'image' => $image,
+            'size_chart_image' => $sizeChartImage,
 
             // ✅ FIXED
             'parent_id' => $request->parent_id ?: null,
@@ -194,6 +218,10 @@ class CategoryController extends Controller
 
         if ($category->image && Storage::disk('public')->exists($category->image)) {
             Storage::disk('public')->delete($category->image);
+        }
+
+        if ($category->size_chart_image && Storage::disk('public')->exists($category->size_chart_image)) {
+            Storage::disk('public')->delete($category->size_chart_image);
         }
 
         $category->delete();

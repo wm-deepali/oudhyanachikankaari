@@ -1,6 +1,55 @@
 @extends('layouts.app')
 @section('content')
 
+    @php
+        // Category/Subcategory size chart — prefer the subcategory's if set,
+        // fall back to the parent category's.
+        $sizeChartImage = optional($product->subcategory)->size_chart_image
+            ?? optional($product->category)->size_chart_image;
+    @endphp
+
+    <style>
+        /* ── Video gallery thumb (play icon overlay) ───────────────── */
+        .aq-gallery-thumb-video { position: relative; cursor: pointer; }
+        .aq-thumb-play-icon {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,.35); color: #fff; font-size: 14px; border-radius: inherit;
+        }
+        #aqMainProductVideo { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+        /* ── Size chart trigger ─────────────────────────────────────── */
+        .aq-size-chart-link {
+            background: transparent; border: none; padding: 0; font-size: 12.5px; font-weight: 600;
+            color: #b5904a; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+            text-decoration: underline;
+        }
+        .aq-size-chart-link:hover { opacity: .8; }
+        #sizeChartModal .modal-body { text-align: center; padding: 20px; }
+        #sizeChartModal .modal-body img { max-width: 100%; border-radius: 8px; }
+
+        /* ── Variant control types ─────────────────────────────────── */
+        .aq-color-swatch {
+            width: 34px; height: 34px; border-radius: 50%; border: 2px solid #e5e5e5;
+            padding: 0; cursor: pointer; display: inline-block;
+        }
+        .aq-color-swatch.active { border-color: #b5904a; box-shadow: 0 0 0 2px rgba(181,144,74,.25); }
+
+        .aq-image-swatch {
+            border: 1px solid #e5e5e5; border-radius: 6px; padding: 3px; cursor: pointer;
+            background: #fff; display: inline-flex;
+        }
+        .aq-image-swatch img { width: 44px; height: 44px; object-fit: cover; border-radius: 4px; }
+        .aq-image-swatch.active { border-color: #b5904a; box-shadow: 0 0 0 2px rgba(181,144,74,.25); }
+
+        .aq-radio-option {
+            display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+            padding: 6px 12px; border: 1px solid #e5e5e5; border-radius: 20px;
+        }
+        .aq-radio-option.active { border-color: #b5904a; background: rgba(181,144,74,.08); }
+
+        .aq-size-dropdown { max-width: 260px; }
+    </style>
+
     <main>
 
         <!-- 1. Luxury Inner Banner / Hero Section -->
@@ -70,6 +119,7 @@
                             <div class="aq-gallery-main-img-wrap">
                                 <img id="aqMainProductImg" src="{{ $product->display_image }}" alt="{{ $product->name }}"
                                     class="aq-gallery-main-img" />
+                                <video id="aqMainProductVideo" style="display:none" controls playsinline></video>
                                 <div class="aq-gallery-zoom-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Roll
                                     over image to zoom</div>
                             </div>
@@ -79,9 +129,21 @@
                                 @foreach($product->images as $index => $image)
 
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}"
-                                        onclick="updateMainImage(this, '{{ asset('storage/' . $image->image) }}')">
+                                        onclick="updateMainMedia(this, '{{ asset('storage/' . $image->image) }}', 'image')">
 
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
+
+                                    </div>
+
+                                @endforeach
+
+                                @foreach($product->videos as $video)
+
+                                    <div class="aq-gallery-thumb-item aq-gallery-thumb-video"
+                                        onclick="updateMainMedia(this, '{{ asset('storage/' . $video->video) }}', 'video')">
+
+                                        <img src="{{ $product->display_image }}" alt="{{ $product->name }} video" />
+                                        <span class="aq-thumb-play-icon"><i class="fa-solid fa-play"></i></span>
 
                                     </div>
 
@@ -163,18 +225,7 @@
                                 {{ $product->name }}
                             </h2>
 
-                            <!-- Star reviews rating -->
-                            <div class="aq-details-rating-wrap d-flex align-items-center gap-2 mt-10 mb-15">
-                                <div class="aq-details-stars">
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <i class="fa-{{ $i <= round($avgRating) ? 'solid' : 'regular' }} fa-star"></i>
-                                    @endfor
-                                </div>
-                                <span class="aq-details-rating-text">
-                                    ({{ $avgRating }} / 5 from {{ $reviewsCount }} verified customer
-                                    {{ Str::plural('review', $reviewsCount) }})
-                                </span>
-                            </div>
+                          
 
                             <!-- Pricing box -->
                             <div class="aq-details-price-box p-3 mb-25">
@@ -188,35 +239,24 @@
                                     @if($discount > 0)
                                         <div class="aq-price-mrp-row d-flex align-items-center gap-2 mb-2">
                                             <span class="mrp-label">
-                                                MRP:
                                                 <span class="mrp-value" id="productMrp">
                                                     ₹{{ number_format($product->mrp) }}
                                                 </span>
                                             </span>
 
                                             <span class="discount-badge" id="productDiscount">
-                                                DISCOUNT: {{ $discount }}% OFF
+                                               {{ $discount }}% OFF
                                             </span>
                                         </div>
                                     @endif
 
                                     <div class="aq-price-offered-row d-flex align-items-baseline gap-2">
-                                        <span class="offered-label">Offered Price:</span>
-
                                         <span class="aq-details-price" id="productPrice">
                                             ₹{{ number_format($product->price) }}
-                                        </span>
-
-                                        <span class="aq-details-price-unit">
-                                            / unit (exclusive of GST)
                                         </span>
                                     </div>
                                 </div>
                                 <div class="aq-moq-info-list">
-                                    <!-- <p class="mb-2">
-                                                                        <i class="fa-solid fa-circle-info"></i> Minimum Order Quantity (MOQ):
-                                                                        <strong>{{ $product->min_qty }}</strong>
-                                                                    </p> -->
                                     <p class="mb-0">
                                         <i class="fa-solid fa-truck-fast"></i> Delivery Time:
                                         <strong>{{ $product->delivery_time }}</strong>
@@ -227,105 +267,173 @@
                             <p class="aq-details-short-desc">
                                 {{ $product->short_description }}
                             </p>
+                              {{-- Info rows: every attribute (variant-backed or not) that's NOT selectable --}}
+    @foreach($variantAttributes as $attributeId => $attribute)
+
+        @if(!$attribute['is_selectable'])
+  
                             
-                            
-                            <div class="aq-creative-details-block mt-25 mb-30">
+                           <div class="aq-creative-details-block mt-25 mb-30">
 
-    @php
-        $groupedAttributes = $product->attributeValues
-            ->filter(function ($item) use ($variantAttributes) {
-                return $item->attribute
-                    && $item->value
-                    && !isset($variantAttributes[$item->attribute_id]);
-            })
-            ->groupBy('attribute_id');
-    @endphp
 
-    @foreach($groupedAttributes as $items)
-
-        <div class="aq-detail-item">
-
-            <div class="aq-detail-content">
-
-                <span class="aq-detail-label">
-                    {{ strtoupper($items->first()->attribute->name) }}
-                </span>
-
-                <span class="aq-detail-value">
-                    {{ $items->pluck('value.value')->implode(', ') }}
-                </span>
-
+            <div class="aq-detail-item">
+                <div class="aq-detail-content">
+                    <span class="aq-detail-label">
+                        {{ strtoupper($attribute['name']) }}
+                    </span>
+                    <span class="aq-detail-value">
+                        {{ collect($attribute['values'])->pluck('value')->implode(', ') }}
+                    </span>
+                </div>
             </div>
 
+            {{-- Only variant-backed attributes need the hidden matching button —
+                 non-variant attributes have no price/image/stock/sku dependency,
+                 so there's nothing for the JS matcher to key off of. --}}
+            @if($attribute['has_variant'] ?? true)
+                <button type="button" class="variant-option active d-none"
+                    data-attribute-id="{{ $attributeId }}"
+                    data-value-id="{{ $attribute['default_value_id'] }}"
+                    data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                    data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                    data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                    data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}"></button>
+            @endif
+
+            
         </div>
+        @endif
 
     @endforeach
 
-</div>
 
 
-                     <!--<div class="aq-creative-details-block mt-25 mb-30">-->
+<!-- Co-Branding Customizer -->
+<!-- Size / Variant Selection -->
+@foreach($variantAttributes as $attributeId => $attribute)
 
-                                @php
-                                    $groupedAttributes = $product->attributeValues
-                                        ->filter(function ($item) use ($variantAttributes) {
-                                            return $item->attribute
-                                                && $item->value
-                                                && !isset($variantAttributes[$item->attribute_id]);
-                                        })
-                                        ->groupBy('attribute_id');
-                                @endphp
+    @if($attribute['is_selectable'])
 
-                                @foreach($groupedAttributes as $items)
+        <div class="aq-size-selection-panel p-3">
 
-                                    <!--<div class="aq-detail-item">-->
-                                    <!--    <span class="detail-label">-->
-                                    <!--        {{ $items->first()->attribute->name }}-->
-                                    <!--    </span>-->
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <h5 class="aq-size-title mb-0">
+                    {{ $attribute['name'] }}
+                </h5>
 
-                                    <!--    <span class="detail-value">-->
-                                    <!--        {{ $items->pluck('value.value')->implode(', ') }}-->
-                                    <!--    </span>-->
-                                    <!--</div>-->
+                @if($sizeChartImage && $loop->first)
+                    <button type="button" class="aq-size-chart-link"
+                        data-bs-toggle="modal" data-bs-target="#sizeChartModal">
+                        <i class="fa-regular fa-image"></i> Size Chart
+                    </button>
+                @endif
+            </div>
 
-                                @endforeach
+            @switch($attribute['type'])
 
-                            <!--</div>-->
-                            
-                            
+                {{-- Dropdown: real <select> for UX, driven by hidden proxy
+                     buttons so the existing click-based JS logic stays
+                     completely untouched. --}}
+                @case('dropdown')
+                    <select class="form-select aq-size-dropdown" data-attribute-id="{{ $attributeId }}">
+                        <option value="" disabled selected>Select {{ $attribute['name'] }}</option>
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <option value="{{ $valueId }}">{{ $value['value'] }}</option>
+                        @endforeach
+                    </select>
+                    <div class="d-none">
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <button type="button" class="variant-option"
+                                data-attribute-id="{{ $attributeId }}"
+                                data-value-id="{{ $valueId }}"
+                                data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                                data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                                data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}"></button>
+                        @endforeach
+                    </div>
+                    @break
 
-                            <!-- Co-Branding Customizer -->
-                            <!-- Size Selection -->
-                            @foreach($variantAttributes as $attributeId => $attribute)
+                @case('color_swatch')
+                    <div class="aq-product-size-row gap-2">
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <button type="button" class="aq-color-swatch variant-option"
+                                title="{{ $value['value'] }}"
+                                style="background-color: {{ $value['hex_code'] ?: '#ccc' }};"
+                                data-attribute-id="{{ $attributeId }}"
+                                data-value-id="{{ $valueId }}"
+                                data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                                data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                                data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}"></button>
+                        @endforeach
+                    </div>
+                    @break
 
-                                <div class="aq-size-selection-panel p-3">
+                @case('image')
+                    <div class="aq-product-size-row gap-2">
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <button type="button" class="aq-image-swatch variant-option"
+                                title="{{ $value['value'] }}"
+                                data-attribute-id="{{ $attributeId }}"
+                                data-value-id="{{ $valueId }}"
+                                data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                                data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                                data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}">
+                                @if($value['image'])
+                                    <img src="{{ asset('storage/' . $value['image']) }}" alt="{{ $value['value'] }}">
+                                @else
+                                    {{ $value['value'] }}
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+                    @break
 
-                                    <h5 class="aq-size-title mb-2">
-                                        {{ $attribute['name'] }}
-                                    </h5>
+                @case('radio')
+                    <div class="aq-product-size-row gap-3">
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <label class="aq-radio-option variant-option"
+                                data-attribute-id="{{ $attributeId }}"
+                                data-value-id="{{ $valueId }}"
+                                data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                                data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                                data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}">
+                                <input type="radio" name="attr_{{ $attributeId }}"> {{ $value['value'] }}
+                            </label>
+                        @endforeach
+                    </div>
+                    @break
 
-                                    <div class="aq-product-size-row gap-2">
+                {{-- 'button' and any unknown type fall back to the original look --}}
+                @default
+                    <div class="aq-product-size-row gap-2">
+                        @foreach($attribute['values'] as $valueId => $value)
+                            <button type="button" class="aq-size-badge variant-option"
+                                data-attribute-id="{{ $attributeId }}"
+                                data-value-id="{{ $valueId }}"
+                                data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
+                                data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
+                                data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}">
+                                {{ $value['value'] }}
+                            </button>
+                        @endforeach
+                    </div>
+            @endswitch
 
-                                        @foreach($attribute['values'] as $valueId => $value)
+        </div>
 
-                                            <button type="button" class="aq-size-badge variant-option"
-                                                data-attribute-id="{{ $attributeId }}" data-value-id="{{ $valueId }}">
+    @endif
 
-                                                {{ $value }}
-
-                                            </button>
-
-                                        @endforeach
-
-                                    </div>
-
-                                </div>
-
-                            @endforeach
+@endforeach
 
 
 
 
+@if($product->addons->isNotEmpty())
 <div class="aq-stitching-box">
 
     <div class="card aq-stitch-card">
@@ -342,90 +450,28 @@
 
             <div class="row g-2">
 
-                <div class="col-lg-6">
+                @foreach($product->addons as $addon)
 
-                    <label class="aq-option">
+                    <div class="col-lg-6">
 
-                        <input type="checkbox">
+                        <label class="aq-option">
 
-                        <span class="aq-checkbox"></span>
+                            <input type="checkbox" class="aq-addon-option"
+                                data-addon-id="{{ $addon->id }}"
+                                data-addon-price="{{ $addon->price }}">
 
-                        <span class="aq-text">
-                            Kurta with Butter Crepe Lining
-                            <strong>(+₹1600.00)</strong>
-                        </span>
+                            <span class="aq-checkbox"></span>
 
-                    </label>
+                            <span class="aq-text">
+                                {{ $addon->detail }}
+                                <strong>(+₹{{ number_format($addon->price, 2) }})</strong>
+                            </span>
 
-                </div>
+                        </label>
 
-                <div class="col-lg-6">
+                    </div>
 
-                    <label class="aq-option">
-
-                        <input type="checkbox">
-
-                        <span class="aq-checkbox"></span>
-
-                        <span class="aq-text">
-                            Churidaar
-                            <strong>(+₹1200.00)</strong>
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div class="col-lg-6">
-
-                    <label class="aq-option">
-
-                        <input type="checkbox">
-
-                        <span class="aq-checkbox"></span>
-
-                        <span class="aq-text">
-                            Palazzo
-                            <strong>(+₹1400.00)</strong>
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div class="col-lg-6">
-
-                    <label class="aq-option">
-
-                        <input type="checkbox">
-
-                        <span class="aq-checkbox"></span>
-
-                        <span class="aq-text">
-                            Straight Pants
-                            <strong>(+₹1400.00)</strong>
-                        </span>
-
-                    </label>
-
-                </div>
-
-                <div class="col-lg-6">
-
-                    <label class="aq-option">
-
-                        <input type="checkbox">
-
-                        <span class="aq-checkbox"></span>
-
-                        <span class="aq-text">
-                            Lace Trims
-                            <strong>(+₹1100.00)</strong>
-                        </span>
-
-                    </label>
-
-                </div>
+                @endforeach
 
             </div>
 
@@ -434,6 +480,7 @@
     </div>
 
 </div>
+@endif
 
                             <!-- Interactive Quantity and Action -->
                             <div class="aq-action-panel p-3 mb-30 mt-25">
@@ -541,7 +588,8 @@
         </div>
     </div>
 
-    <!-- Shipping & Returns -->
+    <!-- Shipping & Delivery -->
+    @if($product->shipping_delivery)
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingShipping">
             <button class="accordion-button collapsed"
@@ -550,7 +598,7 @@
                 data-bs-target="#collapseShipping"
                 aria-expanded="false"
                 aria-controls="collapseShipping">
-                Shipping & Returns
+                Shipping & Delivery
             </button>
         </h2>
 
@@ -559,10 +607,62 @@
             aria-labelledby="headingShipping"
             data-bs-parent="#productAccordion">
             <div class="accordion-body">
-                {!! $product->delivery_returns !!}
+                {!! $product->shipping_delivery !!}
             </div>
         </div>
     </div>
+    @endif
+
+    <!-- Exchange Policy -->
+    @if($product->exchange_policy)
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingExchange">
+            <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseExchange"
+                aria-expanded="false"
+                aria-controls="collapseExchange">
+                Exchange Policy
+            </button>
+        </h2>
+
+        <div id="collapseExchange"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingExchange"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+                {!! $product->exchange_policy !!}
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Customization / Assistance -->
+    @if($product->customization_assistance)
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingCustomization">
+            <button class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseCustomization"
+                aria-expanded="false"
+                aria-controls="collapseCustomization">
+                Customization / Assistance
+            </button>
+        </h2>
+
+        <div id="collapseCustomization"
+            class="accordion-collapse collapse"
+            aria-labelledby="headingCustomization"
+            data-bs-parent="#productAccordion">
+            <div class="accordion-body">
+                {!! $product->customization_assistance !!}
+            </div>
+        </div>
+    </div>
+    @endif
+
 
     @if($setting && $setting->product_reviews)
     <!-- Reviews -->
@@ -659,100 +759,6 @@
 </div>
                     </div>
                     </div>
-
-                    <!-- 2. Product Specification Tabs -->
-                    <!--<div class="aq-details-tabs-wrapper mt-60">-->
-                    <!--    <ul class="nav nav-tabs justify-content-center aq-details-nav-tabs" role="tablist">-->
-                    <!--        <li class="nav-item">-->
-                    <!--            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"-->
-                    <!--                data-bs-target="#tab-desc" type="button" role="tab">Full Description</button>-->
-                    <!--        </li>-->
-                    <!--        <li class="nav-item">-->
-                    <!--            <button class="nav-link" id="brand-tab" data-bs-toggle="tab" data-bs-target="#tab-brand"-->
-                    <!--                type="button" role="tab">Fabric & Care</button>-->
-                    <!--        </li>-->
-                    <!--        <li class="nav-item">-->
-                    <!--            <button class="nav-link" id="shipping-tab" data-bs-toggle="tab"-->
-                    <!--                data-bs-target="#tab-shipping" type="button" role="tab">Shipping & Returns</button>-->
-                    <!--        </li>-->
-                    <!--        @if($setting && $setting->product_reviews)-->
-
-                    <!--            <li class="nav-item">-->
-                    <!--                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tab-reviews"-->
-                    <!--                    type="button" role="tab">Reviews ({{ $reviewsCount }})</button>-->
-                    <!--            </li>-->
-                    <!--        @endif-->
-                    <!--    </ul>-->
-                    <!--    <div class="tab-content aq-details-tab-content p-4 mt-3">-->
-
-                            <!-- Description Tab -->
-                    <!--        <div class="tab-pane fade show active" id="tab-desc" role="tabpanel">-->
-                    <!--            {!! $product->description !!}-->
-
-                    <!--        </div>-->
-
-                            <!-- Branding Specs Tab -->
-                    <!--        <div class="tab-pane fade" id="tab-brand" role="tabpanel">-->
-                    <!--            {!! $product->fabric_care !!}-->
-                    <!--        </div>-->
-
-                            <!-- Logistics Tab -->
-                    <!--        <div class="tab-pane fade" id="tab-shipping" role="tabpanel">-->
-                    <!--            {!! $product->delivery_returns !!}-->
-
-                    <!--        </div>-->
-
-
-                    <!--        <div class="tab-pane fade" id="tab-reviews" role="tabpanel">-->
-                    <!--            <h4 class="aq-tab-heading">Customer Reviews</h4>-->
-
-                    <!--            @if($reviews->isEmpty())-->
-                    <!--                <p class="aq-tab-text">No reviews yet for this product.</p>-->
-                    <!--            @else-->
-                    <!--                @foreach($reviews as $review)-->
-                    <!--                    <div class="aq-review-item mb-30 pb-3 border-bottom">-->
-                    <!--                        <div class="d-flex justify-content-between align-items-start">-->
-                    <!--                            <div>-->
-                    <!--                                <div class="aq-review-stars mb-1">-->
-                    <!--                                    @for($i = 1; $i <= 5; $i++)-->
-                    <!--                                        <i class="fa-{{ $i <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>-->
-                    <!--                                    @endfor-->
-                    <!--                                </div>-->
-                    <!--                                <strong class="aq-review-title">{{ $review->title }}</strong>-->
-                    <!--                            </div>-->
-                    <!--                            @if($review->verified_purchase)-->
-                    <!--                                <span class="badge bg-success">Verified Purchase</span>-->
-                    <!--                            @endif-->
-                    <!--                        </div>-->
-
-                    <!--                        <p class="aq-review-body mt-2 mb-2">-->
-                    <!--                            {{ $review->review }}-->
-                    <!--                        </p>-->
-
-                    <!--                        @if($review->images->isNotEmpty())-->
-                    <!--                            <div class="aq-review-images d-flex gap-2 mb-2">-->
-                    <!--                                @foreach($review->images as $image)-->
-                    <!--                                    <img src="{{ asset('storage/' . $image->image) }}" alt="Review image"-->
-                    <!--                                        style="width:70px;height:70px;object-fit:cover;border-radius:6px;" />-->
-                    <!--                                @endforeach-->
-                    <!--                            </div>-->
-                    <!--                        @endif-->
-
-                    <!--                        <span class="text-muted small">-->
-                    <!--                            {{ $review->customer->name ?? 'Anonymous' }} ·-->
-                    <!--                            {{ $review->created_at->format('d M Y') }}-->
-                    <!--                        </span>-->
-                    <!--                    </div>-->
-                    <!--                @endforeach-->
-
-                    <!--                <div class="mt-30">-->
-                    <!--                    {{ $reviews->links() }}-->
-                    <!--                </div>-->
-                    <!--            @endif-->
-                    <!--        </div>-->
-
-                    <!--    </div>-->
-                    <!--</div>-->
 
                 </div>
         </section>
@@ -939,8 +945,8 @@
 
                                     <div class="aq-product-actions">
                                         <button class="aq-product-action-btn" title="Quick Consultation"
-                                            onclick="openGlobalDrawer('about_page')"></button>
-                                        <i class="fa-regular fa-envelope"></i>
+                                            onclick="openGlobalDrawer('about_page')">
+                                            <i class="fa-regular fa-envelope"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -1002,6 +1008,23 @@
 
     </main>
 
+    <!-- Size Chart Modal -->
+    @if($sizeChartImage)
+    <div class="modal fade" id="sizeChartModal" tabindex="-1" aria-labelledby="sizeChartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sizeChartModalLabel">Size Chart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="{{ asset('storage/' . $sizeChartImage) }}" alt="Size Chart">
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <input type="hidden" id="currentUnitPrice" value="{{ $product->price }}">
 
     <input type="hidden" id="currentUnitMrp" value="{{ $product->mrp }}">
@@ -1011,17 +1034,44 @@
 
     <script>
 
-        const variants = @json($variantsJson);
+        /*
+        |----------------------------------------------------------------
+        | variantsByType — matches the admin's 4 independent variant sets.
+        |----------------------------------------------------------------
+        | Expected shape (supplied by the controller):
+        |   { price: [...], image: [...], stock: [...], sku: [...] }
+        | Each entry: { id, values: [attributeValueId, ...], price, mrp,
+        |               stock, image, sku }
+        | A variant "matches" the current selection for a given type when
+        | its `values` array equals the set of selected value ids whose
+        | attribute is flagged *-dependent for that type (see the
+        | data-price-dependent / data-image-dependent / data-stock-dependent
+        | / data-sku-dependent attributes on .variant-option elements above).
+        */
+        const variantsByType = @json($variantsByType);
 
         let selectedValues = [];
+        let selectedAddonIds = [];
+        let selectedAddonTotal = 0;
+
+        function findVariantForType(type) {
+            const relevantIds = $('.variant-option.active')
+                .filter(function () { return $(this).data(type + '-dependent') == 1; })
+                .map(function () { return parseInt($(this).data('value-id')); })
+                .get();
+
+            if (relevantIds.length === 0) return null;
+
+            return (variantsByType[type] || []).find(function (variant) {
+                return relevantIds.length === variant.values.length &&
+                    relevantIds.every(function (id) { return variant.values.includes(id); });
+            }) || null;
+        }
 
         $(document).on(
             'click',
             '.variant-option',
             function () {
-
-                const valueId =
-                    parseInt($(this).data('value-id'));
 
                 const attributeId =
                     $(this).data('attribute-id');
@@ -1043,91 +1093,132 @@
 
                         }).get();
 
-                const matchedVariant =
-                    variants.find(function (variant) {
+                const priceVariant = findVariantForType('price');
+                const imageVariant = findVariantForType('image');
+                const stockVariant = findVariantForType('stock');
+                const skuVariant   = findVariantForType('sku');
 
-                        return selectedValues.every(
-                            value =>
-                                variant.values.includes(value)
-                        );
+                window.currentVariantIds = {
+                    price: priceVariant ? priceVariant.id : null,
+                    image: imageVariant ? imageVariant.id : null,
+                    stock: stockVariant ? stockVariant.id : null,
+                    sku:   skuVariant   ? skuVariant.id   : null,
+                };
 
-                    });
+                if (priceVariant) {
+                    $('#currentUnitPrice').val(priceVariant.price);
+                    $('#currentUnitMrp').val(priceVariant.mrp);
+                }
 
-                if (matchedVariant) {
+                updatePriceByQty();
 
-                    $('#currentUnitPrice').val(
-                        matchedVariant.price
-                    );
+                const stockValue = stockVariant ? stockVariant.stock : {{ (int) $product->stock }};
+                $('#currentStock').text(stockValue);
 
-                    $('#currentUnitMrp').val(
-                        matchedVariant.mrp
-                    );
-
-                    updatePriceByQty();
-
-                    $('#currentStock').text(matchedVariant.stock);
-
-                    if (matchedVariant.stock > 0) {
-                        $('#aqDetailQty')
-                            .attr('max', matchedVariant.stock)
-                            .val(
-                                Math.max(
-                                    parseInt($('#aqDetailQty').attr('min')) || 1,
-                                    Math.min(
-                                        parseInt($('#aqDetailQty').val()) || 1,
-                                        matchedVariant.stock
-                                    )
+                if (stockValue > 0) {
+                    $('#aqDetailQty')
+                        .attr('max', stockValue)
+                        .val(
+                            Math.max(
+                                parseInt($('#aqDetailQty').attr('min')) || 1,
+                                Math.min(
+                                    parseInt($('#aqDetailQty').val()) || 1,
+                                    stockValue
                                 )
-                            );
-                    } else {
-                        $('#aqDetailQty')
-                            .attr('max', 0)
-                            .val(0);
-                    }
-
-                    if (matchedVariant.stock < 1) {
-
-                        $('.aq-add-to-cart-btn')
-                            .prop('disabled', true)
-                            .html('<i class="fa-solid fa-ban"></i> Out of Stock');
-
-                        $('.aq-buy-now-btn')
-                            .prop('disabled', true)
-                            .text('Out of Stock');
-
-                    } else {
-
-                        $('.aq-add-to-cart-btn')
-                            .prop('disabled', false)
-                            .html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
-
-                        $('.aq-buy-now-btn')
-                            .prop('disabled', false)
-                            .text('Buy it Now');
-                    }
-
-                    if (matchedVariant.image) {
-
-                        $('#aqMainProductImg').attr(
-                            'src',
-                            '/storage/' + matchedVariant.image
+                            )
                         );
-                    }
+                } else {
+                    $('#aqDetailQty')
+                        .attr('max', 0)
+                        .val(0);
+                }
+
+                if (stockValue < 1) {
+
+                    $('.aq-add-to-cart-btn')
+                        .prop('disabled', true)
+                        .html('<i class="fa-solid fa-ban"></i> Out of Stock');
+
+                    $('.aq-buy-now-btn')
+                        .prop('disabled', true)
+                        .text('Out of Stock');
+
+                } else {
+
+                    $('.aq-add-to-cart-btn')
+                        .prop('disabled', false)
+                        .html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
+
+                    $('.aq-buy-now-btn')
+                        .prop('disabled', false)
+                        .text('Buy it Now');
+                }
+
+                if (imageVariant && imageVariant.image) {
+
+                    $('#aqMainProductImg').attr(
+                        'src',
+                        '/storage/' + imageVariant.image
+                    );
+                    showMainImage();
                 }
 
             }
         );
 
-        function updateMainImage(thumb, imgSrc) {
-            // Update main image src
-            const mainImg = document.getElementById('aqMainProductImg');
-            if (mainImg) {
-                mainImg.src = imgSrc;
+        // ── Dropdown-type attributes: proxy to the hidden .variant-option
+        //    button so the click handler above stays the single source
+        //    of truth for selection state, no matter the control type.
+        $(document).on('change', '.aq-size-dropdown', function () {
+            const attributeId = $(this).data('attribute-id');
+            const valueId = $(this).val();
+
+            $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]')
+                .trigger('click');
+        });
+
+        // ── Addon selection (Choose Your Style) ─────────────────────
+        $(document).on('change', '.aq-addon-option', function () {
+            selectedAddonIds = $('.aq-addon-option:checked')
+                .map(function () { return parseInt($(this).data('addon-id')); })
+                .get();
+
+            selectedAddonTotal = $('.aq-addon-option:checked').toArray()
+                .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
+
+            updatePriceByQty();
+        });
+
+        // ── Gallery: image + video thumbs ────────────────────────────
+        function showMainImage() {
+            $('#aqMainProductVideo').get(0).pause();
+            $('#aqMainProductVideo').hide();
+            $('#aqMainProductImg').show();
+        }
+
+        function showMainVideo(src) {
+            const video = $('#aqMainProductVideo').get(0);
+            video.src = src;
+            $('#aqMainProductImg').hide();
+            $('#aqMainProductVideo').show();
+            video.play();
+        }
+
+        function updateMainMedia(thumb, src, type) {
+            if (type === 'video') {
+                showMainVideo(src);
+            } else {
+                document.getElementById('aqMainProductImg').src = src;
+                showMainImage();
             }
-            // Toggle active thumbnail states
-            const thumbs = document.querySelectorAll('.aq-gallery-thumb-item');
-            thumbs.forEach(t => t.classList.remove('active'));
+
+            document.querySelectorAll('.aq-gallery-thumb-item').forEach(t => t.classList.remove('active'));
             thumb.classList.add('active');
+        }
+
+        // Backward-compatible alias (in case other scripts on the page still call updateMainImage)
+        function updateMainImage(thumb, imgSrc) {
+            updateMainMedia(thumb, imgSrc, 'image');
         }
 
         function adjustQty(amount) {
@@ -1167,7 +1258,7 @@
                 ) || 0;
 
             const totalPrice =
-                qty * unitPrice;
+                qty * (unitPrice + selectedAddonTotal);
 
             const totalMrp =
                 qty * unitMrp;
@@ -1229,28 +1320,7 @@
                 return;
             }
 
-            let variantId = null;
-
-            const selectedValues = $('.variant-option.active')
-                .map(function () {
-                    return parseInt($(this).data('value-id'));
-                })
-                .get();
-
-            if (typeof variants !== 'undefined' && variants.length > 0) {
-
-                const matchedVariant = variants.find(function (variant) {
-
-                    return selectedValues.every(
-                        value => variant.values.includes(value)
-                    );
-
-                });
-
-                if (matchedVariant) {
-                    variantId = matchedVariant.id;
-                }
-            }
+            const variantIds = window.currentVariantIds || { price: null, image: null, stock: null, sku: null };
 
             $.ajax({
                 url: "{{ route('cart.add') }}",
@@ -1258,7 +1328,13 @@
                 data: {
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     product_id: productId,
-                    variant_id: variantId,
+                    // ── Type-aware variant ids (replaces the old single variant_id) ──
+                    price_variant_id: variantIds.price,
+                    image_variant_id: variantIds.image,
+                    stock_variant_id: variantIds.stock,
+                    sku_variant_id:   variantIds.sku,
+                    // ── Selected addon options ──
+                    addon_ids: selectedAddonIds,
                     quantity: quantity
                 },
                 success: function (response) {

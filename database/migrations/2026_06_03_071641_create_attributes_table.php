@@ -18,12 +18,11 @@ return new class extends Migration {
             $table->string('slug')->unique();
 
             $table->enum('type', [
-                'text',
-                'number',
-                'select',
-                'multiselect',
-                'color',
-                'boolean'
+                'button',
+                'dropdown',
+                'image',
+                'color_swatch',
+                'radio'
             ]);
 
             $table->boolean('has_values')->default(true);
