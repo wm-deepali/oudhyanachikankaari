@@ -412,7 +412,7 @@ class CheckoutController extends Controller
 
                 DB::commit();
 
-                // $this->sendOrderEmails($order);
+                $this->sendOrderEmails($order);
 
                 return response()->json([
                     'success' => true,
@@ -702,7 +702,7 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // $this->sendOrderEmails($order);
+            $this->sendOrderEmails($order);
 
             return response()->json([
 
@@ -738,30 +738,256 @@ class CheckoutController extends Controller
     }
 
 
-    protected function sendOrderEmails(Order $order)
+    protected function sendOrderEmails(Order $order): void
     {
-        $smtpSetting = SmtpSetting::first();
+        $order->loadMissing([
+            'items.product',
+            'state',
+            'city',
+        ]);
 
-        if (!$smtpSetting) {
-            return;
+        /*
+         |--------------------------------------------------------------------------
+         | Order Items HTML
+         |--------------------------------------------------------------------------
+         */
+        $orderItems = '';
+
+        foreach ($order->items as $item) {
+
+            // Thumbnail: image variant > product default image > null (matches admin blade)
+            $thumb = null;
+            if ($item->imageVariant && $item->imageVariant->image) {
+                $thumb = asset('storage/' . $item->imageVariant->image);
+            } elseif ($item->product) {
+                $thumb = $item->product->display_image;
+            }
+
+            $imageHtml = $thumb
+                ? "<img src='{$thumb}' alt='{$item->product_name}' style='width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid #d0d8d7;display:block;'>"
+                : "<span style='display:block;width:56px;height:56px;background:#e8efee;border-radius:4px;border:1px solid #d0d8d7;'></span>";
+
+            // Variant label from selected_attributes snapshot (same logic as admin blade)
+            $variantLabel = null;
+            if (!empty($item->selected_attributes)) {
+                $variantLabel = collect($item->selected_attributes)
+                    ->map(function ($value, $key) {
+                        if (is_array($value)) {
+                            $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                            $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                            return $attrName . ': ' . $attrVal;
+                        }
+                        return $key . ': ' . $value;
+                    })
+                    ->join(' · ');
+            }
+
+            $variantHtml = $variantLabel
+                ? "<div style='font-size:11px;color:#7a9e9c;'>{$variantLabel}</div>"
+                : '';
+
+            // SKU: sku variant > snapshot sku > product sku
+            $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
+            $skuHtml = $sku
+                ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
+                : '';
+
+            // Addons — list each one and fold into the line total
+            $addonsTotal = $item->addons->sum('price');
+            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+
+            $addonsHtml = '';
+            if ($item->addons->isNotEmpty()) {
+                foreach ($item->addons as $addon) {
+                    $addonsHtml .= "<div style='font-size:11px;color:#7a9e9c;'>+ {$addon->detail} (₹" . number_format($addon->price, 2) . ")</div>";
+                }
+            }
+
+            $orderItems .= "
+    <div style='display:table;width:100%;border-bottom:1px solid #e6eae9;padding:14px 0;'>
+        <div style='display:table-cell;width:60px;vertical-align:middle;padding-right:14px;'>
+            {$imageHtml}
+        </div>
+        <div style='display:table-cell;vertical-align:middle;'>
+            <div style='font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:3px;'>{$item->product_name}</div>
+            {$variantHtml}
+            {$skuHtml}
+            <div style='font-size:11px;color:#7a9e9c;'>Qty: {$item->quantity}</div>
+            {$addonsHtml}
+        </div>
+        <div style='display:table-cell;vertical-align:middle;text-align:right;font-size:14px;font-weight:700;color:#1F5552;white-space:nowrap;'>
+            ₹ " . number_format($lineTotal, 2) . "
+        </div>
+    </div>
+";
+        }
+        /*
+        |--------------------------------------------------------------------------
+        | Order Summary HTML
+        |--------------------------------------------------------------------------
+        */
+        $orderSummary = "
+        <div style='margin-top:16px;'>
+            <div style='display:table;width:100%;padding:5px 0;'>
+                <span style='display:table-cell;font-size:13px;color:#666;'>Subtotal</span>
+                <span style='display:table-cell;text-align:right;font-size:13px;color:#333;'>
+                    ₹ " . number_format($order->subtotal, 2) . "
+                </span>
+            </div>
+    ";
+
+        if ($order->discount > 0) {
+            $discountLabel = 'Discount' . ($order->coupon_code ? " ({$order->coupon_code})" : '');
+            $orderSummary .= "
+            <div style='display:table;width:100%;padding:5px 0;'>
+                <span style='display:table-cell;font-size:13px;color:#2e7d32;font-weight:500;'>{$discountLabel}</span>
+                <span style='display:table-cell;text-align:right;font-size:13px;color:#2e7d32;font-weight:500;'>
+                    − ₹ " . number_format($order->discount, 2) . "
+                </span>
+            </div>
+        ";
         }
 
-        MailHelper::configure();
+        if ($order->tax_amount > 0) {
 
-        if ($smtpSetting->order_confirmation) {
+            if ($order->gst_type === 'igst' && $order->igst_amount > 0) {
 
-            Mail::to($order->customer_email)
-                ->send(
-                    new OrderConfirmationMail($order)
-                );
+                $orderSummary .= "
+                <div style='display:table;width:100%;padding:5px 0;'>
+                    <span style='display:table-cell;font-size:13px;color:#666;'>IGST ({$order->igst_rate}%)</span>
+                    <span style='display:table-cell;text-align:right;font-size:13px;color:#333;'>
+                        ₹ " . number_format($order->igst_amount, 2) . "
+                    </span>
+                </div>
+            ";
+
+            } else {
+
+                if ($order->cgst_amount > 0) {
+                    $orderSummary .= "
+                    <div style='display:table;width:100%;padding:5px 0;'>
+                        <span style='display:table-cell;font-size:13px;color:#666;'>CGST ({$order->cgst_rate}%)</span>
+                        <span style='display:table-cell;text-align:right;font-size:13px;color:#333;'>
+                            ₹ " . number_format($order->cgst_amount, 2) . "
+                        </span>
+                    </div>
+                ";
+                }
+
+                if ($order->sgst_amount > 0) {
+                    $orderSummary .= "
+                    <div style='display:table;width:100%;padding:5px 0;'>
+                        <span style='display:table-cell;font-size:13px;color:#666;'>SGST ({$order->sgst_rate}%)</span>
+                        <span style='display:table-cell;text-align:right;font-size:13px;color:#333;'>
+                            ₹ " . number_format($order->sgst_amount, 2) . "
+                        </span>
+                    </div>
+                ";
+                }
+            }
         }
 
-        if ($smtpSetting->new_order_alert) {
+        $orderSummary .= "
+            <hr style='border:none;border-top:1px solid #d4dbd9;margin:10px 0;'>
+            <div style='display:table;width:100%;padding:5px 0;'>
+                <span style='display:table-cell;font-size:15px;font-weight:600;color:#1a1a1a;'>Grand Total</span>
+                <span style='display:table-cell;text-align:right;font-size:16px;font-weight:700;color:#1F5552;'>
+                    ₹ " . number_format($order->grand_total, 2) . "
+                </span>
+            </div>
+        </div>
+    ";
+        /*
+        |--------------------------------------------------------------------------
+        | Shipping Address HTML
+        |--------------------------------------------------------------------------
+        */
+        $shippingAddress = "
+        <div>
+            <strong>{$order->customer_name}</strong><br>
+            {$order->address_line_1}
+    ";
 
-            $setting = Setting::first();
+        if (!empty($order->address_line_2)) {
+            $shippingAddress .= "<br>{$order->address_line_2}";
+        }
 
-            Mail::to($setting->admin_email)->send(
-                new NewOrderAdminMail($order)
+        $shippingAddress .= "
+            <br>{$order->city?->name}, {$order->state?->name} - {$order->pincode}
+            <br>📞 {$order->customer_phone}
+        </div>
+    ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | Common Variables
+        |--------------------------------------------------------------------------
+        */
+        $variables = [
+
+            '{customer_name}' => $order->customer_name,
+
+            '{order_number}' => $order->order_number,
+            '{order_date}' => $order->created_at->format('d M Y'),
+            '{grand_total}' => '₹' . number_format($order->grand_total, 2),
+
+            '{payment_method}' => ucfirst($order->payment_method),
+            '{payment_status}' => ucfirst($order->payment_status),
+            '{transaction_id}' => $order->transaction_id ?? 'N/A',
+
+            '{order_url}' => route('order.success', $order->id),
+
+            '{order_items}' => $orderItems,
+            '{order_summary}' => $orderSummary,
+            '{shipping_address}' => $shippingAddress,
+        ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Customer - Order Confirmed
+        |--------------------------------------------------------------------------
+        */
+        \App\Services\Email\EmailDispatcher::send(
+            'order-confirmed',
+            $order->customer_email,
+            $variables,
+            $order->customer_name
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Customer - Payment Received
+        |--------------------------------------------------------------------------
+        */
+        if ($order->payment_status === 'paid') {
+
+            \App\Services\Email\EmailDispatcher::send(
+                'payment-received',
+                $order->customer_email,
+                array_merge($variables, [
+                    '{payment_amount}' => '₹' . number_format($order->grand_total, 2),
+                    '{transaction_id}' => $order->transaction_id ?? $order->razorpay_payment_id ?? 'N/A',
+                    '{invoice_url}' => route('order.success', $order->id),
+                ]),
+                $order->customer_name
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Admin - New Order Alert
+        |--------------------------------------------------------------------------
+        */
+        $adminEmail = Setting::first()?->admin_email;
+
+        if ($adminEmail) {
+
+            \App\Services\Email\EmailDispatcher::send(
+                'new-order-alert',
+                $adminEmail,
+                array_merge($variables, [
+                    '{admin_order_url}' => route('admin.orders.show', $order->id),
+                ])
             );
         }
     }

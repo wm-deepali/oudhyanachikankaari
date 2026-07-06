@@ -155,7 +155,7 @@ class OrderController extends Controller
     {
         $order->load([
             'items.product.images',   // product thumbnail
-            'items.imageVariant',  
+            'items.imageVariant',
             'items.skuVariant',     // variant image (falls back to product thumb)
             'items.addons',           // selected addons
             'customer',               // customer profile info
@@ -165,7 +165,7 @@ class OrderController extends Controller
             'statusHistory',
 
         ]);
-        
+
 
         // Customer's total order count (for sidebar)
         $customerOrderCount = $order->customer_id
@@ -326,36 +326,196 @@ class OrderController extends Controller
                 ]);
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Email Notifications
+            |--------------------------------------------------------------------------
+            */
 
-            // Send status mails
             $smtpSetting = SmtpSetting::first();
 
             if ($smtpSetting) {
 
-                MailHelper::configure();
+                /*
+                |--------------------------------------------------------------------------
+                | Email Notifications
+                |--------------------------------------------------------------------------
+                */
 
-                // Shipped Mail
-                if (
-                    $request->status === 'shipped' &&
-                    $smtpSetting->order_shipped
-                ) {
-                    Mail::to($order->customer_email)
-                        ->send(
-                            new OrderShippedMail($order)
-                        );
+                // Build these once — shipped/delivered/cancelled all need them
+                // Build these once — shipped/delivered/cancelled all need them
+                $orderItems = '';
+
+                if (in_array($request->status, ['shipped', 'delivered', 'cancelled'])) {
+                    $order->loadMissing(['items.product', 'items.imageVariant', 'items.skuVariant', 'items.addons', 'courier', 'state', 'city']);
+
+                    foreach ($order->items as $item) {
+
+    // Thumbnail: image variant > product default image > null
+    $thumb = null;
+    if ($item->imageVariant && $item->imageVariant->image) {
+        $thumb = asset('storage/' . $item->imageVariant->image);
+    } elseif ($item->product) {
+        $thumb = $item->product->display_image;
+    }
+
+    $imageHtml = $thumb
+        ? "<img src='{$thumb}' alt='{$item->product_name}' style='width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid #d0d8d7;display:block;'>"
+        : "<span style='display:block;width:56px;height:56px;background:#e8efee;border-radius:4px;border:1px solid #d0d8d7;'></span>";
+
+    // Variant label from selected_attributes snapshot
+    $variantLabel = null;
+    if (!empty($item->selected_attributes)) {
+        $variantLabel = collect($item->selected_attributes)
+            ->map(function ($value, $key) {
+                if (is_array($value)) {
+                    $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                    $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                    return $attrName . ': ' . $attrVal;
+                }
+                return $key . ': ' . $value;
+            })
+            ->join(' · ');
+    }
+
+    $variantHtml = $variantLabel
+        ? "<div style='font-size:11px;color:#7a9e9c;'>{$variantLabel}</div>"
+        : '';
+
+    // SKU: sku variant > snapshot sku > product sku
+    $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
+    $skuHtml = $sku
+        ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
+        : '';
+
+    // Addons — list each one and fold into the line total
+    $addonsTotal = $item->addons->sum('price');
+    $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+
+    $addonsHtml = '';
+    if ($item->addons->isNotEmpty()) {
+        foreach ($item->addons as $addon) {
+            $addonsHtml .= "<div style='font-size:11px;color:#7a9e9c;'>+ {$addon->detail} (₹" . number_format($addon->price, 2) . ")</div>";
+        }
+    }
+
+    $orderItems .= "
+    <div style='display:table;width:100%;border-bottom:1px solid #e6eae9;padding:14px 0;'>
+        <div style='display:table-cell;width:60px;vertical-align:middle;padding-right:14px;'>
+            {$imageHtml}
+        </div>
+        <div style='display:table-cell;vertical-align:middle;'>
+            <div style='font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:3px;'>{$item->product_name}</div>
+            {$variantHtml}
+            {$skuHtml}
+            <div style='font-size:11px;color:#7a9e9c;'>Qty: {$item->quantity}</div>
+            {$addonsHtml}
+        </div>
+        <div style='display:table-cell;vertical-align:middle;text-align:right;font-size:14px;font-weight:700;color:#1F5552;white-space:nowrap;'>
+            ₹ " . number_format($lineTotal, 2) . "
+        </div>
+    </div>
+";
+}
+
+                    $shippingAddress = "
+        <div>
+            <strong>{$order->customer_name}</strong><br>
+            {$order->address_line_1}
+    ";
+
+                    if (!empty($order->address_line_2)) {
+                        $shippingAddress .= "<br>{$order->address_line_2}";
+                    }
+
+                    $shippingAddress .= "
+            <br>{$order->city?->name}, {$order->state?->name} - {$order->pincode}
+            <br>📞 {$order->customer_phone}
+        </div>
+    ";
                 }
 
-                // Delivered Mail
-                if (
-                    $request->status === 'delivered' &&
-                    $smtpSetting->order_delivered
-                ) {
-                    Mail::to($order->customer_email)
-                        ->send(
-                            new OrderDeliveredMail($order)
-                        );
+
+                if ($request->status === 'shipped') {
+
+                    \App\Services\Email\EmailDispatcher::send(
+                        'order-shipped',
+                        $order->customer_email,
+                        [
+                            '{customer_name}' => $order->customer_name,
+
+                            '{order_number}' => $order->order_number,
+                            '{shipped_date}' => now()->format('d M Y'),
+
+                            '{courier_name}' => $order->courier?->name ?? 'Courier Service',
+                            '{tracking_number}' => $order->tracking_number ?? 'N/A',
+                            '{tracking_url}' => $order->courier?->website_url
+                                ?? url('/track-order/' . $order->order_number),
+
+                            '{expected_delivery}' => now()->addDays(3)->format('d M Y'),
+
+                            '{grand_total}' => '₹' . number_format($order->grand_total, 2),
+
+                            '{payment_method}' => ucfirst($order->payment_method),
+                            '{payment_status}' => ucfirst($order->payment_status),
+
+                            '{order_items}' => $orderItems,
+                            '{shipping_address}' => $shippingAddress,
+
+                            '{order_url}' => route('order.success', $order->id),
+                        ],
+                        $order->customer_name
+                    );
                 }
+
+                if ($request->status === 'delivered') {
+
+                    \App\Services\Email\EmailDispatcher::send(
+                        'order-delivered',
+                        $order->customer_email,
+                        [
+                            '{customer_name}' => $order->customer_name,
+
+                            '{order_number}' => $order->order_number,
+                            '{delivered_date}' => now()->format('d M Y'),
+                            '{grand_total}' => '₹' . number_format($order->grand_total, 2),
+                            '{item_count}' => $order->items->count(),
+
+                            '{payment_method}' => ucfirst($order->payment_method),
+                            '{payment_status}' => ucfirst($order->payment_status),
+
+                            '{order_items}' => $orderItems,
+                            '{shipping_address}' => $shippingAddress,
+
+                            '{review_url}' => route('home'),
+                            '{order_url}' => route('order.success', $order->id),
+                            '{return_url}' => route('order.success', $order->id),
+                        ],
+                        $order->customer_name
+                    );
+                }
+
+                if ($request->status === 'cancelled') {
+
+                    \App\Services\Email\EmailDispatcher::send(
+                        'order-cancelled',
+                        $order->customer_email,
+                        [
+                            '{customer_name}' => $order->customer_name,
+                            '{order_number}' => $order->order_number,
+
+                            '{cancel_reason}' => $request->note ?: 'Cancelled by store',
+                            '{refund_amount}' => '₹' . number_format($order->grand_total, 2),
+                            '{refund_days}' => '5-7',
+
+                            '{shipping_address}' => $shippingAddress,
+                        ],
+                        $order->customer_name
+                    );
+                }
+
             }
+
         }
 
         return back()->with(

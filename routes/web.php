@@ -51,7 +51,8 @@ use App\Http\Controllers\Admin\{
     StockAlertsController,
     SalesReportController,
     ProductReportController,
-    CustomerReportController
+    CustomerReportController,
+    EmailTemplateController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -369,6 +370,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('announcements', AnnouncementController::class);
 
+        Route::post('coupons/{coupon}/share', [CouponController::class, 'share'])->name('coupons.share');
         Route::resource('coupons', CouponController::class);
 
         // Admin Settings routes
@@ -379,8 +381,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::view('/security/system-logs', 'admin.security.system-logs')->name('security.system-logs');
         Route::view('/security/security-settings', 'admin.security.security-settings')->name('security.security-settings');
         Route::view('/security/redirects', 'admin.security.redirects')->name('security.redirects');
-        
-        
+
+
         Route::get('/admin-setting', [AdminSettingController::class, 'index'])->name('admin-setting.index');
         Route::post('/invoice-settings', [AdminSettingController::class, 'invoiceSettingStore'])->name('invoice-settings.store');
         Route::post('/smtp-settings/store', [AdminSettingController::class, 'smtpSettingStore'])->name('smtp-settings.store');
@@ -388,6 +390,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/settings/general', [AdminSettingController::class, 'generalSettingStore'])->name('settings.general.store');
         Route::post('/settings/courier/store', [AdminSettingController::class, 'courierStore'])->name('couriers.store');
         Route::delete('/settings/courier/{courier}', [AdminSettingController::class, 'courierDelete'])->name('couriers.delete');
+
+        Route::get('/settings/email-templates', [EmailTemplateController::class, 'index'])->name('settings.email-templates.index');
+        Route::post('settings/email-templates/test', [EmailTemplateController::class, 'sendTest'])->name('settings.email-templates.test');
+        Route::post('settings/email-templates/{eventKey}', [EmailTemplateController::class, 'save'])->name('settings.email-templates.save');
 
         // Orders routes
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
@@ -417,8 +423,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('stored-carts', [StoredCartController::class, 'index'])->name('stored-carts.index');
         Route::delete('stored-carts/{cart}', [StoredCartController::class, 'destroy'])->name('stored-carts.destroy');
         Route::get('stored-carts/export', [StoredCartController::class, 'export'])->name('stored-carts.export');
-        
-        
+
+
 
         Route::resource('return-reasons', ReturnReasonController::class)->names('return-reasons');
 
@@ -453,7 +459,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         // Listing page
-        
+
         Route::get('/reviews', [App\Http\Controllers\Admin\ProductReviewController::class, 'index'])->name('reviews.index');
         Route::get('/reviews/{review}', [App\Http\Controllers\Admin\ProductReviewController::class, 'show'])->name('reviews.show');
         Route::patch('/reviews/{review}/approve', [App\Http\Controllers\Admin\ProductReviewController::class, 'approve'])->name('reviews.approve');
@@ -476,36 +482,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/customers/export/pdf', [CustomerReportController::class, 'exportPdf'])->name('reports.customers.export.pdf');
         // Cleaner URL
         Route::get('/notifications/', function () {
-    return view('admin.notifications.index');
-})->name('notifications.index');
+            return view('admin.notifications.index');
+        })->name('notifications.index');
 
 
-    Route::view('/templates-setting', 'admin.admin-settings.template-setting')->name('templates.template-setting');
+        Route::view('/templates-setting', 'admin.admin-settings.template-setting')->name('templates.template-setting');
 
-Route::prefix('roles-and-permission')->group(function () {
+        Route::prefix('roles-and-permission')->group(function () {
 
-    // Roles Category
-    Route::view('/roles-category', 'admin.roles-and-permission.roles-category.index')->name('roles-category.index');
-    Route::view('/roles-category/create', 'admin.roles-and-permission.roles-category.create')->name('roles-category.create');
-    Route::view('/roles-category/edit', 'admin.roles-and-permission.roles-category.edit')->name('roles-category.edit');
+            // Roles Category
+            Route::view('/roles-category', 'admin.roles-and-permission.roles-category.index')->name('roles-category.index');
+            Route::view('/roles-category/create', 'admin.roles-and-permission.roles-category.create')->name('roles-category.create');
+            Route::view('/roles-category/edit', 'admin.roles-and-permission.roles-category.edit')->name('roles-category.edit');
 
-    // Permission and Settings
-    Route::view('/permission-and-settings', 'admin.roles-and-permission.permission-and-settings.index')->name('permission-settings.index');
-    Route::view('/permission-and-settings/create', 'admin.roles-and-permission.permission-and-settings.create')->name('permission-settings.create');
-    Route::view('/permission-and-settings/edit', 'admin.roles-and-permission.permission-and-settings.edit')->name('permission-settings.edit');
+            // Permission and Settings
+            Route::view('/permission-and-settings', 'admin.roles-and-permission.permission-and-settings.index')->name('permission-settings.index');
+            Route::view('/permission-and-settings/create', 'admin.roles-and-permission.permission-and-settings.create')->name('permission-settings.create');
+            Route::view('/permission-and-settings/edit', 'admin.roles-and-permission.permission-and-settings.edit')->name('permission-settings.edit');
 
-    // Team
-    Route::view('/team', 'admin.roles-and-permission.team.index')->name('team.index');
-    Route::view('/team/create', 'admin.roles-and-permission.team.create')->name('team.create');
-    Route::view('/team/edit', 'admin.roles-and-permission.team.edit')->name('team.edit');
-    Route::view('/team/customise-permission', 'admin.roles-and-permission.team.customise-permission')->name('team.customise-permission');
-    Route::view('/team/activity-logs', 'admin.roles-and-permission.team.activity-logs')->name('team.activity-logs');
-    Route::view('/team/login', 'admin.roles-and-permission.team.login')->name('team.login');
-    Route::view('/team/login-summary', 'admin.roles-and-permission.team.login-summary')->name('team.login-summary');
-    Route::view('/team/login-history', 'admin.roles-and-permission.team.login-history')->name('team.login-history');
-    
-   
-});
+            // Team
+            Route::view('/team', 'admin.roles-and-permission.team.index')->name('team.index');
+            Route::view('/team/create', 'admin.roles-and-permission.team.create')->name('team.create');
+            Route::view('/team/edit', 'admin.roles-and-permission.team.edit')->name('team.edit');
+            Route::view('/team/customise-permission', 'admin.roles-and-permission.team.customise-permission')->name('team.customise-permission');
+            Route::view('/team/activity-logs', 'admin.roles-and-permission.team.activity-logs')->name('team.activity-logs');
+            Route::view('/team/login', 'admin.roles-and-permission.team.login')->name('team.login');
+            Route::view('/team/login-summary', 'admin.roles-and-permission.team.login-summary')->name('team.login-summary');
+            Route::view('/team/login-history', 'admin.roles-and-permission.team.login-history')->name('team.login-history');
+
+
+        });
 
     });
 });

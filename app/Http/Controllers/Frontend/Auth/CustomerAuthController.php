@@ -55,6 +55,15 @@ class CustomerAuthController extends Controller
         );
         $customer = Customer::create($validated);
 
+        \App\Services\Email\EmailDispatcher::send(
+            'welcome',
+            $customer->email,
+            [
+                '{customer_name}' => $customer->name,
+            ]
+        );
+
+
         return redirect()
             ->route('user.login')
             ->with('success', 'Registration completed successfully. Please login.');

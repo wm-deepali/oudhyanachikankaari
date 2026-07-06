@@ -125,9 +125,9 @@
                 <li><a href="{{ route('admin.blogs.index') }}">Blog Management</a></li>
                 <li><a href="{{ route('admin.pages.index') }}">Dynamic Pages</a></li>
                 <li><a href="{{ route('admin.announcements.index') }}">Announcement Bar</a></li>
-                 <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li>
+                <li><a href="{{ route('admin.teams.index') }}">Manage Teams</a></li>
                 <li><a href="{{ route('admin.testimonials.index') }}">Testimonial & Feedback</a></li>
-                 <li><a href="{{ route('admin.contact-branches.index') }}">Manage Office Branches</a></li>
+                <li><a href="{{ route('admin.contact-branches.index') }}">Manage Office Branches</a></li>
             </ul>
         </li>
 
@@ -177,6 +177,11 @@
                 <li><a href="{{ route('admin.admin-setting.index', ['tab' => 'general']) }}">General Setting</a></li>
                 <li><a href="{{ route('admin.admin-setting.index', ['tab' => 'payment']) }}">Payment Gateway</a></li>
                 <li><a href="{{ route('admin.admin-setting.index', ['tab' => 'smtp']) }}">SMTP</a></li>
+                <li>
+                    <a href="{{ route('admin.settings.email-templates.index') }}">
+                        Email Template Settings
+                    </a>
+                </li>
                 <li>
                     <a href="{{ route('admin.admin-setting.index', ['tab' => 'gst']) }}">
                         GST & Invoice

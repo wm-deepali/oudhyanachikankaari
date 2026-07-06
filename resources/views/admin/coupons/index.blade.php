@@ -648,6 +648,13 @@
 
                                             </a>
 
+                                            {{-- Share Coupon Button --}}
+                                            <button class="action-btn"
+                                                onclick="openShareModal({{ $coupon->id }}, '{{ $coupon->code }}', '{{ $coupon->discount_type == 'percentage' ? $coupon->discount_value . '%' : '₹' . number_format($coupon->discount_value, 2) }}', '{{ date('d M Y', strtotime($coupon->end_date)) }}')"
+                                                title="Share Coupon">
+                                                <i class="fa fa-share-alt"></i>
+                                            </button>
+
                                             <button class="action-btn action-btn-danger"
                                                 onclick="deleteCoupon({{ $coupon->id }})">
 
@@ -701,6 +708,42 @@
     </div>
 </div>
 
+<!-- Share Coupon Modal -->
+<div id="share-coupon-modal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div
+        style="background:#fff;border-radius:12px;padding:28px 28px 24px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;">
+
+        <button onclick="closeShareModal()"
+            style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#6d7175;cursor:pointer;">
+            <i class="fa fa-times"></i>
+        </button>
+
+        <h3 style="font-size:16px;font-weight:700;color:#202223;margin:0 0 4px;">
+            <i class="fa fa-share-alt" style="color:#303d89;margin-right:6px;"></i>
+            Share Coupon
+        </h3>
+        <p id="share-coupon-info" style="font-size:13px;color:#6d7175;margin:0 0 20px;"></p>
+
+        <label
+            style="font-size:12px;font-weight:600;color:#6d7175;text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:6px;">
+            Mobile Number
+        </label>
+        <input type="text" id="share-mobile-input" maxlength="10" inputmode="numeric"
+            placeholder="Enter 10-digit mobile number"
+            style="width:100%;height:40px;border:1px solid #e3e5e8;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:6px;"
+            onkeydown="if(event.key==='Enter') sendCouponSms()">
+        <p id="share-error-msg" style="font-size:12px;color:#b22222;margin:4px 0 14px;display:none;"></p>
+
+        <button onclick="sendCouponSms()" id="share-send-btn"
+            style="width:100%;background:#303d89;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;">
+            <i class="fa fa-paper-plane"></i>
+            Send SMS
+        </button>
+
+    </div>
+</div>
+
 @include('admin.footer')
 
 <script>
@@ -737,4 +780,69 @@
         const div = document.getElementById('categoryFilterDiv');
         div.style.display = this.value === 'subcategory' ? '' : 'none';
     });
+
+   var _shareCouponData = {};
+   
+    function openShareModal(id, code, discount, expiry) {
+        _shareCouponData = { id, code, discount, expiry };
+        document.getElementById('share-coupon-info').textContent =
+            'Code: ' + code + '  |  Discount: ' + discount + '  |  Valid till: ' + expiry;
+        document.getElementById('share-mobile-input').value = '';
+        document.getElementById('share-error-msg').style.display = 'none';
+        document.getElementById('share-coupon-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('share-mobile-input').focus(), 100);
+    }
+
+    function closeShareModal() {
+        document.getElementById('share-coupon-modal').style.display = 'none';
+    }
+
+    // Close on backdrop click
+    document.getElementById('share-coupon-modal').addEventListener('click', function (e) {
+        if (e.target === this) closeShareModal();
+    });
+
+    function sendCouponSms() {
+        const mobile = document.getElementById('share-mobile-input').value.trim();
+        const errEl = document.getElementById('share-error-msg');
+        const btn = document.getElementById('share-send-btn');
+
+        // Validate
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            errEl.textContent = 'Please enter a valid 10-digit mobile number.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        errEl.style.display = 'none';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+
+        $.ajax({
+            url: "{{ url('admin/coupons') }}/" + _shareCouponData.id + "/share",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                mobile: mobile,
+            },
+            success: function (res) {
+                if (res.status) {
+                    Swal.fire({ icon: 'success', title: 'SMS Sent!', text: res.message, timer: 2000, showConfirmButton: false });
+                    closeShareModal();
+                } else {
+                    errEl.textContent = res.message ?? 'Failed to send SMS.';
+                    errEl.style.display = 'block';
+                }
+            },
+            error: function () {
+                errEl.textContent = 'Something went wrong. Please try again.';
+                errEl.style.display = 'block';
+            },
+            complete: function () {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-paper-plane"></i> Send SMS';
+            }
+        });
+    }
+
 </script>

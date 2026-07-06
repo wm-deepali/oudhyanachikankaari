@@ -9,6 +9,9 @@
     @endphp
 
     <style>
+        body {
+            overflow-x: clip;
+        }
         /* ── Video gallery thumb (play icon overlay) ───────────────── */
         .aq-gallery-thumb-video { position: relative; cursor: pointer; }
         .aq-thumb-play-icon {
@@ -29,8 +32,23 @@
 
         /* ── Variant control types ─────────────────────────────────── */
         .aq-color-swatch {
-            width: 34px; height: 34px; border-radius: 50%; border: 2px solid #e5e5e5;
-            padding: 0; cursor: pointer; display: inline-block;
+            min-width: 35px;
+            height: 35px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fff;
+            padding: 2px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .aq-color-swatch-inner {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: block;
         }
         .aq-color-swatch.active { border-color: #b5904a; box-shadow: 0 0 0 2px rgba(181,144,74,.25); }
 
@@ -50,11 +68,21 @@
         .aq-size-dropdown { max-width: 260px; }
 
         /* ── Desktop Gallery Layout & Sticky column ────────────────── */
-        .aq-sticky-column {
-            position: sticky;
-            top: 120px;
-            align-self: flex-start;
-        }
+       .aq-sticky-column {
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
+
+    /*max-height: calc(100vh - 140px);*/
+    /*overflow-y: auto;*/
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.aq-sticky-column::-webkit-scrollbar {
+    display: none;
+}
         .aq-gallery-thumbs {
             display: flex;
             gap: 12px;
@@ -180,16 +208,20 @@
         }
         .design-accordion .accordion-button::after {
             content: '+';
-            background-image: none;
-            font-size: 18px;
+            background-image: none !important;
+            font-size: 24px;
             font-weight: 300;
             display: flex;
             align-items: center;
             justify-content: center;
             transform: none !important;
+            line-height: 1;
+            width: 24px;
+            height: 24px;
         }
         .design-accordion .accordion-button:not(.collapsed)::after {
-            content: '-';
+            content: '\2212'; /* Unicode minus sign for perfect vertical centering */
+            background-image: none !important;
         }
         .design-accordion .accordion-body {
             padding: 0 0 20px 0;
@@ -197,6 +229,41 @@
             color: #666;
             line-height: 1.6;
         }
+        
+        .aq-details-price-box {
+    background-color: var(--aq-color-cream);
+    border-radius: 12px;
+    border-left: 2px solid var(--aq-color-maroon) !important;
+}
+
+h5.aq-size-title {
+    color: black;
+    font-size: 18px;
+    font-weight: 600;
+}
+ 
+ 
+ .aq-size-badge {
+    border: 1px solid #ddd;
+    padding: 3px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: Inter, sans-serif;
+    min-width: 35px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: .875rem;
+    position: relative;
+}
+
+
+.aq-moq-info-list p {
+font-size:15px;
+}
     </style>
 
     <main>
@@ -252,9 +319,15 @@
                 <div class="row g-5 justify-content-between">
 
                     <!-- Left Column: Thumbnails (Sticky) -->
-                    <div class="col-lg-1 d-none d-lg-block">
+                    <div class="col-lg-1 d-none d-lg-block p-0">
                         <div class="aq-sticky-column">
                             <div class="aq-gallery-thumbs d-flex flex-column h-100" style="max-height: calc(100vh - 150px);">
+                                 {{-- Variant image thumb — hidden until a color/image variant with its own image is selected --}}
+                                <div class="aq-gallery-thumb-item" id="thumb-variant" style="display:none;"
+                                    onclick="document.getElementById('main-img-variant').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                                    <img id="aqVariantThumbImg" src="" alt="{{ $product->name }}" />
+                                </div>
+                                
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
@@ -282,6 +355,12 @@
                                 @endforeach
                             </div>
 
+    {{-- Variant image slot — populated & shown by JS when a color/image variant is selected --}}
+                            <div class="aq-gallery-main-img-wrap" id="main-img-variant" style="display:none;">
+                                <img id="aqVariantImage" src="" alt="{{ $product->name }}"
+                                    class="aq-gallery-main-img" style="width: 100%; border-radius: 8px; object-fit: cover;" />
+                            </div>
+                            
                             <!-- All Images Stacked -->
                             @foreach($product->images as $index => $image)
                                 <div class="aq-gallery-main-img-wrap" id="main-img-{{ $index }}">
@@ -299,6 +378,12 @@
                             
                             <!-- Mobile Thumbnails -->
                             <div class="d-lg-none aq-gallery-thumbs d-flex flex-row overflow-auto mt-3">
+                                 {{-- Variant image thumb (mobile) — hidden until a color/image variant with its own image is selected --}}
+                                <div class="aq-gallery-thumb-item" id="thumb-variant-mobile" style="display:none;"
+                                    onclick="document.getElementById('main-img-variant').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                                    <img id="aqVariantThumbImgMobile" src="" alt="{{ $product->name }}" />
+                                </div>
+
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
@@ -361,7 +446,7 @@
                     </div>
 
                     <!-- Right Column: Product Specs & Ordering Drawer Trigger -->
-                    <div class="col-lg-4 col-12">
+                    <div class="col-lg-4 col-12 p-0">
                         <div class="aq-sticky-column" style="max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 10px;">
                         
                         
@@ -373,7 +458,7 @@
                             <h2 class="design-title">
                                 {{ $product->name }}
                             </h2>
-                            <span class="design-tax-info">Inclusive of all taxes.</span>
+                            <!--<span class="design-tax-info">Inclusive of all taxes.</span>-->
 
                           
 
@@ -462,7 +547,7 @@
 
     @if($attribute['is_selectable'])
 
-        <div class="aq-size-selection-panel p-3">
+        <div class="aq-size-selection-panel">
 
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <h5 class="aq-size-title mb-0">
@@ -503,17 +588,18 @@
                     @break
 
                 @case('color_swatch')
-                    <div class="aq-product-size-row gap-2">
+                    <div class="aq-product-size-row d-flex flex-wrap gap-2">
                         @foreach($attribute['values'] as $valueId => $value)
                             <button type="button" class="aq-color-swatch variant-option"
                                 title="{{ $value['value'] }}"
-                                style="background-color: {{ $value['hex_code'] ?: '#ccc' }};"
                                 data-attribute-id="{{ $attributeId }}"
                                 data-value-id="{{ $valueId }}"
                                 data-price-dependent="{{ !empty($attribute['price_dependent']) ? 1 : 0 }}"
                                 data-image-dependent="{{ !empty($attribute['image_dependent']) ? 1 : 0 }}"
                                 data-stock-dependent="{{ !empty($attribute['stock_dependent']) ? 1 : 0 }}"
-                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}"></button>
+                                data-sku-dependent="{{ !empty($attribute['sku_dependent']) ? 1 : 0 }}">
+                                <span class="aq-color-swatch-inner" style="background-color: {{ $value['hex_code'] ?: '#ccc' }};"></span>
+                            </button>
                         @endforeach
                     </div>
                     @break
@@ -631,8 +717,8 @@
 @endif
 
                             <!-- Interactive Quantity and Action -->
-                            <div class="p-0 mb-30 mt-30">
-                                <div class="d-flex flex-column gap-2">
+                            <div class="px-3 mb-30 mt-30">
+                                <div class="d-flex flex-column gap-2 w-100">
                                     <div class="aq-qty-selector luxury-qty d-none">
                                         <button type="button" class="qty-btn" onclick="adjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
@@ -681,17 +767,17 @@
     <!-- Full Description -->
     <div class="accordion-item">
         <h2 class="accordion-header" id="headingDesc">
-            <button class="accordion-button" type="button"
+            <button class="accordion-button collapsed" type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#collapseDesc"
-                aria-expanded="true"
+                aria-expanded="false"
                 aria-controls="collapseDesc">
                 Full Description
             </button>
         </h2>
 
         <div id="collapseDesc"
-            class="accordion-collapse collapse show"
+            class="accordion-collapse collapse"
             aria-labelledby="headingDesc"
             data-bs-parent="#productAccordion">
             <div class="accordion-body">
@@ -1161,7 +1247,7 @@
     @endif
 
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
         const variantsByType = @json($variantsByType);
@@ -1248,9 +1334,32 @@
                 $('.aq-buy-now-btn').prop('disabled', false).text('Buy it Now');
             }
 
+            // ── Variant image: pop it into the gallery stack as a dedicated
+            // slot + thumbnail, and scroll it into view. Hide it again when
+            // the current combination has no dedicated image.
             if (imageVariant && imageVariant.image) {
-                $('#aqMainProductImg').attr('src', '/storage/' + imageVariant.image);
-                showMainImage();
+                const url = '/storage/' + imageVariant.image;
+
+                $('#aqVariantImage').attr('src', url);
+                $('#aqVariantThumbImg').attr('src', url);
+                $('#aqVariantThumbImgMobile').attr('src', url);
+
+                $('#main-img-variant').show();
+                $('#thumb-variant').show();
+                $('#thumb-variant-mobile').show();
+
+                document.querySelectorAll('.aq-gallery-thumb-item').forEach(function (t) {
+                    t.classList.remove('active');
+                });
+                document.getElementById('thumb-variant')?.classList.add('active');
+                document.getElementById('thumb-variant-mobile')?.classList.add('active');
+
+                document.getElementById('main-img-variant')
+                    .scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                $('#main-img-variant').hide();
+                $('#thumb-variant').hide();
+                $('#thumb-variant-mobile').hide();
             }
         });
 
@@ -1270,35 +1379,6 @@
 
             updatePriceDisplay();
         });
-
-        function showMainImage() {
-            $('#aqMainProductVideo').get(0).pause();
-            $('#aqMainProductVideo').hide();
-            $('#aqMainProductImg').show();
-        }
-
-        function showMainVideo(src) {
-            const video = $('#aqMainProductVideo').get(0);
-            video.src = src;
-            $('#aqMainProductImg').hide();
-            $('#aqMainProductVideo').show();
-            video.play();
-        }
-
-        function updateMainMedia(thumb, src, type) {
-            if (type === 'video') {
-                showMainVideo(src);
-            } else {
-                document.getElementById('aqMainProductImg').src = src;
-                showMainImage();
-            }
-            document.querySelectorAll('.aq-gallery-thumb-item').forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-        }
-
-        function updateMainImage(thumb, imgSrc) {
-            updateMainMedia(thumb, imgSrc, 'image');
-        }
 
         function adjustQty(amount) {
             const qtyInput = document.getElementById('aqDetailQty');
@@ -1327,31 +1407,64 @@
         */
         function updatePriceDisplay() {
 
-            const qty = parseInt($('#aqDetailQty').val()) || 1;
+    const qty = parseInt($('#aqDetailQty').val()) || 1;
 
-            const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
-            const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
+    const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
+    const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
 
-            const totalPrice = Math.round(qty * unitPriceWithAddons);
-            const totalMrp   = Math.round(qty * unitMrpWithAddons);
+    const totalPrice = Math.round(qty * unitPriceWithAddons);
+    const totalMrp   = Math.round(qty * unitMrpWithAddons);
 
-            $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
+    console.log({
+        currentUnitPrice,
+        currentUnitMrp,
+        selectedAddonTotal,
+        qty,
+        totalPrice,
+        totalMrp
+    });
 
-            let discount = 0;
+    // Always update selling price
+    $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
 
-            if (totalMrp > 0 && totalPrice < totalMrp) {
-                discount = Math.round(((totalMrp - totalPrice) / totalMrp) * 100);
-            }
+    // Hide MRP + Discount when MRP and Price are same
+    if (
+        totalMrp <= 0 ||
+        totalMrp <= totalPrice ||
+        totalMrp === totalPrice
+    ) {
 
-            if (discount > 0) {
-                $('#productMrp').text('₹' + totalMrp.toLocaleString('en-IN'));
-                $('#productDiscount').text(discount + '% OFF');
-                $('#priceMrpRow').show();
-            } else {
-                $('#priceMrpRow').hide();
-            }
-        }
+        $('#productMrp').text('');
+        $('#productDiscount').text('');
+        $('#priceMrpRow').attr('style', 'display:none !important;');
 
+        return;
+    }
+
+    // Calculate discount
+    const discount = Math.round(
+        ((totalMrp - totalPrice) / totalMrp) * 100
+    );
+
+    if (discount > 0) {
+
+        $('#productMrp').text(
+            '₹' + totalMrp.toLocaleString('en-IN')
+        );
+
+        $('#productDiscount').text(
+            discount + '% OFF'
+        );
+
+        $('#priceMrpRow').attr('style', 'display:flex !important;');
+
+    } else {
+
+        $('#productMrp').text('');
+        $('#productDiscount').text('');
+        $('#priceMrpRow').attr('style', 'display:none !important;');
+    }
+}
         document.getElementById('aqDetailQty')?.addEventListener('change', function () {
             const minQty = parseInt(this.min) || 1;
             const maxQty = parseInt(this.max) || 0;
