@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\StockHistory;
 use App\Models\StockSetting;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,8 @@ class StockService
 {
     /**
      * Add stock — admin restock, bulk import, customer return, etc.
+     * Pass $variant to credit a specific stock-type variant instead of the
+     * parent product (used when the product has stock-dependent variants).
      */
     public function credit(
         Product $product,
@@ -20,22 +23,37 @@ class StockService
         string $reason,
         ?Model $reference = null,
         ?int $createdBy = null,
-        ?string $note = null
+        ?string $note = null,
+        ?ProductVariant $variant = null
     ): StockHistory {
         if ($quantity <= 0) {
             throw new RuntimeException('Credit quantity must be a positive number.');
         }
 
-        return DB::transaction(function () use ($product, $quantity, $reason, $reference, $createdBy, $note) {
-            $product = Product::whereKey($product->id)->lockForUpdate()->first();
+        return DB::transaction(function () use ($product, $quantity, $reason, $reference, $createdBy, $note, $variant) {
+            if ($variant) {
+                $variant = ProductVariant::whereKey($variant->id)->lockForUpdate()->first();
 
-            $before = $product->stock;
-            $product->stock = $before + $quantity;
-            $product->save();
+                $before = $variant->stock;
+                $variant->stock = $before + $quantity;
+                $variant->save();
 
-            $history = $this->logHistory($product, 'credit', $quantity, $before, $product->stock, $reason, $reference, $createdBy, $note);
+                $after = $variant->stock;
+            } else {
+                $product = Product::whereKey($product->id)->lockForUpdate()->first();
 
-            $this->syncListingVisibility($product);
+                $before = $product->stock;
+                $product->stock = $before + $quantity;
+                $product->save();
+
+                $after = $product->stock;
+            }
+
+            $history = $this->logHistory($product, $variant, 'credit', $quantity, $before, $after, $reason, $reference, $createdBy, $note);
+
+            if (!$variant) {
+                $this->syncListingVisibility($product);
+            }
 
             return $history;
         });
@@ -44,6 +62,8 @@ class StockService
     /**
      * Remove stock — customer order, damage write-off, etc.
      * Throws if there isn't enough stock unless $allowNegative is true.
+     * Pass $variant to debit a specific stock-type variant instead of the
+     * parent product (used when the product has stock-dependent variants).
      */
     public function debit(
         Product $product,
@@ -52,31 +72,55 @@ class StockService
         ?Model $reference = null,
         ?int $createdBy = null,
         ?string $note = null,
-        bool $allowNegative = false
+        bool $allowNegative = false,
+        ?ProductVariant $variant = null
     ): StockHistory {
         if ($quantity <= 0) {
             throw new RuntimeException('Debit quantity must be a positive number.');
         }
 
-        return DB::transaction(function () use ($product, $quantity, $reason, $reference, $createdBy, $note, $allowNegative) {
-            // Locks the row so two simultaneous orders can't both pass a stock
-            // check against the same starting quantity and oversell the product.
-            $product = Product::whereKey($product->id)->lockForUpdate()->first();
+        return DB::transaction(function () use ($product, $quantity, $reason, $reference, $createdBy, $note, $allowNegative, $variant) {
+            if ($variant) {
+                // Locks the row so two simultaneous orders can't both pass a stock
+                // check against the same starting quantity and oversell the variant.
+                $variant = ProductVariant::whereKey($variant->id)->lockForUpdate()->first();
 
-            $before = $product->stock;
+                $before = $variant->stock;
 
-            if (!$allowNegative && $quantity > $before) {
-                throw new RuntimeException(
-                    "Insufficient stock for \"{$product->name}\". Available: {$before}, requested: {$quantity}."
-                );
+                if (!$allowNegative && $quantity > $before) {
+                    throw new RuntimeException(
+                        "Insufficient stock for \"{$product->name}\" ({$variant->sku}). Available: {$before}, requested: {$quantity}."
+                    );
+                }
+
+                $variant->stock = $before - $quantity;
+                $variant->save();
+
+                $after = $variant->stock;
+            } else {
+                // Locks the row so two simultaneous orders can't both pass a stock
+                // check against the same starting quantity and oversell the product.
+                $product = Product::whereKey($product->id)->lockForUpdate()->first();
+
+                $before = $product->stock;
+
+                if (!$allowNegative && $quantity > $before) {
+                    throw new RuntimeException(
+                        "Insufficient stock for \"{$product->name}\". Available: {$before}, requested: {$quantity}."
+                    );
+                }
+
+                $product->stock = $before - $quantity;
+                $product->save();
+
+                $after = $product->stock;
             }
 
-            $product->stock = $before - $quantity;
-            $product->save();
+            $history = $this->logHistory($product, $variant, 'debit', $quantity, $before, $after, $reason, $reference, $createdBy, $note);
 
-            $history = $this->logHistory($product, 'debit', $quantity, $before, $product->stock, $reason, $reference, $createdBy, $note);
-
-            $this->syncListingVisibility($product);
+            if (!$variant) {
+                $this->syncListingVisibility($product);
+            }
 
             return $history;
         });
@@ -85,29 +129,47 @@ class StockService
     /**
      * Set stock to an exact value — used by the inline "Update Stock" field on
      * the Stock Management table. Records the difference as a credit/debit.
+     * Pass $variant to set a specific stock-type variant's stock instead of
+     * the parent product's.
      */
     public function setStock(
         Product $product,
         int $newStock,
         string $reason,
         ?int $createdBy = null,
-        ?string $note = null
+        ?string $note = null,
+        ?ProductVariant $variant = null
     ): ?StockHistory {
-        return DB::transaction(function () use ($product, $newStock, $reason, $createdBy, $note) {
-            $product = Product::whereKey($product->id)->lockForUpdate()->first();
+        return DB::transaction(function () use ($product, $newStock, $reason, $createdBy, $note, $variant) {
+            if ($variant) {
+                $variant = ProductVariant::whereKey($variant->id)->lockForUpdate()->first();
 
-            $before = $product->stock;
-            $diff = $newStock - $before;
+                $before = $variant->stock;
+                $diff = $newStock - $before;
 
-            if ($diff === 0) {
-                return null;
+                if ($diff === 0) {
+                    return null;
+                }
+
+                $variant->stock = $newStock;
+                $variant->save();
+            } else {
+                $product = Product::whereKey($product->id)->lockForUpdate()->first();
+
+                $before = $product->stock;
+                $diff = $newStock - $before;
+
+                if ($diff === 0) {
+                    return null;
+                }
+
+                $product->stock = $newStock;
+                $product->save();
             }
-
-            $product->stock = $newStock;
-            $product->save();
 
             $history = $this->logHistory(
                 $product,
+                $variant,
                 $diff > 0 ? 'credit' : 'debit',
                 abs($diff),
                 $before,
@@ -118,7 +180,9 @@ class StockService
                 $note
             );
 
-            $this->syncListingVisibility($product);
+            if (!$variant) {
+                $this->syncListingVisibility($product);
+            }
 
             return $history;
         });
@@ -126,20 +190,24 @@ class StockService
 
     /**
      * critical | low | watch | in_stock — purely based on the global thresholds.
+     * Pass $variant to check a specific stock-type variant's stock instead of
+     * the parent product's.
      */
-    public function status(Product $product): string
+    public function status(Product $product, ?ProductVariant $variant = null): string
     {
         [$critical, $low, $watch] = $this->thresholds();
 
-        if ($product->stock <= $critical) {
+        $stock = $variant ? $variant->stock : $product->stock;
+
+        if ($stock <= $critical) {
             return 'critical';
         }
 
-        if ($product->stock <= $low) {
+        if ($stock <= $low) {
             return 'low';
         }
 
-        if ($product->stock <= $watch) {
+        if ($stock <= $watch) {
             return 'watch';
         }
 
@@ -159,6 +227,7 @@ class StockService
 
     protected function logHistory(
         Product $product,
+        ?ProductVariant $variant,
         string $type,
         int $quantity,
         int $before,
@@ -170,6 +239,7 @@ class StockService
     ): StockHistory {
         return StockHistory::create([
             'product_id' => $product->id,
+            'stock_variant_id' => $variant?->id,
             'type' => $type,
             'quantity' => $quantity,
             'stock_before' => $before,
@@ -186,6 +256,13 @@ class StockService
      * Mirrors the "Auto-Disable Listings" toggle on the Stock Alerts page —
      * hides a product from the storefront once it hits the critical threshold,
      * and brings it back once restocked above it.
+     *
+     * Only runs for plain-product stock movements. When a stock-type variant
+     * is debited/credited, this is intentionally skipped — one variant hitting
+     * zero shouldn't disable the whole product while other variants still have
+     * stock. Let me know if you want product-level auto-disable to kick in
+     * once ALL of a product's stock variants are exhausted; that's a separate
+     * check this method doesn't currently make.
      */
     protected function syncListingVisibility(Product $product): void
     {
@@ -204,14 +281,18 @@ class StockService
     /**
      * Simplified 3-state status for the Stock Management UI.
      * Returns 'out' | 'low' | 'in'
+     * Pass $variant to check a specific stock-type variant's stock instead of
+     * the parent product's.
      */
-    public function simpleStatus(Product $product): string
+    public function simpleStatus(Product $product, ?ProductVariant $variant = null): string
     {
         [$critical, $low] = $this->thresholds();
 
-        if ($product->stock <= $critical)
+        $stock = $variant ? $variant->stock : $product->stock;
+
+        if ($stock <= $critical)
             return 'out';
-        if ($product->stock <= $low)
+        if ($stock <= $low)
             return 'low';
 
         return 'in';

@@ -157,6 +157,49 @@
        value="1"
        {{ old('low_stock_alert', $smtp->low_stock_alert ?? 0) ? 'checked' : '' }}><span class="toggle-track"></span></label>
             </div>
+            <div class="toggle-row">
+    <div>
+        <div class="toggle-info-label">Order Cancelled</div>
+        <div class="toggle-info-sub">Notify customer when their order is cancelled.</div>
+    </div>
+    <label class="toggle-switch"><input type="checkbox"
+        name="order_cancelled" value="1"
+        {{ old('order_cancelled', $smtp->order_cancelled ?? 1) ? 'checked' : '' }}>
+        <span class="toggle-track"></span></label>
+</div>
+
+<div class="toggle-row">
+    <div>
+        <div class="toggle-info-label">Payment Received</div>
+        <div class="toggle-info-sub">Send payment receipt to customer on successful payment.</div>
+    </div>
+    <label class="toggle-switch"><input type="checkbox"
+        name="payment_received" value="1"
+        {{ old('payment_received', $smtp->payment_received ?? 1) ? 'checked' : '' }}>
+        <span class="toggle-track"></span></label>
+</div>
+
+<div class="toggle-row">
+    <div>
+        <div class="toggle-info-label">Coupon / Offer Email</div>
+        <div class="toggle-info-sub">Allow sending promotional coupon emails to opted-in customers.</div>
+    </div>
+    <label class="toggle-switch"><input type="checkbox"
+        name="coupon" value="1"
+        {{ old('coupon', $smtp->coupon ?? 0) ? 'checked' : '' }}>
+        <span class="toggle-track"></span></label>
+</div>
+
+<div class="toggle-row">
+    <div>
+        <div class="toggle-info-label">Welcome Email</div>
+        <div class="toggle-info-sub">Send welcome email to customer on registration.</div>
+    </div>
+    <label class="toggle-switch"><input type="checkbox"
+        name="welcome" value="1"
+        {{ old('welcome', $smtp->welcome ?? 1) ? 'checked' : '' }}>
+        <span class="toggle-track"></span></label>
+</div>
         </div>
 
     </div>

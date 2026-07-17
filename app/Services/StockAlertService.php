@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\StockSetting;
 use App\Services\Email\EmailDispatcher;
@@ -22,18 +23,40 @@ class StockAlertService
 
         [$critical, $low] = $this->stock->thresholds();
 
+        $variantProductIds = ProductVariant::where('type', 'stock')->pluck('product_id')->unique();
+
         $criticalProducts = Product::with('category')
+            ->whereNotIn('id', $variantProductIds)
             ->where('stock', '<=', $critical)
             ->orderBy('stock')
             ->get();
 
         $lowProducts = Product::with('category')
+            ->whereNotIn('id', $variantProductIds)
             ->where('stock', '>', $critical)
             ->where('stock', '<=', $low)
             ->orderBy('stock')
             ->get();
 
-        if ($criticalProducts->isEmpty() && $lowProducts->isEmpty()) {
+        $criticalVariants = ProductVariant::where('type', 'stock')
+            ->where('stock', '<=', $critical)
+            ->with('product.category')
+            ->orderBy('stock')
+            ->get()
+            ->filter(fn($v) => $v->product);
+
+        $lowVariants = ProductVariant::where('type', 'stock')
+            ->where('stock', '>', $critical)
+            ->where('stock', '<=', $low)
+            ->with('product.category')
+            ->orderBy('stock')
+            ->get()
+            ->filter(fn($v) => $v->product);
+
+        $totalCritical = $criticalProducts->count() + $criticalVariants->count();
+        $totalLow = $lowProducts->count() + $lowVariants->count();
+
+        if ($totalCritical === 0 && $totalLow === 0) {
             return;
         }
 
@@ -50,19 +73,21 @@ class StockAlertService
                 [
                     '{report_date}' => now()->format('l, d F Y — g:i A'),
 
-                    '{total_count}' => $criticalProducts->count() + $lowProducts->count(),
-                    '{critical_count}' => $criticalProducts->count(),
-                    '{low_count}' => $lowProducts->count(),
+                    '{total_count}' => $totalCritical + $totalLow,
+                    '{critical_count}' => $totalCritical,
+                    '{low_count}' => $totalLow,
                     '{critical_threshold}' => $critical,
                     '{low_threshold}' => $low,
 
                     '{critical_products}' => $this->renderProductList(
                         $criticalProducts,
+                        $criticalVariants,
                         '🔴 Out of Stock (≤ ' . $critical . ' units)',
                         'critical'
                     ),
                     '{low_products}' => $this->renderProductList(
                         $lowProducts,
+                        $lowVariants,
                         '🟡 Low Stock (≤ ' . $low . ' units)',
                         'low'
                     ),
@@ -76,13 +101,13 @@ class StockAlertService
     }
 
     /**
-     * Render a list of colored product rows matching the original
-     * StockAlertMail design, used to fill the {critical_products} /
-     * {low_products} smart blocks.
+     * Render a list of colored rows for both plain products and stock-type
+     * variants, used to fill the {critical_products} / {low_products}
+     * smart blocks.
      */
-    protected function renderProductList($products, string $sectionTitle, string $variant): string
+    protected function renderProductList($products, $variants, string $sectionTitle, string $variant): string
     {
-        if ($products->isEmpty()) {
+        if ($products->isEmpty() && $variants->isEmpty()) {
             return '';
         }
 
@@ -96,21 +121,31 @@ class StockAlertService
 
         $rows = '';
 
-        foreach ($products as $product) {
-            $sku = $product->sku ?? '—';
-            $category = $product->category->name ?? 'Uncategorized';
-
-            $rows .= "
+        $renderRow = function (string $name, string $meta, int $stock) use ($rowBg, $rowBorder, $badgeBg, $badgeColor) {
+            return "
         <tr>
             <td style='padding:10px 14px;background:{$rowBg};border:1px solid {$rowBorder};border-radius:8px 0 0 8px'>
-                <div style='font-size:13px;font-weight:600;color:#202223'>{$product->name}</div>
-                <div style='font-size:11.5px;color:#8c9196;margin-top:2px;font-family:\"Courier New\",monospace'>SKU: {$sku} · {$category}</div>
+                <div style='font-size:13px;font-weight:600;color:#202223'>{$name}</div>
+                <div style='font-size:11.5px;color:#8c9196;margin-top:2px;font-family:\"Courier New\",monospace'>{$meta}</div>
             </td>
             <td style='padding:10px 14px;background:{$rowBg};border:1px solid {$rowBorder};border-left:none;border-radius:0 8px 8px 0;text-align:right;white-space:nowrap'>
-                <span style='font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;background:{$badgeBg};color:{$badgeColor}'>{$product->stock} left</span>
+                <span style='font-size:13px;font-weight:700;padding:3px 10px;border-radius:20px;background:{$badgeBg};color:{$badgeColor}'>{$stock} left</span>
             </td>
         </tr>
         <tr><td colspan='2' style='height:6px;line-height:6px;font-size:0'>&nbsp;</td></tr>";
+        };
+
+        foreach ($products as $product) {
+            $sku = $product->sku ?? '—';
+            $category = $product->category->name ?? 'Uncategorized';
+            $rows .= $renderRow($product->name, "SKU: {$sku} · {$category}", $product->stock);
+        }
+
+        foreach ($variants as $productVariant) {
+            $product = $productVariant->product;
+            $sku = $productVariant->sku ?? '—';
+            $category = $product->category->name ?? 'Uncategorized';
+            $rows .= $renderRow($product->name . ' — ' . ($productVariant->sku ?: "Variant #{$productVariant->id}"), "SKU: {$sku} · {$category}", $productVariant->stock);
         }
 
         return "

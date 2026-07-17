@@ -1243,12 +1243,12 @@
                         <div class="priority-banner-icon"><i class="fa fa-fire"></i></div>
                         <div>
                             <div class="priority-banner-title">
-                                🔴 Critical: {{ $kpi['critical'] }} {{ Str::plural('product', $kpi['critical']) }}
+                                🔴 Critical: {{ $kpi['critical'] }} {{ Str::plural('item', $kpi['critical']) }}
                                 {{ $kpi['critical'] === 1 ? 'is' : 'are' }} completely out of stock
                             </div>
                             <div class="priority-banner-sub">
-                                These products are live on your store and cannot be purchased. Restock immediately to avoid
-                                lost sales.
+                                These products (or specific variants) are live on your store and cannot be purchased.
+                                Restock immediately to avoid lost sales.
                             </div>
                         </div>
                     </div>
@@ -1361,16 +1361,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($products as $product)
+                                    @forelse($products as $line)
                                         @php
-                                            $sev = $loop->first ? '' : ''; // computed below
-                                            if ($product->stock <= $critical) {
-                                                $sev = 'critical';
-                                            } elseif ($product->stock <= $low) {
-                                                $sev = 'low';
-                                            } else {
-                                                $sev = 'watch';
-                                            }
+                                            $sev = $line['severity'];
+                                            $isVariant = $line['kind'] === 'variant';
 
                                             $rowClass = match ($sev) { 'critical' => 'row-critical', 'low' => 'row-low', default => ''};
                                             $sevClass = match ($sev) { 'critical' => 'sev-critical', 'low' => 'sev-low', default => 'sev-watch'};
@@ -1381,25 +1375,34 @@
 
                                             $threshold = match ($sev) { 'critical' => max($critical, 1), 'low' => $low, default => $watch};
                                             $barWidth = $threshold > 0
-                                                ? min(100, round(($product->stock / $threshold) * 100))
+                                                ? min(100, round(($line['stock'] / $threshold) * 100))
                                                 : 0;
 
                                             $gaugeLabel = match ($sev) {
                                                 'critical' => '0% of threshold',
                                                 'watch' => 'Slightly above threshold',
-                                                default => round((1 - $product->stock / max($low, 1)) * 100) . '% depleted',
+                                                default => round((1 - $line['stock'] / max($low, 1)) * 100) . '% depleted',
                                             };
+
+                                            $restockUrl = $isVariant
+                                                ? route('admin.stock.alerts.variant.restock', $line['variant'])
+                                                : route('admin.stock.alerts.restock', $line['product']);
                                         @endphp
-                                        <tr class="{{ $rowClass }}" data-product-id="{{ $product->id }}">
-                                            <td><span class="id-chip">{{ $product->id }}</span></td>
+                                        <tr class="{{ $rowClass }}" data-product-id="{{ $line['id'] }}">
+                                            <td><span class="id-chip">{{ $line['id'] }}</span></td>
                                             <td>
                                                 <div style="display:flex;align-items:center;gap:10px">
-                                                    <img src="{{ $product->display_image ?? 'https://placehold.co/46x46/e8f2ff/0069d9?text=P' }}"
+                                                    <img src="{{ $line['image'] ?? 'https://placehold.co/46x46/e8f2ff/0069d9?text=P' }}"
                                                         class="prod-thumb" alt="">
                                                     <div>
-                                                        <div class="prod-name">{{ $product->name }}</div>
+                                                        <div class="prod-name">
+                                                            {{ $line['display_name'] }}
+                                                            @if($isVariant)
+                                                                <span style="font-weight:500;color:var(--text-hint)"> — {{ $line['sub_label'] }}</span>
+                                                            @endif
+                                                        </div>
                                                         <div class="prod-meta">
-                                                            {{ $product->sku }} · CODE: {{ $product->product_code }}
+                                                            {{ $line['sku'] }} · CODE: {{ $line['product_code'] }}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1407,16 +1410,16 @@
                                             <td>
                                                 <span class="cat-tag">
                                                     <i class="fa fa-folder-o" style="font-size:10px"></i>
-                                                    {{ $product->category->name ?? 'Uncategorized' }}
+                                                    {{ $line['category']->name ?? 'Uncategorized' }}
                                                 </span>
                                             </td>
                                             <td>
                                                 <div class="gauge-wrap">
                                                     <div class="gauge-numbers">
                                                         <span class="gauge-current"
-                                                            style="color:{{ $stockColor }}">{{ $product->stock }}</span>
+                                                            style="color:{{ $stockColor }}">{{ $line['stock'] }}</span>
                                                         <span class="gauge-divider">/</span>
-                                                        <span class="gauge-min">{{ $product->min_qty }}</span>
+                                                        <span class="gauge-min">{{ $line['min_qty'] }}</span>
                                                     </div>
                                                     <div class="gauge-bar">
                                                         <div class="gauge-fill"
@@ -1432,8 +1435,8 @@
                                             </td>
                                             <td>
                                                 <div class="time-cell">
-                                                    {{ $product->updated_at->format('d M Y') }}
-                                                    <small>{{ $product->updated_at->format('g:i A') }}</small>
+                                                    {{ $line['updated_at']->format('d M Y') }}
+                                                    <small>{{ $line['updated_at']->format('g:i A') }}</small>
                                                 </div>
                                             </td>
                                             <td>
@@ -1441,7 +1444,7 @@
                                                     <input type="number" min="1" class="restock-input" placeholder="Qty"
                                                         value="10">
                                                     <button class="btn-restock"
-                                                        data-action="{{ route('admin.stock.alerts.restock', $product) }}"
+                                                        data-action="{{ $restockUrl }}"
                                                         onclick="handleRestock(this)">
                                                         <i class="fa fa-plus"></i> Add
                                                     </button>
@@ -1450,12 +1453,12 @@
                                             <td>
                                                 <div style="display:flex;gap:5px">
                                                     <div class="action-wrap">
-                                                        <a href="{{ route('admin.products.edit', $product->id) }}"
+                                                        <a href="{{ route('admin.products.edit', $line['product']->id) }}"
                                                             class="action-btn action-btn-view"><i class="fa fa-eye"></i></a>
                                                         <span class="tooltip-label">View Product</span>
                                                     </div>
                                                     <div class="action-wrap">
-                                                        <a href="{{ route('admin.stock.index', ['search' => $product->sku]) }}"
+                                                        <a href="{{ route('admin.stock.index', ['search' => $line['sku']]) }}"
                                                             class="action-btn action-btn-edit">
                                                             <i class="fa fa-pencil"></i>
                                                         </a>
@@ -1499,13 +1502,15 @@
                         </div>
                         <div class="sidebar-body">
                             @forelse($topCritical as $item)
-                                @php $isCritical = $item->stock <= $critical; @endphp
+                                @php $isCritical = $item['severity'] === 'critical'; @endphp
                                 <div class="critical-item">
                                     <div class="critical-dot"
                                         style="background:{{ $isCritical ? 'var(--red)' : 'var(--amber)' }}"></div>
-                                    <span class="critical-name">{{ Str::limit($item->name, 22) }}</span>
+                                    <span class="critical-name">
+                                        {{ Str::limit($item['display_name'] . ($item['sub_label'] ? ' — ' . $item['sub_label'] : ''), 22) }}
+                                    </span>
                                     <span class="critical-stock {{ $isCritical ? '' : 'amber' }}">
-                                        {{ $item->stock }} left
+                                        {{ $item['stock'] }} left
                                     </span>
                                 </div>
                             @empty
@@ -1728,17 +1733,17 @@ function restockAllCritical() {
                 <div style="background:#fce8e8;border:1px solid #f5c6c6;border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
                     <i class="fa fa-exclamation-circle" style="color:#b22222;font-size:16px;flex-shrink:0"></i>
                     <div>
-                        <div style="font-size:13px;font-weight:600;color:#b22222">{{ $kpi['critical'] }} critical {{ Str::plural('product', $kpi['critical']) }} will be restocked</div>
-                        <div style="font-size:12px;color:#6d7175;margin-top:2px">Stock will be credited to each product immediately</div>
+                        <div style="font-size:13px;font-weight:600;color:#b22222">{{ $kpi['critical'] }} critical {{ Str::plural('item', $kpi['critical']) }} will be restocked</div>
+                        <div style="font-size:12px;color:#6d7175;margin-top:2px">Stock will be credited to each item immediately</div>
                     </div>
                 </div>
                 <label style="font-size:12px;font-weight:600;color:#6d7175;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px">
-                    Units to add per product
+                    Units to add per item
                 </label>
                 <input id="swal-qty-input" type="number" min="1" value="10" class="swal2-input"
                     style="width:100%;margin:0;font-size:20px;font-weight:700;text-align:center;border-color:#e3e5e8;border-radius:8px">
                 <div style="font-size:11.5px;color:#8c9196;margin-top:8px;text-align:center">
-                    This quantity will be added on top of each product's current stock
+                    This quantity will be added on top of each item's current stock
                 </div>
             </div>
         `,
@@ -1776,7 +1781,7 @@ function restockAllCritical() {
             html: `
                 <div style="font-family:'Inter',sans-serif;font-size:13px;color:#6d7175">
                     You are about to add <strong style="color:#202223;font-size:15px">${result.value} units</strong>
-                    to each of the <strong style="color:#b22222">{{ $kpi['critical'] }} critical</strong> products.<br><br>
+                    to each of the <strong style="color:#b22222">{{ $kpi['critical'] }} critical</strong> items.<br><br>
                     This action will be logged in stock history and <strong>cannot be undone</strong>.
                 </div>
             `,
@@ -1809,7 +1814,7 @@ function restockAllCritical() {
 }
 </script>
 
-@if(session('success') && str_contains(session('success'), 'critical products'))
+@if(session('success') && str_contains(session('success'), 'critical'))
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         Swal.fire({

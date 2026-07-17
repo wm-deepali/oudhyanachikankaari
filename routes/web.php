@@ -448,7 +448,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/{product}/restock', [StockManagementController::class, 'restock'])->name('stock.restock');
         Route::get('stock/{product}/history', [StockManagementController::class, 'history'])->name('stock.history');
         Route::get('stock/bulk-update/template', [StockManagementController::class, 'downloadTemplate'])->name('stock.bulk-update.template');
-
+        Route::post('stock/variant/{variant}/update', [StockManagementController::class, 'updateVariantStock'])->name('stock.variant.update');
+        Route::post('stock/variant/{variant}/restock', [StockManagementController::class, 'restockVariant'])->name('stock.variant.restock');
+        Route::get('stock/variant/{variant}/history', [StockManagementController::class, 'historyVariant'])->name('stock.variant.history');
 
         Route::get('stock/alerts', [StockAlertsController::class, 'index'])->name('stock.alerts');
         Route::post('stock/alerts/{product}/restock', [StockAlertsController::class, 'restock'])->name('stock.alerts.restock');
@@ -456,7 +458,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/alerts/settings/notifications', [StockAlertsController::class, 'updateNotifications'])->name('stock.alerts.notifications');
         Route::get('stock/alerts/export', [StockAlertsController::class, 'export'])->name('stock.alerts.export');
         Route::post('stock/alerts/restock-all-critical', [StockAlertsController::class, 'restockAllCritical'])->name('stock.alerts.restock.all');
-
+        Route::post('stock/alerts/variant/{variant}/restock', [StockAlertsController::class, 'restockVariant'])->name('stock.alerts.variant.restock');
 
         // Listing page
 
