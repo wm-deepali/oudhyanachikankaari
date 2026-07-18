@@ -1,6 +1,17 @@
 @extends('layouts.app')
 @section('content')
 
+ <style>
+        .wishlist-active {
+            background: #ff4d94 !important;
+            color: #fff !important;
+        }
+
+        .wishlist-active svg path {
+            stroke: #fff !important;
+        }
+    </style>
+
     <main>
         <!-- 1. Luxury Inner Banner / Hero Section -->
         <section class="aq-catpage-hero">
@@ -671,6 +682,53 @@
                 }
             });
         }
+
+
+         function addToWishlist(productId) {
+
+                $.ajax({
+                    url: "{{ route('wishlist.add') }}",
+                    type: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        product_id: productId
+                    },
+                    success: function (response) {
+
+                        if (response.status) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('.wishlist-count').text(response.wishlist_count);
+
+                        } else {
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message ?? 'Unable to add to wishlist.'
+                            });
+
+                        }
+
+                    },
+                    error: function (xhr) {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                        });
+
+                    }
+                });
+            }
 
     </script>
 

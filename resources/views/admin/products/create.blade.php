@@ -1320,7 +1320,61 @@
         let videoTransfer = new DataTransfer();
         selectedVideos.forEach(file => videoTransfer.items.add(file));
         document.getElementById('videos').files = videoTransfer.files;
+
+        $('.variant-image-input').each(function () {
+        const prefix = $(this).data('prefix');
+        const dt = new DataTransfer();
+        (variantImageFiles[prefix] || []).forEach(file => dt.items.add(file));
+        this.files = dt.files;
+        this.name = prefix + '[images][]';
     });
+    
+    });
+
+
+    /* ── Variant image uploads (multiple, per variant row) ──────────
+ * Keyed by the row's own prefix string (e.g. "variants_image[2]")
+ * since that's already unique per row. Posted as {prefix}[images][].
+ */
+let variantImageFiles = {};
+
+$(document).on('change', '.variant-image-input', function (e) {
+    const prefix = $(this).data('prefix');
+    if (!variantImageFiles[prefix]) variantImageFiles[prefix] = [];
+
+    const files = Array.from(e.target.files);
+    if ((variantImageFiles[prefix].length + files.length) > 6) {
+        alert('Maximum 6 images allowed per variant');
+        return;
+    }
+
+    files.forEach(file => variantImageFiles[prefix].push(file));
+    renderVariantImagePreview(prefix);
+});
+
+function renderVariantImagePreview(prefix) {
+    const $container = $('.variant-image-preview[data-prefix="' + prefix + '"]');
+    $container.html('');
+
+    (variantImageFiles[prefix] || []).forEach(function (file, index) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $container.append(`
+                <div class="thumb-box">
+                    <img src="${e.target.result}" style="width:50px;height:50px;">
+                    <button type="button" class="remove-btn" onclick="removeVariantImage('${prefix}', ${index})">×</button>
+                </div>
+            `);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeVariantImage(prefix, index) {
+    variantImageFiles[prefix].splice(index, 1);
+    renderVariantImagePreview(prefix);
+}
+
 
     /* ── Addon Options (dynamic rows) ──────────────────────────────
      * Posted as addons[index][detail] / addons[index][price] — an
@@ -1641,8 +1695,15 @@
             }
 
             if (type === 'image') {
-                rows += `<td><input type="file" name="${prefix}[image]" class="field-input" style="height:auto;padding:4px 8px;font-size:12px"></td>`;
-            }
+    rows += `<td style="min-width:220px">
+        <div class="file-upload-area variant-image-upload" style="padding:14px 10px;">
+            <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
+            <div class="upload-icon" style="font-size:16px;margin-bottom:4px;"><i class="fa fa-cloud-upload"></i></div>
+            <p style="font-size:11.5px;margin:0;">Click or drag images</p>
+        </div>
+        <div class="variant-image-preview" data-prefix="${prefix}" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+    </td>`;
+}
 
             rows += `</tr>`;
 

@@ -52,7 +52,8 @@ use App\Http\Controllers\Admin\{
     SalesReportController,
     ProductReportController,
     CustomerReportController,
-    EmailTemplateController
+    EmailTemplateController,
+    CouponEnquiryController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -112,6 +113,7 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::post('/contact-submit', 'submitContact')->name('contact.submit');
         Route::post('/supplier-enquiry-submit', 'submitSupplierEnquiry')->name('supplier.enquiry.submit');
         Route::post('/general-enquiry', 'submitGeneralEnquiry')->name('general.enquiry');
+        Route::post('/coupon-enquiry', 'couponEnquiryStore')->name('coupon-enquiry.store');
 
         Route::prefix('wishlist')->name('wishlist.')->group(function () {
 
@@ -277,6 +279,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('supplier-enquiries/export', [SupplierEnquiryController::class, 'export'])->name('supplier-enquiries.export');
         Route::delete('supplier-enquiries/bulk-delete', [SupplierEnquiryController::class, 'bulkDelete'])->name('supplier-enquiries.bulk-delete');
         Route::resource('supplier-enquiries', SupplierEnquiryController::class);
+
+        Route::resource('coupon-enquiries', CouponEnquiryController::class);
+        Route::delete('coupon-enquiries/bulk-delete', [CouponEnquiryController::class, 'bulkDelete'])->name('coupon-enquiries.bulk-delete');
+        Route::get('coupon-enquiries-export', [CouponEnquiryController::class, 'export'])->name('coupon-enquiries.export');
 
         Route::resource('awards', AwardController::class);
 
@@ -448,9 +454,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/{product}/restock', [StockManagementController::class, 'restock'])->name('stock.restock');
         Route::get('stock/{product}/history', [StockManagementController::class, 'history'])->name('stock.history');
         Route::get('stock/bulk-update/template', [StockManagementController::class, 'downloadTemplate'])->name('stock.bulk-update.template');
-        Route::post('stock/variant/{variant}/update', [StockManagementController::class, 'updateVariantStock'])->name('stock.variant.update');
-        Route::post('stock/variant/{variant}/restock', [StockManagementController::class, 'restockVariant'])->name('stock.variant.restock');
-        Route::get('stock/variant/{variant}/history', [StockManagementController::class, 'historyVariant'])->name('stock.variant.history');
+
 
         Route::get('stock/alerts', [StockAlertsController::class, 'index'])->name('stock.alerts');
         Route::post('stock/alerts/{product}/restock', [StockAlertsController::class, 'restock'])->name('stock.alerts.restock');
@@ -458,7 +462,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/alerts/settings/notifications', [StockAlertsController::class, 'updateNotifications'])->name('stock.alerts.notifications');
         Route::get('stock/alerts/export', [StockAlertsController::class, 'export'])->name('stock.alerts.export');
         Route::post('stock/alerts/restock-all-critical', [StockAlertsController::class, 'restockAllCritical'])->name('stock.alerts.restock.all');
-        Route::post('stock/alerts/variant/{variant}/restock', [StockAlertsController::class, 'restockVariant'])->name('stock.alerts.variant.restock');
+
 
         // Listing page
 

@@ -9,9 +9,16 @@
     @endphp
 
     <style>
-        body {
-            overflow-x: clip;
-        }
+
+        
+        .aq-preloader-logo img {
+    width: 66px;
+    position: absolute;
+    top: 72px;
+    inset-inline-start: 0;
+    /* width: 100%; */
+    left: 38px;
+}
         /* ── Video gallery thumb (play icon overlay) ───────────────── */
         .aq-gallery-thumb-video { position: relative; cursor: pointer; }
         .aq-thumb-play-icon {
@@ -32,8 +39,8 @@
 
         /* ── Variant control types ─────────────────────────────────── */
         .aq-color-swatch {
-            min-width: 35px;
-            height: 35px;
+            min-width: 50px;
+            min-height: 50px;
             border: 1px solid #ddd;
             border-radius: 4px;
             background: #fff;
@@ -45,13 +52,18 @@
             transition: all 0.3s;
         }
         .aq-color-swatch-inner {
-            width: 26px;
-            height: 26px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: block;
         }
-        .aq-color-swatch.active { border-color: #b5904a; box-shadow: 0 0 0 2px rgba(181,144,74,.25); }
 
+    .aq-color-swatch.active {
+    border-color: #c98f9d;
+    box-shadow: 0 0 0 2px rgb(181 74 132 / 25%);
+}
+    
+    
         .aq-image-swatch {
             border: 1px solid #e5e5e5; border-radius: 6px; padding: 3px; cursor: pointer;
             background: #fff; display: inline-flex;
@@ -184,7 +196,7 @@
             justify-content: center;
             gap: 10px;
             transition: all 0.3s ease;
-            margin-top: 10px;
+            /*margin-top: 10px;*/
         }
         .btn-design-secondary:hover {
             background-color: #eee;
@@ -223,13 +235,12 @@
             content: '\2212'; /* Unicode minus sign for perfect vertical centering */
             background-image: none !important;
         }
-        .design-accordion .accordion-body {
-            padding: 0 0 20px 0;
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
-        }
-        
+       .design-accordion .accordion-body {
+    padding: 20px 20px 20px 20px;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+}
         .aq-details-price-box {
     background-color: var(--aq-color-cream);
     border-radius: 12px;
@@ -246,13 +257,14 @@ h5.aq-size-title {
  .aq-size-badge {
     border: 1px solid #ddd;
     padding: 3px 8px;
-    font-size: 12px;
+    font-size: 14px;
     border-radius: 4px;
     color: #555;
     cursor: pointer;
     transition: all 0.3s;
     font-family: Inter, sans-serif;
-    min-width: 35px;
+    min-width: 50px;
+    min-height: 50px;
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -263,6 +275,281 @@ h5.aq-size-title {
 
 .aq-moq-info-list p {
 font-size:15px;
+}
+
+.aq-product-details-area .aq-gallery-thumb-item {
+    width: 60px!important;
+    
+}
+
+.aq-product-accordion .accordion-item {
+    
+    border-radius: 0px !important;
+   
+}
+
+
+.aq-product-details-area .aq-product-details-summary {
+    padding-left: 0px!important;
+}
+
+.aq-product-accordion .accordion {
+    border: none;
+    border-top: 1px solid #8080800f !important;
+}
+
+
+
+.aq-product-accordion .accordion-button {
+   
+    font-size: 16px!important;
+   
+    padding: 9px 26px!important;
+   
+}
+
+.aq-product-accordion .accordion-button::before {
+    content: "";
+    width: 36px;
+    height: 36px;
+    
+}
+
+.aq-catpage-hero {
+   
+    min-height: 43px !important;
+    height: 43px;
+  
+}
+
+.aq-floating-gift-box {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    backdrop-filter: blur(5px);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+#variant-images-container,
+#variant-thumbs-container {
+    display: contents;
+}
+/* Baseline (desktop) — recreates the gap-4 spacing that used to
+   come from .aq-product-gallery's own flex context, now that
+   images live one level deeper inside #aqGallerySlides */
+.aq-gallery-slides {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* = Bootstrap's gap-4 */
+}
+/* ══════════════════════════════════════════════════════════
+   MOBILE — Image Slider (replaces thumbnail-only layout)
+   Scoped strictly under lg breakpoint — desktop untouched
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 991.98px) {
+
+    /* Turn the stacked images into a horizontal swipe slider.
+       #variant-images-container already has display:contents,
+       so its children (variant slides) become direct flex items
+       here too — no extra markup needed for that case. */
+   @media (max-width: 991.98px) {
+
+    .aq-gallery-slides {
+        display: flex;
+        flex-direction: row;        /* ← ADD KARO — column ko override karta hai */
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 0;
+    }
+    .aq-gallery-slides::-webkit-scrollbar { display: none; }
+
+    .aq-gallery-slides .aq-gallery-main-img-wrap {
+        flex: 0 0 100%;
+        min-width: 100%;            /* ← ADD KARO — flex-basis ko browsers me force karta hai */
+        scroll-snap-align: start;
+        margin: 0;
+    }
+    .aq-gallery-slides .aq-gallery-main-img,
+    .aq-gallery-slides video {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        object-fit: cover;
+        border-radius: 0 !important;
+    }
+
+    /* baaki sab same rahega — thumbnails hide, dots, typography */
+
+    /* Old horizontal thumbnail strip is replaced by dots below —
+       hidden on mobile only, markup/JS untouched. */
+    .aq-product-gallery > .d-lg-none.aq-gallery-thumbs {
+        display: none !important;
+    }
+
+    /* Dot indicators */
+    .aq-gallery-dots {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 7px;
+        padding: 14px 0 4px;
+    }
+    .aq-gallery-dots .aq-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d9d9d9;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: all .25s ease;
+    }
+    .aq-gallery-dots .aq-dot.active {
+        background: #333;
+        width: 8px;
+        height: 8px;
+    }
+
+    /* Light polish on info section so it reads clean like the
+       reference — no class renamed, no functionality touched */
+    .aq-product-details-summary {
+        padding-top: 4px;
+    }
+    .design-title {
+        font-size: 19px;
+    }
+    .aq-details-price-box {
+        margin-top: 4px;
+    }
+    .aq-product-details-area .aq-sticky-column {
+        position: static !important;
+    }
+    
+    /* ══════════════════════════════════════════════════════════
+   MOBILE — 2-column New Arrivals / Related Products cards
+   Trims card content so it fits cleanly at 2-per-row.
+   Scoped to true phone widths only — tablets (576px+) already
+   had 2 columns with full content and stay untouched.
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+    .aq-new-arrivals-section .aq-product-card-desc,
+    .aq-related-products-section .aq-product-card-desc,
+    .aq-new-arrivals-section .aq-product-card-sizes,
+    .aq-related-products-section .aq-product-card-sizes {
+        display: none !important;
+    }
+@media (max-width: 575.98px) {
+
+    .aq-new-arrivals-section .aq-product-card-desc,
+    .aq-related-products-section .aq-product-card-desc,
+    .aq-new-arrivals-section .aq-product-card-sizes,
+    .aq-related-products-section .aq-product-card-sizes {
+        display: none !important;
+    }
+
+    /* ── Card + column stretch to equal height ─────────────── */
+    .aq-new-arrivals-section .col,
+    .aq-related-products-section .col {
+        display: flex;
+    }
+    .aq-new-arrivals-section .aq-product-card,
+    .aq-related-products-section .aq-product-card {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .aq-new-arrivals-section .aq-product-card-info,
+    .aq-related-products-section .aq-product-card-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    /* ── Title: clamp to 2 lines so it never grows the card ─── */
+    .aq-new-arrivals-section .aq-product-card-title,
+    .aq-related-products-section .aq-product-card-title {
+        font-size: 13.5px;
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.7em; /* reserves space even for 1-line titles */
+    }
+
+    /* ── Button always pinned to the bottom of the card ──────── */
+    .aq-new-arrivals-section .aq-product-card-bottom,
+    .aq-related-products-section .aq-product-card-bottom {
+        margin-top: auto;
+        padding-top: 10px;
+    }
+    .aq-new-arrivals-section .aq-product-card-cta,
+    .aq-related-products-section .aq-product-card-cta {
+        font-size: 12.5px;
+        padding: 10px 8px;
+    }
+@media (max-width: 575.98px) {
+
+    /* ... pehle wale rules (desc/sizes hide, card stretch, title clamp) waise hi rahenge ... */
+
+    /* ── Price group: wrap cleanly, smaller & consistent ─────── */
+    .aq-new-arrivals-section .aq-product-card-price-group,
+    .aq-related-products-section .aq-product-card-price-group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 6px;
+        row-gap: 2px;
+    }
+    .aq-new-arrivals-section .aq-product-card-price,
+    .aq-related-products-section .aq-product-card-price {
+        font-size: 15px;
+    }
+    .aq-new-arrivals-section .aq-product-card-old-price,
+    .aq-related-products-section .aq-product-card-old-price {
+        font-size: 12px;
+    }
+   .aq-new-arrivals-section .aq-product-card-discount,
+.aq-related-products-section .aq-product-card-discount {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #000 !important;
+    white-space: nowrap;
+    flex-basis: 100%;
+    width: fit-content;
+    color: #fff;
+    background-color: #f8f2e9;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+}
+
+    /* ── Add to Cart button: single-line fit ──────────────────── */
+    .aq-new-arrivals-section .aq-product-card-cta,
+    .aq-related-products-section .aq-product-card-cta {
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        padding: 9px 6px;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .aq-new-arrivals-section .aq-product-card-cta i,
+    .aq-related-products-section .aq-product-card-cta i {
+        font-size: 12px;
+    }
+}
 }
     </style>
 
@@ -278,7 +565,7 @@ font-size:15px;
                 <i class="fa-regular fa-star"></i>
             </div>
             <div class="aq-catpage-hero-content">
-                <h1 class="aq-catpage-title">{{ $product->name }}</h1>
+                <!--<h1 class="aq-catpage-title">{{ $product->name }}</h1>-->
                 
                 
                 
@@ -302,7 +589,7 @@ font-size:15px;
 
         <!-- 1. Luxury Product Details Container -->
         <section class="aq-product-details-area pt-50 pb-60">
-            <div class="container">
+            <div class="container-fluid px-4 px-xl-5">
                 <!-- Elegant Breadcrumbs -->
              <!--   <div class="aq-details-breadcrumbs mb-40">
                     <a href="{{ route('home') }}">Home</a>
@@ -319,15 +606,10 @@ font-size:15px;
                 <div class="row g-5 justify-content-between">
 
                     <!-- Left Column: Thumbnails (Sticky) -->
-                    <div class="col-lg-1 d-none d-lg-block p-0">
+                    <div class="col-lg-1 d-none d-lg-block">
                         <div class="aq-sticky-column">
-                            <div class="aq-gallery-thumbs d-flex flex-column h-100" style="max-height: calc(100vh - 150px);">
-                                 {{-- Variant image thumb — hidden until a color/image variant with its own image is selected --}}
-                                <div class="aq-gallery-thumb-item" id="thumb-variant" style="display:none;"
-                                    onclick="document.getElementById('main-img-variant').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                                    <img id="aqVariantThumbImg" src="" alt="{{ $product->name }}" />
-                                </div>
-                                
+                            <div class="aq-gallery-thumbs d-flex flex-column h-100">
+                                <div id="variant-thumbs-container"></div>
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
@@ -355,12 +637,10 @@ font-size:15px;
                                 @endforeach
                             </div>
 
-    {{-- Variant image slot — populated & shown by JS when a color/image variant is selected --}}
-                            <div class="aq-gallery-main-img-wrap" id="main-img-variant" style="display:none;">
-                                <img id="aqVariantImage" src="" alt="{{ $product->name }}"
-                                    class="aq-gallery-main-img" style="width: 100%; border-radius: 8px; object-fit: cover;" />
-                            </div>
-                            
+                            <!-- Variant preview image — populated when a color/image variant is selected -->
+                            <div class="aq-gallery-slides" id="aqGallerySlides">
+                            <div id="variant-images-container"></div>
+
                             <!-- All Images Stacked -->
                             @foreach($product->images as $index => $image)
                                 <div class="aq-gallery-main-img-wrap" id="main-img-{{ $index }}">
@@ -375,15 +655,13 @@ font-size:15px;
                                     <video src="{{ asset('storage/' . $video->video) }}" style="width: 100%; border-radius: 8px; object-fit: cover;" controls playsinline></video>
                                 </div>
                             @endforeach
+                            </div>
+
+<!-- Mobile-only dot indicators (JS-populated) -->
+<div class="aq-gallery-dots d-lg-none" id="aqGalleryDots"></div>
                             
                             <!-- Mobile Thumbnails -->
                             <div class="d-lg-none aq-gallery-thumbs d-flex flex-row overflow-auto mt-3">
-                                 {{-- Variant image thumb (mobile) — hidden until a color/image variant with its own image is selected --}}
-                                <div class="aq-gallery-thumb-item" id="thumb-variant-mobile" style="display:none;"
-                                    onclick="document.getElementById('main-img-variant').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                                    <img id="aqVariantThumbImgMobile" src="" alt="{{ $product->name }}" />
-                                </div>
-
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
                                         <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
@@ -398,8 +676,8 @@ font-size:15px;
                             </div>
                         </div>
 
-                        <!-- SUITABLE FOR SELECTIONS -->
-                        <div class="aq-details-suitable-wrap mt-40 mb-20">
+                        <!-- SUITABLE FOR SELECTIONS — Desktop only (mobile version moved below Buy buttons) -->
+                        <div class="aq-details-suitable-wrap mt-40 mb-20 d-none d-lg-block">
                             <h5 class="aq-details-suitable-title">
                                 <i class="fa-solid fa-check-double"></i> Perfectly Suited For
                             </h5>
@@ -417,8 +695,8 @@ font-size:15px;
                             </div>
                         </div>
                         
-                        <!-- Trust Badges Section -->
-                        <div class="aq-luxury-trust-badges">
+                       <!-- Trust Badges Section — Desktop only (mobile version moved below Buy buttons) -->
+                        <div class="aq-luxury-trust-badges d-none d-lg-block">
                             @if($product->pan_india)
                                 <div class="aq-trust-badge-item">
                                     <span class="aq-trust-badge-icon">
@@ -446,8 +724,8 @@ font-size:15px;
                     </div>
 
                     <!-- Right Column: Product Specs & Ordering Drawer Trigger -->
-                    <div class="col-lg-4 col-12 p-0">
-                        <div class="aq-sticky-column" style="max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 10px;">
+                    <div class="col-lg-4 col-12">
+                        <div class="aq-sticky-column" style="padding-right: 10px;">
                         
                         
                         
@@ -473,7 +751,7 @@ font-size:15px;
 
                                     <div class="aq-price-mrp-row d-flex align-items-center gap-2 mb-2"
                                          id="priceMrpRow"
-                                         style="{{ $discount > 0 ? '' : 'display:none' }}">
+                                         style="{{ $discount > 0 ? '' : 'display:none !important' }}">
                                         <span class="mrp-label">
                                             <span class="mrp-value" id="productMrp">
                                                 ₹{{ number_format($product->mrp) }}
@@ -497,6 +775,11 @@ font-size:15px;
                                     </p>
                                 </div>
                             </div>
+                            
+                            <!-- Promo Discount Box -->
+                             <div class="coupon-container" id="couponContainer"></div>
+                            
+
                             <p class="aq-details-short-desc">
                                 {{ $product->short_description }}
                             </p>
@@ -547,7 +830,7 @@ font-size:15px;
 
     @if($attribute['is_selectable'])
 
-        <div class="aq-size-selection-panel">
+        <div class="aq-size-selection-panel mb-3">
 
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <h5 class="aq-size-title mb-0">
@@ -675,7 +958,7 @@ font-size:15px;
         <div class="card-body">
 
             <h2 class="aq-title">
-                Want It Stitched?
+               Choose Add ons?
             </h2>
 
             <p class="aq-subtitle">
@@ -717,9 +1000,9 @@ font-size:15px;
 @endif
 
                             <!-- Interactive Quantity and Action -->
-                            <div class="px-3 mb-30 mt-30">
+                            <div class=" mb-30 mt-30">
                                 <div class="d-flex flex-column gap-2 w-100">
-                                    <div class="aq-qty-selector luxury-qty d-none">
+                                    <div class="aq-qty-selector luxury-qty d-flex align-items-center justify-content-center gap-3">
                                         <button type="button" class="qty-btn" onclick="adjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
                                         <input type="number" id="aqDetailQty" value="{{ $product->min_qty }}"
@@ -746,7 +1029,7 @@ font-size:15px;
                                     @endif
                                     
                                     
-                                     @if($product->stock >= $product->min_qty)
+                                    @if($product->stock >= $product->min_qty)
                                     <button class="btn-design-secondary aq-buy-now-btn"
                                         onclick="addToCart({{ $product->id }})">
                                         <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Buy it Now
@@ -761,8 +1044,53 @@ font-size:15px;
                             </div>
                         </div>
 
+                        <!-- Mobile-only: Suitable For + Trust Badges (shown here so product info comes right after images) -->
+                        <div class="d-lg-none">
+                            <div class="aq-details-suitable-wrap mt-30 mb-20">
+                                <h5 class="aq-details-suitable-title">
+                                    <i class="fa-solid fa-check-double"></i> Perfectly Suited For
+                                </h5>
+                                <div class="aq-details-suitable-grid">
+                                    @foreach($product->occasions as $occasion)
+                                        <div class="aq-details-suitable-item">
+                                            <div class="aq-details-suitable-icon">
+                                                <i class="fa-solid fa-gift"></i>
+                                            </div>
+                                            <span>{{ $occasion->title }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="aq-luxury-trust-badges">
+                                @if($product->pan_india)
+                                    <div class="aq-trust-badge-item">
+                                        <span class="aq-trust-badge-icon">
+                                            <i class="fa-solid fa-truck-fast"></i>
+                                        </span>
+                                        <div class="aq-trust-badge-content">
+                                            <span class="aq-trust-badge-text">PAN India Delivery</span>
+                                            <span class="aq-trust-badge-sub">{{ $product->delivery_time ?: 'Express Shipping Available' }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($product->quality)
+                                    <div class="aq-trust-badge-item">
+                                        <span class="aq-trust-badge-icon">
+                                            <i class="fa-solid fa-circle-check"></i>
+                                        </span>
+                                        <div class="aq-trust-badge-content">
+                                            <span class="aq-trust-badge-text">100% Quality Audited</span>
+                                            <span class="aq-trust-badge-sub">Strict Assurance Audit</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
                        <div class="aq-product-accordion " >
-                       <div class="accordion design-accordion mt-30 " id="productAccordion">
+                       <div class="accordion design-accordion pt-30 " id="productAccordion">
 
     <!-- Full Description -->
     <div class="accordion-item">
@@ -996,7 +1324,7 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
                     @foreach($newArrivals as $newArrival)
 
                         @php
@@ -1076,9 +1404,8 @@ font-size:15px;
                                             </span>
 
                                             <span class="aq-product-card-discount">
-                                                ({{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}%
-                                                OFF)
-                                            </span>
+    (You Save {{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}% Off)
+</span>
                                         @endif
 
                                     </div>
@@ -1116,7 +1443,7 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
 
                     @foreach($relatedProducts as $relatedProduct)
 
@@ -1247,10 +1574,12 @@ font-size:15px;
     @endif
 
 
-     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
         const variantsByType = @json($variantsByType);
+        const storageBaseUrl = "{{ asset('storage') }}";
+
 
         let selectedValues = [];
         let selectedAddonIds = [];
@@ -1262,6 +1591,210 @@ font-size:15px;
         let currentUnitPrice = {{ (float) $product->price }};
         let currentUnitMrp = {{ (float) $product->mrp }};
 
+
+        const activeCoupons = @json($activeCoupons);
+
+function renderBestCoupon(totalPriceForCoupon) {
+  
+    const $container = $('#couponContainer');
+
+    if (!activeCoupons.length) {
+        $container.html('');
+        return;
+    }
+
+    // Sirf woh coupons jinka minimum_order_amount current total se satisfy ho raha hai
+    const eligible = activeCoupons.filter(function (c) {
+        return !c.minimum_order_amount || parseFloat(c.minimum_order_amount) <= totalPriceForCoupon;
+    });
+
+    if (!eligible.length) {
+        $container.html('');
+        return;
+    }
+
+    // Actual discount amount har eligible coupon ka nikal ke sabse zyada wala pick karo
+    function actualDiscount(c) {
+        let discount = 0;
+        if (c.discount_type === 'percentage') {
+            discount = (totalPriceForCoupon * parseFloat(c.discount_value)) / 100;
+            if (c.maximum_discount) {
+                discount = Math.min(discount, parseFloat(c.maximum_discount));
+            }
+        } else {
+            discount = parseFloat(c.discount_value);
+        }
+        return discount;
+    }
+
+    let best = eligible[0];
+    let bestAmount = actualDiscount(best);
+
+    eligible.forEach(function (c) {
+        const amt = actualDiscount(c);
+        if (amt > bestAmount) {
+            best = c;
+            bestAmount = amt;
+        }
+    });
+
+    let descText = '';
+    if (best.discount_type === 'percentage') {
+        descText = 'Get ' + parseFloat(best.discount_value) + '% off';
+        if (best.maximum_discount) {
+            descText += ' (up to ₹' + Math.round(best.maximum_discount).toLocaleString('en-IN') + ')';
+        }
+    } else {
+        descText = 'Flat ₹' + Math.round(best.discount_value).toLocaleString('en-IN') + ' off';
+    }
+    if (best.minimum_order_amount) {
+        descText += ' on orders above ₹' + Math.round(best.minimum_order_amount).toLocaleString('en-IN');
+    }
+
+    $container.html(`
+        <div class="coupon-card" id="coupon-${best.code}" onclick="copyCouponCode('${best.code}')" style="cursor:pointer;">
+          <div class="coupon-icon">
+            <img src="https://cdn.shopify.com/s/files/1/0826/6157/2916/files/discount-44c58e749e567564fb2f555dff7651bd1440b89dd808b77e29f72cddeb818dfa.svg?v=1747926128" alt="Discount Icon">
+          </div>
+          <div class="coupon-details">
+            <div class="coupon-code">USE CODE: ${best.code}</div>
+            <div class="coupon-desc">${descText}</div>
+          </div>
+        </div>
+    `);
+}
+
+function copyCouponCode(code) {
+    navigator.clipboard.writeText(code).then(function () {
+        Swal.fire({
+            icon: 'success',
+            title: 'Copied!',
+            text: 'Coupon code "' + code + '" copied to clipboard.',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    });
+}
+
+        // ── Auto-select the matching value of every OTHER selectable
+// attribute when one is picked (e.g. Color=Blue → Size auto-picks
+// XL if that's the only size Blue comes in) ─────────────────────
+//
+// The "master" combination list is whichever type array's entries
+// carry the most attribute-value ids per combo — that's the
+// fullest picture of which combinations are actually valid
+// together (stock/sku almost always depend on every selectable
+// attribute combined).
+function getMasterVariantList() {
+    let best = [];
+    let bestAttrCount = -1;
+    Object.keys(variantsByType).forEach(function (type) {
+        const list = variantsByType[type] || [];
+        if (list.length && Array.isArray(list[0].values)) {
+            const attrCount = list[0].values.length;
+            if (attrCount > bestAttrCount) {
+                bestAttrCount = attrCount;
+                best = list;
+            }
+        }
+    });
+    return best;
+}
+
+function updateStockAvailability() {
+    const stockList = variantsByType['stock'] || [];
+    if (!stockList.length) return;
+
+    const allValueIds = new Set();
+    stockList.forEach(function (combo) { combo.values.forEach(function (v) { allValueIds.add(v); }); });
+
+    allValueIds.forEach(function (valueId) {
+        const combosWithThisValue = stockList.filter(function (combo) {
+            return combo.values.includes(valueId);
+        });
+
+        const allZero = combosWithThisValue.length > 0 &&
+            combosWithThisValue.every(function (combo) { return (parseInt(combo.stock) || 0) <= 0; });
+
+        const $options = $('.variant-option[data-value-id="' + valueId + '"][data-stock-dependent="1"]');
+        const $dropdownOpt = $('.aq-size-dropdown option[value="' + valueId + '"]');
+
+        if (allZero) {
+            $options.addClass('variant-option-disabled').removeClass('active')
+                .css({ 'pointer-events': 'none', 'opacity': '0.4', 'cursor': 'not-allowed' });
+            $dropdownOpt.prop('disabled', true);
+        } else {
+            $options.removeClass('variant-option-disabled')
+                .css({ 'pointer-events': '', 'opacity': '', 'cursor': '' });
+            $dropdownOpt.prop('disabled', false);
+        }
+    });
+}
+
+$(document).ready(function () {
+    updateStockAvailability();
+    updatePriceDisplay(); // initial load pe coupon + price sync ho jayega
+});
+
+const masterVariantList = getMasterVariantList();function autoSelectDependentAttributes(changedAttributeId, changedValueId) {
+    if (!masterVariantList.length) return;
+
+    const matchingCombos = masterVariantList.filter(function (combo) {
+        return combo.values.includes(changedValueId);
+    });
+    if (!matchingCombos.length) return;
+
+    // Stock of the SPECIFIC combo that pairs the just-clicked value with a
+    // given candidate value — not the candidate's stock in isolation across
+    // every other combo. This is what makes Black+S (0 stock) get skipped
+    // even when S itself has stock under some other color.
+    function comboStockFor(candidateValueId) {
+        const combo = matchingCombos.find(function (c) {
+            return c.values.includes(candidateValueId);
+        });
+        return combo ? (parseInt(combo.stock) || 0) : 0;
+    }
+
+    const otherAttributeIds = new Set();
+    $('.variant-option').each(function () {
+        const attrId = $(this).data('attribute-id');
+        if (attrId != changedAttributeId) otherAttributeIds.add(attrId);
+    });
+
+    otherAttributeIds.forEach(function (attrId) {
+        const attrValueIds = $('.variant-option[data-attribute-id="' + attrId + '"]')
+            .map(function () { return parseInt($(this).data('value-id')); })
+            .get();
+
+        const validValuesForThisAttr = new Set();
+        matchingCombos.forEach(function (combo) {
+            combo.values.forEach(function (v) {
+                if (attrValueIds.includes(v)) validValuesForThisAttr.add(v);
+            });
+        });
+
+        if (validValuesForThisAttr.size === 0) return;
+
+        // Prefer the first valid value whose SPECIFIC combo (with the
+        // just-clicked value) actually has stock; only fall back to a
+        // 0-stock combo if literally nothing else pairs with it.
+        let chosenValueId = attrValueIds.find(function (id) {
+            return validValuesForThisAttr.has(id) && comboStockFor(id) > 0;
+        });
+
+        if (chosenValueId === undefined) {
+            chosenValueId = attrValueIds.find(function (id) {
+                return validValuesForThisAttr.has(id);
+            });
+        }
+
+        if (chosenValueId === undefined) return;
+
+        $('.variant-option[data-attribute-id="' + attrId + '"]').removeClass('active');
+        $('.variant-option[data-attribute-id="' + attrId + '"][data-value-id="' + chosenValueId + '"]').addClass('active');
+        $('.aq-size-dropdown[data-attribute-id="' + attrId + '"]').val(chosenValueId);
+    });
+}
         function findVariantForType(type) {
             const relevantIds = $('.variant-option.active')
                 .filter(function () { return $(this).data(type + '-dependent') == 1; })
@@ -1276,14 +1809,19 @@ font-size:15px;
             }) || null;
         }
 
-        $(document).on('click', '.variant-option', function () {
+$(document).on('click', '.variant-option', function () {
 
-            const attributeId = $(this).data('attribute-id');
+    const attributeId = $(this).data('attribute-id');
+    const clickedValueId = parseInt($(this).data('value-id'));
 
-            $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
-            $(this).addClass('active');
+    $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
+    $(this).addClass('active');
 
-            selectedValues = $('.variant-option.active')
+    // Auto-highlight the matching value(s) of any other selectable
+    // attribute(s) — this is what makes Blue→XL, Pink→L etc. work.
+    autoSelectDependentAttributes(attributeId, clickedValueId);
+
+    selectedValues = $('.variant-option.active')
                 .map(function () { return parseInt($(this).data('value-id')); })
                 .get();
 
@@ -1334,51 +1872,100 @@ font-size:15px;
                 $('.aq-buy-now-btn').prop('disabled', false).text('Buy it Now');
             }
 
-            // ── Variant image: pop it into the gallery stack as a dedicated
-            // slot + thumbnail, and scroll it into view. Hide it again when
-            // the current combination has no dedicated image.
-            if (imageVariant && imageVariant.image) {
-                const url = '/storage/' + imageVariant.image;
+          if (imageVariant && imageVariant.images?.length) {
+    updateVariantImages(imageVariant.images);
+} else {
+    $('#variant-images-container').html('');
+    $('#variant-thumbs-container').html('');
+    rebuildGalleryDots();   // ← ADD KARO: base images pe wapas dots resync
+}
 
-                $('#aqVariantImage').attr('src', url);
-                $('#aqVariantThumbImg').attr('src', url);
-                $('#aqVariantThumbImgMobile').attr('src', url);
 
-                $('#main-img-variant').show();
-                $('#thumb-variant').show();
-                $('#thumb-variant-mobile').show();
+updateStockAvailability();
+});
 
-                document.querySelectorAll('.aq-gallery-thumb-item').forEach(function (t) {
-                    t.classList.remove('active');
-                });
-                document.getElementById('thumb-variant')?.classList.add('active');
-                document.getElementById('thumb-variant-mobile')?.classList.add('active');
+  function updateVariantImages(images) {
 
-                document.getElementById('main-img-variant')
-                    .scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('#variant-images-container').html('');
+    $('#variant-thumbs-container').html('');
+
+    if (!images || !images.length) {
+        return;
+    }
+
+    images.forEach(function(imagePath, index) {
+
+        const src = storageBaseUrl + '/' + imagePath;
+
+        $('#variant-thumbs-container').append(`
+            <div class="aq-gallery-thumb-item variant-thumb ${index === 0 ? 'active' : ''}"
+                 onclick="document.getElementById('variant-main-${index}').scrollIntoView({behavior:'smooth', block:'center'})">
+                <img src="${src}" alt="">
+            </div>
+        `);
+
+        $('#variant-images-container').append(`
+            <div class="aq-gallery-main-img-wrap"
+                 id="variant-main-${index}">
+                <img src="${src}"
+                     class="aq-gallery-main-img"
+                     style="width:100%;border-radius:8px;object-fit:cover;">
+            </div>
+        `);
+    });
+
+    document.getElementById('variant-main-0')
+        ?.scrollIntoView({ behavior:'smooth', block:'center' });
+
+    rebuildGalleryDots();   // ← ADD KIYA: variant image change hone pe dots resync honge
+}
+
+$(document).on('change', '.aq-size-dropdown', function () {
+    const attributeId = $(this).data('attribute-id');
+    const valueId = $(this).val();
+    $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]').trigger('click');
+});
+
+$(document).on('change', '.aq-addon-option', function () {
+    selectedAddonIds = $('.aq-addon-option:checked')
+        .map(function () { return parseInt($(this).data('addon-id')); })
+        .get();
+
+    selectedAddonTotal = $('.aq-addon-option:checked').toArray()
+        .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
+
+    updatePriceDisplay();
+    // ← HATA DIYA: rebuildGalleryDots(); (addon change ka images/dots se koi lena dena nahi tha)
+});
+
+        function showMainImage() {
+            $('#aqMainProductVideo').get(0).pause();
+            $('#aqMainProductVideo').hide();
+            $('#aqMainProductImg').show();
+        }
+
+        function showMainVideo(src) {
+            const video = $('#aqMainProductVideo').get(0);
+            video.src = src;
+            $('#aqMainProductImg').hide();
+            $('#aqMainProductVideo').show();
+            video.play();
+        }
+
+        function updateMainMedia(thumb, src, type) {
+            if (type === 'video') {
+                showMainVideo(src);
             } else {
-                $('#main-img-variant').hide();
-                $('#thumb-variant').hide();
-                $('#thumb-variant-mobile').hide();
+                document.getElementById('aqMainProductImg').src = src;
+                showMainImage();
             }
-        });
+            document.querySelectorAll('.aq-gallery-thumb-item').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+        }
 
-        $(document).on('change', '.aq-size-dropdown', function () {
-            const attributeId = $(this).data('attribute-id');
-            const valueId = $(this).val();
-            $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]').trigger('click');
-        });
-
-        $(document).on('change', '.aq-addon-option', function () {
-            selectedAddonIds = $('.aq-addon-option:checked')
-                .map(function () { return parseInt($(this).data('addon-id')); })
-                .get();
-
-            selectedAddonTotal = $('.aq-addon-option:checked').toArray()
-                .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
-
-            updatePriceDisplay();
-        });
+        function updateMainImage(thumb, imgSrc) {
+            updateMainMedia(thumb, imgSrc, 'image');
+        }
 
         function adjustQty(amount) {
             const qtyInput = document.getElementById('aqDetailQty');
@@ -1405,7 +1992,7 @@ font-size:15px;
         |   due to separate rounding of price vs mrp vs their difference.
         |--------------------------------------------------------------------
         */
-        function updatePriceDisplay() {
+       function updatePriceDisplay() {
 
     const qty = parseInt($('#aqDetailQty').val()) || 1;
 
@@ -1415,56 +2002,25 @@ font-size:15px;
     const totalPrice = Math.round(qty * unitPriceWithAddons);
     const totalMrp   = Math.round(qty * unitMrpWithAddons);
 
-    console.log({
-        currentUnitPrice,
-        currentUnitMrp,
-        selectedAddonTotal,
-        qty,
-        totalPrice,
-        totalMrp
-    });
-
-    // Always update selling price
     $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
 
-    // Hide MRP + Discount when MRP and Price are same
-    if (
-        totalMrp <= 0 ||
-        totalMrp <= totalPrice ||
-        totalMrp === totalPrice
-    ) {
+    let discount = 0;
 
-        $('#productMrp').text('');
-        $('#productDiscount').text('');
-        $('#priceMrpRow').attr('style', 'display:none !important;');
-
-        return;
+    if (totalMrp > 0 && totalPrice < totalMrp) {
+        discount = Math.round(((totalMrp - totalPrice) / totalMrp) * 100);
     }
-
-    // Calculate discount
-    const discount = Math.round(
-        ((totalMrp - totalPrice) / totalMrp) * 100
-    );
 
     if (discount > 0) {
-
-        $('#productMrp').text(
-            '₹' + totalMrp.toLocaleString('en-IN')
-        );
-
-        $('#productDiscount').text(
-            discount + '% OFF'
-        );
-
-        $('#priceMrpRow').attr('style', 'display:flex !important;');
-
+        $('#productMrp').text('₹' + totalMrp.toLocaleString('en-IN'));
+        $('#productDiscount').text(discount + '% OFF');
+        $('#priceMrpRow').show();
     } else {
-
-        $('#productMrp').text('');
-        $('#productDiscount').text('');
-        $('#priceMrpRow').attr('style', 'display:none !important;');
+        $('#priceMrpRow').hide();
     }
+
+    renderBestCoupon(totalPrice); // ← naya add kiya
 }
+
         document.getElementById('aqDetailQty')?.addEventListener('change', function () {
             const minQty = parseInt(this.min) || 1;
             const maxQty = parseInt(this.max) || 0;
@@ -1541,5 +2097,48 @@ font-size:15px;
                 window.location.href = "{{ route('cart') }}";
             };
         }
+        /* ── Mobile slider dots: build + sync + click-to-jump ────────── */
+let galleryDotsObserver = null;
+
+function rebuildGalleryDots() {
+    const container = document.getElementById('aqGallerySlides');
+    const dotsWrap   = document.getElementById('aqGalleryDots');
+    if (!container || !dotsWrap) return;
+
+    if (galleryDotsObserver) {
+        galleryDotsObserver.disconnect();
+    }
+
+    const slides = container.querySelectorAll('.aq-gallery-main-img-wrap');
+    dotsWrap.innerHTML = '';
+    if (slides.length <= 1) return;
+
+    slides.forEach(function (slide, index) {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'aq-dot' + (index === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Go to slide ' + (index + 1));
+        dot.addEventListener('click', function () {
+            slide.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        });
+        dotsWrap.appendChild(dot);
+    });
+
+    galleryDotsObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                const idx = Array.prototype.indexOf.call(slides, entry.target);
+                dotsWrap.querySelectorAll('.aq-dot').forEach(function (d, i) {
+                    d.classList.toggle('active', i === idx);
+                });
+            }
+        });
+    }, { root: container, threshold: 0.6 });
+
+    slides.forEach(function (slide) { galleryDotsObserver.observe(slide); });
+}
+
+$(document).ready(function () { rebuildGalleryDots(); });
 
     </script>
+@endsection

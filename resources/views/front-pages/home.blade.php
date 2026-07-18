@@ -123,74 +123,74 @@
 
         <!-- categories area start -->
         <!--   <section class="aqf-categories-area">
-                <div class="aqf-cat-floating-shape aqf-cat-shape-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                    </svg>
-                </div>
-                <div class="aqf-cat-floating-shape aqf-cat-shape-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <rect x="3" y="8" width="18" height="13" rx="2" ry="2" />
-                        <path d="M12 8V21M3 13h18M12 8L7 2M12 8l5-6" />
-                    </svg>
-                </div>
-                <div class="container custom-fluid-container">
-                    <div class="row align-items-center mb-40">
-                        <div class="col-xl-12 col-lg-12 col-md-12 col-12">
-
-                            <div class="aq-creative-title-box ">
-                                <span class="aq-creative-subtitle">Curated For You</span>
-                                <h4 class="aq-creative-title">Shop by Category</h4>
-                                <div class="aq-creative-title-line"></div>
+                            <div class="aqf-cat-floating-shape aqf-cat-shape-1">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
                             </div>
-
-
-                            <div class="position-relative">
-                                <div class="aqf-categories-nav text-end ">
-                                    <button class="aqf-categories-prev"><i class="fal fa-angle-left"></i></button>
-                                    <button class="aqf-categories-next"><i class="fal fa-angle-right"></i></button>
-                                </div>
+                            <div class="aqf-cat-floating-shape aqf-cat-shape-2">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="3" y="8" width="18" height="13" rx="2" ry="2" />
+                                    <path d="M12 8V21M3 13h18M12 8L7 2M12 8l5-6" />
+                                </svg>
                             </div>
+                            <div class="container custom-fluid-container">
+                                <div class="row align-items-center mb-40">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-12">
 
-                        </div>
-
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="swiper aqf-categories-active">
-                                <div class="swiper-wrapper">
-
-                                    @foreach($popularCategories as $category)
-
-                                        <!-- Women Wear -->
-        <!--    <div class="swiper-slide">
-                                            <div class="aqf-categories-item text-center">
-                                                <a href="{{ route('products.listing', $category->slug) }}">
-
-                                                    <div class="aqf-categories-img">
-                                                        <img src="{{ asset('storage/' . $category->image) }}"
-                                                            alt="{{ $category->name }}" alt="{{$category->name  }}">
-                                                    </div>
-                                                    <span
-                                                        style="font-family: var(--aq-ff-heading); font-size: 18px; font-weight: 500; color: var(--aq-color-black);">
-                                                        {{ $category->name }}
-                                                    </span>
-                                                </a>
-                                            </div>
+                                        <div class="aq-creative-title-box ">
+                                            <span class="aq-creative-subtitle">Curated For You</span>
+                                            <h4 class="aq-creative-title">Shop by Category</h4>
+                                            <div class="aq-creative-title-line"></div>
                                         </div>
 
 
-                                    @endforeach
+                                        <div class="position-relative">
+                                            <div class="aqf-categories-nav text-end ">
+                                                <button class="aqf-categories-prev"><i class="fal fa-angle-left"></i></button>
+                                                <button class="aqf-categories-next"><i class="fal fa-angle-right"></i></button>
+                                            </div>
+                                        </div>
 
+                                    </div>
 
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> 
-            </section> -->
+                                <div class="row">
+                                    <div class="col-xl-12">
+                                        <div class="swiper aqf-categories-active">
+                                            <div class="swiper-wrapper">
+
+                                                @foreach($popularCategories as $category)
+
+                                                    <!-- Women Wear -->
+        <!--    <div class="swiper-slide">
+                                                        <div class="aqf-categories-item text-center">
+                                                            <a href="{{ route('products.listing', $category->slug) }}">
+
+                                                                <div class="aqf-categories-img">
+                                                                    <img src="{{ asset('storage/' . $category->image) }}"
+                                                                        alt="{{ $category->name }}" alt="{{$category->name  }}">
+                                                                </div>
+                                                                <span
+                                                                    style="font-family: var(--aq-ff-heading); font-size: 18px; font-weight: 500; color: var(--aq-color-black);">
+                                                                    {{ $category->name }}
+                                                                </span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+
+                                                @endforeach
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </section> -->
         <!-- categories area end -->
 
 
@@ -890,96 +890,102 @@
 
 
         <!--  <section class="hero-section2 ">
-                <div class="position-relative">
+                            <div class="position-relative">
 
-                    <div class="aqf-floating-shape aqf-floating-shape-1">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <polyline points="20 12 20 22 4 22 4 12"></polyline>
-                            <rect x="2" y="7" width="20" height="5"></rect>
-                            <line x1="12" y1="22" x2="12" y2="7"></line>
-                            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-                            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-                        </svg>
-                    </div>
-                    <div class="aqf-floating-shape aqf-floating-shape-2">
-                        <svg viewBox="0 0 100 100" fill="currentColor">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" />
-                        </svg>
-                    </div>
-
-                    <div class="container custom-fluid-container">
-                        <div class="row justify-content-center pt-20 pb-20">
-                            <div class="col-xl-12">
-
-
-                                <div class="aq-creative-title-box">
-                                    <span class="aq-creative-subtitle">Elegant Attire for Every Celebration</span>
-                                    <h4 class="aq-creative-title">Elegant Attire for Every Celebration</h4>
-                                    <div class="aq-creative-title-line"></div>
+                                <div class="aqf-floating-shape aqf-floating-shape-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                                        <rect x="2" y="7" width="20" height="5"></rect>
+                                        <line x1="12" y1="22" x2="12" y2="7"></line>
+                                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="aqf-floating-shape aqf-floating-shape-2">
+                                    <svg viewBox="0 0 100 100" fill="currentColor">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" />
+                                    </svg>
                                 </div>
 
-                            </div>
-                        </div>
+                                <div class="container custom-fluid-container">
+                                    <div class="row justify-content-center pt-20 pb-20">
+                                        <div class="col-xl-12">
 
-                        <div class="row g-3 pt-md-5 ">
-                            <div class="col-lg-8 ">
-                                <div class="hero-slider-wrap">
-                                    <div class="hero-slider swiper hero-slider-active">
-                                        <div class="swiper-wrapper">
 
-                                            @foreach($heroSlides as $slide)
+                                            <div class="aq-creative-title-box">
+                                                <span class="aq-creative-subtitle">Elegant Attire for Every Celebration</span>
+                                                <h4 class="aq-creative-title">Elegant Attire for Every Celebration</h4>
+                                                <div class="aq-creative-title-line"></div>
+                                            </div>
 
-                                                <div class="hero-single swiper-slide">
+                                        </div>
+                                    </div>
 
-                                                    <div class="container custom-fluid-container">
+                                    <div class="row g-3 pt-md-5 ">
+                                        <div class="col-lg-8 ">
+                                            <div class="hero-slider-wrap">
+                                                <div class="hero-slider swiper hero-slider-active">
+                                                    <div class="swiper-wrapper">
 
-                                                        <div class="row align-items-center">
+                                                        @foreach($heroSlides as $slide)
 
-                                                            <div class="col-md-12 col-lg-7">
+                                                            <div class="hero-single swiper-slide">
 
-                                                                <div class="hero-content">
+                                                                <div class="container custom-fluid-container">
 
-                                                                    <h6 class="hero-sub-title">
-                                                                        {{ $slide->subtitle }}
-                                                                    </h6>
+                                                                    <div class="row align-items-center">
 
-                                                                    <h1 class="hero-title">
-                                                                        {!! $slide->title  !!}
-                                                                    </h1>
+                                                                        <div class="col-md-12 col-lg-7">
 
-                                                                    <p>
-                                                                        {{ $slide->description }}
-                                                                    </p>
+                                                                            <div class="hero-content">
 
-                                                                    @if($slide->button_text)
+                                                                                <h6 class="hero-sub-title">
+                                                                                    {{ $slide->subtitle }}
+                                                                                </h6>
 
-                                                                        <div class="hero-btn">
+                                                                                <h1 class="hero-title">
+                                                                                    {!! $slide->title  !!}
+                                                                                </h1>
 
-                                                                            <a href="{{ $slide->button_link }}" class="aq-btn-black">
+                                                                                <p>
+                                                                                    {{ $slide->description }}
+                                                                                </p>
 
-                                                                                {{ $slide->button_text }}
+                                                                                @if($slide->button_text)
 
-                                                                                <i class="fas fa-arrow-right"></i>
+                                                                                    <div class="hero-btn">
 
-                                                                            </a>
+                                                                                        <a href="{{ $slide->button_link }}" class="aq-btn-black">
+
+                                                                                            {{ $slide->button_text }}
+
+                                                                                            <i class="fas fa-arrow-right"></i>
+
+                                                                                        </a>
+
+                                                                                    </div>
+
+                                                                                @endif
+
+                                                                            </div>
 
                                                                         </div>
 
-                                                                    @endif
+                                                                        <div class="col-md-12 col-lg-5">
 
-                                                                </div>
+                                                                            <div class="hero-right">
 
-                                                            </div>
+                                                                                <div class="hero-img">
 
-                                                            <div class="col-md-12 col-lg-5">
+                                                                                    <img src="{{ asset('storage/' . $slide->image) }}"
+                                                                                        alt="{{ $slide->title }}" loading="lazy" />
 
-                                                                <div class="hero-right">
+                                                                                </div>
 
-                                                                    <div class="hero-img">
+                                                                            </div>
 
-                                                                        <img src="{{ asset('storage/' . $slide->image) }}"
-                                                                            alt="{{ $slide->title }}" loading="lazy" />
+                                                                        </div>
 
                                                                     </div>
 
@@ -987,66 +993,60 @@
 
                                                             </div>
 
-                                                        </div>
+                                                        @endforeach
 
                                                     </div>
-
-                                                </div>
-
-                                            @endforeach
-
-                                        </div>
-                                        <!-- Swiper Pagination/Navigation -->
+                                                    <!-- Swiper Pagination/Navigation -->
         <!--       <div class="swiper-pagination"></div>
-                                        <div class="swiper-button-prev hero-slider-prev"></div>
-                                        <div class="swiper-button-next hero-slider-next"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4">
-                                <div class="small-banner">
-                                    <div class="container custom-fluid-container">
-                                        <div class="row">
+                                                    <div class="swiper-button-prev hero-slider-prev"></div>
+                                                    <div class="swiper-button-next hero-slider-next"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="small-banner">
+                                                <div class="container custom-fluid-container">
+                                                    <div class="row">
 
-                                            @foreach($heroBanners as $banner)
+                                                        @foreach($heroBanners as $banner)
 
-                                                <div class="col-md-6 col-lg-12 px-lg-0">
+                                                            <div class="col-md-6 col-lg-12 px-lg-0">
 
-                                                    <div class="banner-item">
+                                                                <div class="banner-item">
 
-                                                        <img src="{{ asset('storage/' . $banner->image) }}"
-                                                            alt="{{ $banner->title }}" loading="lazy" />
+                                                                    <img src="{{ asset('storage/' . $banner->image) }}"
+                                                                        alt="{{ $banner->title }}" loading="lazy" />
 
-                                                        <div class="banner-content">
+                                                                    <div class="banner-content">
 
-                                                            <p>
-                                                                {{ $banner->small_text }}
-                                                            </p>
+                                                                        <p>
+                                                                            {{ $banner->small_text }}
+                                                                        </p>
 
-                                                            <h3>
-                                                                {!!  $banner->title !!}
-                                                            </h3>
+                                                                        <h3>
+                                                                            {!!  $banner->title !!}
+                                                                        </h3>
 
-                                                            <a href="{{ $banner->button_link }}">
-                                                                {{ $banner->button_text }}
-                                                            </a>
+                                                                        <a href="{{ $banner->button_link }}">
+                                                                            {{ $banner->button_text }}
+                                                                        </a>
 
-                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        @endforeach
 
                                                     </div>
-
                                                 </div>
-
-                                            @endforeach
-
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section> -->
+                        </section> -->
 
 
 
@@ -1420,190 +1420,190 @@
 
         <!-- reels area start -->
         <!--   <section>
-                <div class="aqf-reels-area fix pb-md-50 ">
-                    <div class="container custom-fluid-container">
-                        <div class="aqf-collection-top mb-40">
-                            <div class="row align-items-end">
-                                <div class="col-md-12">
+                            <div class="aqf-reels-area fix pb-md-50 ">
+                                <div class="container custom-fluid-container">
+                                    <div class="aqf-collection-top mb-40">
+                                        <div class="row align-items-end">
+                                            <div class="col-md-12">
 
 
 
-                                    <div class="aq-creative-title-box">
-                                        <span class="aq-creative-subtitle">Video Showcase</span>
-                                        <h4 class="aq-creative-title">Gift Inspiration Reels</h4>
-                                        <div class="aq-creative-title-line"></div>
+                                                <div class="aq-creative-title-box">
+                                                    <span class="aq-creative-subtitle">Video Showcase</span>
+                                                    <h4 class="aq-creative-title">Gift Inspiration Reels</h4>
+                                                    <div class="aq-creative-title-line"></div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
                                     </div>
+                                    <div class="aqf-reels-slider-wrap">
+                                        <div class="swiper aqf-reels-active">
+                                            <div class="swiper-wrapper">
+                                                @foreach($reels as $reel)
 
-                                </div>
+                                                                        <div class="swiper-slide">
+                                                                            <div class="aqf-reel-item p-relative">
 
-                            </div>
-                        </div>
-                        <div class="aqf-reels-slider-wrap">
-                            <div class="swiper aqf-reels-active">
-                                <div class="swiper-wrapper">
-                                    @foreach($reels as $reel)
+                                                                                <div class="aqf-reel-video">
 
-                                                            <div class="swiper-slide">
-                                                                <div class="aqf-reel-item p-relative">
+                                                                                    @if($reel->reel_file)
 
-                                                                    <div class="aqf-reel-video">
-
-                                                                        @if($reel->reel_file)
-
-                                                                            <video autoplay muted loop playsinline preload="none">
-                                                                                <source src="{{ asset('storage/' . $reel->reel_file) }}" type="video/mp4">
-                                                                            </video>
+                                                                                        <video autoplay muted loop playsinline preload="none">
+                                                                                            <source src="{{ asset('storage/' . $reel->reel_file) }}" type="video/mp4">
+                                                                                        </video>
 
 
-                                                                        @elseif($reel->reel_url)
+                                                                                    @elseif($reel->reel_url)
 
-                                                                            <video autoplay muted loop playsinline preload="none">
-                                                                                <source src="{{ $reel->reel_url }}" type="video/mp4">
-                                                                            </video>
+                                                                                        <video autoplay muted loop playsinline preload="none">
+                                                                                            <source src="{{ $reel->reel_url }}" type="video/mp4">
+                                                                                        </video>
 
-                                                                        @endif
+                                                                                    @endif
 
-                                                                    </div>
+                                                                                </div>
 
-                                                                    <div class="aqf-reel-content-wrap">
+                                                                                <div class="aqf-reel-content-wrap">
 
-                                                                        <div class="aqf-reel-profile">
+                                                                                    <div class="aqf-reel-profile">
 
-                                                                            <img src="{{ $reel->photo
-                                        ? asset('storage/' . $reel->photo)
-                                        : asset('assets/img/default-user.png') }}" alt="{{ $reel->name }}" />
+                                                                                        <img src="{{ $reel->photo
+                                                    ? asset('storage/' . $reel->photo)
+                                                    : asset('assets/img/default-user.png') }}" alt="{{ $reel->name }}" />
 
-                                                                            <h4 class="aqf-reel-title">
-                                                                                {{ $reel->name }}
-                                                                            </h4>
+                                                                                        <h4 class="aqf-reel-title">
+                                                                                            {{ $reel->name }}
+                                                                                        </h4>
 
+                                                                                    </div>
+
+                                                                                </div>
+
+                                                                            </div>
                                                                         </div>
 
-                                                                    </div>
+                                                @endforeach
 
-                                                                </div>
-                                                            </div>
-
-                                    @endforeach
-
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-            </section>
-            <!-- reels area end -->
+                            </div>
+                        </section>
+                        <!-- reels area end -->
 
 
 
         <!--   <section>
-                <div class="masonry-main-section p-relative pt-20 pb-20">
-                    <!-- Floating Star Shapes -->
+                            <div class="masonry-main-section p-relative pt-20 pb-20">
+                                <!-- Floating Star Shapes -->
         <!--      <div class="aq-star-shape star-1 d-none d-xl-block">
-                        <svg viewBox="0 0 100 100" fill="#C5A059">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                        </svg>
-                    </div>
-                    <div class="aq-star-shape star-2 d-none d-xl-block">
-                        <svg viewBox="0 0 100 100" fill="#800000">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                        </svg>
-                    </div>
-                    <div class="aq-star-shape star-3 d-none d-xl-block">
-                        <svg viewBox="0 0 100 100" fill="#C5A059">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                        </svg>
-                    </div>
-                    <div class="aq-star-shape star-4 d-none d-xl-block">
-                        <svg viewBox="0 0 100 100" fill="#800000">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                        </svg>
-                    </div>
-                    <div class="aq-star-shape star-5 d-none d-xl-block">
-                        <svg viewBox="0 0 100 100" fill="#C5A059">
-                            <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                        </svg>
-                    </div>
-
-
-                    <div class="container custom-fluid-container">
-
-
-                        <div class="row justify-content-center">
-                            <div class="col-xl-12">
-
-                                <div class="aq-creative-title-box pt-30">
-                                    <span class="aq-creative-subtitle">Curated Portfolio</span>
-                                    <h4 class="aq-creative-title">Our Luxury Instagram Gallery</h4>
-                                    <div class="aq-creative-title-line"></div>
+                                    <svg viewBox="0 0 100 100" fill="#C5A059">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="aq-star-shape star-2 d-none d-xl-block">
+                                    <svg viewBox="0 0 100 100" fill="#800000">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="aq-star-shape star-3 d-none d-xl-block">
+                                    <svg viewBox="0 0 100 100" fill="#C5A059">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="aq-star-shape star-4 d-none d-xl-block">
+                                    <svg viewBox="0 0 100 100" fill="#800000">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="aq-star-shape star-5 d-none d-xl-block">
+                                    <svg viewBox="0 0 100 100" fill="#C5A059">
+                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                    </svg>
                                 </div>
 
-                            </div>
-                        </div>
 
-                        <div class="row g-4 masonry-wrapper">
+                                <div class="container custom-fluid-container">
 
-                            <!-- COLUMN 1 -->
+
+                                    <div class="row justify-content-center">
+                                        <div class="col-xl-12">
+
+                                            <div class="aq-creative-title-box pt-30">
+                                                <span class="aq-creative-subtitle">Curated Portfolio</span>
+                                                <h4 class="aq-creative-title">Our Luxury Instagram Gallery</h4>
+                                                <div class="aq-creative-title-line"></div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-4 masonry-wrapper">
+
+                                        <!-- COLUMN 1 -->
         <!--   <div class="col-lg-4 col-md-6">
-                                <div class="masonry-column">
-                                    <div class="masonry-track direction-down">
+                                            <div class="masonry-column">
+                                                <div class="masonry-track direction-down">
 
-                                        @foreach($galleryColumn1 as $image)
+                                                    @foreach($galleryColumn1 as $image)
 
-                                            <div class="masonry-card {{ $image->height_class }}">
-                                                <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}" />
+                                                        <div class="masonry-card {{ $image->height_class }}">
+                                                            <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}" />
+                                                        </div>
+
+                                                    @endforeach
+
+                                                </div>
                                             </div>
+                                        </div>
 
-                                        @endforeach
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- COLUMN 2 -->
+                                        <!-- COLUMN 2 -->
         <!--    <div class="col-lg-4 col-md-6">
-                                <div class="masonry-column">
-                                    <div class="masonry-track direction-up">
+                                            <div class="masonry-column">
+                                                <div class="masonry-track direction-up">
 
-                                        @foreach($galleryColumn2 as $image)
+                                                    @foreach($galleryColumn2 as $image)
 
-                                            <div class="masonry-card {{ $image->height_class }}">
-                                                <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
-                                                    loading="lazy" />
+                                                        <div class="masonry-card {{ $image->height_class }}">
+                                                            <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
+                                                                loading="lazy" />
+                                                        </div>
+
+                                                    @endforeach
+
+                                                </div>
                                             </div>
-
-                                        @endforeach
-
-                                    </div>
-                                </div>
-                            </div>
+                                        </div>
 
 
-                            <!-- COLUMN 3 -->
+                                        <!-- COLUMN 3 -->
         <!--    <div class="col-lg-4 col-md-12">
-                                <div class="masonry-column">
-                                    <div class="masonry-track direction-down">
+                                            <div class="masonry-column">
+                                                <div class="masonry-track direction-down">
 
-                                        @foreach($galleryColumn3 as $image)
+                                                    @foreach($galleryColumn3 as $image)
 
-                                            <div class="masonry-card {{ $image->height_class }}">
-                                                <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
-                                                    loading="lazy" />
+                                                        <div class="masonry-card {{ $image->height_class }}">
+                                                            <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
+                                                                loading="lazy" />
+                                                        </div>
+
+                                                    @endforeach
+
+                                                </div>
                                             </div>
-
-                                        @endforeach
+                                        </div>
 
                                     </div>
+
                                 </div>
                             </div>
 
-                        </div>
-
-                    </div>
-                </div>
-
-            </section> -->
+                        </section> -->
 
 
 
@@ -1913,5 +1913,123 @@
                 });
             }
 
+        </script>
+
+        <!-- First time popup modal -->
+        <div id="firstTimeModalOverlay" class="first-time-modal-overlay">
+            <div class="first-time-modal">
+                <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
+                <div class="first-time-modal-content">
+                    <div class="modal-left-side">
+                        <!-- We assume a placeholder or you can replace with correct image path -->
+                        <img src="https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg?auto=compress&cs=tinysrgb&w=600"
+                            alt="Chikankari Arrivals" style="background:#e9dcc9;" />
+                        <div class="modal-left-text">
+                            <!--<span>Discover new</span>-->
+                            <!--<h2>Chikankari</h2>-->
+                            <!--<span class="arrivals-text">Arrivals</span>-->
+                        </div>
+                    </div>
+                    <div class="modal-right-side">
+                        <h3>PERKS AWAIT—JUST FOR YOU</h3>
+                        <p>Enjoy 10% off on your first order when you sign up—<br>just for trying us out!</p>
+                        <form id="firstTimeForm" class="first-time-form">
+                            <input type="email" name="email" placeholder="Enter your email address" required>
+                            <div class="phone-input-group">
+                                <div class="country-code">
+                                    <img src="https://flagcdn.com/w20/in.png" alt="India">
+                                    <span>+91</span>
+                                    <span class="dropdown-arrow">▾</span>
+                                </div>
+                                <input type="tel" name="phone" placeholder="Enter your phone number" required>
+                            </div>
+                            <label class="whatsapp-optin">
+                                <input type="checkbox" name="whatsapp_optin" checked>
+                                <span>Receive important information and updates on <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                                        alt="WhatsApp" width="16" height="16"> WhatsApp</span>
+                            </label>
+                            <button type="submit" class="claim-now-btn">CLAIM NOW</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Show modal after 4 seconds every time the page loads
+                setTimeout(function () {
+                    var modal = document.getElementById('firstTimeModalOverlay');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                    }
+                }, 4000);
+
+                // Close modal
+                var closeBtn = document.getElementById('closeFirstTimeModal');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function () {
+                        document.getElementById('firstTimeModalOverlay').style.display = 'none';
+                    });
+                }
+
+                var modalOverlay = document.getElementById('firstTimeModalOverlay');
+                if (modalOverlay) {
+                    modalOverlay.addEventListener('click', function (e) {
+                        if (e.target === this) {
+                            this.style.display = 'none';
+                        }
+                    });
+                }
+
+                // Form submission
+                var form = document.getElementById('firstTimeForm');
+                if (form) {
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+
+                        var email = form.querySelector('input[name="email"]').value;
+                        var phone = form.querySelector('input[name="phone"]').value;
+                        var whatsappOptin = form.querySelector('input[name="whatsapp_optin"]').checked;
+
+                        $.ajax({
+                            url: "{{ route('coupon-enquiry.store') }}",
+                            type: "POST",
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                email: email,
+                                phone: phone,
+                                whatsapp_optin: whatsappOptin ? 1 : 0
+                            },
+                            success: function (response) {
+                                if (response.status) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thank You!',
+                                        text: response.message,
+                                        timer: 1800,
+                                        showConfirmButton: false
+                                    });
+                                    document.getElementById('firstTimeModalOverlay').style.display = 'none';
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: response.message ?? 'Something went wrong.'
+                                    });
+                                }
+                            },
+                            error: function (xhr) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                                });
+                            }
+                        });
+                    });
+                }
+            });
         </script>
 @endsection

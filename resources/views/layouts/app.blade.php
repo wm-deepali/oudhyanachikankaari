@@ -7,8 +7,8 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php
-        require_once app_path('Helpers/seo.php');
-        $seo = getSeo();
+    require_once app_path('Helpers/seo.php');
+    $seo = getSeo();
     @endphp
 
     <title>
@@ -18,7 +18,7 @@
     <meta name="description" content="{{ $seo->meta_description ?? $general?->tagline }}">
 
     @if($seo && $seo->scripts)
-        {!! $seo->scripts !!}
+    {!! $seo->scripts !!}
     @endif
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -117,9 +117,9 @@
                             <h4 class="aq-search-cat-title mb-35">Popular Searches</h4>
                             <div class="aq-search-cat">
                                 @foreach($popularCategories as $category)
-                                    <a href="{{ route('products.listing', $category->slug) }}">
-                                        {{ $category->name }}
-                                    </a>
+                                <a href="{{ route('products.listing', $category->slug) }}">
+                                    {{ $category->name }}
+                                </a>
                                 @endforeach
                             </div>
                         </div>
@@ -135,40 +135,40 @@
 
                                 @forelse($recentProducts as $product)
 
-                                    <div class="col">
-                                        <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                            <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
+                                <div class="col">
+                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
+                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
+                                            <a href="{{ route('product.details', $product->slug) }}">
+
+                                                <img class="lazyload aq-product-img"
+                                                    src="{{ asset('storage/' . $product->display_image) }}"
+                                                    alt="{{ $product->name }}" loading="lazy" />
+
+                                                <img class="aq-img-hover lazyload"
+                                                    src="{{ asset('storage/' . $product->display_image) }}"
+                                                    alt="{{ $product->name }}" loading="lazy" />
+                                            </a>
+                                        </div>
+                                        <div class="aq-product-content">
+                                            <span class="aqf-product-3-category">Premium Hampers</span>
+                                            <h4 class="aq-product-title mb-5">
                                                 <a href="{{ route('product.details', $product->slug) }}">
-
-                                                    <img class="lazyload aq-product-img"
-                                                        src="{{ asset('storage/' . $product->display_image) }}"
-                                                        alt="{{ $product->name }}" loading="lazy" />
-
-                                                    <img class="aq-img-hover lazyload"
-                                                        src="{{ asset('storage/' . $product->display_image) }}"
-                                                        alt="{{ $product->name }}" loading="lazy" />
-                                                </a>
-                                            </div>
-                                            <div class="aq-product-content">
-                                                <span class="aqf-product-3-category">Premium Hampers</span>
-                                                <h4 class="aq-product-title mb-5">
-                                                    <a href="{{ route('product.details', $product->slug) }}">
-                                                        {{ $product->name }}</a>
-                                                </h4>
-                                                <div class="aq-product-price">
-                                                    <ins><span
-                                                            class="aq-product-new-price">${{ number_format($product->price, 2) }}</span></ins>
-                                                </div>
+                                                    {{ $product->name }}</a>
+                                            </h4>
+                                            <div class="aq-product-price">
+                                                <ins><span class="aq-product-new-price">${{
+                                                        number_format($product->price, 2) }}</span></ins>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
 
                                 @empty
 
-                                    <div class="col-12">
-                                        <p>No recently viewed products found.</p>
-                                    </div>
+                                <div class="col-12">
+                                    <p>No recently viewed products found.</p>
+                                </div>
 
                                 @endforelse
 
@@ -190,11 +190,11 @@
             <h4 class="aq-cartmini-title">Shopping Cart</h4>
         </div>
         <div class="aq-cartmini-body">
-             @include('layouts.mini-cart')
+            @include('layouts.mini-cart')
         </div>
 
         <div class="aq-cartmini-footer">
-                        <div class="aq-cartmini-total d-flex justify-content-between align-items-center">
+            <div class="aq-cartmini-total d-flex justify-content-between align-items-center">
                 <span class="aq-cartmini-total-title">Subtotal</span>
                 <span class="aq-cartmini-total-value" id="miniCartSubtotal">
                     ₹{{ number_format($miniCart->total_amount ?? 0, 2) }}
@@ -433,10 +433,10 @@
                     </div>
                 </a>
             </div>
-            <button type="button" class="aq-offcanvas-close aq-menu-close" aria-label="Close Menu"
+            <button type="button" class="aq-offcanvas-close " aria-label="Close Menu"
                 style="cursor: pointer; z-index: 99;"
                 onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.remove('opened'); document.querySelector('.body-overlay')?.classList.remove('opened');">
-                <i class="fal fa-times" style="font-size: 20px;"></i>
+                <i class="fal fa-times" style="font-size: 20px;font-weight:700;"></i>
             </button>
         </div>
         <div class="aq-offcanvas-menu-wrap">
@@ -563,27 +563,27 @@
 
                 @foreach($announcements as $announcement)
 
-                    <div class="offer-item {{ $loop->first ? 'active' : '' }}">
+                <div class="offer-item {{ $loop->first ? 'active' : '' }}">
 
-                        @if($announcement->link)
+                    @if($announcement->link)
 
-                            <a href="{{ $announcement->link }}" style="color: inherit; text-decoration:none;">
+                    <a href="{{ $announcement->link }}" style="color: inherit; text-decoration:none;">
 
-                                <span>
-                                    {{ $announcement->title }}
-                                </span>
+                        <span>
+                            {{ $announcement->title }}
+                        </span>
 
-                            </a>
+                    </a>
 
-                        @else
+                    @else
 
-                            <span>
-                                {{ $announcement->title }}
-                            </span>
+                    <span>
+                        {{ $announcement->title }}
+                    </span>
 
-                        @endif
+                    @endif
 
-                    </div>
+                </div>
 
                 @endforeach
 
@@ -599,20 +599,37 @@
             style="background: rgb(255 246 246 / 43%); position: relative;">
             <div class="container container-1830">
                 <div class="row align-items-center">
-                    <div class="col-xl-2 col-lg-3 col-md-3 col-4">
-                        <div class="aq-header-logo text-start pt-10 pb-10">
+                    <!-- Mobile Hamburger Menu (Left side) -->
+                    <div class="col-3 d-md-none d-flex align-items-center">
+                        <button type="button" class="aq-offcanvas-toggle" aria-label="Open Menu"
+                            style="position: relative; background: transparent; border: none; padding: 0; color: #1c1c1c; cursor: pointer; z-index: 99;"
+                            onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.add('opened'); document.querySelector('.body-overlay')?.classList.add('opened');">
+                            <i>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"
+                                    viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 12H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M4 6H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <path d="M4 18H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </i>
+                        </button>
+                    </div>
+
+                    <!-- Logo Column (Centered on mobile) -->
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-6 text-center text-md-start">
+                        <div class="aq-header-logo pt-10 pb-10 d-flex justify-content-center justify-content-md-start">
                             <a href="{{ url('/') }}">
-                                <img style="width: 150px; max-width: 100%; height: auto;" src="{{ $general?->logo
+                                <img class="mobile-logo-img" style="width: 160px; max-width: 100%; height: auto;" src="{{ $general?->logo
     ? asset('storage/' . $general->logo)
     : asset('assets/img/corporate/Oudhyana_img/logo.png') }}" alt="{{ $general?->site_name }}">
 
-                                <div>
+                                <div class=" d-md-block">
                                     {{ $general?->tagline ?? '' }}
                                 </div>
                             </a>
                         </div>
                     </div>
-                    <div class="col-xl-8 col-lg-6 col-md-6 d-none d-md-block">
+                    <div class="col-xl-7 col-lg-6 col-md-6 d-none d-md-block">
                         <div class="aq-header-search-form" style="position: relative;">
                             <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off"
                                 style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 30px; background: #fff; overflow: hidden; padding: 2px 2px 2px 20px;">
@@ -626,7 +643,7 @@
                             </form>
                         </div>
                     </div>
-                    <div class="col-xl-2 col-lg-3 col-md-3 col-8">
+                    <div class="col-xl-2 col-lg-3 col-md-3 col-3">
                         <div class="aq-header-right-options text-end">
                             <ul style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
                                 <li class="d-md-none aq-mobile-search-btn-wrapper">
@@ -664,9 +681,9 @@
                                     <button aria-label="Shopping Cart"
                                         style="position: relative; background: transparent; border: none; padding: 0;">
                                         @php
-                                            $cart = auth()->check()
-                                                ? \App\Models\Cart::where('user_id', auth()->id())->first()
-                                                : \App\Models\Cart::where('session_id', session()->getId())->first();
+                                        $cart = auth()->check()
+                                        ? \App\Models\Cart::where('user_id', auth()->id())->first()
+                                        : \App\Models\Cart::where('session_id', session()->getId())->first();
                                         @endphp
 
                                         <span class="count-box cart-count" style="background: #c98f9d; color: #fff;">
@@ -679,24 +696,6 @@
                                                     d="M5.48681 5.07041C5.48681 2.68433 7.4211 0.750039 9.80717 0.750039C10.9562 0.74517 12.0598 1.1982 12.874 2.00895C13.6882 2.81971 14.1459 3.92139 14.1458 5.07041M6.84107 9.57384H6.88684M12.6721 9.57388H12.7179M5.62368 19.972H13.9715C17.0379 19.972 19.3903 18.8645 18.7221 14.4068L17.944 8.3656C17.5321 6.14134 16.1134 5.29008 14.8685 5.29008H4.69004C3.42688 5.29008 2.0905 6.20542 1.61453 8.3656L0.836493 14.4068C0.268988 18.361 2.55732 19.972 5.62368 19.972Z"
                                                     stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
                                                     stroke-linejoin="round"></path>
-                                            </svg>
-                                        </i>
-                                    </button>
-                                </li>
-
-                                <li class="d-xl-none">
-                                    <button type="button" class="aq-offcanvas-toggle" aria-label="Open Menu"
-                                        style="position: relative; background: transparent; border: none; padding: 0; color: #1c1c1c; cursor: pointer; z-index: 99;"
-                                        onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.add('opened'); document.querySelector('.body-overlay')?.classList.add('opened');">
-                                        <i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                viewBox="0 0 24 24" fill="none">
-                                                <path d="M4 12H20" stroke="currentColor" stroke-width="1.5"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M4 6H20" stroke="currentColor" stroke-width="1.5"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
-                                                <path d="M4 18H20" stroke="currentColor" stroke-width="1.5"
-                                                    stroke-linecap="round" stroke-linejoin="round" />
                                             </svg>
                                         </i>
                                     </button>
@@ -774,47 +773,47 @@
 
                                                     @forelse($headerAttributes as $attribute)
 
-                                                        <div class="aq-corp-megamenu-col">
-                                                            <h6 class="aq-corp-megamenu-heading">
-                                                                Shop By {{ $attribute->name }}
-                                                            </h6>
+                                                    <div class="aq-corp-megamenu-col">
+                                                        <h6 class="aq-corp-megamenu-heading">
+                                                            Shop By {{ $attribute->name }}
+                                                        </h6>
 
-                                                            <ul>
-                                                                @forelse($attribute->values as $value)
+                                                        <ul>
+                                                            @forelse($attribute->values as $value)
 
-                                                                    <li>
-                                                                        <a
-                                                                            href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">
-                                                                            {{ $value->value }}
-                                                                        </a>
-                                                                    </li>
+                                                            <li>
+                                                                <a
+                                                                    href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">
+                                                                    {{ $value->value }}
+                                                                </a>
+                                                            </li>
 
-                                                                @empty
+                                                            @empty
 
-                                                                    <li>
-                                                                        <a href="#">
-                                                                            No {{ $attribute->name }} Found
-                                                                        </a>
-                                                                    </li>
+                                                            <li>
+                                                                <a href="#">
+                                                                    No {{ $attribute->name }} Found
+                                                                </a>
+                                                            </li>
 
-                                                                @endforelse
-                                                            </ul>
-                                                        </div>
+                                                            @endforelse
+                                                        </ul>
+                                                    </div>
 
                                                     @empty
 
-                                                        <div class="aq-corp-megamenu-col">
-                                                            <h6 class="aq-corp-megamenu-heading">
-                                                                Attributes
-                                                            </h6>
-                                                            <ul>
-                                                                <li>
-                                                                    <a href="#">
-                                                                        No Attributes Found
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
+                                                    <div class="aq-corp-megamenu-col">
+                                                        <h6 class="aq-corp-megamenu-heading">
+                                                            Attributes
+                                                        </h6>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="#">
+                                                                    No Attributes Found
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
 
                                                     @endforelse
 
@@ -827,9 +826,10 @@
 
                                                             @foreach($headerCollections as $collection)
 
-                                                                <li><a
-                                                                        href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
-                                                                </li>
+                                                            <li><a
+                                                                    href="{{ route('collections.listing', $collection->slug) }}">{{
+                                                                    $collection->name }}</a>
+                                                            </li>
 
                                                             @endforeach
 
@@ -840,9 +840,9 @@
                                                         <h6 class="aq-corp-megamenu-heading">Price Range</h6>
                                                         <ul>
                                                             @foreach(config('price_ranges') as $band)
-                                                                <li><a
-                                                                        href="{{ route('price.listing', $band['slug']) }}">{{ $band['label'] }}</a>
-                                                                </li>
+                                                            <li><a href="{{ route('price.listing', $band['slug']) }}">{{
+                                                                    $band['label'] }}</a>
+                                                            </li>
                                                             @endforeach
                                                         </ul>
                                                     </div>
@@ -852,15 +852,16 @@
 
                                                             @forelse($headerOccasions as $occasion)
 
-                                                                <li><a
-                                                                        href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
-                                                                </li>
+                                                            <li><a
+                                                                    href="{{ route('occasions.listing', $occasion->slug) }}">{{
+                                                                    $occasion->title }}</a>
+                                                            </li>
 
                                                             @empty
 
-                                                                <li>
-                                                                    <a href="#">No Occasions Found</a>
-                                                                </li>
+                                                            <li>
+                                                                <a href="#">No Occasions Found</a>
+                                                            </li>
 
                                                             @endforelse
 
@@ -873,7 +874,7 @@
                                         </div>
                                     </li>
 
-                              <!--      <li class="has-dropdown p-static">
+                                    <!--      <li class="has-dropdown p-static">
                                         <a href="#">Categories</a>
                                         <div class="aq-megamenu-wrap aq-megamenu-img-wrap mega-menu">
                                             <div class="container">
@@ -902,38 +903,41 @@
                                             </div>
                                         </div>
                                     </li> -->
+
                                     @foreach($navbarCategories as $category)
 
-                                        <li class="has-dropdown">
+                                    <li class="has-dropdown">
 
-                                            <a href="{{ route('products.listing', $category->slug) }}">
-                                                {{ $category->name }}
-                                            </a>
+                                        <a href="{{ route('products.listing', $category->slug) }}">
+                                            {{ $category->name }}
+                                        </a>
 
-                                            @if($category->children->count())
+                                        @if($category->children->count())
 
-                                                <ul class="submenu">
+                                        <ul class="submenu">
 
-                                                    @foreach($category->children as $subcategory)
+                                            @foreach($category->children as $subcategory)
 
-                                                        <li>
-                                                            <a
-                                                                href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
-                                                                {{ $subcategory->name }}
-                                                            </a>
-                                                        </li>
+                                            <li>
+                                                <a
+                                                    href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
+                                                    {{ $subcategory->name }}
+                                                </a>
+                                            </li>
 
-                                                    @endforeach
+                                            @endforeach
 
-                                                </ul>
+                                        </ul>
 
-                                            @endif
+                                        @endif
 
-                                        </li>
+                                    </li>
 
                                     @endforeach
-
-                                  <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
+                                    <li><a
+                                            href="https://oudhyanachikankaari.com/dynamic/collections/end-of-season-sale">End
+                                            of Season Sale</a></li>
+                                    <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
                                 </ul>
                             </nav>
@@ -1034,8 +1038,9 @@
                     <i class="fa-solid fa-bag-shopping"></i>
                 </div>
                 <h3 class="aq-drawer-title">Bulk Order Enquiry</h3>
-                <p class="aq-drawer-subtitle">Send enquiry for Bulk orders for Chikankari suits, sarees, kurtis, and women's ethnic 
-                wear with competitive pricing, premium quality, and timely delivery.</p>
+                <p class="aq-drawer-subtitle">Send enquiry for Bulk orders for Chikankari suits, sarees, kurtis, and
+                    women's ethnic
+                    wear with competitive pricing, premium quality, and timely delivery.</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -1136,10 +1141,10 @@
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
                     <h4 class="aq-drawer-success-title">Request Submitted!</h4>
-<p class="aq-drawer-success-desc">
-    Thank you for your bulk order inquiry. Our team will contact you shortly with wholesale 
-    pricing, product catalogs, and customization options within <strong>2 business hours</strong>.
-</p>
+                    <p class="aq-drawer-success-desc">
+                        Thank you for your bulk order inquiry. Our team will contact you shortly with wholesale
+                        pricing, product catalogs, and customization options within <strong>2 business hours</strong>.
+                    </p>
 
                     <button type="button" class="aq-drawer-success-close-btn" id="aqDrawerSuccessClose">
                         Return to Site
@@ -1170,40 +1175,52 @@
                                 <div class="aq-footer-logo-luxury mb-35">
                                     <a href="{{ route('home') }}">
                                         @if(!empty($general?->logo))
-                                            <img src="{{ asset('storage/' . $general->logo) }}"
-                                                alt="{{ $general?->site_name }}"
-                                                style="filter: brightness(0) invert(1); width: 180px;">
+                                        <img src="{{ asset('storage/' . $general->logo) }}"
+                                            alt="{{ $general?->site_name }}"
+                                            style="filter: brightness(0) invert(1); width: 180px;">
                                         @endif
                                     </a>
                                 </div>
                                 @if(!empty($general?->footer_description))
-                                    <p class="aq-footer-intro-text">
-                                        {!! $general->footer_description !!}
-                                    </p>
+                                <p class="aq-footer-intro-text">
+                                    {!! $general->footer_description !!}
+                                </p>
                                 @endif
                                 <div class="aq-footer-social-luxury mt-40">
+                                    
+                                    @if($general?->whatsapp)
+    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank" class="social-icon">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+@endif
                                     @if($general?->facebook)
-                                        <a href="{{ $general->facebook }}" target="_blank" class="social-icon">
-                                            <i class="fa-brands fa-facebook-f"></i>
-                                        </a>
+                                    <a href="{{ $general->facebook }}" target="_blank" class="social-icon">
+                                        <i class="fa-brands fa-facebook-f"></i>
+                                    </a>
                                     @endif
 
                                     @if($general?->twitter)
-                                        <a href="{{ $general->twitter }}" target="_blank" class="social-icon">
-                                            <i class="fa-brands fa-twitter"></i>
-                                        </a>
+                                    <a href="{{ $general->twitter }}" target="_blank" class="social-icon">
+                                        <i class="fa-brands fa-twitter"></i>
+                                    </a>
                                     @endif
 
                                     @if($general?->linkedin)
-                                        <a href="{{ $general->linkedin }}" target="_blank" class="social-icon">
-                                            <i class="fa-brands fa-linkedin-in"></i>
-                                        </a>
+                                    <a href="{{ $general->linkedin }}" target="_blank" class="social-icon">
+                                        <i class="fa-brands fa-linkedin-in"></i>
+                                    </a>
                                     @endif
 
                                     @if($general?->instagram)
-                                        <a href="{{ $general->instagram }}" target="_blank" class="social-icon">
-                                            <i class="fa-brands fa-instagram"></i>
-                                        </a>
+                                    <a href="{{ $general->instagram }}" target="_blank" class="social-icon">
+                                        <i class="fa-brands fa-instagram"></i>
+                                    </a>
+                                    @endif
+
+                                    @if($general?->youtube)
+                                    <a href="{{ $general->youtbe }}" target="_blank" class="social-icon">
+                                        <i class="fa-brands fa-youtube"></i>
+                                    </a>
                                     @endif
                                 </div>
 
@@ -1243,9 +1260,9 @@
                                             Shop All Collections</a></li>
                                     @foreach($headerCollections as $collection)
 
-                                        <li><a href="{{ route('collections.listing', $collection->slug) }}"><i
-                                                    class="fa-solid fa-chevron-right"></i>{{ $collection->name }}</a>
-                                        </li>
+                                    <li><a href="{{ route('collections.listing', $collection->slug) }}"><i
+                                                class="fa-solid fa-chevron-right"></i>{{ $collection->name }}</a>
+                                    </li>
 
                                     @endforeach
 
@@ -1267,7 +1284,7 @@
                                         <div class="aq-contact-content-luxury">
                                             <h6>ADDRESS</h6>
                                             @if(!empty($general?->business_address))
-                                                <p>{{ $general->business_address }}</p>
+                                            <p>{{ $general->business_address }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1279,7 +1296,7 @@
                                         <div class="aq-contact-content-luxury">
                                             <h6>PHONE</h6>
                                             @if(!empty($general?->phone))
-                                                <p>{{ $general->phone }}</p>
+                                            <p>{{ $general->phone }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1293,14 +1310,14 @@
                                         <div class="aq-contact-content-luxury">
                                             <h6>WHATSAPP</h6>
                                             @if(!empty($general?->whatsapp))
-                                                <p>
-                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}"
-                                                        target="_blank">
+                                            <p>
+                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}"
+                                                    target="_blank">
 
-                                                        {{ $general->whatsapp }}
+                                                    {{ $general->whatsapp }}
 
-                                                    </a>
-                                                </p>
+                                                </a>
+                                            </p>
                                             @endif
                                         </div>
                                     </div>
@@ -1312,7 +1329,7 @@
                                         <div class="aq-contact-content-luxury">
                                             <h6>EMAIL</h6>
                                             @if(!empty($general?->support_email))
-                                                <p>{{ $general->support_email }}</p>
+                                            <p>{{ $general->support_email }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1331,8 +1348,8 @@
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-policy-links text-center mb-20 mt-10">
                                 @foreach($footerPages as $page)
-                                    <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
-                                        {{ $page->heading }}</a>
+                                <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
+                                    {{ $page->heading }}</a>
                                 @endforeach
                             </div>
                         </div>
@@ -1380,12 +1397,12 @@
         <div class="footer_whatspp">
 
             @if(!empty($general?->whatsapp))
-                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank"
-                    class="social-whatspp" title="WhatsApp">
+            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank"
+                class="social-whatspp" title="WhatsApp">
 
-                    <i class="fa-brands fa-whatsapp"></i>
+                <i class="fa-brands fa-whatsapp"></i>
 
-                </a>
+            </a>
             @endif
 
         </div>
@@ -1641,53 +1658,53 @@
 
 
     @if(session('success_general'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
 
-                const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
-                const drawerForm = document.getElementById("aqDrawerForm");
-                const drawerSuccess = document.getElementById("aqDrawerSuccess");
+            const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
+            const drawerForm = document.getElementById("aqDrawerForm");
+            const drawerSuccess = document.getElementById("aqDrawerSuccess");
 
-                // Open drawer
-                if (drawerWrap) {
-                    drawerWrap.classList.add("active");
+            // Open drawer
+            if (drawerWrap) {
+                drawerWrap.classList.add("active");
+            }
+
+            // Hide form
+            if (drawerForm) {
+                drawerForm.classList.add("hidden");
+            }
+
+            // Show success state
+            setTimeout(() => {
+                if (drawerSuccess) {
+                    drawerSuccess.classList.add("active");
                 }
+            }, 250);
 
-                // Hide form
-                if (drawerForm) {
-                    drawerForm.classList.add("hidden");
-                }
-
-                // Show success state
-                setTimeout(() => {
-                    if (drawerSuccess) {
-                        drawerSuccess.classList.add("active");
-                    }
-                }, 250);
-
-            });
-        </script>
+        });
+    </script>
     @endif
 
     @if($errors->generalForm->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
 
-                const drawerWrap = document.getElementById('aqEnquiryDrawerWrap');
+            const drawerWrap = document.getElementById('aqEnquiryDrawerWrap');
 
-                if (drawerWrap) {
-                    drawerWrap.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
+            if (drawerWrap) {
+                drawerWrap.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
 
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Validation Error',
-                    html: `{!! implode('<br>', $errors->generalForm->all()) !!}`
-                });
-
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                html: `{!! implode('<br>', $errors->generalForm->all()) !!}`
             });
-        </script>
+
+        });
+    </script>
     @endif
 
     <!-- Bulk Orders Submission Handler & Drawer Controller -->
@@ -2283,6 +2300,47 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var topArea = document.querySelector('.aq-header-top-area');
+            var bottomArea = document.querySelector('.aq-header-bottom-area');
+            var offerBar = document.querySelector('.offer-bar');
+
+            if (topArea) {
+                var topAreaHeight = topArea.offsetHeight;
+
+                window.addEventListener('scroll', function () {
+                    var stickyOffset = offerBar ? offerBar.offsetHeight : 0;
+
+                    if (window.scrollY > stickyOffset) {
+                        topArea.style.position = 'fixed';
+                        topArea.style.top = '0';
+                        topArea.style.left = '0';
+                        topArea.style.width = '100%';
+                        topArea.style.zIndex = '1020';
+                        topArea.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.05)';
+                        topArea.style.background = '#fff';
+
+                        if (bottomArea) {
+                            bottomArea.style.marginTop = topAreaHeight + 'px';
+                        }
+                    } else {
+                        topArea.style.position = 'relative';
+                        topArea.style.top = '';
+                        topArea.style.left = '';
+                        topArea.style.width = '';
+                        topArea.style.zIndex = '';
+                        topArea.style.boxShadow = '';
+                        topArea.style.background = 'rgb(255 246 246 / 43%)';
+
+                        if (bottomArea) {
+                            bottomArea.style.marginTop = '0';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

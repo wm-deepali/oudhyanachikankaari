@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Wishlist;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Cart;
 use Illuminate\Support\Facades\View;
@@ -76,6 +77,14 @@ class AppServiceProvider extends ServiceProvider
 
             $general = \App\Models\Setting::first();
 
+              $wishlistIds = Wishlist::current()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->pluck('product_id')
+            ->toArray();
+
             $view->with(
                 [
                     'globalCartCount' => $count,
@@ -86,7 +95,8 @@ class AppServiceProvider extends ServiceProvider
                     'menuCategories' => $menuCategories,
                     'headerAttributes' => $headerAttributes,
                     'navbarCategories' => $navbarCategories,
-                    'general' => $general
+                    'general' => $general,
+                    'wishlistIds' => $wishlistIds,
                 ]
             );
         });

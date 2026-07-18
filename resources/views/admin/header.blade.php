@@ -131,19 +131,21 @@
             </ul>
         </li>
 
-        {{-- ENQUIRIES --}}
-        <li class="{{ request()->routeIs(
+     {{-- ENQUIRIES --}}
+<li class="{{ request()->routeIs(
     'admin.contact-enquiries.*',
     'admin.other-enquiries.*',
-    'admin.supplier-enquiries.*'
+    'admin.supplier-enquiries.*',
+    'admin.coupon-enquiries.*'
 ) ? 'active' : '' }}">
-            <a href="#"><i class="fa-solid fa-envelope"></i> Enquiries</a>
-            <ul>
-                <li><a href="{{ route('admin.contact-enquiries.index') }}">Contact Us Enquiries</a></li>
-                <li><a href="{{ route('admin.supplier-enquiries.index') }}">Bulk Order Enquiries</a></li>
-                <li><a href="{{ route('admin.other-enquiries.index') }}">Other Enquiries</a></li>
-            </ul>
-        </li>
+    <a href="#"><i class="fa-solid fa-envelope"></i> Enquiries</a>
+    <ul>
+        <li><a href="{{ route('admin.contact-enquiries.index') }}">Contact Us Enquiries</a></li>
+        <li><a href="{{ route('admin.supplier-enquiries.index') }}">Bulk Order Enquiries</a></li>
+        <li><a href="{{ route('admin.other-enquiries.index') }}">Other Enquiries</a></li>
+        <li><a href="{{ route('admin.coupon-enquiries.index') }}">Coupon Enquiries</a></li>
+    </ul>
+</li>
 
         {{-- MARKETING & SETTINGS --}}
         <li class="{{ request()->routeIs(

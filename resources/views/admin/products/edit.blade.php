@@ -1463,6 +1463,7 @@
     */
     let selectedAttributeValues = @json($selectedAttributeValues);
     let existingVariantsByType = @json($existingVariantsByType);
+let storageBaseUrl = "{{ asset('storage') }}"; // ✅ matches main image asset() pattern
 
     CKEDITOR.config.versionCheck = false;
     CKEDITOR.replace('description');
@@ -1511,6 +1512,52 @@
             variantDataByType[type][key] = variant;
         });
     });
+
+    let variantImageFiles = {};
+
+$(document).on('change', '.variant-image-input', function (e) {
+    const prefix = $(this).data('prefix');
+    if (!variantImageFiles[prefix]) variantImageFiles[prefix] = [];
+
+    const files = Array.from(e.target.files);
+    if ((variantImageFiles[prefix].length + files.length) > 6) {
+        alert('Maximum 6 images allowed per variant');
+        return;
+    }
+
+    files.forEach(file => variantImageFiles[prefix].push(file));
+    renderVariantImagePreview(prefix);
+});
+
+function renderVariantImagePreview(prefix) {
+    const $container = $('.variant-image-preview[data-prefix="' + prefix + '"]');
+    $container.html('');
+
+    (variantImageFiles[prefix] || []).forEach(function (file, index) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $container.append(`
+                <div class="thumb-box" style="width:50px;height:50px;">
+                    <img src="${e.target.result}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+                    <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeVariantImage('${prefix}', ${index})">×</button>
+                </div>
+            `);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeVariantImage(prefix, index) {
+    variantImageFiles[prefix].splice(index, 1);
+    renderVariantImagePreview(prefix);
+}
+
+function removeExistingVariantImage(id) {
+    if (confirm('Remove this variant image?')) {
+        $('#variant-img-' + id).remove();
+        $('<input>').attr({ type: 'hidden', name: 'delete_variant_images[]', value: id }).appendTo('form');
+    }
+}
 
     function comboKey(ids) {
         return ids.map(String).slice().sort(function (a, b) { return Number(a) - Number(b); }).join(',');
@@ -1595,6 +1642,14 @@
         let videoTransfer = new DataTransfer();
         selectedVideos.forEach(file => videoTransfer.items.add(file));
         document.getElementById('videos').files = videoTransfer.files;
+
+        $('.variant-image-input').each(function () {
+        const prefix = $(this).data('prefix');
+        const dt = new DataTransfer();
+        (variantImageFiles[prefix] || []).forEach(file => dt.items.add(file));
+        this.files = dt.files;
+        this.name = prefix + '[images][]';
+    });
     });
 
     // ── Video handling ─────────────────────────────────────────────
@@ -1977,12 +2032,27 @@
             row += `<td><input type="number" data-field="stock" name="${prefix}[stock]" class="form-control" value="${data.stock || ''}"></td>`;
         }
 
-        if (type === 'image') {
-            row += `<td>
-            ${data.image ? `<img src="/storage/${data.image}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);margin-bottom:6px;display:block">` : ''}
-            <input type="file" name="${prefix}[image]" class="form-control" style="height:auto;padding:4px">
-        </td>`;
-        }
+   if (type === 'image') {
+    let existingImagesHtml = '';
+    (data.images || []).forEach(function (img) {
+        existingImagesHtml += `
+            <div class="thumb-box" id="variant-img-${img.id}" style="width:50px;height:50px;">
+                <img src="${storageBaseUrl}/${img.image}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
+                <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeExistingVariantImage(${img.id})">×</button>
+            </div>`;
+    });
+
+    row += `<td style="min-width:220px">
+        <div class="media-grid" style="margin-bottom:6px;">${existingImagesHtml}</div>
+        <div class="upload-area variant-image-upload" style="padding:10px;">
+            <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
+            <div class="upload-icon" style="font-size:14px;margin-bottom:2px;"><i class="fa fa-cloud-upload"></i></div>
+            <div class="upload-sub">Click or drag images</div>
+        </div>
+        <div class="variant-image-preview media-grid" data-prefix="${prefix}" style="margin-top:6px;"></div>
+    </td>`;
+}
+
 
         comboIds.forEach(function (id) {
             row += `<input type="hidden" data-field="values" name="${prefix}[values][]" value="${id}">`;

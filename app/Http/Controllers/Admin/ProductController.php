@@ -22,6 +22,7 @@ use App\Models\ProductAddon;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
+use App\Models\ProductVariantImage;
 use App\Models\Collection;
 
 class ProductController extends Controller
@@ -34,68 +35,64 @@ class ProductController extends Controller
      */
     protected const VARIANT_TYPES = ['price', 'image', 'stock', 'sku'];
 
-    public function index(Request $request)
-    {
-        $query = Product::with('images');
+   public function index(Request $request)
+{
+    $query = Product::with('images');
 
-        // Categories dropdown
-        $categories = Category::whereNull('parent_id')
+    // Categories dropdown
+    $categories = Category::whereNull('parent_id')
+        ->orderBy('name')
+        ->get();
+
+    // Subcategories dropdown
+    $subCategories = collect();
+
+    if ($request->filled('category_id')) {
+        $subCategories = Category::where('parent_id', $request->category_id)
             ->orderBy('name')
             ->get();
-
-        // Subcategories dropdown
-        $subCategories = collect();
-
-        if ($request->filled('category_id')) {
-            $subCategories = Category::where('parent_id', $request->category_id)
-                ->orderBy('name')
-                ->get();
-        }
-
-        // Search
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        // Category Filter
-        if ($request->filled('category_id')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('categories.id', $request->category_id);
-            });
-        }
-
-        // Sub Category Filter
-        if ($request->filled('subcategory_id')) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('categories.id', $request->subcategory_id);
-            });
-        }
-
-        // Sorting
-        $sortBy = $request->get('sort_by', 'id');
-        $sortOrder = $request->get('sort_order', 'desc');
-
-        $allowedSorts = [
-            'id',
-            'name',
-            'price',
-            'status'
-        ];
-
-        if (in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        $products = $query
-            ->paginate(10)
-            ->appends($request->all());
-
-        return view('admin.products.index', compact(
-            'products',
-            'categories',
-            'subCategories'
-        ));
     }
+
+    // Search
+    if ($request->filled('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    // Category Filter
+    if ($request->filled('category_id')) {
+        $query->where('category_id', $request->category_id);
+    }
+
+    // Sub Category Filter
+    if ($request->filled('subcategory_id')) {
+        $query->where('subcategory_id', $request->subcategory_id);
+    }
+
+    // Sorting
+    $sortBy = $request->get('sort_by', 'id');
+    $sortOrder = $request->get('sort_order', 'desc');
+
+    $allowedSorts = [
+        'id',
+        'name',
+        'price',
+        'status'
+    ];
+
+    if (in_array($sortBy, $allowedSorts)) {
+        $query->orderBy($sortBy, $sortOrder);
+    }
+
+    $products = $query
+        ->paginate(10)
+        ->appends($request->all());
+
+    return view('admin.products.index', compact(
+        'products',
+        'categories',
+        'subCategories'
+    ));
+}
 
     public function create()
     {
@@ -166,6 +163,9 @@ class ProductController extends Controller
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
             'addons.*.price' => 'nullable|numeric|min:0',
+
+            // ✅ new: multiple images per image-type variant
+            'variants_image.*.images.*' => 'nullable|image|max:2048',
         ]);
 
 
@@ -367,6 +367,7 @@ class ProductController extends Controller
             'attributeValues.value',
 
             'variants.values.attributeValue',
+            'variants.images',
 
             'occasions',
 
@@ -432,6 +433,15 @@ class ProductController extends Controller
 
                         'image' => $variant->image,
 
+                        // ✅ full list of images for this variant (multi-image support)
+                        'images' => $variant->images->map(function ($img) {
+                            return [
+                                'id' => $img->id,
+                                'image' => $img->image,
+                                'is_default' => $img->is_default,
+                            ];
+                        })->values(),
+
                         'variant_name' => $variant->values
                             ->map(function ($v) {
                                 return $v->attributeValue->value;
@@ -487,6 +497,10 @@ class ProductController extends Controller
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
             'addons.*.price' => 'nullable|numeric|min:0',
+
+            // ✅ new: multiple images per image-type variant + per-image delete
+            'variants_image.*.images.*' => 'nullable|image|max:2048',
+            'delete_variant_images.*' => 'nullable|integer',
         ]);
 
         DB::beginTransaction();
@@ -612,6 +626,29 @@ class ProductController extends Controller
                             Storage::disk('public')->delete($vid->video);
                         }
                         $vid->delete();
+                    }
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Delete individually-removed variant images
+            |--------------------------------------------------------------------------
+            | Distinct from full variant deletion (handled in syncVariantsForType) —
+            | this is for when the admin removes ONE image from a variant that
+            | still keeps its other images / stays selected.
+            */
+
+            if ($request->filled('delete_variant_images')) {
+                foreach ($request->delete_variant_images as $imgId) {
+
+                    $img = ProductVariantImage::find($imgId);
+
+                    if ($img) {
+                        if (Storage::disk('public')->exists($img->image)) {
+                            Storage::disk('public')->delete($img->image);
+                        }
+                        $img->delete();
                     }
                 }
             }
@@ -788,17 +825,54 @@ class ProductController extends Controller
                 break;
 
             case ProductVariant::TYPE_IMAGE:
-                $uploaded = $request->file("variants_image.$index.image");
-
-                if ($uploaded instanceof \Illuminate\Http\UploadedFile) {
-
-                    if ($variant->image) {
-                        Storage::disk('public')->delete($variant->image);
-                    }
-
-                    $variant->image = $uploaded->store('product-variants', 'public');
-                }
+                // Multiple images per variant are handled AFTER save() in
+                // createVariantsForType() / syncVariantsForType(), since
+                // ProductVariantImage rows need a real variant_id to attach to.
                 break;
+        }
+    }
+
+    /**
+     * Stores newly-uploaded images for an image-type variant. Existing
+     * ProductVariantImage rows are left untouched (same "add new, keep old"
+     * pattern used for product-level images/videos) unless the admin
+     * explicitly marks one for deletion via delete_variant_images[].
+     */
+    protected function storeVariantImages(Request $request, ProductVariant $variant, int $index): void
+    {
+        $files = $request->file("variants_image.$index.images") ?? [];
+
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        $hasExisting = $variant->images()->exists();
+
+        foreach ($files as $i => $file) {
+
+            if (!$file instanceof \Illuminate\Http\UploadedFile) {
+                continue;
+            }
+
+            $path = $file->store('product-variants', 'public');
+
+            ProductVariantImage::create([
+                'variant_id' => $variant->id,
+                'image' => $path,
+                // First image becomes default only if this variant had none before.
+                'is_default' => (!$hasExisting && $i === 0) ? 1 : 0,
+            ]);
+        }
+
+        // Keep the legacy single `image` column in sync as "the default
+        // image for this variant" — some older frontend code may still
+        // read $variant->image directly.
+        $default = $variant->images()->where('is_default', 1)->first()
+            ?? $variant->images()->first();
+
+        if ($default) {
+            $variant->image = $default->image;
+            $variant->save();
         }
     }
 
@@ -828,6 +902,10 @@ class ProductController extends Controller
                     'variant_id' => $variant->id,
                     'attribute_value_id' => $valueId,
                 ]);
+            }
+
+            if ($type === ProductVariant::TYPE_IMAGE) {
+                $this->storeVariantImages($request, $variant, $index);
             }
         }
     }
@@ -869,6 +947,10 @@ class ProductController extends Controller
 
             $variant->save();
 
+            if ($type === ProductVariant::TYPE_IMAGE) {
+                $this->storeVariantImages($request, $variant, $index);
+            }
+
             if (empty($data['id'])) {
 
                 $existingIds[] = $variant->id;
@@ -909,6 +991,14 @@ class ProductController extends Controller
 
             if ($variant->image) {
                 Storage::disk('public')->delete($variant->image);
+            }
+
+            // ✅ delete all of this variant's images too
+            foreach ($variant->images as $img) {
+                if (Storage::disk('public')->exists($img->image)) {
+                    Storage::disk('public')->delete($img->image);
+                }
+                $img->delete();
             }
 
             ProductVariantValue::where('variant_id', $variant->id)->delete();

@@ -39,12 +39,30 @@
                                         <div class="aq-product-brand-badge">
                                             <img src="{{ $product->display_image }}" alt="{{ $product->name }}" />
                                         </div>
+                                        <!--<div class="aq-product-actions">-->
+                                        <!--    <button class="aq-product-action-btn" title="Quick Consultation"-->
+                                        <!--         onclick="openGlobalDrawer('products')">-->
+                                        <!--        <i class="fa-regular fa-envelope"></i>-->
+                                        <!--    </button>-->
+                                        <!--</div>-->
+                                        
                                         <div class="aq-product-actions">
-                                            <button class="aq-product-action-btn" title="Quick Consultation"
-                                                 onclick="openGlobalDrawer('products')">
-                                                <i class="fa-regular fa-envelope"></i>
-                                            </button>
-                                        </div>
+    <!-- Quick Consultation -->
+   <button class="aq-product-action-btn"
+        title="Chat on WhatsApp"
+        onclick="window.open('https://wa.me/917905015386', '_blank')">
+    <i class="fa-brands fa-whatsapp"></i>
+</button>
+
+</div>
+ <div class="aq-product-actions2">
+    <!-- Wishlist -->
+    <button class="aq-product-action-btn {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}"
+            title="Add to Wishlist"
+            onclick="addToWishlist({{ $product->id }})">
+        <i class="fa-regular fa-heart"></i>
+    </button>
+</div>
                                     </div>
                                     <div class="aq-product-card-info">
                                         <span class="aq-product-card-brand-name">

@@ -33,6 +33,7 @@ use App\Models\Setting;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\CategoryAttribute;
+use App\Models\CouponEnquiry;
 
 class FrontController extends Controller
 {
@@ -102,22 +103,37 @@ class FrontController extends Controller
             ->get();
 
 
-        $featuredCategories = Category::with([
-            'products.images'
-        ])
-            ->where('status', 1)
-            ->where('is_featured', 1) // or your featured flag
+        $featuredCategories = Category::where('status', 1)
+            ->where('is_featured', 1)
             ->take(5)
             ->get()
             ->map(function ($category) {
 
-                $prices = $category->products->pluck('price')->filter();
+                // This category could itself be a parent OR a subcategory.
+                // Collect: itself + its children (if any) — covers both cases.
+                $childIds = $category->children()->pluck('id');
+                $allIds = $childIds->push($category->id);
 
+                // Match products where EITHER column points to any of these IDs
+                $products = Product::where(function ($q) use ($allIds) {
+                    $q->whereIn('category_id', $allIds)
+                        ->orWhereIn('subcategory_id', $allIds);
+                })
+                    ->visible()
+                    ->with('images')
+                    ->latest()
+                    ->take(6) // blade only shows first 6 anyway
+                    ->get();
+
+                $prices = $products->pluck('price')->filter();
+
+                $category->setRelation('products', $products); // ✅ overrides the products() relation with our matched set
                 $category->min_price = $prices->min();
                 $category->max_price = $prices->max();
 
                 return $category;
             });
+
 
         $galleryColumn1 = GalleryImage::where('status', 1)
             ->where('column_no', 1)
@@ -341,15 +357,30 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
+        // Check if a subcategory is selected via ?subcategory=slug
+        $selectedSubcategory = null;
+        if ($request->filled('subcategory')) {
+            $selectedSubcategory = $subcategories->firstWhere('slug', $request->subcategory);
+        }
+
         $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
-        $this->scopeByContext($products, 'category', $category);
+
+        if ($selectedSubcategory) {
+            // Direct subcategory_id match — scopeByContext's 'category' branch
+            // checks category_id / subcategory_id-of-children, which is wrong
+            // for a leaf subcategory (it has no children of its own).
+            $products->where('subcategory_id', $selectedSubcategory->id);
+        } else {
+            $this->scopeByContext($products, 'category', $category);
+        }
+
         $products = $products->latest()->paginate(12);
 
         return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
             'contextType' => 'category',
-            'contextModel' => $category,
+            'contextModel' => $selectedSubcategory ?: $category,
             'categories' => collect(), // not needed on category page
-            'pageTitle' => $category->name,
+            'pageTitle' => $selectedSubcategory ? $selectedSubcategory->name : $category->name,
         ]);
     }
 
@@ -583,7 +614,12 @@ class FrontController extends Controller
             'attributeValues.attribute',
             'attributeValues.value',
 
-            'variants.values.attributeValue.attribute'
+            'variants' => function ($q) {
+                $q->with([
+                    'values.attributeValue.attribute',
+                    'images'
+                ]);
+            },
         ])
             ->where('slug', $slug)
             ->visible()
@@ -770,13 +806,17 @@ class FrontController extends Controller
                     'mrp' => $variant->mrp,
                     'stock' => $variant->stock,
                     'image' => $variant->image,
+                    'images' => $variant->images
+                        ->sortByDesc('is_default')
+                        ->pluck('image')
+                        ->values()
+                        ->toArray(),
                     'sku' => $variant->sku,
                 ];
             }
 
             $variantsByType[$type] = $bucket;
         }
-
         $reviews = $product->approvedReviews()
             ->with(['customer', 'images'])
             ->latest()
@@ -787,6 +827,20 @@ class FrontController extends Controller
 
         $setting = Setting::first();
 
+        $activeCoupons = \App\Models\Coupon::where('status', 1)
+            ->where(function ($q) {
+                $q->whereNull('start_date')->orWhere('start_date', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('usage_limit')
+                    ->orWhereColumn('used_count', '<', 'usage_limit');
+            })
+            ->orderByDesc('discount_value')
+            ->get(['code', 'discount_type', 'discount_value', 'minimum_order_amount', 'maximum_discount']);
+
         return view('front-pages.product-detail', compact(
             'product',
             'newArrivals',
@@ -796,7 +850,8 @@ class FrontController extends Controller
             'reviews',
             'avgRating',
             'reviewsCount',
-            'setting'
+            'setting',
+            'activeCoupons'
         ));
     }
 
@@ -1224,5 +1279,25 @@ class FrontController extends Controller
         return view('front-pages.occasions', compact('occasions'));
     }
 
+
+    public function couponEnquiryStore(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'phone' => 'required|string|max:20',
+        ]);
+
+        CouponEnquiry::create([
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'country_code' => $request->country_code ?? '+91',
+            'whatsapp_optin' => $request->boolean('whatsapp_optin'),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Thanks! Your 10% off code request has been received.',
+        ]);
+    }
 
 }
