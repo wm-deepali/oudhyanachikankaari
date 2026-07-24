@@ -287,22 +287,24 @@
 
                                 <!-- Payment Method -->
                                 <h4 class="aq-checkout-section-title font-family-heading my-4 pb-2">3. Payment Method</h4>
-                                <div class="checkout-payment-methods">
-                                    <div class="payment-method-box active">
-                                        <label class="aq-custom-radio-container">
-                                            <input type="radio" name="payment_method" value="razorpay" checked>
-                                            <span class="checkmark-radio"></span>
-                                            Pay Online
-                                        </label>
-                                    </div>
-                                    <div class="payment-method-box">
-                                        <label class="aq-custom-radio-container">
-                                            <input type="radio" name="payment_method" value="cod">
-                                            <span class="checkmark-radio"></span>
-                                            Cash on Delivery (COD)
-                                        </label>
-                                    </div>
-                                </div>
+                               <div class="checkout-payment-methods">
+    <div class="payment-method-box active">
+        <label class="aq-custom-radio-container">
+            <input type="radio" name="payment_method" value="razorpay" checked>
+            <span class="checkmark-radio"></span>
+            Pay Online
+        </label>
+    </div>
+    @if($general && $general->cod_enabled)
+        <div class="payment-method-box">
+            <label class="aq-custom-radio-container">
+                <input type="radio" name="payment_method" value="cod">
+                <span class="checkmark-radio"></span>
+                Cash on Delivery (COD)
+            </label>
+        </div>
+    @endif
+</div>
 
                                 <div class="aq-checkout-disclaimer">
                                     <i class="fa-solid fa-lock mr-5"></i> Your personal data will be used to process your

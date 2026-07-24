@@ -1,6 +1,7 @@
 @include('admin.top-header')
 
 <div class="main-section">
+    
     @include('admin.header')
 
     <style>

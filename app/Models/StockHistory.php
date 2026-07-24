@@ -8,7 +8,6 @@ class StockHistory extends Model
 {
     protected $fillable = [
         'product_id',
-        'stock_variant_id',
         'type',
         'quantity',
         'stock_before',
@@ -46,10 +45,4 @@ class StockHistory extends Model
     {
         return $this->type === 'debit';
     }
-
-    public function stockVariant()
-    {
-        return $this->belongsTo(ProductVariant::class, 'stock_variant_id');
-    }
-
 }

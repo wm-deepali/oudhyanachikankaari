@@ -30,14 +30,25 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
 
-            $sessionId = session()->getId();
+ if (auth('customer')->check()) {
 
-            $cart = Cart::with([
+                  $cart = Cart::with([
+                'items.product.images',
+                'items'
+            ])
+                ->where('user_id', auth('customer')->id())
+                ->first();
+
+        } else {
+  $sessionId = session()->getId();
+             $cart = Cart::with([
                 'items.product.images',
                 'items'
             ])
                 ->where('session_id', $sessionId)
                 ->first();
+        }
+      
 
             $count = $cart ? $cart->items->count() : 0;
 
@@ -84,7 +95,6 @@ class AppServiceProvider extends ServiceProvider
             })
             ->pluck('product_id')
             ->toArray();
-
             $view->with(
                 [
                     'globalCartCount' => $count,

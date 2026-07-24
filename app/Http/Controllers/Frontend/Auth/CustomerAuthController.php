@@ -13,10 +13,14 @@ use App\Models\Wishlist;
 
 class CustomerAuthController extends Controller
 {
-    public function registerForm()
+    public function registerForm(Request $request)
     {
         if (Auth::guard('customer')->check()) {
             return redirect()->route('user.dashboard.index');
+        }
+
+        if ($request->filled('redirect')) {
+            session(['url.intended' => $request->redirect]);
         }
 
         return view('user.register');
@@ -37,22 +41,23 @@ class CustomerAuthController extends Controller
 
     public function register(Request $request)
     {
+        // alternate_mobile is optional, but if filled must still be a valid format
         $validated = $request->validate(
             [
                 'name' => ['required', 'max:100', 'regex:/^[A-Za-z\s]+$/'],
                 'email' => ['required', 'email', 'unique:customers,email'],
                 'mobile' => ['required', 'regex:/^[6-9]\d{9}$/', 'unique:customers,mobile'],
-                'alternate_mobile' => ['required', 'regex:/^[6-9]\d{9}$/', 'different:mobile'],
+                'alternate_mobile' => ['nullable', 'regex:/^[6-9]\d{9}$/'],
                 'password' => ['required', 'min:8', 'confirmed'],
             ],
             [
                 'name.regex' => 'Name should contain only letters.',
                 'mobile.regex' => 'Enter a valid Indian mobile number.',
                 'alternate_mobile.regex' => 'Enter a valid alternate mobile number.',
-                'alternate_mobile.different' => 'Alternate number must be different from mobile number.',
                 'password.confirmed' => 'Password and confirm password do not match.',
             ]
         );
+
         $customer = Customer::create($validated);
 
         \App\Services\Email\EmailDispatcher::send(
@@ -63,10 +68,22 @@ class CustomerAuthController extends Controller
             ]
         );
 
+        // Capture the guest session id BEFORE regenerating it, so the guest
+        // cart/wishlist tied to this session can still be found and merged.
+        $guestSessionId = session()->getId();
 
+        Auth::guard('customer')->login($customer);
+
+        $this->mergeGuestCart($customer, $guestSessionId);
+        $this->mergeGuestWishlist($customer, $guestSessionId);
+
+        $request->session()->regenerate();
+
+        // Sends the customer back to wherever they came from (e.g. the cart
+        // page) instead of always landing on the dashboard after signup.
         return redirect()
-            ->route('user.login')
-            ->with('success', 'Registration completed successfully. Please login.');
+            ->intended(route('user.dashboard.index'))
+            ->with('success', 'Registration completed successfully.');
     }
 
 

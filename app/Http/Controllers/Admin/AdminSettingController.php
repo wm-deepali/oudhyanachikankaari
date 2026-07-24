@@ -233,18 +233,6 @@ class AdminSettingController extends Controller
         $validated['low_stock_alert']
             = $request->has('low_stock_alert');
 
-        $validated['order_cancelled']
-            = $request->has('order_cancelled');
-
-        $validated['payment_received']
-            = $request->has('payment_received');
-
-        $validated['coupon']
-            = $request->has('coupon');
-
-        $validated['welcome']
-            = $request->has('welcome');
-
         SmtpSetting::updateOrCreate(
             ['id' => 1],
             $validated
@@ -321,6 +309,9 @@ class AdminSettingController extends Controller
 
         $validated['stock_alerts']
             = $request->has('stock_alerts');
+            
+             $validated['cod_enabled']
+            = $request->has('cod_enabled');
 
         if ($request->hasFile('logo')) {
 

@@ -323,12 +323,12 @@
                         <div>
                             <div style="display:flex;align-items:center;gap:8px">
                                 <span class="widget-num">8</span>
-                                <span class="widget-title">Premium Gifting Gallery</span>
+                                <span class="widget-title">Premium Gallery</span>
                             </div>
                             <span class="type-badge tb-multiple"><i class="fa fa-th-large"></i> Multiple</span>
                         </div>
                     </div>
-                    <div style="font-size:12px;color:var(--text-hint)">Image gallery showcasing premium gifting products or curated looks.</div>
+                    <div style="font-size:12px;color:var(--text-hint)">Image gallery showcasing premium collections or curated looks.</div>
                     <div class="widget-actions">
                         <a href="{{ route('admin.gallery-images.index') }}" class="btn-manage">
                             <i class="fa fa-pencil"></i> Manage

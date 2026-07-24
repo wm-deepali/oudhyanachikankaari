@@ -30,11 +30,10 @@
             <div class="row align-items-center mb-80 mt-50">
                 <div class="col-lg-5 mb-5 mb-lg-0">
                     <span class="aq-luxury-subtitle">Bespoke Curation for Bulk Orders</span>
-                    <h2 class="aq-luxury-title mb-4">Elevate Your Corporate Gifting with Chikankari Elegance</h2>
+                    <h2 class="aq-luxury-title mb-4">Elevate Your Wardrobe with our Premium Collections</h2>
                     <p class="aq-luxury-desc mb-4">
-                        Whether it’s premium employee gifting, high-end client giveaways, or exclusive corporate
-                        events, we provide customized Chikankari apparel and handcrafted luxury solutions with
-                        impeccable quality and reliable delivery across India.
+                        Discover premium Chikankari suits, sarees, kurtis, and elegant women's ethnic wear, 
+                        handcrafted with exquisite embroidery, exceptional quality, and delivered across India.
                     </p>
                     <div class="aq-luxury-contact-info">
                         <div class="info-item">

@@ -67,7 +67,6 @@ class EmailDispatcher
      */
     public static function send(string $eventKey, string $to, array $variables = [], ?string $toName = null): array
     {
-       
         $smtp = SmtpSetting::getInstance();
 
         // ── Guard 1: SmtpSetting per-event toggle ─────────────────────────────

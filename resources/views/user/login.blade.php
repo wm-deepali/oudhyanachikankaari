@@ -155,9 +155,12 @@
                                 <!-- <div class="aq-auth-alt-link">
                                                     <a href="#"><i class="fa-solid fa-globe mr-5"></i> Click here for International Users</a>
                                                 </div> -->
-                                <div class="aq-auth-alt-link mt-15">
-                                    Don't have an account? <a href="{{ route('user.register') }}">Sign Up here</a>
-                                </div>
+                               <div class="aq-auth-alt-link mt-15">
+    Don't have an account?
+    <a href="{{ route('user.register', request('redirect') ? ['redirect' => request('redirect')] : []) }}">
+        Sign Up here
+    </a>
+</div>
                             </div>
 
                         </div>

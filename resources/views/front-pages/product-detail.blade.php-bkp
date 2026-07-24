@@ -9,10 +9,7 @@
     @endphp
 
     <style>
-.qty-btn:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-}
+
         
         .aq-preloader-logo img {
     width: 66px;
@@ -346,235 +343,6 @@ font-size:15px;
 #variant-thumbs-container {
     display: contents;
 }
-#variant-images-container,
-#variant-thumbs-container {
-    display: contents;
-}
-
-/* Baseline (desktop) — recreates the gap-4 spacing */
-.aq-gallery-slides {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* ══════════════════════════════════════════════
-   VARIANT AVAILABILITY — diagonal line for "not
-   available in this color" + small "Sold Out"
-   label for "available combo but zero stock"
-   ══════════════════════════════════════════════ */
-.variant-option-unavailable {
-    position: relative !important;
-    opacity: 0.4 !important;
-    pointer-events: none !important;
-    cursor: not-allowed !important;
-}
-.variant-option-unavailable::after {
-    content: '';
-    position: absolute;
-    left: 3px;
-    right: 3px;
-    top: 50%;
-    height: 1px;
-    background: #999;
-    transform: rotate(-18deg);
-    pointer-events: none;
-}
-
-.variant-option-soldout {
-    position: relative !important;
-    opacity: 0.55 !important;
-    pointer-events: none !important;
-    cursor: not-allowed !important;
-}
-.aq-soldout-label {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    line-height: 1;
-    font-weight: 700;
-    letter-spacing: .2px;
-    color: #b3261e;
-    text-transform: uppercase;
-    white-space: nowrap;
-    pointer-events: none;
-}
-/* radio/image swatch labels need extra bottom room so the label
-   doesn't collide with the size text */
-.aq-radio-option.variant-option-soldout,
-.aq-image-swatch.variant-option-soldout {
-    padding-bottom: 16px;
-}
-
-/* ══════════════════════════════════════════════
-   MOBILE — Image Slider + Sticky disable + 2-col grid
-   Single, flat 991.98px block — no nesting
-   ══════════════════════════════════════════════ */
-@media (max-width: 991.98px) {
-
-    .aq-gallery-slides {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        gap: 0;
-    }
-    .aq-gallery-slides::-webkit-scrollbar { display: none; }
-
-    .aq-gallery-slides .aq-gallery-main-img-wrap {
-        flex: 0 0 100%;
-        min-width: 100%;
-        scroll-snap-align: start;
-        margin: 0;
-    }
-    .aq-gallery-slides .aq-gallery-main-img,
-    .aq-gallery-slides video {
-        width: 100%;
-        aspect-ratio: 3 / 4;
-        object-fit: cover;
-        border-radius: 0 !important;
-    }
-
-    .aq-product-gallery > .d-lg-none.aq-gallery-thumbs {
-        display: none !important;
-    }
-
-    .aq-gallery-dots {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 7px;
-        padding: 14px 0 4px;
-    }
-    .aq-gallery-dots .aq-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #d9d9d9;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        transition: all .25s ease;
-    }
-    .aq-gallery-dots .aq-dot.active {
-        background: #333;
-        width: 8px;
-        height: 8px;
-    }
-
-    .aq-product-details-summary {
-        padding-top: 4px;
-    }
-    .design-title {
-        font-size: 19px;
-    }
-    .aq-details-price-box {
-        margin-top: 4px;
-    }
-
-    /* Sticky OFF on mobile — everything just stacks normally */
-    .aq-product-details-area .aq-sticky-column {
-        position: static !important;
-    }
-}
-
-/* ══════════════════════════════════════════════
-   MOBILE — 2-column New Arrivals / Related Products cards
-   Separate 575.98px block — only once, not nested
-   ══════════════════════════════════════════════ */
-@media (max-width: 575.98px) {
-
-    .aq-new-arrivals-section .aq-product-card-desc,
-    .aq-related-products-section .aq-product-card-desc,
-    .aq-new-arrivals-section .aq-product-card-sizes,
-    .aq-related-products-section .aq-product-card-sizes {
-        display: none !important;
-    }
-
-    .aq-new-arrivals-section .col,
-    .aq-related-products-section .col {
-        display: flex;
-    }
-    .aq-new-arrivals-section .aq-product-card,
-    .aq-related-products-section .aq-product-card {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    .aq-new-arrivals-section .aq-product-card-info,
-    .aq-related-products-section .aq-product-card-info {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .aq-new-arrivals-section .aq-product-card-title,
-    .aq-related-products-section .aq-product-card-title {
-        font-size: 13.5px;
-        line-height: 1.35;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 2.7em;
-    }
-
-    .aq-new-arrivals-section .aq-product-card-bottom,
-    .aq-related-products-section .aq-product-card-bottom {
-        margin-top: auto;
-        padding-top: 10px;
-    }
-
-    .aq-new-arrivals-section .aq-product-card-price-group,
-    .aq-related-products-section .aq-product-card-price-group {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        column-gap: 6px;
-        row-gap: 2px;
-    }
-    .aq-new-arrivals-section .aq-product-card-price,
-    .aq-related-products-section .aq-product-card-price {
-        font-size: 15px;
-    }
-    .aq-new-arrivals-section .aq-product-card-old-price,
-    .aq-related-products-section .aq-product-card-old-price {
-        font-size: 12px;
-    }
-    .aq-new-arrivals-section .aq-product-card-discount,
-    .aq-related-products-section .aq-product-card-discount {
-        font-size: 10.5px;
-        font-weight: 600;
-        color: #000 !important;
-        white-space: nowrap;
-        flex-basis: 100%;
-        width: fit-content;
-        background-color: #f8f2e9;
-        padding: 2px 8px;
-        border-radius: 20px;
-        margin-top: 3px;
-        letter-spacing: 0.3px;
-    }
-
-    .aq-new-arrivals-section .aq-product-card-cta,
-    .aq-related-products-section .aq-product-card-cta {
-        font-size: 11px;
-        letter-spacing: 0.3px;
-        padding: 9px 6px;
-        gap: 6px;
-        white-space: nowrap;
-    }
-    .aq-new-arrivals-section .aq-product-card-cta i,
-    .aq-related-products-section .aq-product-card-cta i {
-        font-size: 12px;
-    }
-
-}
     </style>
 
     <main>
@@ -593,17 +361,17 @@ font-size:15px;
                 
                 
                 
-               <div class="aq-catpage-breadcrumbs">
-    <a href="{{ route('home') }}">Home</a>
-    <span>/</span>
-    <a href="{{ route('products.listing', $product->category->slug) }}">
-        {{ $product->category->name }}
-    </a>
-    <span class="d-none d-md-inline">/</span>
-    <span class="current d-none d-md-inline">
-        {{ $product->name }}
-    </span>
-</div>
+                <div class="aq-catpage-breadcrumbs">
+                    <a href="{{ route('home') }}">Home</a>
+                    <span>/</span>
+                    <a href="{{ route('products.listing', $product->category->slug) }}">
+                        {{ $product->category->name }}
+                    </a>
+                    <span>/</span>
+                    <span class="current">
+                        {{ $product->name }}
+                    </span>
+                </div>
                 
                 
                 
@@ -632,7 +400,7 @@ font-size:15px;
                     <!-- Left Column: Thumbnails (Sticky) -->
                     <div class="col-lg-1 d-none d-lg-block">
                         <div class="aq-sticky-column">
-                            <div class="aq-gallery-thumbs d-flex flex-column h-100">
+                            <div class="aq-gallery-thumbs d-flex flex-column h-100" style="max-height: calc(100vh - 150px);">
                                 <div id="variant-thumbs-container"></div>
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
@@ -662,8 +430,7 @@ font-size:15px;
                             </div>
 
                             <!-- Variant preview image — populated when a color/image variant is selected -->
-                            <div class="aq-gallery-slides" id="aqGallerySlides">
-                            <div id="variant-images-container"></div>
+<div id="variant-images-container"></div>
 
                             <!-- All Images Stacked -->
                             @foreach($product->images as $index => $image)
@@ -679,10 +446,6 @@ font-size:15px;
                                     <video src="{{ asset('storage/' . $video->video) }}" style="width: 100%; border-radius: 8px; object-fit: cover;" controls playsinline></video>
                                 </div>
                             @endforeach
-                            </div>
-
-<!-- Mobile-only dot indicators (JS-populated) -->
-<div class="aq-gallery-dots d-lg-none" id="aqGalleryDots"></div>
                             
                             <!-- Mobile Thumbnails -->
                             <div class="d-lg-none aq-gallery-thumbs d-flex flex-row overflow-auto mt-3">
@@ -700,8 +463,8 @@ font-size:15px;
                             </div>
                         </div>
 
-                        <!-- SUITABLE FOR SELECTIONS — Desktop only (mobile version moved below Buy buttons) -->
-                        <div class="aq-details-suitable-wrap mt-40 mb-20 d-none d-lg-block">
+                        <!-- SUITABLE FOR SELECTIONS -->
+                        <div class="aq-details-suitable-wrap mt-40 mb-20">
                             <h5 class="aq-details-suitable-title">
                                 <i class="fa-solid fa-check-double"></i> Perfectly Suited For
                             </h5>
@@ -719,8 +482,8 @@ font-size:15px;
                             </div>
                         </div>
                         
-                       <!-- Trust Badges Section — Desktop only (mobile version moved below Buy buttons) -->
-                        <div class="aq-luxury-trust-badges d-none d-lg-block">
+                        <!-- Trust Badges Section -->
+                        <div class="aq-luxury-trust-badges">
                             @if($product->pan_india)
                                 <div class="aq-trust-badge-item">
                                     <span class="aq-trust-badge-icon">
@@ -749,7 +512,7 @@ font-size:15px;
 
                     <!-- Right Column: Product Specs & Ordering Drawer Trigger -->
                     <div class="col-lg-4 col-12">
-                        <div class="aq-sticky-column" style="padding-right: 10px;">
+                        <div class="aq-sticky-column" style="max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 10px;">
                         
                         
                         
@@ -801,8 +564,22 @@ font-size:15px;
                             </div>
                             
                             <!-- Promo Discount Box -->
-                             <div class="coupon-container" id="couponContainer"></div>
-                            
+                            <div class="coupon-container">
+
+    <!-- B2G10 Coupon -->
+    <div class="coupon-card" id="coupon-b2g10">
+      <div class="coupon-icon">
+        <img src="https://cdn.shopify.com/s/files/1/0826/6157/2916/files/discount-44c58e749e567564fb2f555dff7651bd1440b89dd808b77e29f72cddeb818dfa.svg?v=1747926128" alt="Discount Icon">
+      </div>
+      <div class="coupon-details">
+        <div class="coupon-code">BUY 2 OR MORE</div>
+        <div class="coupon-desc">Get extra 10% off</div>
+      </div>
+    </div>
+
+  
+
+  </div>
 
                             <p class="aq-details-short-desc">
                                 {{ $product->short_description }}
@@ -878,7 +655,7 @@ font-size:15px;
                     <select class="form-select aq-size-dropdown" data-attribute-id="{{ $attributeId }}">
                         <option value="" disabled selected>Select {{ $attribute['name'] }}</option>
                         @foreach($attribute['values'] as $valueId => $value)
-                            <option value="{{ $valueId }}" data-original-text="{{ $value['value'] }}">{{ $value['value'] }}</option>
+                            <option value="{{ $valueId }}">{{ $value['value'] }}</option>
                         @endforeach
                     </select>
                     <div class="d-none">
@@ -1027,7 +804,7 @@ font-size:15px;
                             <div class=" mb-30 mt-30">
                                 <div class="d-flex flex-column gap-2 w-100">
                                     <div class="aq-qty-selector luxury-qty d-flex align-items-center justify-content-center gap-3">
-                                        <button type="button" class="qty-btn" onclick="aqAdjustQty(-1)"><i
+                                        <button type="button" class="qty-btn" onclick="adjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
                                         <input type="number" id="aqDetailQty" value="{{ $product->min_qty }}"
                                             min="{{ $product->min_qty }}" max="{{ $product->stock }}" />
@@ -1035,7 +812,7 @@ font-size:15px;
                                         <span id="currentStock" class="d-none">
                                             {{ $product->stock }}
                                         </span>
-                                        <button type="button" class="qty-btn" onclick="aqAdjustQty(1)"><i
+                                        <button type="button" class="qty-btn" onclick="adjustQty(1)"><i
                                                 class="fa-solid fa-plus"></i></button>
                                     </div>
                                     @if($product->stock >= $product->min_qty)
@@ -1053,7 +830,7 @@ font-size:15px;
                                     @endif
                                     
                                     
-                                    @if($product->stock >= $product->min_qty)
+                                     @if($product->stock >= $product->min_qty)
                                     <button class="btn-design-secondary aq-buy-now-btn"
                                         onclick="addToCart({{ $product->id }})">
                                         <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Buy it Now
@@ -1065,51 +842,6 @@ font-size:15px;
                                     </button>
                                 @endif
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Mobile-only: Suitable For + Trust Badges (shown here so product info comes right after images) -->
-                        <div class="d-lg-none">
-                            <div class="aq-details-suitable-wrap mt-30 mb-20">
-                                <h5 class="aq-details-suitable-title">
-                                    <i class="fa-solid fa-check-double"></i> Perfectly Suited For
-                                </h5>
-                                <div class="aq-details-suitable-grid">
-                                    @foreach($product->occasions as $occasion)
-                                        <div class="aq-details-suitable-item">
-                                            <div class="aq-details-suitable-icon">
-                                                <i class="fa-solid fa-gift"></i>
-                                            </div>
-                                            <span>{{ $occasion->title }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div class="aq-luxury-trust-badges">
-                                @if($product->pan_india)
-                                    <div class="aq-trust-badge-item">
-                                        <span class="aq-trust-badge-icon">
-                                            <i class="fa-solid fa-truck-fast"></i>
-                                        </span>
-                                        <div class="aq-trust-badge-content">
-                                            <span class="aq-trust-badge-text">PAN India Delivery</span>
-                                            <span class="aq-trust-badge-sub">{{ $product->delivery_time ?: 'Express Shipping Available' }}</span>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if($product->quality)
-                                    <div class="aq-trust-badge-item">
-                                        <span class="aq-trust-badge-icon">
-                                            <i class="fa-solid fa-circle-check"></i>
-                                        </span>
-                                        <div class="aq-trust-badge-content">
-                                            <span class="aq-trust-badge-text">100% Quality Audited</span>
-                                            <span class="aq-trust-badge-sub">Strict Assurance Audit</span>
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
                         </div>
 
@@ -1348,18 +1080,14 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-4 justify-content-center">
                     @foreach($newArrivals as $newArrival)
 
                         @php
                             $otherImages = $newArrival->images
                                 ->where('is_default', 0)
                                 ->values();
-                                
-    $newArrivalStock = $newArrival->variants->count()
-        ? $newArrival->variants->where('type', 'stock')->sum('stock')
-        : $newArrival->stock;
-@endphp
+                        @endphp
 
                         <div class="col">
                             <div class="aq-product-card" data-category="onboarding" data-price="1899">
@@ -1432,54 +1160,24 @@ font-size:15px;
                                             </span>
 
                                             <span class="aq-product-card-discount">
-    (You Save {{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}% Off)
-</span>
+                                                ({{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}%
+                                                OFF)
+                                            </span>
                                         @endif
 
                                     </div>
-                                   @php
-    $listingAttributes = \App\Models\CategoryAttribute::where('category_id', $newArrival->category_id)
-        ->where('show_on_listing', 1)
-        ->pluck('attribute_id')
-        ->toArray();
-
-    $listingValues = $newArrival->attributeValues
-        ->whereIn('attribute_id', $listingAttributes);
-
-    $groupedValues = $listingValues->groupBy('attribute_id');
-
-
-            $availableStock = $newArrival->variants->count()
-        ? $newArrival->variants->sum('stock')
-        : $newArrival->stock;
-@endphp
-
-@if($groupedValues->count())
-    @foreach($groupedValues as $attributeValues)
-        <a href="{{ route('product.details', $newArrival->slug) }}"
-           style="text-decoration:none;color:inherit;">
-            <div class="aq-product-card-sizes">
-                @foreach($attributeValues as $attributeValue)
-                    <span class="aq-size-badge">
-                        {{ $attributeValue->value->value }}
-                    </span>
-                @endforeach
-            </div>
-        </a>
-    @endforeach
-@endif
-                                   <div class="aq-product-card-bottom">
-    @if($newArrivalStock >= $newArrival->min_qty)
-        <button class="aq-product-card-cta"
-                onclick="addToCartCard({{ $newArrival->id }}, {{ $newArrival->min_qty }}, this)">
-            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-        </button>
-    @else
-        <button class="aq-product-card-cta" disabled style="background:#999;cursor:not-allowed;">
-            <i class="fa-solid fa-ban"></i> Sold Out
-        </button>
-    @endif
-</div>
+                                    <div class="aq-product-card-sizes">
+                                        <span class="aq-size-badge">S</span>
+                                        <span class="aq-size-badge">M</span>
+                                        <span class="aq-size-badge active">L</span>
+                                        <span class="aq-size-badge">XL</span>
+                                        <span class="aq-size-badge">XXL</span>
+                                    </div>
+                                    <div class="aq-product-card-bottom">
+                                        <button class="aq-product-card-cta">
+                                            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1502,7 +1200,7 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-1 g-4 justify-content-center">
 
                     @foreach($relatedProducts as $relatedProduct)
 
@@ -1588,55 +1286,19 @@ font-size:15px;
                                             </span>
                                         @endif
 
-                                        </div>
-                                       @php
-    $listingAttributes = \App\Models\CategoryAttribute::where('category_id', $relatedProduct->category_id)
-        ->where('show_on_listing', 1)
-        ->pluck('attribute_id')
-        ->toArray();
-
-    $listingValues = $relatedProduct->attributeValues
-        ->whereIn('attribute_id', $listingAttributes);
-
-    $groupedValues = $listingValues->groupBy('attribute_id');
-
-
-            $availableStock = $relatedProduct->variants->count()
-        ? $relatedProduct->variants->sum('stock')
-        : $relatedProduct->stock;
-@endphp
-
-@if($groupedValues->count())
-    @foreach($groupedValues as $attributeValues)
-        <a href="{{ route('product.details', $relatedProduct->slug) }}"
-           style="text-decoration:none;color:inherit;">
-            <div class="aq-product-card-sizes">
-                @foreach($attributeValues as $attributeValue)
-                    <span class="aq-size-badge">
-                        {{ $attributeValue->value->value }}
-                    </span>
-                @endforeach
-            </div>
-        </a>
-    @endforeach
-@endif
-                                   @php
-    $relatedStock = $relatedProduct->variants->count()
-        ? $relatedProduct->variants->where('type', 'stock')->sum('stock')
-        : $relatedProduct->stock;
-@endphp
-<div class="aq-product-card-bottom">
-    @if($relatedStock >= $relatedProduct->min_qty)
-        <button class="aq-product-card-cta"
-                onclick="addToCartCard({{ $relatedProduct->id }}, {{ $relatedProduct->min_qty }}, this)">
-            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-        </button>
-    @else
-        <button class="aq-product-card-cta" disabled style="background:#999;cursor:not-allowed;">
-            <i class="fa-solid fa-ban"></i> Sold Out
-        </button>
-    @endif
-</div>
+                                    </div>
+                                    <div class="aq-product-card-sizes">
+                                        <span class="aq-size-badge">S</span>
+                                        <span class="aq-size-badge">M</span>
+                                        <span class="aq-size-badge active">L</span>
+                                        <span class="aq-size-badge">XL</span>
+                                        <span class="aq-size-badge">XXL</span>
+                                    </div>
+                                    <div class="aq-product-card-bottom">
+                                        <button class="aq-product-card-cta">
+                                            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1687,90 +1349,6 @@ font-size:15px;
         let currentUnitMrp = {{ (float) $product->mrp }};
 
 
-        const activeCoupons = @json($activeCoupons);
-
-function renderBestCoupon(totalPriceForCoupon) {
-  
-    const $container = $('#couponContainer');
-
-    if (!activeCoupons.length) {
-        $container.html('');
-        return;
-    }
-
-    // Sirf woh coupons jinka minimum_order_amount current total se satisfy ho raha hai
-    const eligible = activeCoupons.filter(function (c) {
-        return !c.minimum_order_amount || parseFloat(c.minimum_order_amount) <= totalPriceForCoupon;
-    });
-
-    if (!eligible.length) {
-        $container.html('');
-        return;
-    }
-
-    // Actual discount amount har eligible coupon ka nikal ke sabse zyada wala pick karo
-    function actualDiscount(c) {
-        let discount = 0;
-        if (c.discount_type === 'percentage') {
-            discount = (totalPriceForCoupon * parseFloat(c.discount_value)) / 100;
-            if (c.maximum_discount) {
-                discount = Math.min(discount, parseFloat(c.maximum_discount));
-            }
-        } else {
-            discount = parseFloat(c.discount_value);
-        }
-        return discount;
-    }
-
-    let best = eligible[0];
-    let bestAmount = actualDiscount(best);
-
-    eligible.forEach(function (c) {
-        const amt = actualDiscount(c);
-        if (amt > bestAmount) {
-            best = c;
-            bestAmount = amt;
-        }
-    });
-
-    let descText = '';
-    if (best.discount_type === 'percentage') {
-        descText = 'Get ' + parseFloat(best.discount_value) + '% off';
-        if (best.maximum_discount) {
-            descText += ' (up to ₹' + Math.round(best.maximum_discount).toLocaleString('en-IN') + ')';
-        }
-    } else {
-        descText = 'Flat ₹' + Math.round(best.discount_value).toLocaleString('en-IN') + ' off';
-    }
-    if (best.minimum_order_amount) {
-        descText += ' on orders above ₹' + Math.round(best.minimum_order_amount).toLocaleString('en-IN');
-    }
-
-    $container.html(`
-        <div class="coupon-card" id="coupon-${best.code}" onclick="copyCouponCode('${best.code}')" style="cursor:pointer;">
-          <div class="coupon-icon">
-            <img src="https://cdn.shopify.com/s/files/1/0826/6157/2916/files/discount-44c58e749e567564fb2f555dff7651bd1440b89dd808b77e29f72cddeb818dfa.svg?v=1747926128" alt="Discount Icon">
-          </div>
-          <div class="coupon-details">
-            <div class="coupon-code">USE CODE: ${best.code}</div>
-            <div class="coupon-desc">${descText}</div>
-          </div>
-        </div>
-    `);
-}
-
-function copyCouponCode(code) {
-    navigator.clipboard.writeText(code).then(function () {
-        Swal.fire({
-            icon: 'success',
-            title: 'Copied!',
-            text: 'Coupon code "' + code + '" copied to clipboard.',
-            timer: 1500,
-            showConfirmButton: false
-        });
-    });
-}
-
         // ── Auto-select the matching value of every OTHER selectable
 // attribute when one is picked (e.g. Color=Blue → Size auto-picks
 // XL if that's the only size Blue comes in) ─────────────────────
@@ -1796,99 +1374,37 @@ function getMasterVariantList() {
     return best;
 }
 
-// ══════════════════════════════════════════════════════════════
-// Combo availability — for every stock-dependent attribute value
-// (typically Size), work out one of three states relative to the
-// OTHER attributes currently selected (typically Color):
-//
-//   1. normal     — a combo exists and has stock  > 0
-//   2. sold out   — a combo exists but its stock  <= 0   → small
-//                   "Sold Out" label, option disabled
-//   3. unavailable — no such combo exists at all for the current
-//                    selection (e.g. size not offered in that
-//                    color) → diagonal strike line, disabled
-//
-// Before any color is picked, we fall back to a simple "is this
-// size sold out everywhere" check so the page still makes sense
-// on first load.
-// ══════════════════════════════════════════════════════════════
-function updateComboAvailability() {
+function updateStockAvailability() {
     const stockList = variantsByType['stock'] || [];
     if (!stockList.length) return;
 
-    const attributeIds = [...new Set(
-        $('.variant-option').map(function () { return $(this).data('attribute-id'); }).get()
-    )];
+    const allValueIds = new Set();
+    stockList.forEach(function (combo) { combo.values.forEach(function (v) { allValueIds.add(v); }); });
 
-    attributeIds.forEach(function (attrId) {
-
-        const otherActiveValueIds = $('.variant-option.active')
-            .filter(function () { return $(this).data('attribute-id') != attrId; })
-            .map(function () { return parseInt($(this).data('value-id')); })
-            .get();
-
-        $('.variant-option[data-attribute-id="' + attrId + '"]').each(function () {
-            const $opt = $(this);
-
-            // Reset to a clean state first.
-            $opt.removeClass('variant-option-unavailable variant-option-soldout');
-            $opt.find('.aq-soldout-label').remove();
-
-            const $ddOpt = $('.aq-size-dropdown[data-attribute-id="' + attrId + '"] option[value="' + $opt.data('value-id') + '"]');
-            if ($ddOpt.length) {
-                $ddOpt.prop('disabled', false).text($ddOpt.data('original-text'));
-            }
-
-            if ($opt.data('stock-dependent') != 1) return; // only relevant for the stock-driving attribute (Size)
-
-            const valueId = parseInt($opt.data('value-id'));
-
-            if (otherActiveValueIds.length === 0) {
-                // Nothing else selected yet — just flag sizes that are
-                // completely out of stock across every color/combo.
-                const combosWithValue = stockList.filter(function (c) { return c.values.includes(valueId); });
-                const totalStock = combosWithValue.reduce(function (sum, c) { return sum + (parseInt(c.stock) || 0); }, 0);
-
-                if (combosWithValue.length && totalStock <= 0) {
-                    markSoldOut($opt, $ddOpt);
-                }
-                return;
-            }
-
-            // A color (or other attribute) is selected — find the exact combo.
-            const matchingCombo = stockList.find(function (combo) {
-                if (!combo.values.includes(valueId)) return false;
-                return otherActiveValueIds.every(function (id) { return combo.values.includes(id); });
-            });
-
-            if (!matchingCombo) {
-                markUnavailable($opt, $ddOpt);
-            } else if ((parseInt(matchingCombo.stock) || 0) <= 0) {
-                markSoldOut($opt, $ddOpt);
-            }
+    allValueIds.forEach(function (valueId) {
+        const combosWithThisValue = stockList.filter(function (combo) {
+            return combo.values.includes(valueId);
         });
+
+        const allZero = combosWithThisValue.length > 0 &&
+            combosWithThisValue.every(function (combo) { return (parseInt(combo.stock) || 0) <= 0; });
+
+        const $options = $('.variant-option[data-value-id="' + valueId + '"][data-stock-dependent="1"]');
+        const $dropdownOpt = $('.aq-size-dropdown option[value="' + valueId + '"]');
+
+        if (allZero) {
+            $options.addClass('variant-option-disabled').removeClass('active')
+                .css({ 'pointer-events': 'none', 'opacity': '0.4', 'cursor': 'not-allowed' });
+            $dropdownOpt.prop('disabled', true);
+        } else {
+            $options.removeClass('variant-option-disabled')
+                .css({ 'pointer-events': '', 'opacity': '', 'cursor': '' });
+            $dropdownOpt.prop('disabled', false);
+        }
     });
 }
 
-function markUnavailable($opt, $ddOpt) {
-    $opt.addClass('variant-option-unavailable');
-    if ($ddOpt && $ddOpt.length) {
-        $ddOpt.prop('disabled', true).text($ddOpt.data('original-text') + ' (Not Available)');
-    }
-}
-
-function markSoldOut($opt, $ddOpt) {
-    $opt.addClass('variant-option-soldout').append('<span class="aq-soldout-label">Sold Out</span>');
-    if ($ddOpt && $ddOpt.length) {
-        $ddOpt.prop('disabled', true).text($ddOpt.data('original-text') + ' (Sold Out)');
-    }
-}
-
-$(document).ready(function () {
-    updateComboAvailability();
-    updateQtyButtonStates();  
-    updatePriceDisplay(); // initial load pe coupon + price sync ho jayega
-});
+$(document).ready(function () { updateStockAvailability(); });
 
 const masterVariantList = getMasterVariantList();function autoSelectDependentAttributes(changedAttributeId, changedValueId) {
     if (!masterVariantList.length) return;
@@ -1965,10 +1481,6 @@ const masterVariantList = getMasterVariantList();function autoSelectDependentAtt
 
 $(document).on('click', '.variant-option', function () {
 
-    if ($(this).hasClass('variant-option-unavailable') || $(this).hasClass('variant-option-soldout')) {
-        return; // guard against programmatic/keyboard triggers on a disabled option
-    }
-
     const attributeId = $(this).data('attribute-id');
     const clickedValueId = parseInt($(this).data('value-id'));
 
@@ -2035,14 +1547,13 @@ $(document).on('click', '.variant-option', function () {
 } else {
     $('#variant-images-container').html('');
     $('#variant-thumbs-container').html('');
-    rebuildGalleryDots();   // ← ADD KARO: base images pe wapas dots resync
 }
 
 
-updateComboAvailability();
+updateStockAvailability();
 });
 
-  function updateVariantImages(images) {
+       function updateVariantImages(images) {
 
     $('#variant-images-container').html('');
     $('#variant-thumbs-container').html('');
@@ -2074,27 +1585,24 @@ updateComboAvailability();
 
     document.getElementById('variant-main-0')
         ?.scrollIntoView({ behavior:'smooth', block:'center' });
-
-    rebuildGalleryDots();   // ← ADD KIYA: variant image change hone pe dots resync honge
 }
 
-$(document).on('change', '.aq-size-dropdown', function () {
-    const attributeId = $(this).data('attribute-id');
-    const valueId = $(this).val();
-    $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]').trigger('click');
-});
+        $(document).on('change', '.aq-size-dropdown', function () {
+            const attributeId = $(this).data('attribute-id');
+            const valueId = $(this).val();
+            $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + valueId + '"]').trigger('click');
+        });
 
-$(document).on('change', '.aq-addon-option', function () {
-    selectedAddonIds = $('.aq-addon-option:checked')
-        .map(function () { return parseInt($(this).data('addon-id')); })
-        .get();
+        $(document).on('change', '.aq-addon-option', function () {
+            selectedAddonIds = $('.aq-addon-option:checked')
+                .map(function () { return parseInt($(this).data('addon-id')); })
+                .get();
 
-    selectedAddonTotal = $('.aq-addon-option:checked').toArray()
-        .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
+            selectedAddonTotal = $('.aq-addon-option:checked').toArray()
+                .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
 
-    updatePriceDisplay();
-    // ← HATA DIYA: rebuildGalleryDots(); (addon change ka images/dots se koi lena dena nahi tha)
-});
+            updatePriceDisplay();
+        });
 
         function showMainImage() {
             $('#aqMainProductVideo').get(0).pause();
@@ -2125,46 +1633,20 @@ $(document).on('change', '.aq-addon-option', function () {
             updateMainMedia(thumb, imgSrc, 'image');
         }
 
-     function aqAdjustQty(amount) {
-    const qtyInput = document.getElementById('aqDetailQty');
-    if (!qtyInput) return;
+        function adjustQty(amount) {
+            const qtyInput = document.getElementById('aqDetailQty');
+            if (!qtyInput) return;
 
-    const minQty = parseInt(qtyInput.min) || 1;
-    const maxQty = parseInt(qtyInput.max) || 0;
-    let newVal = parseInt(qtyInput.value || minQty) + amount;
+            const minQty = parseInt(qtyInput.min) || 1;
+            const maxQty = parseInt(qtyInput.max) || 0;
 
-    if (newVal < minQty) newVal = minQty;
-    if (maxQty > 0 && newVal > maxQty) newVal = maxQty;
+            let newVal = parseInt(qtyInput.value || minQty) + amount;
+            if (newVal < minQty) newVal = minQty;
+            if (maxQty > 0 && newVal > maxQty) newVal = maxQty;
 
-    qtyInput.value = newVal;
-    updateQtyButtonStates();
-    updatePriceDisplay();
-}
-
-function updateQtyButtonStates() {
-    const qtyInput = document.getElementById('aqDetailQty');
-    if (!qtyInput) return;
-
-    const minQty = parseInt(qtyInput.min) || 1;
-    const maxQty = parseInt(qtyInput.max) || 0;
-    const val = parseInt(qtyInput.value) || minQty;
-
-    $('.qty-btn').eq(0).prop('disabled', val <= minQty);  // minus button
-    $('.qty-btn').eq(1).prop('disabled', maxQty > 0 && val >= maxQty);  // plus button
-
-    // Stock hint text
-    let $hint = $('#aqStockHint');
-    if (!$hint.length) {
-        $hint = $('<div id="aqStockHint" style="font-size:12px;color:#999;text-align:center;margin-top:4px;"></div>');
-        $('.aq-qty-selector').after($hint);
-    }
-    if (maxQty > 0 && maxQty <= 5) {
-        $hint.text('Only ' + maxQty + ' left in stock').show();
-    } else {
-        $hint.hide();
-    }
-}
-
+            qtyInput.value = newVal;
+            updatePriceDisplay();
+        }
 
         /*
         |--------------------------------------------------------------------
@@ -2176,34 +1658,32 @@ function updateQtyButtonStates() {
         |   due to separate rounding of price vs mrp vs their difference.
         |--------------------------------------------------------------------
         */
-       function updatePriceDisplay() {
+        function updatePriceDisplay() {
 
-    const qty = parseInt($('#aqDetailQty').val()) || 1;
+            const qty = parseInt($('#aqDetailQty').val()) || 1;
 
-    const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
-    const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
+            const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
+            const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
 
-    const totalPrice = Math.round(qty * unitPriceWithAddons);
-    const totalMrp   = Math.round(qty * unitMrpWithAddons);
+            const totalPrice = Math.round(qty * unitPriceWithAddons);
+            const totalMrp   = Math.round(qty * unitMrpWithAddons);
 
-    $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
+            $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
 
-    let discount = 0;
+            let discount = 0;
 
-    if (totalMrp > 0 && totalPrice < totalMrp) {
-        discount = Math.round(((totalMrp - totalPrice) / totalMrp) * 100);
-    }
+            if (totalMrp > 0 && totalPrice < totalMrp) {
+                discount = Math.round(((totalMrp - totalPrice) / totalMrp) * 100);
+            }
 
-    if (discount > 0) {
-        $('#productMrp').text('₹' + totalMrp.toLocaleString('en-IN'));
-        $('#productDiscount').text(discount + '% OFF');
-        $('#priceMrpRow').show();
-    } else {
-        $('#priceMrpRow').hide();
-    }
-
-    renderBestCoupon(totalPrice); // ← naya add kiya
-}
+            if (discount > 0) {
+                $('#productMrp').text('₹' + totalMrp.toLocaleString('en-IN'));
+                $('#productDiscount').text(discount + '% OFF');
+                $('#priceMrpRow').show();
+            } else {
+                $('#priceMrpRow').hide();
+            }
+        }
 
         document.getElementById('aqDetailQty')?.addEventListener('change', function () {
             const minQty = parseInt(this.min) || 1;
@@ -2250,7 +1730,6 @@ function updateQtyButtonStates() {
                         });
 
                         $('.cart-count').text(response.cart_count);
-                         refreshMiniCart(response);          // ← add this
 
                         if (response.mini_cart_html) {
                             $('.aq-cartmini-body').html(response.mini_cart_html);
@@ -2282,83 +1761,6 @@ function updateQtyButtonStates() {
                 window.location.href = "{{ route('cart') }}";
             };
         }
-        /* ── Mobile slider dots: build + sync + click-to-jump ────────── */
-let galleryDotsObserver = null;
 
-function rebuildGalleryDots() {
-    const container = document.getElementById('aqGallerySlides');
-    const dotsWrap   = document.getElementById('aqGalleryDots');
-    if (!container || !dotsWrap) return;
-
-    if (galleryDotsObserver) {
-        galleryDotsObserver.disconnect();
-    }
-
-    const slides = container.querySelectorAll('.aq-gallery-main-img-wrap');
-    dotsWrap.innerHTML = '';
-    if (slides.length <= 1) return;
-
-    slides.forEach(function (slide, index) {
-        const dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'aq-dot' + (index === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Go to slide ' + (index + 1));
-        dot.addEventListener('click', function () {
-            slide.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-        });
-        dotsWrap.appendChild(dot);
-    });
-
-    galleryDotsObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                const idx = Array.prototype.indexOf.call(slides, entry.target);
-                dotsWrap.querySelectorAll('.aq-dot').forEach(function (d, i) {
-                    d.classList.toggle('active', i === idx);
-                });
-            }
-        });
-    }, { root: container, threshold: 0.6 });
-
-    slides.forEach(function (slide) { galleryDotsObserver.observe(slide); });
-}
-
-$(document).ready(function () { rebuildGalleryDots(); });
-
-function addToCartCard(productId, minQty, btnEl) {
-
-    const $btn = $(btnEl);
-    const originalHTML = $btn.html();
-
-    $.ajax({
-        url: "{{ route('cart.add') }}",
-        type: "POST",
-        data: {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            product_id: productId,
-            quantity: minQty
-        },
-        success: function (response) {
-            if (response.status) {
-                Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-                $('.cart-count').text(response.cart_count);
-                refreshMiniCart(response);
-
-                $btn.html('<i class="fa-solid fa-check"></i> Added to Cart').prop('disabled', true);
-                setTimeout(function () {
-                    $btn.html(originalHTML).prop('disabled', false);
-                }, 1500);
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: response.message ?? 'Unable to add product.' });
-            }
-        },
-        error: function (xhr) {
-            Swal.fire({
-                icon: 'error', title: 'Error',
-                text: xhr.responseJSON?.message ?? 'Something went wrong.'
-            });
-        }
-    });
-}
     </script>
 @endsection

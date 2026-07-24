@@ -943,6 +943,15 @@
                 grid-template-columns: 1fr;
             }
         }
+        .variant-row-excluded {
+    opacity: 0.55;
+    background: #fafafa;
+}
+
+.variant-row-excluded input,
+.variant-row-excluded select {
+    background: #f1f2f4;
+}
     </style>
 
     <div class="app-content content container-fluid">
@@ -1504,14 +1513,14 @@ let storageBaseUrl = "{{ asset('storage') }}"; // ✅ matches main image asset()
     | being rendered (and will be deleted server-side on save, same as
     | before); combinations that are still checked keep their data.
     */
-    let variantDataByType = { price: {}, image: {}, stock: {}, sku: {} };
+ let variantDataByType = { price: {}, image: {}, stock: {}, sku: {} };
 
-    ['price', 'image', 'stock', 'sku'].forEach(function (type) {
-        (existingVariantsByType[type] || []).forEach(function (variant) {
-            let key = comboKey(variant.attribute_value_ids);
-            variantDataByType[type][key] = variant;
-        });
+['price', 'image', 'stock', 'sku'].forEach(function (type) {
+    (existingVariantsByType[type] || []).forEach(function (variant) {
+        let key = comboKey(variant.attribute_value_ids);
+        variantDataByType[type][key] = variant;
     });
+});
 
     let variantImageFiles = {};
 
@@ -1907,165 +1916,52 @@ function removeExistingVariantImage(id) {
      * captured (existing DB rows, or values typed in during this session)
      * for combinations that are still selected.
      */
-    function renderVariantsForType(type) {
-        // 1. Capture whatever is currently in the DOM for this type before we
-        //    tear the table down, so in-progress edits aren't lost.
-        captureVariantType(type);
+ function renderVariantsForType(type) {
+    captureVariantType(type);
 
-        // 2. Build combinations from checked, type-dependent attribute values.
-        let groups = {};
-        $('.attribute-value:checked').each(function () {
-            if ($(this).data('variant') != 1) return;
-            if ($(this).data(type + '-dependent') != 1) return;
+    let groups = {};
+    $('.attribute-value:checked').each(function () {
+        if ($(this).data('variant') != 1) return;
+        if ($(this).data(type + '-dependent') != 1) return;
 
-            let attributeId = $(this).data('attribute-id');
-            if (!groups[attributeId]) groups[attributeId] = [];
-            groups[attributeId].push({ id: $(this).val(), name: $(this).data('value-name') });
-        });
-
-        let groupArr = Object.values(groups);
-        let $existingCard = $('#variant-table-' + type).closest('.section-card');
-
-        if (groupArr.length === 0) {
-            // No checked attribute is dependent for this type anymore — remove its table.
-            // (Any previously-saved data for this type stays in variantDataByType in
-            // memory, so if the admin re-checks a value it comes right back.)
-            if ($existingCard.length) $existingCard.remove();
-            return;
-        }
-
-        let combinations = cartesian(groupArr);
-        let rows = '';
-
-        combinations.forEach(function (combo, index) {
-            if (!Array.isArray(combo)) combo = [combo];
-            let ids = combo.map(c => c.id);
-            let names = combo.map(c => c.name).join(' / ');
-            let key = comboKey(ids);
-            let data = variantDataByType[type][key] || {};
-            rows += buildVariantRow(type, index, key, names, ids, data);
-        });
-
-        let wrap = variantTableWrap(type, headColsForType(type), rows);
-
-        if ($existingCard.length) {
-            $existingCard.replaceWith(wrap);
-        } else {
-            $('#variant-container').append(wrap);
-        }
-    }
-
-    /**
-     * Reads whatever is currently rendered for a type back into
-     * variantDataByType, keyed by each row's data-key. Skips file inputs
-     * (browsers won't let us read a real value from them, and we don't want
-     * to overwrite an in-progress file selection with a blank).
-     */
-    function captureVariantType(type) {
-        $(`.variant-row[data-type="${type}"]`).each(function () {
-            let $row = $(this);
-            let key = $row.data('key');
-            if (!key) return;
-
-            let data = variantDataByType[type][key] || {};
-
-            $row.find('[data-field]').each(function () {
-                if ($(this).attr('type') === 'file') return;
-                let field = $(this).data('field');
-                data[field] = $(this).val();
-            });
-
-            variantDataByType[type][key] = data;
-        });
-    }
-
-    function cartesian(arr) {
-        if (arr.length === 1) return arr[0].map(item => [item]);
-        return arr.reduce((a, b) => a.flatMap(d => b.map(e => [].concat(d, e))));
-    }
-
-    function headColsForType(type) {
-        let head = '<th>Variant</th>';
-        if (type === 'sku') head += '<th>SKU</th>';
-        if (type === 'price') head += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
-        if (type === 'stock') head += '<th>Stock</th>';
-        if (type === 'image') head += '<th>Image</th>';
-        return head;
-    }
-
-    /**
-     * Builds a single <tr> for a given type/combination. Field names use
-     * variants_{type}[index][...] to match the controller's
-     * createVariantsForType() / syncVariantsForType(). The hidden [id] field
-     * is always present (empty for a brand-new combination) so the backend's
-     * !empty($data['id']) check works whether or not this combo already
-     * existed in the DB.
-     */
-    function buildVariantRow(type, index, key, names, comboIds, data) {
-        data = data || {};
-        let prefix = `variants_${type}[${index}]`;
-
-        let row = `<tr class="variant-row" data-type="${type}" data-key="${key}">
-        <td>
-            <span class="variant-name-cell">${names}</span>
-            <input type="hidden" data-field="id" name="${prefix}[id]" value="${data.id || ''}">
-        </td>`;
-
-        if (type === 'sku') {
-            row += `<td><input type="text" data-field="sku" name="${prefix}[sku]" class="form-control" value="${data.sku || ''}"></td>`;
-        }
-
-        if (type === 'price') {
-            row += `
-            <td><input type="number" step="0.01" data-field="mrp" name="${prefix}[mrp]" class="form-control" value="${data.mrp || ''}"></td>
-            <td>
-                <select data-field="discount_type" name="${prefix}[discount_type]" class="form-control">
-                    <option value="amount"     ${(data.discount_type || 'amount') === 'amount' ? 'selected' : ''}>Amount</option>
-                    <option value="percentage" ${(data.discount_type || '') === 'percentage' ? 'selected' : ''}>%</option>
-                </select>
-            </td>
-            <td><input type="number" step="0.01" data-field="discount" name="${prefix}[discount]" class="form-control" value="${data.discount || ''}"></td>
-            <td><input type="number" step="0.01" data-field="price" name="${prefix}[price]" class="form-control" value="${data.price || ''}" readonly></td>`;
-        }
-
-        if (type === 'stock') {
-            row += `<td><input type="number" data-field="stock" name="${prefix}[stock]" class="form-control" value="${data.stock || ''}"></td>`;
-        }
-
-   if (type === 'image') {
-    let existingImagesHtml = '';
-    (data.images || []).forEach(function (img) {
-        existingImagesHtml += `
-            <div class="thumb-box" id="variant-img-${img.id}" style="width:50px;height:50px;">
-                <img src="${storageBaseUrl}/${img.image}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
-                <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeExistingVariantImage(${img.id})">×</button>
-            </div>`;
+        let attributeId = $(this).data('attribute-id');
+        if (!groups[attributeId]) groups[attributeId] = [];
+        groups[attributeId].push({ id: $(this).val(), name: $(this).data('value-name') });
     });
 
-    row += `<td style="min-width:220px">
-        <div class="media-grid" style="margin-bottom:6px;">${existingImagesHtml}</div>
-        <div class="upload-area variant-image-upload" style="padding:10px;">
-            <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
-            <div class="upload-icon" style="font-size:14px;margin-bottom:2px;"><i class="fa fa-cloud-upload"></i></div>
-            <div class="upload-sub">Click or drag images</div>
-        </div>
-        <div class="variant-image-preview media-grid" data-prefix="${prefix}" style="margin-top:6px;"></div>
-    </td>`;
-}
+    let groupArr = Object.values(groups);
+    let $existingCard = $('#variant-table-' + type).closest('.section-card');
 
-
-        comboIds.forEach(function (id) {
-            row += `<input type="hidden" data-field="values" name="${prefix}[values][]" value="${id}">`;
-        });
-
-        row += `</tr>`;
-        return row;
+    if (groupArr.length === 0) {
+        if ($existingCard.length) $existingCard.remove();
+        return;
     }
 
-    function variantTableWrap(type, headHtml, rows) {
-        let titleMap = { price: 'Price Variants', image: 'Image Variants', stock: 'Stock Variants', sku: 'SKU Variants' };
+    let combinations = cartesian(groupArr);
+    let rows = '';
 
-        return `<div class="section-card" style="margin-bottom:16px">
+    combinations.forEach(function (combo, index) {
+        if (!Array.isArray(combo)) combo = [combo];
+        let ids = combo.map(c => c.id);
+        let names = combo.map(c => c.name).join(' / ');
+        let key = comboKey(ids);
+        let data = variantDataByType[type][key] || {};
+        rows += buildVariantRow(type, index, key, names, ids, data);
+    });
+
+    let wrap = variantTableWrap(type, headColsForType(type), rows);
+
+    if ($existingCard.length) {
+        $existingCard.replaceWith(wrap);
+    } else {
+        $('#variant-container').append(wrap);
+    }
+}
+
+function variantTableWrap(type, headHtml, rows) {
+    let titleMap = { price: 'Price Variants', image: 'Image Variants', stock: 'Stock Variants', sku: 'SKU Variants' };
+
+    return `<div class="section-card" style="margin-bottom:16px">
         <div class="section-card-header"><h5>${titleMap[type]}</h5></div>
         <div class="section-card-body" style="padding:0;overflow-x:auto">
             <table class="table table-bordered" style="margin:0" id="variant-table-${type}">
@@ -2073,8 +1969,136 @@ function removeExistingVariantImage(id) {
                 <tbody>${rows}</tbody>
             </table>
         </div>
+        <div class="variant-note">Tick "Not offered" for a combination that doesn't exist (e.g. Red isn't available in Small) — it stays saved but hidden from customers. Leave it unchecked with Stock = 0 for a combination that's temporarily sold out.</div>
     </div>`;
+}
+
+
+    /**
+     * Reads whatever is currently rendered for a type back into
+     * variantDataByType, keyed by each row's data-key. Skips file inputs
+     * (browsers won't let us read a real value from them, and we don't want
+     * to overwrite an in-progress file selection with a blank).
+     */
+   function captureVariantType(type) {
+    $(`.variant-row[data-type="${type}"]`).each(function () {
+        let $row = $(this);
+        let key = $row.data('key');
+        if (!key) return;
+
+        let data = variantDataByType[type][key] || {};
+
+        $row.find('[data-field]').each(function () {
+            if ($(this).attr('type') === 'file') return;
+            let field = $(this).data('field');
+
+            // ✅ checkboxes need their checked state, not .val()
+            if ($(this).attr('type') === 'checkbox') {
+                if (field === 'excluded') {
+                    data.is_available = !$(this).is(':checked');
+                }
+                return;
+            }
+
+            data[field] = $(this).val();
+        });
+
+        variantDataByType[type][key] = data;
+    });
+}
+
+    function cartesian(arr) {
+        if (arr.length === 1) return arr[0].map(item => [item]);
+        return arr.reduce((a, b) => a.flatMap(d => b.map(e => [].concat(d, e))));
     }
+
+function headColsForType(type) {
+    let head = '<th>Variant</th>';
+    if (type === 'sku') head += '<th>SKU</th>';
+    if (type === 'price') head += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
+    if (type === 'stock') head += '<th>Stock</th>';
+    if (type === 'image') head += '<th>Image</th>';
+    head += '<th>Available</th>'; // ✅ replaces the remove-button column
+    return head;
+}
+
+function buildVariantRow(type, index, key, names, comboIds, data) {
+    data = data || {};
+    let prefix = `variants_${type}[${index}]`;
+    let isExcluded = data.is_available === false;
+
+    let row = `<tr class="variant-row${isExcluded ? ' variant-row-excluded' : ''}" data-type="${type}" data-key="${key}">
+    <td>
+        <span class="variant-name-cell">${names}</span>
+        <input type="hidden" data-field="id" name="${prefix}[id]" value="${data.id || ''}">
+    </td>`;
+
+    if (type === 'sku') {
+        row += `<td><input type="text" data-field="sku" name="${prefix}[sku]" class="form-control" value="${data.sku || ''}"></td>`;
+    }
+
+    if (type === 'price') {
+        row += `
+        <td><input type="number" step="0.01" data-field="mrp" name="${prefix}[mrp]" class="form-control" value="${data.mrp || ''}"></td>
+        <td>
+            <select data-field="discount_type" name="${prefix}[discount_type]" class="form-control">
+                <option value="amount"     ${(data.discount_type || 'amount') === 'amount' ? 'selected' : ''}>Amount</option>
+                <option value="percentage" ${(data.discount_type || '') === 'percentage' ? 'selected' : ''}>%</option>
+            </select>
+        </td>
+        <td><input type="number" step="0.01" data-field="discount" name="${prefix}[discount]" class="form-control" value="${data.discount || ''}"></td>
+        <td><input type="number" step="0.01" data-field="price" name="${prefix}[price]" class="form-control" value="${data.price || ''}" readonly></td>`;
+    }
+
+    if (type === 'stock') {
+        row += `<td><input type="number" data-field="stock" name="${prefix}[stock]" class="form-control" value="${data.stock || ''}"></td>`;
+    }
+
+    if (type === 'image') {
+        let existingImagesHtml = '';
+        (data.images || []).forEach(function (img) {
+            existingImagesHtml += `
+                <div class="thumb-box" id="variant-img-${img.id}" style="width:50px;height:50px;">
+                    <img src="${storageBaseUrl}/${img.image}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
+                    <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeExistingVariantImage(${img.id})">×</button>
+                </div>`;
+        });
+
+        row += `<td style="min-width:220px">
+            <div class="media-grid" style="margin-bottom:6px;">${existingImagesHtml}</div>
+            <div class="upload-area variant-image-upload" style="padding:10px;">
+                <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
+                <div class="upload-icon" style="font-size:14px;margin-bottom:2px;"><i class="fa fa-cloud-upload"></i></div>
+                <div class="upload-sub">Click or drag images</div>
+            </div>
+            <div class="variant-image-preview media-grid" data-prefix="${prefix}" style="margin-top:6px;"></div>
+        </td>`;
+    }
+
+    comboIds.forEach(function (id) {
+        row += `<input type="hidden" data-field="values" name="${prefix}[values][]" value="${id}">`;
+    });
+
+    // ✅ "Not offered" checkbox — pre-checked if this variant was previously
+    // saved with is_available = false, so the exclusion survives reload
+    // (this fixes the original bug: nothing here depends on in-memory state)
+    row += `<td style="text-align:center">
+        <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;white-space:nowrap;justify-content:center;">
+            <input type="checkbox" data-field="excluded" name="${prefix}[excluded]"
+                ${isExcluded ? 'checked' : ''} onchange="toggleVariantRowStyle(this)">
+            Not offered
+        </label>
+    </td>`;
+
+    row += `</tr>`;
+    return row;
+}
+
+// ✅ visually grey out a row when marked "Not offered"
+function toggleVariantRowStyle(checkbox) {
+    $(checkbox).closest('tr').toggleClass('variant-row-excluded', checkbox.checked);
+}
+
 
     // Variant price calc — matches on the suffix so it works regardless of
     // which variants_{type}[index] prefix the field belongs to.

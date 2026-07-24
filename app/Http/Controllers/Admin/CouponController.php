@@ -140,26 +140,27 @@ class CouponController extends Controller
     public function share(Request $request, \App\Models\Coupon $coupon)
     {
         $request->validate([
-            'email' => ['required', 'email'],
+            'mobile' => ['required', 'regex:/^[6-9]\d{9}$/'],
         ]);
 
-        $customer = \App\Models\Customer::where('email', $request->email)
+        $customer = \App\Models\Customer::where('mobile', $request->mobile)
             ->first();
 
-        \App\Services\Email\EmailDispatcher::send('coupon', $request->email, [
-            '{coupon_code}' => $coupon->code,
-            '{discount_value}' => $coupon->discount_type === 'percentage'
-                ? $coupon->discount_value . '%'
-                : '₹' . number_format($coupon->discount_value, 2),
-            '{expiry_date}' => \Carbon\Carbon::parse($coupon->end_date)->format('d M Y'),
-            '{customer_name}' => $customer->name ?? 'Valued Customer',
-            '{store_url}' => url('/'),
-        ], $customer->name);
-
+        if ($customer?->email) {
+            \App\Services\Email\EmailDispatcher::send('coupon', $customer->email, [
+                '{coupon_code}' => $coupon->code,
+                '{discount_value}' => $coupon->discount_type === 'percentage'
+                    ? $coupon->discount_value . '%'
+                    : '₹' . number_format($coupon->discount_value, 2),
+                '{expiry_date}' => \Carbon\Carbon::parse($coupon->end_date)->format('d M Y'),
+                '{customer_name}' => $customer->name ?? 'Valued Customer',
+                '{store_url}' => url('/'),
+            ], $customer->name);
+        }
 
         return response()->json([
             'status' => true,
-            'message' => 'Coupon email sent successfully to ' . $request->email,
+            'message' => 'Coupon SMS sent successfully to ' . $request->mobile,
         ]);
     }
 

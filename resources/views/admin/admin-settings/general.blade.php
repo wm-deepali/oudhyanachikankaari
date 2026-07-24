@@ -351,6 +351,13 @@
                     </div>
                     <label class="toggle-switch"><input type="checkbox" name="stock_alerts" {{ old('stock_alerts', $general?->stock_alerts) ? 'checked' : '' }}><span class="toggle-track"></span></label>
                 </div>
+                <div class="toggle-row">
+    <div>
+        <div class="toggle-info-label">Cash on Delivery (COD)</div>
+        <div class="toggle-info-sub">Allow customers to pay cash on delivery at checkout.</div>
+    </div>
+    <label class="toggle-switch"><input type="checkbox" name="cod_enabled" {{ old('cod_enabled', $general?->cod_enabled) ? 'checked' : '' }}><span class="toggle-track"></span></label>
+</div>
             </div>
 
         </div><!-- /settings-content -->

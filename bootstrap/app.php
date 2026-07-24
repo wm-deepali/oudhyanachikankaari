@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.timeout' =>
                 \App\Http\Middleware\AdminSessionTimeout::class,
         ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\NoCacheHeaders::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

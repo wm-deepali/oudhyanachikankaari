@@ -80,7 +80,7 @@
 @else
 
     <div class="cartmini-empty text-center">
-        <img src="{{ asset('assets/img/corporate/empty-cart.webp') }}" alt="Empty Cart" loading="lazy">
+        <img src="{{ asset('assets/img/corporate/empty-cart.svg') }}" alt="Empty Cart" loading="lazy">
         <p>Your Cart is empty</p>
         <a href="{{ route('categories') }}" class="aq-btn-black border-btn">Continue Shopping</a>
     </div>

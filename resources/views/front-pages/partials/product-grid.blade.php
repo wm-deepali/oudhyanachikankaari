@@ -126,18 +126,18 @@
 <div class="aq-product-card-bottom">
     @if($availableStock >= $product->min_qty)
         <button class="aq-product-card-cta"
-                onclick="addToCart({{ $product->id }}, {{ $product->min_qty }})">
-            <i class="fa-solid fa-cart-shopping"></i>
-            Add to Cart
-        </button>
-    @else
-        <button class="aq-product-card-cta"
-                disabled
-                style="background:#999;cursor:not-allowed;">
-            <i class="fa-solid fa-ban"></i>
-            Out of Stock
-        </button>
-    @endif
+            onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)">
+        <i class="fa-solid fa-cart-shopping"></i>
+        Add to Cart
+    </button>
+   @else
+    <button class="aq-product-card-cta"
+            disabled
+            style="background:#999;cursor:not-allowed;">
+        <i class="fa-solid fa-ban"></i>
+        Sold Out
+    </button>
+@endif
 </div>
 
                               

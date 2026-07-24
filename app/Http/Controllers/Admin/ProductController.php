@@ -407,56 +407,61 @@ class ProductController extends Controller
 
         // ✅ Existing variants grouped by type, so the edit form can
         // rebuild each of the (up to) 4 independent tables separately.
-        $existingVariantsByType = [];
+       // ✅ Existing variants grouped by type, so the edit form can
+// rebuild each of the (up to) 4 independent tables separately.
+$existingVariantsByType = [];
 
-        foreach (self::VARIANT_TYPES as $type) {
+foreach (self::VARIANT_TYPES as $type) {
 
-            $existingVariantsByType[$type] = $product->variants
-                ->where('type', $type)
-                ->map(function ($variant) {
+    $existingVariantsByType[$type] = $product->variants
+        ->where('type', $type)
+        ->map(function ($variant) {
 
+            return [
+
+                'id' => $variant->id,
+
+                'sku' => $variant->sku,
+
+                'mrp' => $variant->mrp,
+
+                'discount_type' => $variant->discount_type,
+
+                'discount' => $variant->discount,
+
+                'price' => $variant->price,
+
+                'stock' => $variant->stock,
+
+                'image' => $variant->image,
+
+                // ✅ so the edit form can pre-check "Not offered" and grey out
+                // the row on initial render, not just after a manual toggle
+                'is_available' => (bool) $variant->is_available,
+
+                'images' => $variant->images->map(function ($img) {
                     return [
-
-                        'id' => $variant->id,
-
-                        'sku' => $variant->sku,
-
-                        'mrp' => $variant->mrp,
-
-                        'discount_type' => $variant->discount_type,
-
-                        'discount' => $variant->discount,
-
-                        'price' => $variant->price,
-
-                        'stock' => $variant->stock,
-
-                        'image' => $variant->image,
-
-                        // ✅ full list of images for this variant (multi-image support)
-                        'images' => $variant->images->map(function ($img) {
-                            return [
-                                'id' => $img->id,
-                                'image' => $img->image,
-                                'is_default' => $img->is_default,
-                            ];
-                        })->values(),
-
-                        'variant_name' => $variant->values
-                            ->map(function ($v) {
-                                return $v->attributeValue->value;
-                            })
-                            ->implode(' / '),
-
-                        'attribute_value_ids' => $variant->values
-                            ->pluck('attribute_value_id')
-                            ->toArray(),
-
+                        'id' => $img->id,
+                        'image' => $img->image,
+                        'is_default' => $img->is_default,
                     ];
+                })->values(),
 
-                })
-                ->values();
-        }
+                'variant_name' => $variant->values
+                    ->map(function ($v) {
+                        return $v->attributeValue->value;
+                    })
+                    ->implode(' / '),
+
+                'attribute_value_ids' => $variant->values
+                    ->pluck('attribute_value_id')
+                    ->toArray(),
+
+            ];
+
+        })
+        ->values();
+}
 
         $collections = Collection::where('status', 1)
             ->orderBy('sort_order')
@@ -480,6 +485,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
+       
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
@@ -502,7 +508,6 @@ class ProductController extends Controller
             'variants_image.*.images.*' => 'nullable|image|max:2048',
             'delete_variant_images.*' => 'nullable|integer',
         ]);
-
         DB::beginTransaction();
 
         try {
@@ -799,38 +804,43 @@ class ProductController extends Controller
         return 'variants_' . $type;
     }
 
-    protected function fillVariantFieldsForType(ProductVariant $variant, string $type, array $data, Request $request, int $index): void
-    {
-        switch ($type) {
+   protected function fillVariantFieldsForType(ProductVariant $variant, string $type, array $data, Request $request, int $index): void
+{
+    // ✅ applies to every type — checked "Not offered" in the form means
+    // is_available = false; unchecked (or absent) means true. This is what
+    // the storefront's stock-matching query filters on.
+    $variant->is_available = !isset($data['excluded']);
 
-            case ProductVariant::TYPE_PRICE:
-                $variant->fill([
-                    'mrp' => $data['mrp'] ?? 0,
-                    'discount_type' => $data['discount_type'] ?? 'amount',
-                    'discount' => $data['discount'] ?? 0,
-                    'price' => $data['price'] ?? 0,
-                ]);
-                break;
+    switch ($type) {
 
-            case ProductVariant::TYPE_STOCK:
-                $variant->fill([
-                    'stock' => $data['stock'] ?? 0,
-                ]);
-                break;
+        case ProductVariant::TYPE_PRICE:
+            $variant->fill([
+                'mrp' => $data['mrp'] ?? 0,
+                'discount_type' => $data['discount_type'] ?? 'amount',
+                'discount' => $data['discount'] ?? 0,
+                'price' => $data['price'] ?? 0,
+            ]);
+            break;
 
-            case ProductVariant::TYPE_SKU:
-                $variant->fill([
-                    'sku' => $data['sku'] ?? null,
-                ]);
-                break;
+        case ProductVariant::TYPE_STOCK:
+            $variant->fill([
+                'stock' => $data['stock'] ?? 0,
+            ]);
+            break;
 
-            case ProductVariant::TYPE_IMAGE:
-                // Multiple images per variant are handled AFTER save() in
-                // createVariantsForType() / syncVariantsForType(), since
-                // ProductVariantImage rows need a real variant_id to attach to.
-                break;
-        }
+        case ProductVariant::TYPE_SKU:
+            $variant->fill([
+                'sku' => $data['sku'] ?? null,
+            ]);
+            break;
+
+        case ProductVariant::TYPE_IMAGE:
+            // Multiple images per variant are handled AFTER save() in
+            // createVariantsForType() / syncVariantsForType(), since
+            // ProductVariantImage rows need a real variant_id to attach to.
+            break;
     }
+}
 
     /**
      * Stores newly-uploaded images for an image-type variant. Existing

@@ -301,7 +301,7 @@
             let itemId = $(this).data('id');
 
             $.ajax({
-                url: '/cart/remove/' + itemId,
+               url: '{{ url("/cart/remove") }}/' + itemId,
                 type: 'DELETE',
                 data: {
                     _token: '{{ csrf_token() }}'
@@ -341,49 +341,77 @@
 
         });
 
-        $(document).on('click', '.qty-plus, .qty-minus', function () {
+      $(document).on('click', '.qty-plus, .qty-minus', function () {
 
-            let itemId = $(this).data('id');
+    let itemId = $(this).data('id');
 
-            let action = $(this).hasClass('qty-plus')
-                ? 'plus'
-                : 'minus';
+    let action = $(this).hasClass('qty-plus')
+        ? 'plus'
+        : 'minus';
 
-            $.ajax({
-                url: "{{ route('cart.update.quantity') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    item_id: itemId,
-                    action: action
-                },
-                success: function (response) {
+    $.ajax({
+        url: "{{ route('cart.update.quantity') }}",
+        type: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            item_id: itemId,
+            action: action
+        },
+        success: function (response) {
 
-                    if (response.status) {
+            if (response.status) {
 
-                        $('.aq-cart-qty-input[data-id="' + itemId + '"]')
-                            .val(response.quantity);
+                $('.aq-cart-qty-input[data-id="' + itemId + '"]')
+                    .val(response.quantity);
 
-                        $('#total-' + itemId).text(
-                            '₹' + Number(response.item_total).toLocaleString()
-                        );
+                $('#total-' + itemId).text(
+                    '₹' + Number(response.item_total).toLocaleString()
+                );
 
-                        $('#mrp-' + itemId).text(
-                            '₹' + Number(response.total_mrp).toLocaleString()
-                        );
+                $('#mrp-' + itemId).text(
+                    '₹' + Number(response.total_mrp).toLocaleString()
+                );
 
-                        $('#summarySubtotal').text(
-                            '₹' + Number(response.cart_total).toLocaleString()
-                        );
+                $('#summarySubtotal').text(
+                    '₹' + Number(response.cart_total).toLocaleString()
+                );
 
-                        $('#summaryTotal').text(
-                            '₹' + Number(response.cart_total).toLocaleString()
-                        );
-                    }
-                }
+                $('#summaryTotal').text(
+                    '₹' + Number(response.cart_total).toLocaleString()
+                );
+
+            } else {
+
+                // stock limit ya koi aur reason — customer ko batao
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cannot Update Quantity',
+                    text: response.message || 'Unable to update quantity.',
+                    confirmButtonColor: '#C98F9D'
+                });
+
+            }
+        },
+        error: function (xhr) {
+
+            // agar controller 422/500 status ke saath json bhejta hai
+            let message = 'Unable to update quantity.';
+
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Cannot Update Quantity',
+                text: message,
+                confirmButtonColor: '#C98F9D'
             });
 
-        });
+        }
+    });
+
+});
 
         $('#applyCouponBtn').on('click', function () {
 

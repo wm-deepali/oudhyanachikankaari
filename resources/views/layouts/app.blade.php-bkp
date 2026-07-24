@@ -420,260 +420,39 @@
     </div>
     <!-- Modal -->
 
-    {{--
-====================================================================
-MOBILE DRILL-DOWN MENU — replace ONLY the existing block:
+    <!-- offcanvas area start -->
+    <div class="aq-offcanvas-wrap">
+        <div class="aq-offcanvas-top d-flex align-items-center justify-content-between">
+            <div class="aq-offcanvas-logo">
+                <a href="{{ url('/') }}">
+                    <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
+                        alt="{{ $general?->site_name }}">
 
-    <div class="aq-offcanvas-wrap"> ... </div>
-
-with the block below.
-
-DOES NOT TOUCH:
-- Top offer bar
-- Logo / search header
-- Desktop nav (.aq-header-bottom-area) — completely untouched
-- Cart / wishlist / quickview scripts
-- Existing hamburger open trigger classes (.aq-offcanvas-wrap.opened, .body-overlay.opened)
-  -> so your existing open/close JS keeps working as-is.
-
-Only new things added: new markup inside offcanvas, new CSS (scoped
-under .aq-offcanvas-wrap so nothing leaks to desktop), new JS scoped
-to drill-down behaviour only.
-====================================================================
---}}
-
-<!-- offcanvas area start -->
-<div class="aq-offcanvas-wrap">
-
-    <!-- top row: logo + close (UNCHANGED from your original) -->
-    <div class="aq-offcanvas-top d-flex align-items-center justify-content-between">
-        <div class="aq-offcanvas-logo">
-            <a href="{{ url('/') }}">
-                <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
-                    alt="{{ $general?->site_name }}">
-                <div>{{ $general?->tagline ?? "" }}</div>
-            </a>
-        </div>
-        <button type="button" class="aq-offcanvas-close" aria-label="Close Menu"
-            style="cursor: pointer; z-index: 99;"
-            onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.remove('opened'); document.querySelector('.body-overlay')?.classList.remove('opened');">
-            <i class="fal fa-times" style="font-size: 20px;font-weight:700;"></i>
-        </button>
-    </div>
-
-    <!-- NEW: drill-down menu panels -->
-    <div class="aq-mm-viewport">
-
-        <!-- LEVEL 0 : root -->
-        <div class="aq-mm-panel is-active" data-panel="mm-root">
-            <ul class="aq-mm-list">
-                <li class="aq-mm-item">
-                    <a href="{{ route('home') }}">Home</a>
-                </li>
-                <li class="aq-mm-item">
-                    <a href="{{ route('about-us') }}">Our Heritage</a>
-                </li>
-
-                <li class="aq-mm-item has-children" data-open="mm-curation">
-                    <span>Chikankari Luxury Curation</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-
-                @foreach($navbarCategories as $category)
-                <li class="aq-mm-item {{ $category->children->count() ? 'has-children' : '' }}"
-                    @if($category->children->count()) data-open="mm-cat-{{ $category->id }}" @endif>
-                    @if($category->children->count())
-                        <span>{{ $category->name }}</span>
-                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    @else
-                        <a href="{{ route('products.listing', $category->slug) }}">{{ $category->name }}</a>
-                    @endif
-                </li>
-                @endforeach
-
-                <li class="aq-mm-item">
-                    <a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End of Season Sale</a>
-                </li>
-                <li class="aq-mm-item">
-                    <a href="{{ route('contact-us') }}">Contact</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- LEVEL 1 : Chikankari Luxury Curation -> attribute list -->
-        <div class="aq-mm-panel" data-panel="mm-curation">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Chikankari Luxury Curation</span>
+                    <div>
+                        {{ $general?->tagline ?? "" }}
+                    </div>
+                </a>
             </div>
-            <ul class="aq-mm-list">
-                @forelse($headerAttributes as $attribute)
-                <li class="aq-mm-item has-children" data-open="mm-attr-{{ $attribute->id }}">
-                    <span>Shop By {{ $attribute->name }}</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No Attributes Found</span></li>
-                @endforelse
-
-                <li class="aq-mm-item has-children" data-open="mm-collections">
-                    <span>Shop By Collections</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-
-                <li class="aq-mm-item has-children" data-open="mm-pricerange">
-                    <span>Price Range</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-
-                <li class="aq-mm-item has-children" data-open="mm-occasions">
-                    <span>Shop By Occasions</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-            </ul>
+            <button type="button" class="aq-offcanvas-close " aria-label="Close Menu"
+                style="cursor: pointer; z-index: 99;"
+                onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.remove('opened'); document.querySelector('.body-overlay')?.classList.remove('opened');">
+                <i class="fal fa-times" style="font-size: 20px;font-weight:700;"></i>
+            </button>
         </div>
-
-        <!-- LEVEL 2 : one panel per attribute -> its values -->
-        @foreach($headerAttributes as $attribute)
-        <div class="aq-mm-panel" data-panel="mm-attr-{{ $attribute->id }}">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By {{ $attribute->name }}</span>
+        <div class="aq-offcanvas-menu-wrap">
+            <div class="aq-offcanvas-menu">
+                <nav></nav>
             </div>
-            <ul class="aq-mm-list">
-                @forelse($attribute->values as $value)
-                <li class="aq-mm-item">
-                    <a href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">{{ $value->value }}</a>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No {{ $attribute->name }} Found</span></li>
-                @endforelse
-            </ul>
         </div>
-        @endforeach
-
-        <!-- LEVEL 2 : Collections -->
-        <div class="aq-mm-panel" data-panel="mm-collections">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By Collections</span>
+        <div class="aq-offcanvas-bottom">
+            <div class="aq-offcanvas-btn-wrap d-flex justify-content-between align-items-center">
+                <a class="aq-offcanvas-btn" href="{{ route('user.login') }}">Login</a>
+                <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('wishlist.index') }}">Wishlist</a>
             </div>
-            <ul class="aq-mm-list">
-                @foreach($headerCollections as $collection)
-                <li class="aq-mm-item">
-                    <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
 
-        <!-- LEVEL 2 : Price Range -->
-        <div class="aq-mm-panel" data-panel="mm-pricerange">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Price Range</span>
-            </div>
-            <ul class="aq-mm-list">
-                @foreach(config('price_ranges') as $band)
-                <li class="aq-mm-item">
-                    <a href="{{ route('price.listing', $band['slug']) }}">{{ $band['label'] }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
-
-        <!-- LEVEL 2 : Occasions -->
-        <div class="aq-mm-panel" data-panel="mm-occasions">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By Occasions</span>
-            </div>
-            <ul class="aq-mm-list">
-                @forelse($headerOccasions as $occasion)
-                <li class="aq-mm-item">
-                    <a href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No Occasions Found</span></li>
-                @endforelse
-            </ul>
-        </div>
-
-        <!-- LEVEL 1 : category -> subcategory panels (Women's Wear, Men's Wear, etc.) -->
-        @foreach($navbarCategories as $category)
-        @if($category->children->count())
-        <div class="aq-mm-panel" data-panel="mm-cat-{{ $category->id }}">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>{{ $category->name }}</span>
-            </div>
-            <ul class="aq-mm-list">
-                <li class="aq-mm-item">
-                    <a href="{{ route('products.listing', $category->slug) }}"><strong>View All {{ $category->name }}</strong></a>
-                </li>
-                @foreach($category->children as $subcategory)
-                <li class="aq-mm-item">
-                    <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">{{ $subcategory->name }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
-        @endforeach
-
-    </div>
-    <!-- /drill-down menu panels -->
-
-    <!-- bottom row (UNCHANGED from your original) -->
-    <div class="aq-offcanvas-bottom">
-        <div class="aq-offcanvas-btn-wrap d-flex justify-content-between align-items-center">
-            <a class="aq-offcanvas-btn" href="{{ route('user.login') }}">Login</a>
-            <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('wishlist.index') }}">Wishlist</a>
         </div>
     </div>
-</div>
-<!-- offcanvas area end -->
-
-
-
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    <!-- offcanvas area end -->
 
     <!-- Body Overlay -->
     <div class="body-overlay"
@@ -880,33 +659,6 @@ to drill-down behaviour only.
                                         </i>
                                     </button>
                                 </li>
-                                <li class="aq-header-top-login d-none d-md-inline-block">
-    @auth('customer')
-        <a href="{{ route('user.dashboard.index') }}" aria-label="My Account"
-           style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
-            <i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
-                    <path d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </i>
-        </a>
-    @else
-        <a href="{{ route('user.login') }}" aria-label="Login"
-           style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
-            <i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
-                    <path d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </i>
-        </a>
-    @endauth
-</li>
                                 <li class="aq-header-top-wishlist d-none d-md-inline-block">
                                     <button class="aq-wishlist-btn" aria-label="Wishlist"
                                         style="position: relative; background: transparent; border: none; padding: 0;">
@@ -928,10 +680,14 @@ to drill-down behaviour only.
                                 <li class="aq-header-top-cart aq-cart-btn">
                                     <button aria-label="Shopping Cart"
                                         style="position: relative; background: transparent; border: none; padding: 0;">
-                                       
+                                        @php
+                                        $cart = auth()->check()
+                                        ? \App\Models\Cart::where('user_id', auth()->id())->first()
+                                        : \App\Models\Cart::where('session_id', session()->getId())->first();
+                                        @endphp
 
                                         <span class="count-box cart-count" style="background: #c98f9d; color: #fff;">
-                                            {{ $globalCartCount }}
+                                            {{ $cart?->items()->sum('quantity') ?? 0 }}
                                         </span>
                                         <i>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21"
@@ -1008,7 +764,7 @@ to drill-down behaviour only.
                             <nav class="aq-mobile-menu-active">
                                 <ul>
                                     <li><a href="{{ route('home') }}">Home</a></li>
-                                    <li><a href="{{ route('about-us') }}">Our Heritage</a></li>
+                                    <li><a href="{{ route('about-us') }}">About Us</a></li>
                                     <li class="has-dropdown p-static">
                                         <a href="#">Chikankari Luxury Curation</a>
                                         <div class="aq-megamenu-wrap aq-corp-megamenu mega-menu">
@@ -1179,7 +935,7 @@ to drill-down behaviour only.
 
                                     @endforeach
                                     <li><a
-                                            href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End
+                                            href="https://oudhyanachikankaari.com/dynamic/collections/end-of-season-sale">End
                                             of Season Sale</a></li>
                                     <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
@@ -1481,8 +1237,9 @@ to drill-down behaviour only.
                                     Company</h4>
                                 <ul class="aq-footer-menu-luxury">
                                     <li><a href="{{ route('about-us') }}"><i class="fa-solid fa-chevron-right"></i>
-                                            Our Heritage</a></li>
-                                    <li><a href="{{ route('colour.chart') }}"><i class="fa-solid fa-chevron-right"></i> Colour Chart</a></li>
+                                            About Us</a></li>
+                                    <li><a href="{{ route('about-us') }}"><i class="fa-solid fa-chevron-right"></i> Our
+                                            Heritage</a></li>
                                     <li><a href="{{ route('contact-us') }}"><i class="fa-solid fa-chevron-right"></i>
                                             Contact Us</a></li>
                                     <li><a href="{{ route('blogs') }}"><i class="fa-solid fa-chevron-right"></i>
@@ -1838,7 +1595,7 @@ to drill-down behaviour only.
             }
 
             .footer_whatspp.whatspp-active.whatspp-scrolled {
-                bottom: 75px !important;
+                bottom: 20px !important;
             }
 
             .social-whatspp {
@@ -1850,7 +1607,7 @@ to drill-down behaviour only.
             .progress-wrap {
                 right: 85px !important;
                 /* Side-by-side with WhatsApp on mobile */
-                bottom: 75px !important;
+                bottom: 20px !important;
                 height: 40px !important;
                 width: 40px !important;
             }
@@ -1879,122 +1636,6 @@ to drill-down behaviour only.
             }
         }
     </style>
-    {{-- ==================================================================
-     NEW CSS — paste inside your existing <style> block (or a new one)
-     Scoped entirely under .aq-offcanvas-wrap so desktop is untouched.
-     ================================================================== --}}
-<style>
-    /* Reset the old empty-nav wrap so it doesn't fight with new panels */
-    .aq-offcanvas-menu-wrap { display: none !important; }
-
-    .aq-offcanvas-wrap {
-        background: #1c1c1c;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        width: 380px !important;
-    }
-
-    .aq-offcanvas-top {
-        background: #1c1c1c;   /* ← ye line add karo */
-        padding: 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        flex-shrink: 0;
-    }
-    .aq-offcanvas-logo img { filter: brightness(0) invert(1); width: 130px; }
-    .aq-offcanvas-logo a div {
-    font-family: 'Georgia', serif;
-    font-style: italic;
-    font-size: 11px;
-    color: #ffffff !important;
-    margin-top: 4px;
-}
-    .aq-offcanvas-close { background: transparent; border: none; color: #fff; }
-
-    .aq-mm-viewport {
-        position: relative;
-        flex: 1 1 auto;
-        overflow: hidden;
-    }
-
-    .aq-mm-panel {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        transform: translateX(100%);
-        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-        background: #1c1c1c;
-        padding: 10px 20px 30px;
-    }
-    .aq-mm-panel.is-active { transform: translateX(0); z-index: 2; }
-    .aq-mm-panel.is-prev   { transform: translateX(-100%); z-index: 1; }
-
-    .aq-mm-panel-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 16px 0;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    margin-bottom: 6px;
-}
-.aq-mm-panel-header span { color: #fff; font-size: 14px; font-weight: 600; }
-
-    .aq-mm-list { list-style: none; margin: 0; padding: 0; margin-top:130px; }
-
-    .aq-mm-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        padding: 15px 2px;
-        cursor: pointer;
-    }
-    .aq-mm-item a, .aq-mm-item > span {
-        color: #f2f2f2;
-        text-decoration: none;
-        font-size: 14px;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        flex: 1;
-    }
-    .aq-mm-item.has-children > span { color: #f2f2f2; }
-    .aq-mm-chevron { color: rgba(255,255,255,0.5); flex-shrink: 0; }
-
-    .aq-offcanvas-bottom { flex-shrink: 0; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-    .aq-offcanvas-btn-wrap .aq-offcanvas-btn {
-        flex: 1;
-        text-align: center;
-        padding: 12px;
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.3);
-        text-decoration: none;
-        font-size: 13px;
-        text-transform: uppercase;
-    }
-    .aq-offcanvas-btn-wrap .aq-offcanvas-btn.btn-black-bg { background: #fff; color: #1c1c1c; border-color: #fff; margin-left: 10px; 
-        
-    }
-   
-    .aq-offcanvas-wrap .aq-mm-panel-header {
-    position: relative !important;
-}
-.aq-offcanvas-wrap .aq-mm-panel-header svg {
-    position: static !important;
-    display: inline-block !important;
-    width: 8px !important;
-    height: 14px !important;
-    flex-shrink: 0 !important;
-}
-</style>
-
 
 
     <!-- JS here -->
@@ -2161,6 +1802,7 @@ to drill-down behaviour only.
 
             // Initialize Setup
             setupInputEffects();
+            observer.observe(document.body, { childList: true, subtree: true });
         });
     </script>
 
@@ -2189,12 +1831,11 @@ to drill-down behaviour only.
 
     </script>
 
-  <script>
+    <script>
         $(document).ready(function () {
 
             const storagePath = "{{ asset('storage') }}";
             const noImage = "{{ asset('assets/images/no-image.png') }}";
-            const baseUrl = "{{ url('/') }}"; // respects subfolder deployment
 
             let searchRequest = null;
 
@@ -2237,7 +1878,7 @@ to drill-down behaviour only.
                                 let image = item.image || noImage;
 
                                 html += `
-                            <a href="${baseUrl}/product/${item.slug}" class="d-flex align-items-center gap-2">
+                            <a href="/product/${item.slug}" class="d-flex align-items-center gap-2">
                                 <img src="${image}"
                                      width="40"
                                      height="40"
@@ -2260,7 +1901,7 @@ to drill-down behaviour only.
                                     : noImage;
 
                                 html += `
-                            <a href="${baseUrl}/category/${item.slug}" class="d-flex align-items-center gap-2">
+                            <a href="/category/${item.slug}" class="d-flex align-items-center gap-2">
                                 <img src="${image}"
                                      width="40"
                                      height="40"
@@ -2283,7 +1924,7 @@ to drill-down behaviour only.
                                     : noImage;
 
                                 html += `
-                            <a href="${baseUrl}/category/${item.parent_slug}?subcategory=${item.slug}"
+                            <a href="/category/${item.parent_slug}?subcategory=${item.slug}"
                                class="d-flex align-items-center gap-2">
                                 <img src="${image}"
                                      width="40"
@@ -2307,7 +1948,7 @@ to drill-down behaviour only.
                                     : noImage;
 
                                 html += `
-                            <a href="${baseUrl}/products?occasion=${item.slug}"
+                            <a href="/products?occasion=${item.slug}"
                                class="d-flex align-items-center gap-2">
                                 <img src="${image}"
                                      width="40"
@@ -2341,71 +1982,92 @@ to drill-down behaviour only.
 
         });
     </script>
- <script>
-    // Swaps fresh mini-cart HTML/count/subtotal into the DOM after any
-    // cart AJAX call, from any page — no reload needed.
-    function refreshMiniCart(data) {
-        if (typeof data.mini_cart_html !== 'undefined') {
-            const body = document.querySelector('.aq-cartmini-body');
-            if (body) body.innerHTML = data.mini_cart_html;
-        }
-        if (typeof data.cart_count !== 'undefined') {
-            document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cart_count);
-        }
-        if (typeof data.cart_subtotal !== 'undefined') {
-            const subtotalEl = document.getElementById('miniCartSubtotal');
-            if (subtotalEl) subtotalEl.textContent = '₹' + data.cart_subtotal;
-        }
-    }
 
-    // Delegated on the static wrapper (never replaced) so remove/qty
-    // buttons keep working even after refreshMiniCart() swaps their
-    // parent .aq-cartmini-body's innerHTML.
-    document.addEventListener('click', function (e) {
+    <script>
+        document.querySelectorAll('.remove-cart-item').forEach(btn => {
+            btn.addEventListener('click', function () {
 
-        const removeBtn = e.target.closest('.aq-cartmini-area .remove-cart-item');
-        if (removeBtn) {
-            const itemId = removeBtn.getAttribute('data-id');
+                let itemId = this.getAttribute('data-id');
 
-            fetch("{{ url('cart/remove') }}/" + itemId, {
-            method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Removed!',
-                    text: data.message,
-                    timer: 1200,
-                    showConfirmButton: false
-                });
-                refreshMiniCart(data);
+                let url = "{{ url('cart/remove') }}/" + itemId;
+
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: data.message,
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+
+                        // ✅ Remove item from UI instantly
+                        this.closest('.aq-cartmini-product-item').remove();
+
+                        // ✅ Reload page (to update totals + header count)
+                        setTimeout(() => {
+                            location.reload();
+                        }, 800);
+
+                    });
+
             });
-            return;
-        }
+        });
 
-        const qtyBtn = e.target.closest('.aq-cartmini-area .update-cart-qty');
-        if (qtyBtn) {
-            const itemId = qtyBtn.getAttribute('data-id');
-            const action = qtyBtn.getAttribute('data-action');
 
+        document.querySelectorAll('.aq-cart-plus').forEach(btn => {
+
+            btn.addEventListener('click', function () {
+
+                updateCartQty(this.dataset.id, 'plus');
+            });
+
+        });
+
+        document.querySelectorAll('.aq-cart-minus').forEach(btn => {
+
+            btn.addEventListener('click', function () {
+
+                updateCartQty(this.dataset.id, 'minus');
+            });
+
+        });
+
+        function updateCartQty(itemId, action) {
             fetch("{{ route('cart.update.quantity') }}", {
-                method: 'POST',
+
+                method: "POST",
+
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
                 },
-                body: JSON.stringify({ item_id: itemId, action: action })
+
+                body: JSON.stringify({
+                    item_id: itemId,
+                    action: action
+                })
+
             })
-            .then(res => res.json())
-            .then(data => refreshMiniCart(data));
+                .then(res => res.json())
+                .then(data => {
+
+                    location.reload();
+
+                });
         }
-    });
-</script>
+
+
+
+    </script>
 
     <script>
         const quickViewBaseUrl = "{{ route('product.quickview', ['id' => '__ID__']) }}";
@@ -2556,17 +2218,16 @@ to drill-down behaviour only.
                     quantity: quantity
                 },
                 success: function (response) {
-    if (response.status) {
-        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-        $('.cart-count').text(response.cart_count);
-        refreshMiniCart(response);          // ← add this
-        if (buyNow) {
-            window.location.href = "{{ route('cart') }}";
-        }
-    } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
-    }
-},
+                    if (response.status) {
+                        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                        $('.cart-count').text(response.cart_count);
+                        if (buyNow) {
+                            window.location.href = "{{ route('cart') }}";
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
+                    }
+                },
                 error: function (xhr) {
                     Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON?.message ?? 'Something went wrong.' });
                 }
@@ -2680,100 +2341,6 @@ to drill-down behaviour only.
             }
         });
     </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    try {
-        var viewport = document.querySelector('.aq-mm-viewport');
-        if (!viewport) return;
-
-        var stack = ['mm-root'];
-
-        function getPanel(id) {
-            return viewport.querySelector('.aq-mm-panel[data-panel="' + id + '"]');
-        }
-
-        // now takes explicit fromId/toId — no more relying on stack timing
-        function goTo(fromId, toId, direction) {
-            var current = getPanel(fromId);
-            var target = getPanel(toId);
-            if (!target || !current || current === target) return;
-
-            if (direction === 'forward') {
-                target.style.transform = 'translateX(100%)';
-                target.scrollTop = 0;
-                target.classList.add('is-active');
-                requestAnimationFrame(function () {
-                    current.classList.add('is-prev');
-                    current.classList.remove('is-active');
-                    target.style.transform = '';
-                });
-            } else {
-                current.classList.add('is-prev-out');
-                target.classList.remove('is-prev');
-                target.classList.add('is-active');
-                target.scrollTop = 0;
-                requestAnimationFrame(function () {
-                    current.classList.remove('is-active', 'is-prev-out');
-                });
-            }
-        }
-
-        function bindTap(el, handler) {
-            var lastFired = 0;
-            function fire(e) {
-                var now = Date.now();
-                if (now - lastFired < 400) return;
-                lastFired = now;
-                handler(e);
-            }
-            el.addEventListener('touchend', function (e) {
-                e.preventDefault();
-                fire(e);
-            }, { passive: false });
-            el.addEventListener('click', fire);
-        }
-
-        viewport.querySelectorAll('[data-open]').forEach(function (el) {
-            bindTap(el, function () {
-                var targetId = el.getAttribute('data-open');
-                if (!targetId) return;
-                var fromId = stack[stack.length - 1];   // capture BEFORE pushing
-                stack.push(targetId);
-                goTo(fromId, targetId, 'forward');
-            });
-        });
-
-        viewport.querySelectorAll('[data-back]').forEach(function (el) {
-            bindTap(el, function () {
-                if (stack.length > 1) {
-                    var fromId = stack.pop();           // panel we're leaving
-                    var toId = stack[stack.length - 1];  // panel we're going back to
-                    goTo(fromId, toId, 'back');
-                }
-            });
-        });
-
-        function resetMenu() {
-            viewport.querySelectorAll('.aq-mm-panel').forEach(function (p) {
-                p.classList.remove('is-active', 'is-prev', 'is-prev-out');
-                p.style.transform = '';
-                p.scrollTop = 0;
-            });
-            getPanel('mm-root').classList.add('is-active');
-            stack = ['mm-root'];
-        }
-
-        document.querySelectorAll('.aq-offcanvas-close, .body-overlay').forEach(function (el) {
-            bindTap(el, function () {
-                setTimeout(resetMenu, 350);
-            });
-        });
-    } catch (err) {
-        console.error('Drill-down menu init failed:', err);
-    }
-});
-</script>
-
 </body>
 
 </html>

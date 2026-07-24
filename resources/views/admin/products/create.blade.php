@@ -791,6 +791,15 @@
                 grid-template-columns: 1fr;
             }
         }
+        .variant-row-excluded {
+    opacity: 0.55;
+    background: #fafafa;
+}
+
+.variant-row-excluded input,
+.variant-row-excluded select {
+    background: #f1f2f4;
+}
     </style>
 
     <div class="app-content content container-fluid">
@@ -1650,79 +1659,99 @@ function removeVariantImage(prefix, index) {
      * Hidden inputs for the attribute value ids are always written so the
      * combination itself is preserved and posted back to the server.
      */
-    function renderVariantTable(type, combinations) {
-        let titleMap = {
-            price: 'Price Variants',
-            image: 'Image Variants',
-            stock: 'Stock Variants',
-            sku: 'SKU Variants'
-        };
+ function renderVariantTable(type, combinations) {
+    let titleMap = {
+        price: 'Price Variants',
+        image: 'Image Variants',
+        stock: 'Stock Variants',
+        sku: 'SKU Variants'
+    };
 
-        let headCols = '<th>Variant</th>';
-        if (type === 'sku') headCols += '<th>SKU</th>';
-        if (type === 'price') headCols += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
-        if (type === 'stock') headCols += '<th>Stock</th>';
-        if (type === 'image') headCols += '<th>Image</th>';
+    let headCols = '<th>Variant</th>';
+    if (type === 'sku') headCols += '<th>SKU</th>';
+    if (type === 'price') headCols += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
+    if (type === 'stock') headCols += '<th>Stock</th>';
+    if (type === 'image') headCols += '<th>Image</th>';
+    headCols += '<th>Available</th>'; // ✅ replaces the remove-button column
 
-        let rows = '';
+    let rows = '';
 
-        combinations.forEach(function (combo, index) {
-            if (!Array.isArray(combo)) combo = [combo];
-            let names = combo.map(x => x.name);
-            let prefix = `variants_${type}[${index}]`;
+    combinations.forEach(function (combo, index) {
+        if (!Array.isArray(combo)) combo = [combo];
+        let names = combo.map(x => x.name);
+        let prefix = `variants_${type}[${index}]`;
+        let rowId = `variant-row-${type}-${index}`;
 
-            rows += `<tr><td><span class="variant-name-cell">${names.join(' / ')}</span></td>`;
+        rows += `<tr id="${rowId}"><td><span class="variant-name-cell">${names.join(' / ')}</span></td>`;
 
-            if (type === 'sku') {
-                rows += `<td><input type="text" name="${prefix}[sku]" class="field-input"></td>`;
-            }
+        if (type === 'sku') {
+            rows += `<td><input type="text" name="${prefix}[sku]" class="field-input"></td>`;
+        }
 
-            if (type === 'price') {
-                rows += `
-                <td><input type="number" step="0.01" name="${prefix}[mrp]" class="field-input"></td>
-                <td>
-                    <select name="${prefix}[discount_type]" class="field-select">
-                        <option value="amount">Amount</option>
-                        <option value="percentage">%</option>
-                    </select>
-                </td>
-                <td><input type="number" step="0.01" name="${prefix}[discount]" class="field-input"></td>
-                <td><input type="number" step="0.01" name="${prefix}[price]" class="field-input" readonly></td>`;
-            }
+        if (type === 'price') {
+            rows += `
+            <td><input type="number" step="0.01" name="${prefix}[mrp]" class="field-input"></td>
+            <td>
+                <select name="${prefix}[discount_type]" class="field-select">
+                    <option value="amount">Amount</option>
+                    <option value="percentage">%</option>
+                </select>
+            </td>
+            <td><input type="number" step="0.01" name="${prefix}[discount]" class="field-input"></td>
+            <td><input type="number" step="0.01" name="${prefix}[price]" class="field-input" readonly></td>`;
+        }
 
-            if (type === 'stock') {
-                rows += `<td><input type="number" name="${prefix}[stock]" class="field-input"></td>`;
-            }
+        if (type === 'stock') {
+            rows += `<td><input type="number" name="${prefix}[stock]" class="field-input"></td>`;
+        }
 
-            if (type === 'image') {
-    rows += `<td style="min-width:220px">
-        <div class="file-upload-area variant-image-upload" style="padding:14px 10px;">
-            <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
-            <div class="upload-icon" style="font-size:16px;margin-bottom:4px;"><i class="fa fa-cloud-upload"></i></div>
-            <p style="font-size:11.5px;margin:0;">Click or drag images</p>
+        if (type === 'image') {
+            rows += `<td style="min-width:220px">
+                <div class="file-upload-area variant-image-upload" style="padding:14px 10px;">
+                    <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
+                    <div class="upload-icon" style="font-size:16px;margin-bottom:4px;"><i class="fa fa-cloud-upload"></i></div>
+                    <p style="font-size:11.5px;margin:0;">Click or drag images</p>
+                </div>
+                <div class="variant-image-preview" data-prefix="${prefix}" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+            </td>`;
+        }
+
+        // ✅ "Not offered" checkbox instead of a delete button — the row
+        // (and its stock/price/etc data) is always submitted, but
+        // checking this tells the controller to save it as is_available=0,
+        // so it stays out of customer-facing stock matching without
+        // losing whatever the admin already typed into the row.
+        rows += `<td style="text-align:center">
+            <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;white-space:nowrap;justify-content:center;">
+                <input type="checkbox" name="${prefix}[excluded]" onchange="toggleVariantRowStyle(this)">
+                Not offered
+            </label>
+        </td>`;
+
+        rows += `</tr>`;
+
+        combo.forEach(function (item) {
+            rows += `<input type="hidden" name="${prefix}[values][]" value="${item.id}">`;
+        });
+    });
+
+    return `
+    <div class="section-card" style="margin-bottom:16px">
+        <div class="section-card-header"><h5>${titleMap[type]}</h5></div>
+        <div class="section-card-body" style="padding:0;overflow-x:auto">
+            <table class="variants-table">
+                <thead><tr>${headCols}</tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
         </div>
-        <div class="variant-image-preview" data-prefix="${prefix}" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-    </td>`;
+        <div class="variant-note">Tick "Not offered" for a combination that doesn't actually exist (e.g. Red isn't available in Small) — it'll be saved but hidden from customers. Leave it unchecked with Stock = 0 if the combination exists but is temporarily out of stock.</div>
+    </div>`;
 }
 
-            rows += `</tr>`;
-
-            combo.forEach(function (item) {
-                rows += `<input type="hidden" name="${prefix}[values][]" value="${item.id}">`;
-            });
-        });
-
-        return `
-        <div class="section-card" style="margin-bottom:16px">
-            <div class="section-card-header"><h5>${titleMap[type]}</h5></div>
-            <div class="section-card-body" style="padding:0;overflow-x:auto">
-                <table class="variants-table">
-                    <thead><tr>${headCols}</tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
-        </div>`;
-    }
+// ✅ visually grey out a row when marked "Not offered"
+function toggleVariantRowStyle(checkbox) {
+    $(checkbox).closest('tr').toggleClass('variant-row-excluded', checkbox.checked);
+}
 
     /* ── Variant price calculator ───────────────────────────────── */
     $(document).on(

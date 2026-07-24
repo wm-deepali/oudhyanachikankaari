@@ -14,16 +14,14 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function __construct(protected StockService $stockService)
-    {
-    }
+    public function __construct(protected StockService $stockService) {}
 
     public function index()
     {
         $now = Carbon::now();
         $startThis = $now->copy()->startOfMonth();
         $startLast = $now->copy()->subMonth()->startOfMonth();
-        $endLast = $now->copy()->subMonth()->endOfMonth();
+        $endLast   = $now->copy()->subMonth()->endOfMonth();
 
         // ── Revenue ──────────────────────────────────────────
         $revenueThisMonth = Order::where('payment_status', 'paid')
@@ -64,9 +62,9 @@ class DashboardController extends Controller
 
         $statusTotal = $statusCounts->sum() ?: 1;
 
-        $pendingPct = round((($statusCounts['pending'] ?? 0) / $statusTotal) * 100);
+        $pendingPct    = round((($statusCounts['pending'] ?? 0) / $statusTotal) * 100);
         $processingPct = round((($statusCounts['processing'] ?? 0) / $statusTotal) * 100);
-        $deliveredPct = round((($statusCounts['delivered'] ?? 0) / $statusTotal) * 100);
+        $deliveredPct  = round((($statusCounts['delivered'] ?? 0) / $statusTotal) * 100);
 
         // ── Quick stats ──────────────────────────────────────
         $avgOrderValue = $ordersThisMonth > 0
@@ -100,7 +98,7 @@ class DashboardController extends Controller
 
         // ── Top selling products this month ──────────────────
         $topProducts = OrderItem::select('product_id', 'product_name', DB::raw('SUM(quantity) as total_qty'))
-            ->whereHas('order', fn($q) => $q->where('created_at', '>=', $startThis))
+            ->whereHas('order', fn ($q) => $q->where('created_at', '>=', $startThis))
             ->groupBy('product_id', 'product_name')
             ->orderByDesc('total_qty')
             ->take(4)
@@ -108,55 +106,20 @@ class DashboardController extends Controller
 
         // ── Stock alert banner ───────────────────────────────
         [$criticalThreshold] = $this->stockService->thresholds();
-
-        // Products that have their own stock-type variants — for these,
-// products.stock is not the source of truth, so we check the
-// variant rows instead of the parent column.
-        $productIdsWithStockVariants = \App\Models\ProductVariant::where('type', 'stock')
-            ->distinct()
-            ->pluck('product_id');
-
-        $criticalPlainProducts = Product::whereNotIn('id', $productIdsWithStockVariants)
-            ->where('stock', '<=', $criticalThreshold)
-            ->get();
-
-        $criticalVariantProductIds = \App\Models\ProductVariant::where('type', 'stock')
-            ->where('stock', '<=', $criticalThreshold)
-            ->pluck('product_id')
-            ->unique();
-
-        $criticalVariantProducts = Product::whereIn('id', $criticalVariantProductIds)->get();
-
-        $criticalProducts = $criticalPlainProducts
-            ->merge($criticalVariantProducts)
-            ->unique('id')
-            ->values();
-
+        $criticalProducts = Product::where('stock', '<=', $criticalThreshold)->get();
         $showStockBanner = $criticalProducts->isNotEmpty();
 
         return view('admin.dashboard.index', compact(
-            'revenueThisMonth',
-            'revenueGrowth',
-            'totalProducts',
-            'productGrowth',
-            'totalOrders',
-            'orderGrowth',
-            'totalCustomers',
-            'customerGrowth',
-            'pendingPayments',
-            'pendingPaymentsCount',
-            'pendingPct',
-            'processingPct',
-            'deliveredPct',
-            'avgOrderValue',
-            'returnRate',
-            'fulfilledToday',
-            'chartLabels',
-            'chartData',
-            'recentOrders',
-            'topProducts',
-            'criticalProducts',
-            'showStockBanner'
+            'revenueThisMonth', 'revenueGrowth',
+            'totalProducts', 'productGrowth',
+            'totalOrders', 'orderGrowth',
+            'totalCustomers', 'customerGrowth',
+            'pendingPayments', 'pendingPaymentsCount',
+            'pendingPct', 'processingPct', 'deliveredPct',
+            'avgOrderValue', 'returnRate', 'fulfilledToday',
+            'chartLabels', 'chartData',
+            'recentOrders', 'topProducts',
+            'criticalProducts', 'showStockBanner'
         ));
     }
 

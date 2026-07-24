@@ -33,10 +33,57 @@ class CartController extends Controller
             'quantity' => 'nullable|integer|min:1',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
-        $quantity = $request->quantity ?? $product->min_qty;
+      $product = Product::with('variants.values')->findOrFail($request->product_id);
+$quantity = $request->quantity ?? $product->min_qty;
 
-        $priceVariant = $request->price_variant_id ? ProductVariant::find($request->price_variant_id) : null;
+/*
+|--------------------------------------------------------------------------
+| Default-variant resolution — jab koi variant id bheja hi nahi gaya
+| (listing page ka "Add to Cart"), lekin product ke variants hain, to
+| khud-ba-khud ek in-stock combination pick karo.
+|--------------------------------------------------------------------------
+*/
+if (!$request->filled('stock_variant_id') && $product->variants->isNotEmpty()) {
+
+    $stockVariants = $product->variants->where('type', 'stock');
+
+    $defaultStockVariant = $stockVariants->firstWhere('stock', '>', 0)
+        ?? $stockVariants->first();
+
+    if ($defaultStockVariant) {
+
+        $defaultValueIds = $defaultStockVariant->values
+            ->pluck('attribute_value_id')
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $request->merge([
+            'stock_variant_id' => $defaultStockVariant->id,
+            'selected_values' => $defaultValueIds,
+        ]);
+
+        foreach (['price', 'image', 'sku'] as $type) {
+
+            $match = $product->variants
+                ->where('type', $type)
+                ->first(function ($variant) use ($defaultValueIds) {
+                    $ids = $variant->values
+                        ->pluck('attribute_value_id')
+                        ->sort()
+                        ->values()
+                        ->toArray();
+                    return $ids === $defaultValueIds;
+                });
+
+            if ($match) {
+                $request->merge([$type . '_variant_id' => $match->id]);
+            }
+        }
+    }
+}
+
+$priceVariant = $request->price_variant_id ? ProductVariant::find($request->price_variant_id) : null;
         $imageVariant = $request->image_variant_id ? ProductVariant::find($request->image_variant_id) : null;
         $stockVariant = $request->stock_variant_id ? ProductVariant::find($request->stock_variant_id) : null;
         $skuVariant = $request->sku_variant_id ? ProductVariant::find($request->sku_variant_id) : null;
@@ -263,18 +310,15 @@ class CartController extends Controller
         );
     }
 
-    public function remove($id)
+   public function remove($id)
     {
         $item = CartItem::findOrFail($id);
 
         if (auth('customer')->check()) {
-
             if ($item->cart->user_id != auth('customer')->id()) {
                 abort(403);
             }
-
         } else {
-
             if ($item->cart->session_id != session()->getId()) {
                 abort(403);
             }
@@ -287,11 +331,16 @@ class CartController extends Controller
         $cart->recalculateTotals();
         $cart->refresh();
 
+        $cart->load(['items.product', 'items.imageVariant', 'items.addons']);
+        $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();
+
         return response()->json([
             'status' => true,
             'message' => 'Item removed successfully',
             'cart_total' => $cart->grand_total,
-            'cart_count' => $cart->items()->sum('quantity')
+            'cart_count' => $cart->items()->sum('quantity'),
+            'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
+            'mini_cart_html' => $miniCartHtml,
         ]);
     }
 
@@ -351,16 +400,16 @@ class CartController extends Controller
         $item->total = $item->quantity * ($item->price + $addonUnitTotal);
         $item->save();
 
-        $cart = $item->cart;
+       $cart = $item->cart;
 
         $cart->recalculateTotals();
         $cart->refresh();
 
-        // Addons carry no MRP/discount of their own — their price counts
-        // toward both the "MRP" (strikethrough) and the actual total, so
-        // that only the base product/variant portion ever shows a discount.
         $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
         $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
+
+        $cart->load(['items.product', 'items.imageVariant', 'items.addons']);
+        $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();
 
         return response()->json([
             'status' => true,
@@ -368,6 +417,9 @@ class CartController extends Controller
             'item_total' => $item->total,
             'total_mrp' => $totalMrp,
             'cart_total' => $cart->grand_total,
+            'cart_count' => $cart->items()->sum('quantity'),
+            'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
+            'mini_cart_html' => $miniCartHtml,
         ]);
     }
 

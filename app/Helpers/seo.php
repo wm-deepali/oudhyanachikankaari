@@ -59,10 +59,12 @@ function getSeo()
 
         // Dynamic Page
         case 'dynamic.page':
-            return DynamicPage::where(
-                'slug',
-                request()->route('slug')
-            )->first();
+            $slug = request()->route('slug');
+            return DynamicPage::get()
+            ->first(function ($p) use ($slug) {
+                return Str::slug($p->page_name) === $slug;
+            });
+
 
         default:
 

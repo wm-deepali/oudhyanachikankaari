@@ -156,6 +156,10 @@ Route::middleware('maintenance.mode')->group(function () {
 
     });
 
+Route::get('/colour-chart', function () {
+    return view('front-pages.colour-chart');
+})->name('colour.chart');
+
     Route::get('/auth/google', [CustomerAuthController::class, 'redirectToGoogle'])
         ->name('google.login');
 

@@ -727,17 +727,18 @@
 
         <label
             style="font-size:12px;font-weight:600;color:#6d7175;text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:6px;">
-            Email Address
+            Mobile Number
         </label>
-        <input type="email" id="share-email-input" placeholder="Enter email address"
+        <input type="text" id="share-mobile-input" maxlength="10" inputmode="numeric"
+            placeholder="Enter 10-digit mobile number"
             style="width:100%;height:40px;border:1px solid #e3e5e8;border-radius:8px;padding:0 12px;font-size:14px;outline:none;font-family:inherit;margin-bottom:6px;"
-            onkeydown="if(event.key==='Enter') sendCouponEmail()">
+            onkeydown="if(event.key==='Enter') sendCouponSms()">
         <p id="share-error-msg" style="font-size:12px;color:#b22222;margin:4px 0 14px;display:none;"></p>
 
-        <button onclick="sendCouponEmail()" id="share-send-btn"
+        <button onclick="sendCouponSms()" id="share-send-btn"
             style="width:100%;background:#303d89;color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;">
             <i class="fa fa-paper-plane"></i>
-            Send Email
+            Send SMS
         </button>
 
     </div>
@@ -786,10 +787,10 @@
         _shareCouponData = { id, code, discount, expiry };
         document.getElementById('share-coupon-info').textContent =
             'Code: ' + code + '  |  Discount: ' + discount + '  |  Valid till: ' + expiry;
-        document.getElementById('share-email-input').value = '';
+        document.getElementById('share-mobile-input').value = '';
         document.getElementById('share-error-msg').style.display = 'none';
         document.getElementById('share-coupon-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('share-email-input').focus(), 100);
+        setTimeout(() => document.getElementById('share-mobile-input').focus(), 100);
     }
 
     function closeShareModal() {
@@ -801,14 +802,14 @@
         if (e.target === this) closeShareModal();
     });
 
-    function sendCouponEmail() {
-        const email = document.getElementById('share-email-input').value.trim();
+    function sendCouponSms() {
+        const mobile = document.getElementById('share-mobile-input').value.trim();
         const errEl = document.getElementById('share-error-msg');
         const btn = document.getElementById('share-send-btn');
 
         // Validate
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            errEl.textContent = 'Please enter a valid email address.';
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            errEl.textContent = 'Please enter a valid 10-digit mobile number.';
             errEl.style.display = 'block';
             return;
         }
@@ -822,14 +823,14 @@
             type: 'POST',
             data: {
                 _token: "{{ csrf_token() }}",
-                email: email,
+                mobile: mobile,
             },
             success: function (res) {
                 if (res.status) {
-                    Swal.fire({ icon: 'success', title: 'Email Sent!', text: res.message, timer: 2000, showConfirmButton: false });
+                    Swal.fire({ icon: 'success', title: 'SMS Sent!', text: res.message, timer: 2000, showConfirmButton: false });
                     closeShareModal();
                 } else {
-                    errEl.textContent = res.message ?? 'Failed to send email.';
+                    errEl.textContent = res.message ?? 'Failed to send SMS.';
                     errEl.style.display = 'block';
                 }
             },
@@ -839,7 +840,7 @@
             },
             complete: function () {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa fa-paper-plane"></i> Send Email';
+                btn.innerHTML = '<i class="fa fa-paper-plane"></i> Send SMS';
             }
         });
     }

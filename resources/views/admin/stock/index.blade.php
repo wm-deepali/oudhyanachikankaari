@@ -1056,10 +1056,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($products as $line)
+                            @forelse($products as $product)
                                 @php
-                                    $isVariant = $line['kind'] === 'variant';
-                                    $state = $line['status']; // 'out' | 'low' | 'in'
+                                    $state = $stockService->simpleStatus($product); // 'out' | 'low' | 'in'
                                     $rowClass = match ($state) { 'out' => 'row-out', 'low' => 'row-low', default => ''};
                                     $pillClass = match ($state) { 'out' => 'pill-out', 'low' => 'pill-low', default => 'pill-in'};
                                     $pillLabel = match ($state) { 'out' => 'Out of Stock', 'low' => 'Low Stock', default => 'In Stock'};
@@ -1067,40 +1066,29 @@
                                     $lowThreshold = $stockService->thresholds()[1];
                                     $barWidth = match ($state) {
                                         'out' => 0,
-                                        'low' => $lowThreshold > 0 ? min(100, round(($line['stock'] / $lowThreshold) * 100)) : 0,
+                                        'low' => $lowThreshold > 0 ? min(100, round(($product->stock / $lowThreshold) * 100)) : 0,
                                         default => 100,
                                     };
-
-                                    $updateUrl = $isVariant
-                                        ? route('admin.stock.variant.update', $line['variant'])
-                                        : route('admin.stock.update', $line['product']);
-
-                                    $historyId = $isVariant ? 'v' . $line['id'] : $line['id'];
                                 @endphp
-                                <tr class="{{ $rowClass }}" data-product-row="{{ $historyId }}">
-                                    <td><span class="id-chip">{{ $line['id'] }}</span></td>
+                                <tr class="{{ $rowClass }}" data-product-row="{{ $product->id }}">
+                                    <td><span class="id-chip">{{ $product->id }}</span></td>
                                     <td>
                                         <div style="display:flex;align-items:center;gap:10px">
-                                            <img src="{{ $line['image'] ?? 'https://placehold.co/48x48/e8f2ff/0069d9?text=P' }}"
+                                            <img src="{{ $product->display_image ?? 'https://placehold.co/48x48/e8f2ff/0069d9?text=P' }}"
                                                 class="prod-thumb" alt="">
                                             <div>
-                                                <div class="prod-name">
-                                                    {{ $line['display_name'] }}
-                                                    @if($isVariant)
-                                                        <span style="font-weight:500;color:var(--text-hint)"> — {{ $line['sub_label'] }}</span>
-                                                    @endif
-                                                </div>
-                                                <div class="prod-sku">CODE: {{ $line['product_code'] }}</div>
+                                                <div class="prod-name">{{ $product->name }}</div>
+                                                <div class="prod-sku">CODE: {{ $product->product_code }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td><span class="cat-tag"><i class="fa fa-folder-o" style="font-size:10px"></i>
-                                            {{ $line['category']->name ?? 'Uncategorized' }}</span></td>
+                                            {{ $product->category->name ?? 'Uncategorized' }}</span></td>
                                     <td><span
-                                            style="font-family:'SF Mono','Fira Code',monospace;font-size:12px;color:var(--text-secondary)">{{ $line['sku'] }}</span>
+                                            style="font-family:'SF Mono','Fira Code',monospace;font-size:12px;color:var(--text-secondary)">{{ $product->sku }}</span>
                                     </td>
                                     <td>
-                                        <div class="stock-qty" data-stock-value {{ $state !== 'in' ? 'style=color:' . $barColor : '' }}>{{ $line['stock'] }}</div>
+                                        <div class="stock-qty" data-stock-value {{ $state !== 'in' ? 'style=color:' . $barColor : '' }}>{{ $product->stock }}</div>
                                         <div class="stock-bar-wrap">
                                             <div class="stock-bar">
                                                 <div class="stock-bar-fill" data-stock-bar
@@ -1109,17 +1097,18 @@
                                         </div>
                                     </td>
                                     <td><span
-                                            style="font-size:13px;color:var(--text-secondary)">{{ $line['min_qty'] }}</span>
+                                            style="font-size:13px;color:var(--text-secondary)">{{ $product->min_qty }}</span>
                                     </td>
                                     <td><span class="pill {{ $pillClass }}" data-stock-pill>{{ $pillLabel }}</span></td>
-                                    <td><span class="pill {{ $line['active'] ? 'pill-active' : 'pill-inactive' }}"
-                                            data-visibility-pill>{{ $line['active'] ? 'Active' : 'Inactive' }}</span></td>
+                                    <td><span class="pill {{ $product->status ? 'pill-active' : 'pill-inactive' }}"
+                                            data-visibility-pill>{{ $product->status ? 'Active' : 'Inactive' }}</span></td>
                                     <td>
-                                        <form class="stock-update-form" data-action="{{ $updateUrl }}">
+                                        <form class="stock-update-form"
+                                            data-action="{{ route('admin.stock.update', $product) }}">
                                             @csrf
                                             <div style="display:flex;gap:6px;align-items:center">
                                                 <input type="number" min="0" name="stock" class="stock-input"
-                                                    value="{{ $line['stock'] }}" {{ $state !== 'in' ? 'style=border-color:' . $barColor : '' }}>
+                                                    value="{{ $product->stock }}" {{ $state !== 'in' ? 'style=border-color:' . $barColor : '' }}>
                                                 <button type="submit" class="btn-update"><i class="fa fa-check"></i>
                                                     Save</button>
                                             </div>
@@ -1128,13 +1117,14 @@
                                     <td>
                                         <div style="display:flex;gap:5px">
                                             <div class="action-wrap">
-                                                <a href="{{ route('admin.products.edit', $line['product']->id) }}"
+                                                <!-- TODO: point at your real product-detail route -->
+                                                <a href="{{ route('admin.products.edit', $product->id) }}"
                                                     class="action-btn action-btn-view"><i class="fa fa-eye"></i></a>
                                                 <span class="tooltip-label">View Product</span>
                                             </div>
                                             <div class="action-wrap">
                                                 <button type="button" class="action-btn action-btn-hist"
-                                                    onclick="openHistory({{ $line['id'] }}, {{ \Illuminate\Support\Js::from($isVariant ? $line['display_name'] . ' — ' . $line['sub_label'] : $line['display_name']) }}, {{ $isVariant ? 'true' : 'false' }})">
+                                                    onclick="openHistory({{ $product->id }}, {{ \Illuminate\Support\Js::from($product->name) }})">
                                                     <i class="fa fa-history"></i>
                                                 </button>
                                                 <span class="tooltip-label">Stock History</span>
@@ -1233,8 +1223,6 @@
                         </div>
                         <div style="font-size:12px;color:var(--text-hint)">
                             Fill in the <strong>Stock</strong> column (col 6) and leave everything else unchanged.
-                            <br>
-                            <em>Note: bulk update currently applies to plain products only, not variant stock rows.</em>
                         </div>
                     </div>
                     <a href="{{ route('admin.stock.bulk-update.template') }}" class="btn-secondary-dash"
@@ -1363,7 +1351,7 @@
                     <div>
                         <label
                             style="font-size:11.5px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:6px">
-                            Product <span style="font-weight:400;text-transform:none">(plain products only for now)</span>
+                            Product
                         </label>
                         <select name="product_id" required
                             style="width:100%;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 11px;font-size:13px;font-family:var(--font);color:var(--text-primary);background:var(--surface);outline:none">
@@ -1457,12 +1445,11 @@
 
 <script>
     const STOCK_HISTORY_URL_TEMPLATE = "{{ route('admin.stock.history', ['product' => '__ID__']) }}";
-    const STOCK_VARIANT_HISTORY_URL_TEMPLATE = "{{ route('admin.stock.variant.history', ['variant' => '__ID__']) }}";
 
-    function openHistory(id, productName, isVariant) {
+    function openHistory(productId, productName) {
         document.getElementById('modalProductName').textContent = productName;
         document.getElementById('historyModal').classList.add('open');
-        loadHistory(id, isVariant);
+        loadHistory(productId);
     }
 
     function closeHistory() {
@@ -1483,13 +1470,12 @@
         initial_stock: 'Initial Stock Set',
     };
 
-    async function loadHistory(id, isVariant = false) {
+    async function loadHistory(productId) {
         const timeline = document.getElementById('histTimeline');
         timeline.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-hint)">Loading…</div>';
 
         try {
-            const template = isVariant ? STOCK_VARIANT_HISTORY_URL_TEMPLATE : STOCK_HISTORY_URL_TEMPLATE;
-            const url = template.replace('__ID__', id);
+            const url = STOCK_HISTORY_URL_TEMPLATE.replace('__ID__', productId);
             const res = await fetch(url, { headers: { Accept: 'application/json' } });
             if (!res.ok) throw new Error('Request failed');
             const data = await res.json();

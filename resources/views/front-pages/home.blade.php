@@ -753,7 +753,7 @@
 
                                                                         @if($product->discount_type == 'percentage')
                                                                             <span class="clr-sale">
-                                                                                -{{ $product->discount }}%
+                                                                                {{ $product->discount }}%
                                                                             </span>
                                                                         @else
                                                                             <span class="clr-sale">
@@ -766,7 +766,7 @@
                                                                 <div class="aq-product-action">
                                                                     @if($product->stock >= $product->min_qty)
                                                                         <button type="button"
-                                                                            onclick="addToCart({{ $product->id }}, {{ $product->min_qty }})"
+                                                                            onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)"
                                                                             class="aq-product-action-btn aq-tooltip">
 
                                                                             <svg xmlns="http://www.w3.org/2000/svg" width="18"
@@ -794,7 +794,7 @@
                                                                                 </path>
                                                                             </svg>
 
-                                                                            <span class="aq-tooltip-item">Out of Stock</span>
+                                                                            <span class="aq-tooltip-item">Sold Out</span>
                                                                         </button>
                                                                     @endif
                                                                     <button type="button"
@@ -1821,52 +1821,56 @@
 
         <script>
 
-            function addToCart(productId, quantity) {
+            function addToCart(productId, quantity, btnEl) {
 
-                $.ajax({
-                    url: "{{ route('cart.add') }}",
-                    type: "POST",
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        product_id: productId,
-                        quantity: quantity
-                    },
-                    success: function (response) {
+    const $btn = btnEl ? $(btnEl) : null;
+    const $tooltipText = $btn ? $btn.find('.aq-tooltip-item') : null;
+    const originalText = $tooltipText ? $tooltipText.text() : null;
 
-                        if (response.status) {
+    $.ajax({
+        url: "{{ route('cart.add') }}",
+        type: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            product_id: productId,
+            quantity: quantity
+        },
+        success: function (response) {
 
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
+            if (response.status) {
 
-                            $('.cart-count').text(response.cart_count);
-
-                        } else {
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Unable to add product.'
-                            });
-
-                        }
-                    },
-                    error: function (xhr) {
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: xhr.responseJSON?.message ??
-                                'Something went wrong.'
-                        });
-
-                    }
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message,
+                    timer: 1500,
+                    showConfirmButton: false
                 });
+
+                $('.cart-count').text(response.cart_count);
+                refreshMiniCart(response);
+
+                if ($tooltipText) {
+                    $tooltipText.text('Added to Cart');
+                    setTimeout(function () {
+                        $tooltipText.text(originalText);
+                    }, 1500);
+                }
+
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
             }
+        },
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message ?? 'Something went wrong.'
+            });
+        }
+    });
+}
+
             function addToWishlist(productId) {
 
                 $.ajax({
@@ -1922,8 +1926,9 @@
                 <div class="first-time-modal-content">
                     <div class="modal-left-side">
                         <!-- We assume a placeholder or you can replace with correct image path -->
-                        <img src="https://images.pexels.com/photos/1055691/pexels-photo-1055691.jpeg?auto=compress&cs=tinysrgb&w=600"
-                            alt="Chikankari Arrivals" style="background:#e9dcc9;" />
+                        <img src="{{ asset('popup/popupimg.webp') }}"
+     alt="Chikankari Arrivals"
+     style="background:#e9dcc9;" />
                         <div class="modal-left-text">
                             <!--<span>Discover new</span>-->
                             <!--<h2>Chikankari</h2>-->
@@ -1932,7 +1937,7 @@
                     </div>
                     <div class="modal-right-side">
                         <h3>PERKS AWAIT—JUST FOR YOU</h3>
-                        <p>Enjoy 10% off on your first order when you sign up—<br>just for trying us out!</p>
+                        <p>Enjoy 5% off on your first order when you sign up—<br>just for trying us out!</p>
                         <form id="firstTimeForm" class="first-time-form">
                             <input type="email" name="email" placeholder="Enter your email address" required>
                             <div class="phone-input-group">

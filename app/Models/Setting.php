@@ -38,6 +38,7 @@ class Setting extends Model
         'product_reviews',
         'wishlist',
         'stock_alerts',
+        'cod_enabled'
     ];
 
     protected $casts = [
@@ -45,5 +46,6 @@ class Setting extends Model
         'product_reviews' => 'boolean',
         'wishlist' => 'boolean',
         'stock_alerts' => 'boolean',
+        'cod_enabled' => 'boolean',
     ];
 }

@@ -23,9 +23,12 @@ class ProductVariant extends Model
         'stock',
         'image',
         'status',
+        'is_available'
     ];
     protected $casts = [
         'status' => 'boolean',
+            'is_available' => 'boolean',
+
     ];
     public function product()
     {

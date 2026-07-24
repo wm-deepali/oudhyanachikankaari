@@ -106,7 +106,7 @@
                                             <i class="fa-regular fa-envelope position-absolute aq-contact-input-icon"></i>
                                             <input type="email" name="email"
                                                 class="form-control aq-contact-input @error('email') is-invalid @enderror"
-                                                value="{{ old('email') }}" placeholder="rajesh@company.com">
+                                                value="{{ old('email') }}" placeholder="xyz@gmail.com">
                                         </div>
                                         @error('email')
                                             <div class="invalid-feedback">
@@ -133,11 +133,11 @@
                                     </div>
 
                                     <div class="col-md-6 mb-4">
-                                        <label class="aq-contact-label">Company Name</label>
+                                        <label class="aq-contact-label">Brand Name</label>
                                         <div class="position-relative">
                                             <i class="fa-solid fa-building position-absolute aq-contact-input-icon"></i>
                                             <input type="text" name="company" class="form-control aq-contact-input"
-                                                value="{{ old('company') }}" placeholder="E.g. XYZ Corp">
+                                                value="{{ old('company') }}" placeholder="E.g. Brand Name">
                                         </div>
                                     </div>
                                 </div>
@@ -150,11 +150,11 @@
                                         <option value="Bespoke Bridal Curation" {{ old('inquiry_type') == 'Bespoke Bridal Curation' ? 'selected' : '' }}>
                                             Bespoke Bridal Curation
                                         </option>
-                                        <option value="Bulk Corporate Gifting" {{ old('inquiry_type') == 'Bulk Corporate Gifting' ? 'selected' : '' }}>
-                                            Bulk Corporate Gifting
+                                        <option value="Premium Collections" {{ old('inquiry_type') == 'Premium Collections' ? 'selected' : '' }}>
+                                            Premium Collections
                                         </option>
-                                        <option value="Partnership / Vendor Inquiry" {{ old('inquiry_type') == 'Partnership / Vendor Inquiry' ? 'selected' : '' }}>
-                                            Partnership / Vendor Inquiry
+                                        <option value="Bulk Order Enquiry" {{ old('inquiry_type') == 'Bulk Order Enquiry' ? 'selected' : '' }}>
+                                            Bulk Order Enquiry
                                         </option>
                                         <option value="Other" {{ old('inquiry_type') == 'Other' ? 'selected' : '' }}>
                                             Other

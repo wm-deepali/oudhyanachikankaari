@@ -637,52 +637,45 @@
             }
         });
 
-        function addToCart(productId, minQty) {
+function addToCart(productId, minQty, btnEl) {
 
-            $.ajax({
-                url: "{{ route('cart.add') }}",
-                type: "POST",
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    product_id: productId,
-                    quantity: minQty
-                },
-                success: function (response) {
+    const $btn = btnEl ? $(btnEl) : null;
+    const originalHTML = $btn ? $btn.html() : null;
 
-                    if (response.status) {
+    $.ajax({
+        url: "{{ route('cart.add') }}",
+        type: "POST",
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            product_id: productId,
+            quantity: minQty
+        },
+        success: function (response) {
+            if (response.status) {
+                Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                $('.cart-count').text(response.cart_count);
+                refreshMiniCart(response);
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-
-                        $('.cart-count').text(response.cart_count);
-
-                    } else {
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Unable to add product.'
-                        });
-
-                    }
-                },
-                error: function (xhr) {
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.message ?? 'Something went wrong.'
-                    });
-
+                if ($btn) {
+                    $btn.html('<i class="fa-solid fa-check"></i> Added to Cart').prop('disabled', true);
+                    setTimeout(function () {
+                        $btn.html(originalHTML).prop('disabled', false);
+                    }, 1500);
                 }
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: response.message ?? 'Unable to add product.' });
+            }
+        },
+        error: function (xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: xhr.responseJSON?.message ?? 'Something went wrong.'
             });
         }
-
+    });
+}
+      
 
          function addToWishlist(productId) {
 

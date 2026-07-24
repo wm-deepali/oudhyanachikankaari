@@ -99,10 +99,10 @@
                                                 <input type="text" name="name" class="form-control aq-contact-input"
                                                     required minlength="2" maxlength="100" pattern="[A-Za-z\s]+"
                                                     placeholder="Full Name" />
-                                                @error('name')
-                                                    <small class="text-danger">{{ $message }}</small>
-                                                @enderror
                                             </div>
+                                            @error('name')
+                                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            @enderror
                                         </div>
                                         <div class="col-md-6">
                                             <div class="position-relative">
@@ -110,51 +110,58 @@
                                                     class="fa-regular fa-envelope position-absolute aq-contact-input-icon"></i>
                                                 <input type="email" name="email" class="form-control aq-contact-input"
                                                     required maxlength="255" placeholder="Email Address" />
-                                                @error('email')
-                                                    <small class="text-danger">{{ $message }}</small>
-                                                @enderror
                                             </div>
+                                            @error('email')
+                                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            @enderror
                                         </div>
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-phone position-absolute aq-contact-input-icon"></i>
-                                                <input type="tel" name="mobile" class="form-control aq-contact-input"
-                                                    required maxlength="10" pattern="[6-9]{1}[0-9]{9}"
-                                                    placeholder="Mobile Number" />
-                                                @error('mobile')
-                                                    <small class="text-danger">{{ $message }}</small>
-                                                @enderror
+                                                <input type="tel" name="mobile" id="mobileInput" class="form-control aq-contact-input"
+                                                    required maxlength="10" pattern="[6-9]{1}[0-9]{9}" placeholder="Mobile Number" />
                                             </div>
+                                            @error('mobile')
+                                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            @enderror
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i
                                                     class="fa-solid fa-phone-volume position-absolute aq-contact-input-icon"></i>
-                                                <input type="tel" name="alternate_mobile"
-                                                    class="form-control aq-contact-input" required maxlength="10"
-                                                    pattern="[6-9]{1}[0-9]{9}" placeholder="Alternate Number" />
-                                                @error('alternate_mobile')
-                                                    <small class="text-danger">{{ $message }}</small>
-                                                @enderror
+                                              <input type="tel" name="alternate_mobile" id="alternateMobileInput"
+    class="form-control aq-contact-input" maxlength="10"
+    pattern="[6-9]{1}[0-9]{9}" placeholder="Alternate Number (Optional)" />
                                             </div>
+                                            @error('alternate_mobile')
+                                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            @enderror
                                         </div>
+
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-lock position-absolute aq-contact-input-icon"></i>
-                                                <input type="password" name="password" class="form-control aq-contact-input"
-                                                    required minlength="8" placeholder="Password (Min 8 Characters)" />
-                                                @error('password')
-                                                    <small class="text-danger">{{ $message }}</small>
-                                                @enderror
+                                                <input type="password" name="password" id="passwordInput" class="form-control aq-contact-input"
+                                                    required minlength="8" placeholder="Password (Min 8 Characters)"
+                                                    style="padding-right: 40px;" />
+                                                <i class="fa-regular fa-eye toggle-password-icon" data-target="passwordInput"
+                                                   style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
                                             </div>
+                                            @error('password')
+                                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            @enderror
                                         </div>
+
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-lock position-absolute aq-contact-input-icon"></i>
-                                                <input type="password" name="password_confirmation"
+                                                <input type="password" name="password_confirmation" id="confirmPasswordInput"
                                                     class="form-control aq-contact-input" required minlength="8"
-                                                    placeholder="Confirm Password" />
+                                                    placeholder="Confirm Password"
+                                                    style="padding-right: 40px;" />
+                                                <i class="fa-regular fa-eye toggle-password-icon" data-target="confirmPasswordInput"
+                                                   style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -209,5 +216,50 @@
         </section>
     </main>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const mobileInput = document.getElementById('mobileInput');
+    const altInput = document.getElementById('alternateMobileInput');
+    const altError = document.getElementById('alternateMobileError');
+
+    function checkSameNumber() {
+        if (altInput.value.trim() !== '' && altInput.value.trim() === mobileInput.value.trim()) {
+            altError.classList.remove('d-none');
+            altInput.classList.add('is-invalid');
+            return false;
+        } else {
+            altError.classList.add('d-none');
+            altInput.classList.remove('is-invalid');
+            return true;
+        }
+    }
+
+    mobileInput.addEventListener('input', checkSameNumber);
+    altInput.addEventListener('input', checkSameNumber);
+
+    document.getElementById('aqRegisterForm').addEventListener('submit', function (e) {
+        if (!checkSameNumber()) {
+            e.preventDefault();
+            altInput.focus();
+        }
+    });
+});
+
+        
+        document.querySelectorAll('.toggle-password-icon').forEach(function (icon) {
+            icon.addEventListener('click', function () {
+                const targetInput = document.getElementById(icon.getAttribute('data-target'));
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    targetInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+    </script>
 
 @endsection
