@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\HomeSlider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 
 class HomeSliderController extends Controller
 {
@@ -56,8 +61,10 @@ class HomeSliderController extends Controller
 
         if ($request->hasFile('image')) {
 
-            $image = $request->file('image')
-                ->store('home-sliders', 'public');
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'home-sliders'
+            );
         }
 
         HomeSlider::create([
@@ -126,8 +133,10 @@ class HomeSliderController extends Controller
                 Storage::disk('public')->delete($slider->image);
             }
 
-            $image = $request->file('image')
-                ->store('home-sliders', 'public');
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'home-sliders'
+            );
         }
 
         $slider->update([
@@ -160,5 +169,35 @@ class HomeSliderController extends Controller
         return response()->json([
             'message' => 'Slider deleted successfully.'
         ]);
+    }
+
+    /**
+     * ✅ Compress & store an uploaded image as WebP.
+     * Sliders render as a full-width hero banner, so keep width generous —
+     * unlike category cards these are the largest images on the site.
+     */
+    private function compressAndStore(
+        UploadedFile $file,
+        string $folder,
+        int $maxWidth = 1920,
+        int $quality = 80
+    ): string {
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->decode($file);
+
+        // Only downscale, never upscale
+        if ($image->width() > $maxWidth) {
+            $image->scale(width: $maxWidth);
+        }
+
+        $encoded = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $filename = Str::uuid() . '.webp';
+        $path = trim($folder, '/') . '/' . $filename;
+
+        Storage::disk('public')->put($path, (string) $encoded);
+
+        return $path;
     }
 }

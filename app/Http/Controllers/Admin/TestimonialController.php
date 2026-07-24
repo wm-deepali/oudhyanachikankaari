@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Testimonial;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\CompressesImages;
 
 class TestimonialController extends Controller
 {
+    use CompressesImages;
+
     public function index()
     {
         $testimonials = Testimonial::latest()->paginate(10);
@@ -26,8 +29,13 @@ class TestimonialController extends Controller
 
 
         if ($request->hasFile('photo')) {
-            $photo = $request->file('photo')->store('testimonials', 'public');
-            $data['photo'] = $photo;
+            // Small circular/avatar-style testimonial photo
+            $data['photo'] = $this->compressAndStore(
+                $request->file('photo'),
+                'testimonials',
+                500,
+                80
+            );
         }
 
         // REEL FILE
@@ -58,8 +66,12 @@ class TestimonialController extends Controller
             if ($testimonial->photo && Storage::disk('public')->exists($testimonial->photo)) {
                 Storage::disk('public')->delete($testimonial->photo);
             }
-            $photo = $request->file('photo')->store('testimonials', 'public');
-            $data['photo'] = $photo;
+            $data['photo'] = $this->compressAndStore(
+                $request->file('photo'),
+                'testimonials',
+                500,
+                80
+            );
         }
 
         // REEL FILE

@@ -7,9 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\Blog;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Traits\CompressesImages;
 
 class BlogController extends Controller
 {
+    use CompressesImages;
 
     public function index()
     {
@@ -45,13 +47,14 @@ class BlogController extends Controller
 
         if ($request->hasFile('image')) {
 
-            $file = $request->file('image');
-
-            $filename = Str::slug($request->title) . '-' . time() . '.' . $file->extension();
-
-            $imageName = $file->storeAs('blogs', $filename, 'public');
+            // Blog featured image — wide banner-style, similar to deal banners
+            $imageName = $this->compressAndStore(
+                $request->file('image'),
+                'blogs',
+                1200,
+                80
+            );
         }
-
 
         Blog::create([
 
@@ -116,11 +119,12 @@ class BlogController extends Controller
                 Storage::disk('public')->delete($blog->image);
             }
 
-            $file = $request->file('image');
-
-            $filename = Str::slug($request->title) . '-' . time() . '.' . $file->extension();
-
-            $imageName = $file->storeAs('blogs', $filename, 'public');
+            $imageName = $this->compressAndStore(
+                $request->file('image'),
+                'blogs',
+                1200,
+                80
+            );
         }
 
 

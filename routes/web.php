@@ -117,7 +117,7 @@ Route::middleware('maintenance.mode')->group(function () {
 
         Route::prefix('wishlist')->name('wishlist.')->group(function () {
 
-            Route::get('/', [WishlistController::class, 'index'])->name('index');
+            Route::get('/', [WishlistController::class, 'index'])->name('index')->middleware('customer');
             Route::post('/add', [WishlistController::class, 'add'])->name('add');
             Route::delete('/{product}', [WishlistController::class, 'remove'])->name('remove');
             Route::post('/{product}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('moveToCart');
@@ -156,9 +156,9 @@ Route::middleware('maintenance.mode')->group(function () {
 
     });
 
-Route::get('/colour-chart', function () {
-    return view('front-pages.colour-chart');
-})->name('colour.chart');
+    Route::get('/colour-chart', function () {
+        return view('front-pages.colour-chart');
+    })->name('colour.chart');
 
     Route::get('/auth/google', [CustomerAuthController::class, 'redirectToGoogle'])
         ->name('google.login');
@@ -458,7 +458,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/{product}/restock', [StockManagementController::class, 'restock'])->name('stock.restock');
         Route::get('stock/{product}/history', [StockManagementController::class, 'history'])->name('stock.history');
         Route::get('stock/bulk-update/template', [StockManagementController::class, 'downloadTemplate'])->name('stock.bulk-update.template');
-
+        Route::post('stock/variant/{variant}/update', [StockManagementController::class, 'updateVariantStock'])->name('stock.variant.update');
+        Route::post('stock/variant/{variant}/restock', [StockManagementController::class, 'restockVariant'])->name('stock.variant.restock');
+        Route::get('stock/variant/{variant}/history', [StockManagementController::class, 'historyVariant'])->name('stock.variant.history');
 
         Route::get('stock/alerts', [StockAlertsController::class, 'index'])->name('stock.alerts');
         Route::post('stock/alerts/{product}/restock', [StockAlertsController::class, 'restock'])->name('stock.alerts.restock');
@@ -466,6 +468,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('stock/alerts/settings/notifications', [StockAlertsController::class, 'updateNotifications'])->name('stock.alerts.notifications');
         Route::get('stock/alerts/export', [StockAlertsController::class, 'export'])->name('stock.alerts.export');
         Route::post('stock/alerts/restock-all-critical', [StockAlertsController::class, 'restockAllCritical'])->name('stock.alerts.restock.all');
+        Route::post('stock/alerts/variant/{variant}/restock', [StockAlertsController::class, 'restockVariant'])->name('stock.alerts.variant.restock');
+
 
 
         // Listing page

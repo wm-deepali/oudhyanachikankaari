@@ -636,7 +636,7 @@ font-size:15px;
                                 <div id="variant-thumbs-container"></div>
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                                        <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
+                                        <img src="{{ asset('storage/' . ($image->thumb ?? $image->image)) }}" alt="{{ $product->name }}" />
                                     </div>
                                 @endforeach
 
@@ -688,7 +688,8 @@ font-size:15px;
                             <div class="d-lg-none aq-gallery-thumbs d-flex flex-row overflow-auto mt-3">
                                 @foreach($product->images as $index => $image)
                                     <div class="aq-gallery-thumb-item {{ $index == 0 ? 'active' : '' }}" onclick="document.getElementById('main-img-{{ $index }}').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                                        <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}" />
+                                       <img src="{{ asset('storage/' . ($image->thumb ?? $image->image)) }}" alt="{{ $product->name }}" />
+                                        
                                     </div>
                                 @endforeach
                                 @foreach($product->videos as $index => $video)
@@ -1368,12 +1369,13 @@ font-size:15px;
 
                                         <img src="{{ $newArrival->display_image }}" class="aq-product-card-img primary-img"
                                             alt="{{ $newArrival->name }}" />
+                                            
+<img src="{{ isset($otherImages[0]) ? asset('storage/' . ($otherImages[0]->thumb ?? $otherImages[0]->image)) : $newArrival->display_image }}"
+    class="secondary-img" alt="{{ $newArrival->name }}" />
 
-                                        <img src="{{ isset($otherImages[0]) ? asset('storage/' . $otherImages[0]->image) : $newArrival->display_image }}"
-                                            class="secondary-img" alt="{{ $newArrival->name }}" />
+<img src="{{ isset($otherImages[1]) ? asset('storage/' . ($otherImages[1]->thumb ?? $otherImages[1]->image)) : $newArrival->display_image }}"
+    class="tertiary-img" alt="{{ $newArrival->name }}" />
 
-                                        <img src="{{ isset($otherImages[1]) ? asset('storage/' . $otherImages[1]->image) : $newArrival->display_image }}"
-                                            class="tertiary-img" alt="{{ $newArrival->name }}" />
 
                                         <video src="{{ asset('assets/img/corporate/reals_video.mp4') }}"
                                             class="aq-product-card-video" muted loop playsinline>
@@ -2051,21 +2053,27 @@ updateComboAvailability();
         return;
     }
 
-    images.forEach(function(imagePath, index) {
+    images.forEach(function(imageObj, index) {
 
-        const src = storageBaseUrl + '/' + imagePath;
+        // Support both the new {image, thumb} shape and a plain string,
+        // in case any older cached response still sends a flat path.
+        const mainPath  = typeof imageObj === 'string' ? imageObj : imageObj.image;
+        const thumbPath = typeof imageObj === 'string' ? imageObj : (imageObj.thumb || imageObj.image);
+
+        const mainSrc  = storageBaseUrl + '/' + mainPath;
+        const thumbSrc = storageBaseUrl + '/' + thumbPath;
 
         $('#variant-thumbs-container').append(`
             <div class="aq-gallery-thumb-item variant-thumb ${index === 0 ? 'active' : ''}"
                  onclick="document.getElementById('variant-main-${index}').scrollIntoView({behavior:'smooth', block:'center'})">
-                <img src="${src}" alt="">
+                <img src="${thumbSrc}" alt="">
             </div>
         `);
 
         $('#variant-images-container').append(`
             <div class="aq-gallery-main-img-wrap"
                  id="variant-main-${index}">
-                <img src="${src}"
+                <img src="${mainSrc}"
                      class="aq-gallery-main-img"
                      style="width:100%;border-radius:8px;object-fit:cover;">
             </div>
@@ -2075,7 +2083,7 @@ updateComboAvailability();
     document.getElementById('variant-main-0')
         ?.scrollIntoView({ behavior:'smooth', block:'center' });
 
-    rebuildGalleryDots();   // ← ADD KIYA: variant image change hone pe dots resync honge
+    rebuildGalleryDots();
 }
 
 $(document).on('change', '.aq-size-dropdown', function () {

@@ -734,7 +734,7 @@ to drill-down behaviour only.
                     <a href="{{ route('wishlist.index') }}">
                         <div class="aq-bottom-menu-item">
                             <button class="p-relative">
-                                <span class="count-box">3</span>
+                              <span class="count-box wishlist-count">{{ \App\Models\Wishlist::current()->count() }}</span>
                                 <i>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="15" viewBox="0 0 18 15"
                                         fill="none">
@@ -751,7 +751,7 @@ to drill-down behaviour only.
                 <div class="col">
                     <div class="aq-bottom-menu-item aq-cart-btn">
                         <button class="p-relative">
-                            <span class="count-box">3</span>
+                           <span class="count-box cart-count">{{ $globalCartCount }}</span>
                             <i>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="14" viewBox="0 0 17 14"
                                     fill="none">
@@ -1118,35 +1118,6 @@ to drill-down behaviour only.
                                         </div>
                                     </li>
 
-                                    <!--      <li class="has-dropdown p-static">
-                                        <a href="#">Categories</a>
-                                        <div class="aq-megamenu-wrap aq-megamenu-img-wrap mega-menu">
-                                            <div class="container">
-                                                <div
-                                                    class="row row-cols-xl-6 row-cols-lg-3 row-cols-md-2 row-cols-1 gx-20">
-                                                    @foreach($menuCategories as $category)
-                                                        <div class="col">
-                                                            <div class="aq-megamenu-img-item mb-20">
-                                                                <a href="{{ route('products.listing', $category->slug) }}">
-                                                                    <div class="aq-megamenu-img">
-                                                                        @if($category->image)
-                                                                            <img src="{{ asset('storage/' . $category->image) }}"
-                                                                                alt="{{ $category->name }}">
-                                                                        @else
-                                                                            <img src="{{ asset('assets/images/no-image.png') }}"
-                                                                                alt="{{ $category->name }}">
-                                                                        @endif
-                                                                    </div><span
-                                                                        class="aq-megamenu-img-title">{{ $category->name }}</span>
-                                                                </a>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li> -->
 
                                     @foreach($navbarCategories as $category)
 

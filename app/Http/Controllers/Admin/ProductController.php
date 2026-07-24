@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\GiftingOccasion;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\CategoryAttribute;
@@ -24,6 +25,9 @@ use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
 use App\Models\ProductVariantImage;
 use App\Models\Collection;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 
 class ProductController extends Controller
 {
@@ -34,6 +38,66 @@ class ProductController extends Controller
      * set of ProductVariant rows tagged with this type.
      */
     protected const VARIANT_TYPES = ['price', 'image', 'stock', 'sku'];
+
+    /**
+     * ✅ Compress & store an uploaded image as WebP — generates BOTH a
+     * full-size version (for detail/gallery views) and a thumb version
+     * (for grid cards / listing pages), so listing pages don't have to
+     * download the full 1200px image just to shrink it via CSS.
+     *
+     * Returns ['full' => path, 'thumb' => path] — both already stored
+     * on the public disk.
+     *
+     * The largest real-world display is the product detail gallery
+     * (main image column), so 1200px covers that with a retina buffer.
+     * The thumb (400px) covers grid cards / listing thumbnails.
+     */
+    private function compressAndStore(
+        UploadedFile $file,
+        string $folder,
+        int $maxWidth = 1200,
+        int $thumbWidth = 400,
+        int $quality = 80
+    ): array {
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $uuid = Str::uuid();
+        $folder = trim($folder, '/');
+
+        // ---- Full size ----
+        $image = $manager->decode($file);
+
+        if ($image->width() > $maxWidth) {
+            $image->scale(width: $maxWidth);
+        }
+
+        $encodedFull = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $fullFilename = $uuid . '.webp';
+        $fullPath = $folder . '/' . $fullFilename;
+
+        Storage::disk('public')->put($fullPath, (string) $encodedFull);
+
+        // ---- Thumb size (decode fresh so we don't compound scaling on
+        // the already-downscaled $image instance) ----
+        $thumbImage = $manager->decode($file);
+
+        if ($thumbImage->width() > $thumbWidth) {
+            $thumbImage->scale(width: $thumbWidth);
+        }
+
+        $encodedThumb = $thumbImage->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $thumbFilename = $uuid . '_thumb.webp';
+        $thumbPath = $folder . '/' . $thumbFilename;
+
+        Storage::disk('public')->put($thumbPath, (string) $encodedThumb);
+
+        return [
+            'full' => $fullPath,
+            'thumb' => $thumbPath,
+        ];
+    }
 
    public function index(Request $request)
 {
@@ -221,14 +285,15 @@ class ProductController extends Controller
 
                 foreach ($request->file('images') as $index => $image) {
 
-                    $path = $image->store(
-                        'products',
-                        'public'
+                    $paths = $this->compressAndStore(
+                        $image,
+                        'products'
                     );
 
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'image' => $path,
+                        'image' => $paths['full'],
+                        'thumb' => $paths['thumb'],
                         'is_default' => $request->default_image == $index ? 1 : 0,
                     ]);
                 }
@@ -407,8 +472,6 @@ class ProductController extends Controller
 
         // ✅ Existing variants grouped by type, so the edit form can
         // rebuild each of the (up to) 4 independent tables separately.
-       // ✅ Existing variants grouped by type, so the edit form can
-// rebuild each of the (up to) 4 independent tables separately.
 $existingVariantsByType = [];
 
 foreach (self::VARIANT_TYPES as $type) {
@@ -443,6 +506,7 @@ foreach (self::VARIANT_TYPES as $type) {
                     return [
                         'id' => $img->id,
                         'image' => $img->image,
+                        'thumb' => $img->thumb,
                         'is_default' => $img->is_default,
                     ];
                 })->values(),
@@ -571,7 +635,10 @@ foreach (self::VARIANT_TYPES as $type) {
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $img) {
 
-                    $path = $img->store('products', 'public');
+                    $paths = $this->compressAndStore(
+                        $img,
+                        'products'
+                    );
 
                     $isDefault = 0;
 
@@ -581,7 +648,8 @@ foreach (self::VARIANT_TYPES as $type) {
 
                     ProductImage::create([
                         'product_id' => $product->id,
-                        'image' => $path,
+                        'image' => $paths['full'],
+                        'thumb' => $paths['thumb'],
                         'is_default' => $isDefault
                     ]);
                 }
@@ -596,6 +664,9 @@ foreach (self::VARIANT_TYPES as $type) {
                     if ($img) {
                         if (Storage::disk('public')->exists($img->image)) {
                             Storage::disk('public')->delete($img->image);
+                        }
+                        if ($img->thumb && Storage::disk('public')->exists($img->thumb)) {
+                            Storage::disk('public')->delete($img->thumb);
                         }
                         $img->delete();
                     }
@@ -652,6 +723,9 @@ foreach (self::VARIANT_TYPES as $type) {
                     if ($img) {
                         if (Storage::disk('public')->exists($img->image)) {
                             Storage::disk('public')->delete($img->image);
+                        }
+                        if ($img->thumb && Storage::disk('public')->exists($img->thumb)) {
+                            Storage::disk('public')->delete($img->thumb);
                         }
                         $img->delete();
                     }
@@ -860,15 +934,19 @@ foreach (self::VARIANT_TYPES as $type) {
 
         foreach ($files as $i => $file) {
 
-            if (!$file instanceof \Illuminate\Http\UploadedFile) {
+            if (!$file instanceof UploadedFile) {
                 continue;
             }
 
-            $path = $file->store('product-variants', 'public');
+            $paths = $this->compressAndStore(
+                $file,
+                'product-variants'
+            );
 
             ProductVariantImage::create([
                 'variant_id' => $variant->id,
-                'image' => $path,
+                'image' => $paths['full'],
+                'thumb' => $paths['thumb'],
                 // First image becomes default only if this variant had none before.
                 'is_default' => (!$hasExisting && $i === 0) ? 1 : 0,
             ]);
@@ -1008,6 +1086,9 @@ foreach (self::VARIANT_TYPES as $type) {
                 if (Storage::disk('public')->exists($img->image)) {
                     Storage::disk('public')->delete($img->image);
                 }
+                if ($img->thumb && Storage::disk('public')->exists($img->thumb)) {
+                    Storage::disk('public')->delete($img->thumb);
+                }
                 $img->delete();
             }
 
@@ -1017,372 +1098,6 @@ foreach (self::VARIANT_TYPES as $type) {
         }
     }
 
-    public function import()
-    {
-        return view('admin.products.import');
-    }
-
-    public function importStore(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimetypes:text/plain,text/csv,application/vnd.ms-excel'
-        ]);
-        try {
-
-            Excel::import(
-                new ProductImport,
-                $request->file('file')
-            );
-
-            return redirect()
-                ->route('admin.products.index')
-                ->with('success', 'Products imported successfully.');
-
-        } catch (\Exception $e) {
-
-            return back()->with(
-                'error',
-                $e->getMessage()
-            );
-        }
-    }
-
-    public function downloadSample()
-    {
-        $headers = [
-            'name',
-            'image_name',
-
-            'brand',
-
-            'sub_title',
-            'summary',
-
-            'video_url',
-
-            'sku',
-            'product_code',
-
-            'mrp',
-            'discount',
-            'discount_type',
-            'price',
-
-            'min_qty',
-            'delivery_time',
-
-            'quality',
-            'pan_india',
-
-            'featured',
-            'new_arrival',
-            'sale',
-            'best_seller',
-
-            'ready_to_ship',
-            'bulk_available',
-            'gift_hamper',
-
-            'is_premium',
-            'is_engraving',
-            'is_personalized_engraving',
-
-            'show_on_website',
-
-            'details',
-            'delivery_returns',
-
-
-            'meta_title',
-            'meta_description',
-
-            'cart',
-            'whatsapp',
-            'call',
-
-            'status',
-            'sort_order',
-            'added_by',
-
-            'categories',
-            'sub_categories',
-
-            'occasions',
-            'customizations',
-
-            'inclusions'
-        ];
-
-        $sampleRow = [
-            'Leather Diary',
-            'SKU001.jpg',
-
-            'Parker',
-
-            'Premium Leather Diary',
-            'Corporate Gift Diary',
-
-            'https://youtube.com/watch?v=abc123',
-
-            'SKU001',
-            'PRD001',
-
-            '500',
-            '10',
-            'percentage',
-            '450',
-
-            '1',
-            '5 Days',
-
-            '1',
-            '1',
-
-            '1',
-            '1',
-            '0',
-            '1',
-
-            '1',
-            '1',
-            '0',
-
-            '1',
-            '0',
-            '0',
-
-            '1',
-
-            'Product Description',
-            'Branding Available',
-
-            'Leather Diary',
-            'Premium Leather Diary Description',
-
-            '1',
-            '1',
-            '0',
-
-            '1',
-            '1',
-            'Admin',
-
-            'Corporate Gifts',
-            'Diaries',
-
-            'Diwali, New Year',
-            'Laser Engraving, Printing',
-
-            'Gift Box, User Manual'
-        ];
-
-        $response = new StreamedResponse(function () use ($headers, $sampleRow) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, $headers);
-            fputcsv($handle, $sampleRow);
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=product_import_sample.csv'
-        );
-
-        return $response;
-    }
-
-    public function uploadImagesZip(Request $request)
-    {
-        $request->validate([
-            'zip_file' => 'required|mimes:zip'
-        ]);
-
-        $zipFile = $request->file('zip_file');
-
-        $zipPath = $zipFile->getRealPath();
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($zipPath) === TRUE) {
-
-            $zip->extractTo(
-                storage_path('app/public/products')
-            );
-
-            $zip->close();
-
-            return back()->with(
-                'success',
-                'Images extracted successfully.'
-            );
-        }
-
-        return back()->with(
-            'error',
-            'Unable to extract zip.'
-        );
-    }
-
-    public function downloadCategoryReference()
-    {
-        $categories = Category::whereNull('parent_id')
-            ->orWhere('parent_id', 0)
-            ->orderBy('id')
-            ->get(['id', 'name']);
-
-        $response = new StreamedResponse(function () use ($categories) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, ['id', 'name']);
-
-            foreach ($categories as $category) {
-
-                fputcsv($handle, [
-                    $category->id,
-                    $category->name
-                ]);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=categories_reference.csv'
-        );
-
-        return $response;
-    }
-
-    public function downloadSubCategoryReference()
-    {
-        $subCategories = Category::with('parent')
-            ->whereNotNull('parent_id')
-            ->orderBy('id')
-            ->get();
-
-        $response = new StreamedResponse(function () use ($subCategories) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, [
-                'id',
-                'name',
-                'parent_category'
-            ]);
-
-            foreach ($subCategories as $subCategory) {
-
-                fputcsv($handle, [
-                    $subCategory->id,
-                    $subCategory->name,
-                    optional($subCategory->parent)->name
-                ]);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=subcategories_reference.csv'
-        );
-
-        return $response;
-    }
-
-    public function downloadBrandReference()
-    {
-        $brands = Brand::orderBy('id')
-            ->get(['id', 'name']);
-
-        $response = new StreamedResponse(function () use ($brands) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, ['id', 'name']);
-
-            foreach ($brands as $brand) {
-
-                fputcsv($handle, [
-                    $brand->id,
-                    $brand->name
-                ]);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=brands_reference.csv'
-        );
-
-        return $response;
-    }
-
-
-    public function downloadOccasionReference()
-    {
-        $occasions = GiftingOccasion::orderBy('id')
-            ->get(['id', 'title']);
-
-        $response = new StreamedResponse(function () use ($occasions) {
-
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, [
-                'id',
-                'title'
-            ]);
-
-            foreach ($occasions as $occasion) {
-
-                fputcsv($handle, [
-                    $occasion->id,
-                    $occasion->title
-                ]);
-            }
-
-            fclose($handle);
-        });
-
-        $response->headers->set(
-            'Content-Type',
-            'text/csv'
-        );
-
-        $response->headers->set(
-            'Content-Disposition',
-            'attachment; filename=occasions_reference.csv'
-        );
-
-        return $response;
-    }
 
     private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {

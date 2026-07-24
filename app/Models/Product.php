@@ -68,6 +68,12 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'subcategory_id');
     }
 
+    /**
+     * ✅ Used across all grid/listing views (homepage sections, product
+     * listing pages, luxury tabs, etc). Prefers the compressed THUMB
+     * (400px) since these are always shown small — falls back to the
+     * full image for older rows created before the thumb column existed.
+     */
     public function getDisplayImageAttribute()
     {
         $default = $this->images()
@@ -75,13 +81,13 @@ class Product extends Model
             ->first();
 
         if ($default) {
-            return asset('storage/' . $default->image);
+            return asset('storage/' . ($default->thumb ?? $default->image));
         }
 
         $image = $this->images()->first();
 
         return $image
-            ? asset('storage/' . $image->image)
+            ? asset('storage/' . ($image->thumb ?? $image->image))
             : null;
     }
 

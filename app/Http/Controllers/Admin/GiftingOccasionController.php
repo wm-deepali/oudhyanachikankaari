@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use App\Models\GiftingOccasion;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -11,6 +12,9 @@ use App\Imports\GiftingOccasionImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 
 class GiftingOccasionController extends Controller
 {
@@ -25,6 +29,36 @@ class GiftingOccasionController extends Controller
         return view('admin.gifting_occasions.create');
     }
 
+    /**
+     * ✅ Compress & store an uploaded image as WebP.
+     * Resizes down to max width (keeps aspect ratio, never upscales)
+     * and re-encodes as WebP at given quality to shrink file size.
+     */
+    private function compressAndStore(
+        UploadedFile $file,
+        string $folder,
+        int $maxWidth = 800,
+        int $quality = 80
+    ): string {
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->decode($file);
+
+        // Only downscale, never upscale
+        if ($image->width() > $maxWidth) {
+            $image->scale(width: $maxWidth);
+        }
+
+        $encoded = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $filename = Str::uuid() . '.webp';
+        $path = trim($folder, '/') . '/' . $filename;
+
+        Storage::disk('public')->put($path, (string) $encoded);
+
+        return $path;
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -34,7 +68,11 @@ class GiftingOccasionController extends Controller
         $image = null;
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image')->store('gifting', 'public');
+            // Used at ~248x520 and ~515x349 on frontend -> 800px covers both with retina buffer
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'gifting'
+            );
         }
 
         GiftingOccasion::create([
@@ -75,8 +113,11 @@ class GiftingOccasionController extends Controller
                 Storage::disk('public')->delete($occasion->image);
             }
 
-            // store new
-            $image = $request->file('image')->store('gifting', 'public');
+            // store new (compressed)
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'gifting'
+            );
         }
 
         $occasion->update([

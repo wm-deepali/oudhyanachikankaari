@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Category;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Imports\CategoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use ZipArchive;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 
 class CategoryController extends Controller
 {
@@ -77,6 +81,37 @@ class CategoryController extends Controller
         return view('admin.categories.create', compact('parents'));
     }
 
+    /**
+     * ✅ Compress & store an uploaded image as WebP.
+     * Resizes down to max width (keeps aspect ratio, never upscales)
+     * and re-encodes as WebP at given quality to shrink file size.
+     * Same pattern used for La Pavone product image optimization.
+     */
+    private function compressAndStore(
+        UploadedFile $file,
+        string $folder,
+        int $maxWidth = 1200,
+        int $quality = 80
+    ): string {
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->decode($file);
+
+        // Only downscale, never upscale
+        if ($image->width() > $maxWidth) {
+            $image->scale(width: $maxWidth);
+        }
+
+        $encoded = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $filename = Str::uuid() . '.webp';
+        $path = trim($folder, '/') . '/' . $filename;
+
+        Storage::disk('public')->put($path, (string) $encoded);
+
+        return $path;
+    }
+
     // ✅ Store
     public function store(Request $request)
     {
@@ -87,14 +122,25 @@ class CategoryController extends Controller
         $image = null;
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image')->store('categories', 'public');
+            // Displayed as a small card (~121x171 on frontend) -> keep small, ~3x retina buffer
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'categories',
+                400,
+                80
+            );
         }
 
         $sizeChartImage = null;
 
         if ($request->hasFile('size_chart_image')) {
-            $sizeChartImage = $request->file('size_chart_image')
-                ->store('categories/size-charts', 'public');
+            // Displayed larger/zoomed (~707x943 on frontend) -> keep bigger, higher quality
+            $sizeChartImage = $this->compressAndStore(
+                $request->file('size_chart_image'),
+                'categories/size-charts',
+                1000,
+                85
+            );
         }
 
         Category::create([
@@ -164,7 +210,12 @@ class CategoryController extends Controller
                 Storage::disk('public')->delete($category->image);
             }
 
-            $image = $request->file('image')->store('categories', 'public');
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'categories',
+                400,
+                80
+            );
         }
 
         $sizeChartImage = $category->size_chart_image;
@@ -178,8 +229,12 @@ class CategoryController extends Controller
                 Storage::disk('public')->delete($category->size_chart_image);
             }
 
-            $sizeChartImage = $request->file('size_chart_image')
-                ->store('categories/size-charts', 'public');
+            $sizeChartImage = $this->compressAndStore(
+                $request->file('size_chart_image'),
+                'categories/size-charts',
+                1000,
+                85
+            );
         }
 
         $category->update([

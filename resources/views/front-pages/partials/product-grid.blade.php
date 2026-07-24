@@ -13,11 +13,11 @@
                                             <img src="{{ $product->display_image }}" class="aq-product-card-img primary-img"
                                                 alt="{{ $product->name }}" />
 
-                                            <img src="{{ isset($otherImages[0]) ? asset('storage/' . $otherImages[0]->image) : $product->display_image }}"
-                                                class="secondary-img" alt="{{ $product->name }}" />
+                                           <img src="{{ isset($otherImages[0]) ? asset('storage/' . ($otherImages[0]->thumb ?? $otherImages[0]->image)) : $product->display_image }}"
+    class="secondary-img" alt="{{ $product->name }}" />
 
-                                            <img src="{{ isset($otherImages[1]) ? asset('storage/' . $otherImages[1]->image) : $product->display_image }}"
-                                                class="tertiary-img" alt="{{ $product->name }}" />
+<img src="{{ isset($otherImages[1]) ? asset('storage/' . ($otherImages[1]->thumb ?? $otherImages[1]->image)) : $product->display_image }}"
+    class="tertiary-img" alt="{{ $product->name }}" />
 
                                             <!--<video src="assets/img/corporate/reals_video.mp4" class="aq-product-card-video"-->
                                             <!--    muted loop playsinline></video>-->
@@ -128,6 +128,7 @@
         <button class="aq-product-card-cta"
             onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)">
         <i class="fa-solid fa-cart-shopping"></i>
+        {{ $availableStock }}
         Add to Cart
     </button>
    @else

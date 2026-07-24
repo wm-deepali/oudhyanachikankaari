@@ -11,7 +11,7 @@
         <div class="aq-wishlist-empty">
             <i class="fa-regular fa-heart fa-3x"></i>
             <p>Your wishlist is empty.</p>
-            <a href="{{ route('shop.index') }}" class="aq-btn-primary">Browse Collections</a>
+            <a href="{{ route('categories') }}" class="aq-btn-primary">Browse Collections</a>
         </div>
     @else
        

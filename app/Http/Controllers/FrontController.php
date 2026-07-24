@@ -633,7 +633,7 @@ class FrontController extends Controller
             'category',
             'subcategory',
             'collections',
-             'attributeValues.attribute',
+            'attributeValues.attribute',
             'attributeValues.value',
         ])
             ->visible()
@@ -647,7 +647,7 @@ class FrontController extends Controller
             'category',
             'subcategory',
             'collections',
-             'attributeValues.attribute',
+            'attributeValues.attribute',
             'attributeValues.value',
         ])
             ->visible()
@@ -757,13 +757,13 @@ class FrontController extends Controller
         }
 
 
-// ⬇️ YAHAN ADD KARO
-foreach ($variantAttributes as $attributeId => &$attr) {
-    if (isset($attr['values'])) {
-        ksort($attr['values']);
-    }
-}
-unset($attr);
+        // ⬇️ YAHAN ADD KARO
+        foreach ($variantAttributes as $attributeId => &$attr) {
+            if (isset($attr['values'])) {
+                ksort($attr['values']);
+            }
+        }
+        unset($attr);
         // ── variantsByType — the shape the product-detail JS actually reads ──
         // For each dependency type, find which attribute ids are flagged for
         // it in this category, reduce every variant of THAT type down to just
@@ -785,55 +785,58 @@ unset($attr);
             }
 
             $seenCombinations = [];
-$bucket = [];
+            $bucket = [];
 
-// FIX: only look at variant rows that actually belong to this type
+            // FIX: only look at variant rows that actually belong to this type
 // (price/image/stock/sku are separate rows in the same table), AND
 // exclude combinations the admin marked "Not offered" — those should
 // never reach the frontend matcher, so a missing match correctly
 // triggers the diagonal "unavailable" line instead of "Sold Out".
-foreach ($product->variants->where('type', $type)->where('is_available', true) as $variant) {
+            foreach ($product->variants->where('type', $type)->where('is_available', true) as $variant) {
 
-    $relevantValueIds = $variant->values
-        ->filter(
-            fn($v) => in_array(
-                $v->attributeValue->attribute_id,
-                $relevantAttributeIds
-            )
-        )
-        ->pluck('attribute_value_id')
-        ->sort()
-        ->values()
-        ->toArray();
+                $relevantValueIds = $variant->values
+                    ->filter(
+                        fn($v) => in_array(
+                            $v->attributeValue->attribute_id,
+                            $relevantAttributeIds
+                        )
+                    )
+                    ->pluck('attribute_value_id')
+                    ->sort()
+                    ->values()
+                    ->toArray();
 
-    if (empty($relevantValueIds)) {
-        continue;
-    }
+                if (empty($relevantValueIds)) {
+                    continue;
+                }
 
-    $key = implode('-', $relevantValueIds);
+                $key = implode('-', $relevantValueIds);
 
-    if (isset($seenCombinations[$key])) {
-        continue;
-    }
-    $seenCombinations[$key] = true;
+                if (isset($seenCombinations[$key])) {
+                    continue;
+                }
+                $seenCombinations[$key] = true;
 
-    $bucket[] = [
-        'id' => $variant->id,
-        'values' => $relevantValueIds,
-        'price' => $variant->price,
-        'mrp' => $variant->mrp,
-        'stock' => $variant->stock,
-        'image' => $variant->image,
-        'images' => $variant->images
-            ->sortByDesc('is_default')
-            ->pluck('image')
-            ->values()
-            ->toArray(),
-        'sku' => $variant->sku,
-    ];
-}
+                $bucket[] = [
+                    'id' => $variant->id,
+                    'values' => $relevantValueIds,
+                    'price' => $variant->price,
+                    'mrp' => $variant->mrp,
+                    'stock' => $variant->stock,
+                    'image' => $variant->image,
+                    'images' => $variant->images
+                        ->sortByDesc('is_default')
+                        ->map(fn($img) => [
+                            'image' => $img->image,
+                            'thumb' => $img->thumb ?? $img->image,
+                        ])
+                        ->values()
+                        ->toArray(),
+                    'sku' => $variant->sku,
+                ];
+            }
 
-$variantsByType[$type] = $bucket;
+            $variantsByType[$type] = $bucket;
 
         }
         $reviews = $product->approvedReviews()

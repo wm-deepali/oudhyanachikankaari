@@ -998,6 +998,8 @@ class CheckoutController extends Controller
         /** @var \App\Services\StockService $stockService */
         $stockService = app(\App\Services\StockService::class);
 
+        $order->loadMissing(['items.product', 'items.stockVariant']);
+
         foreach ($order->items as $item) {
             $product = $item->product;
 
@@ -1009,10 +1011,11 @@ class CheckoutController extends Controller
                     $product,
                     $item->quantity,
                     'order',
-                    $order,           // reference — links history entry to this order
-                    null,             // no admin user, this is a customer action
-                    null,             // no note
-                    true              // allowNegative: true so an order never fails due to stock race
+                    $order,               // reference — links history entry to this order
+                    null,                 // no admin user, this is a customer action
+                    null,                 // no note
+                    true,                 // allowNegative: true so an order never fails due to stock race
+                    $item->stockVariant   // null if this item has no stock-type variant → falls back to product stock
                 );
             } catch (\Exception $e) {
                 // Log but don't block the order — stock can be corrected manually

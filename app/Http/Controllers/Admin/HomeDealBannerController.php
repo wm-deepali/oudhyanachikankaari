@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\HomeDealBanner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 
 class HomeDealBannerController extends Controller
 {
@@ -42,8 +47,10 @@ class HomeDealBannerController extends Controller
 
         if ($request->hasFile('image')) {
 
-            $image = $request->file('image')
-                ->store('deal-banners', 'public');
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'deal-banners'
+            );
         }
 
         HomeDealBanner::create([
@@ -87,8 +94,10 @@ class HomeDealBannerController extends Controller
                 Storage::disk('public')->delete($item->image);
             }
 
-            $image = $request->file('image')
-                ->store('deal-banners', 'public');
+           $image = $this->compressAndStore(
+    $request->file('image'),
+    'deal-banners'
+);
         }
 
         $item->update([
@@ -124,5 +133,34 @@ class HomeDealBannerController extends Controller
             'status' => true,
             'message' => 'Banner deleted successfully.'
         ]);
+    }
+
+    /**
+     * ✅ Compress & store an uploaded image as WebP.
+     * Deal banners render as a large promo block (similar to sliders),
+     * so keep a generous max width.
+     */
+    private function compressAndStore(
+        UploadedFile $file,
+        string $folder,
+        int $maxWidth = 1600,
+        int $quality = 80
+    ): string {
+        $manager = ImageManager::usingDriver(Driver::class);
+
+        $image = $manager->decode($file);
+
+        if ($image->width() > $maxWidth) {
+            $image->scale(width: $maxWidth);
+        }
+
+        $encoded = $image->encodeUsingFormat(Format::WEBP, quality: $quality);
+
+        $filename = Str::uuid() . '.webp';
+        $path = trim($folder, '/') . '/' . $filename;
+
+        Storage::disk('public')->put($path, (string) $encoded);
+
+        return $path;
     }
 }

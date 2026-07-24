@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\HomeBrandSection;
 use App\Models\HomeBrandSectionImage;
+use App\Traits\CompressesImages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class HomeBrandSectionImageController extends Controller
 {
+    use CompressesImages;
+
     public function index()
     {
         $items = HomeBrandSectionImage::latest()
@@ -42,8 +45,13 @@ class HomeBrandSectionImageController extends Controller
 
         if ($request->hasFile('image')) {
 
-            $image = $request->file('image')
-                ->store('brand-section-slider', 'public');
+            // Small slider thumbnail next to the brand text
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'brand-section-slider',
+                600,
+                80
+            );
         }
 
         $home_brand_section_id = HomeBrandSection::where('status', 1)->first()->id ?? null;
@@ -90,8 +98,13 @@ class HomeBrandSectionImageController extends Controller
                 Storage::disk('public')->delete($item->image);
             }
 
-            $image = $request->file('image')
-                ->store('brand-section-slider', 'public');
+            // Small slider thumbnail next to the brand text
+            $image = $this->compressAndStore(
+                $request->file('image'),
+                'brand-section-slider',
+                600,
+                80
+            );
         }
         $home_brand_section_id = HomeBrandSection::where('status', 1)->first()->id ?? null;
         $item->update([
