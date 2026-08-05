@@ -48,9 +48,16 @@
                         {{ $item->addons->pluck('detail')->implode(', ') }}
                     </span>
                 @endif
-                <span class="aq-cartmini-product-price">
-                    ₹{{ number_format($totalMrp, 2) }}
+
+                <span class="aq-cartmini-product-price" id="mini-cart-price-{{ $item->id }}">
+                    ₹{{ number_format($item->total, 2) }}
+                    @if($totalMrp > $item->total)
+                        <span id="mini-cart-mrp-{{ $item->id }}" style="text-decoration: line-through; color:#999; font-size: 12px; margin-left: 6px;">
+                            ₹{{ number_format($totalMrp, 2) }}
+                        </span>
+                    @endif
                 </span>
+
                 <div class="aq-product-details-quantity d-flex align-items-center">
                     <div class="aq-product-quantity">
                         <span class="aq-cart-minus update-cart-qty" data-id="{{ $item->id }}" data-action="minus">

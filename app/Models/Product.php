@@ -167,4 +167,9 @@ class Product extends Model
         return $this->hasMany(ProductReview::class)->where('status', 'approved');
     }
 
+    public function keywords()
+    {
+        return $this->hasMany(ProductKeyword::class);
+    }
+
 }

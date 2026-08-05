@@ -41,17 +41,17 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
-        
-         @include('layouts.tracking-head')
-         
+
+    @include('layouts.tracking-head')
+
 </head>
 
 
 
 <body>
 
- @include('layouts.tracking-body-top')
- 
+    @include('layouts.tracking-body-top')
+
     <!-- pre loader area start -->
     <div id="loading">
         <div id="loading-center">
@@ -449,7 +449,7 @@
             <div class="aq-cartmini-total d-flex justify-content-between align-items-center">
                 <span class="aq-cartmini-total-title">Subtotal</span>
                 <span class="aq-cartmini-total-value" id="miniCartSubtotal">
-                    ₹{{ number_format($miniCart->total_amount ?? 0, 2) }}
+                    ₹{{ number_format($miniCart->subtotal ?? 0, 2) }}
                 </span>
             </div>
             <div class="aq-cartmini-main-btn d-flex justify-content-between">
@@ -2326,13 +2326,13 @@
         .aq-product-content {
             margin-top: 10px;
         }
-        
-        
+
+
         .aq-product-thumb {
-   
-     background-color: white; 
-    
-}
+
+            background-color: white;
+
+        }
     </style>
 
 
@@ -2568,27 +2568,10 @@
                         let productsHtml = '';
                         let collectionsHtml = '';
 
-                        let suggestionsList = [];
-
-                        if (response.categories?.length) {
-                            response.categories.forEach(item => {
-                                suggestionsList.push({ name: item.name, link: `${baseUrl}/category/${item.slug}` });
-                            });
-                        }
-                        if (response.subcategories?.length) {
-                            response.subcategories.forEach(item => {
-                                suggestionsList.push({ name: item.name, link: `${baseUrl}/category/${item.parent_slug}?subcategory=${item.slug}` });
-                            });
-                        }
-                        if (response.occasions?.length) {
-                            response.occasions.forEach(item => {
-                                suggestionsList.push({ name: item.title, link: `${baseUrl}/products?occasion=${item.slug}` });
-                            });
-                        }
-                        if (suggestionsList.length) {
+                        if (response.keywords?.length) {
                             leftHtml += '<ul class="cs-list">';
-                            suggestionsList.forEach(s => {
-                                leftHtml += `<li><a href="${s.link}" style="color:inherit;text-decoration:none;display:block;padding:3px 0;">${s.name}</a></li>`;
+                            response.keywords.forEach(kw => {
+                                leftHtml += `<li><a href="${baseUrl}/search?q=${encodeURIComponent(kw)}" style="color:inherit;text-decoration:none;display:block;padding:3px 0;">${kw}</a></li>`;
                             });
                             leftHtml += '</ul>';
                         } else {
@@ -2645,33 +2628,56 @@
                             productsHtml += '<p style="font-size:14px;color:#999;text-align:center;padding:40px 0;">No products found.</p>';
                         }
 
+                        let collectionItems = [];
+
                         if (response.categories?.length) {
+                            response.categories.forEach(item => {
+                                collectionItems.push({
+                                    name: item.name,
+                                    image: item.image,
+                                    link: `${baseUrl}/products/${item.slug}`,
+                                    label: 'Category'
+                                });
+                            });
+                        }
+
+                        if (response.subcategories?.length) {
+                            response.subcategories.forEach(item => {
+                                collectionItems.push({
+                                    name: item.name,
+                                    image: item.image,
+                                    link: `${baseUrl}/products/${item.parent_slug}?subcategory=${item.slug}`,
+                                    label: 'Subcategory'
+                                });
+                            });
+                        }
+
+                        if (collectionItems.length) {
                             collectionsHtml += '<div class="cs-products-row">';
-                            response.categories.slice(0, 3).forEach(item => {
+                            collectionItems.slice(0, 6).forEach(item => {
                                 let imgUrl = item.image ? `${storagePath}/${item.image}` : noImage;
                                 collectionsHtml += `
-                                <div class="aq-product-item aq-product-main mb-20" data-lazy="true" style="text-align:left;">
-                                    <div class="aq-product-thumb aq-img-hover-wrap p-relative">
-                                        <a href="${baseUrl}/category/${item.slug}">
-                                            <img class="lazyload aq-product-img" src="${imgUrl}" alt="${item.name}" style="height:220px;object-fit:cover;width:100%;border-radius:8px;" />
-                                        </a>
-                                    </div>
-                                    <div class="aq-product-content">
-                                        <h4 class="aq-product-title mb-10" style="font-size:14px;">
-                                            <a href="${baseUrl}/category/${item.slug}">${item.name}</a>
-                                        </h4>
-                                        <div class="aq-product-price">
-                                            <span class="aq-product-new-price" style="color:#666;">Collection</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                `;
+        <div class="aq-product-item aq-product-main mb-20" data-lazy="true" style="text-align:left;">
+            <div class="aq-product-thumb aq-img-hover-wrap p-relative">
+                <a href="${item.link}">
+                    <img class="lazyload aq-product-img" src="${imgUrl}" alt="${item.name}" style="height:220px;object-fit:cover;width:100%;border-radius:8px;" />
+                </a>
+            </div>
+            <div class="aq-product-content">
+                <h4 class="aq-product-title mb-10" style="font-size:14px;">
+                    <a href="${item.link}">${item.name}</a>
+                </h4>
+                <div class="aq-product-price">
+                    <span class="aq-product-new-price" style="color:#666;">${item.label}</span>
+                </div>
+            </div>
+        </div>
+        `;
                             });
                             collectionsHtml += '</div>';
                         } else {
                             collectionsHtml += '<p style="font-size:14px;color:#999;text-align:center;padding:40px 0;">No collections found.</p>';
                         }
-
                         let queryParam = encodeURIComponent(query);
                         let finalHtml = `
                         <div class="cs-container">
@@ -2699,7 +2705,7 @@
                         </div>
                         `;
 
-                        if (response.products?.length || suggestionsList.length) {
+                        if (response.products?.length || response.keywords?.length || response.categories?.length || response.subcategories?.length) {
                             suggestionsBox.html(finalHtml).show();
                             if (!suggestionsBox.hasClass('custom-search-suggestions')) {
                                 suggestionsBox.addClass('custom-search-suggestions');
@@ -3187,21 +3193,21 @@
                 console.error('Drill-down menu init failed:', err);
             }
         });
-        
+
         function fireTrackingEvents(events) {
-    if (!events) return;
+            if (!events) return;
 
-    if (events.ga4 && typeof gtag === 'function') {
-        gtag('event', events.ga4.name, events.ga4.params);
-    }
+            if (events.ga4 && typeof gtag === 'function') {
+                gtag('event', events.ga4.name, events.ga4.params);
+            }
 
-    if (events.meta && typeof fbq === 'function') {
-        fbq('track', events.meta.name, events.meta.params);
-    }
-}
+            if (events.meta && typeof fbq === 'function') {
+                fbq('track', events.meta.name, events.meta.params);
+            }
+        }
     </script>
-    
-@include('layouts.tracking-body-bottom')
+
+    @include('layouts.tracking-body-bottom')
 
 </body>
 

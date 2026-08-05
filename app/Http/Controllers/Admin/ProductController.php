@@ -99,64 +99,64 @@ class ProductController extends Controller
         ];
     }
 
-   public function index(Request $request)
-{
-    $query = Product::with('images');
+    public function index(Request $request)
+    {
+        $query = Product::with('images');
 
-    // Categories dropdown
-    $categories = Category::whereNull('parent_id')
-        ->orderBy('name')
-        ->get();
-
-    // Subcategories dropdown
-    $subCategories = collect();
-
-    if ($request->filled('category_id')) {
-        $subCategories = Category::where('parent_id', $request->category_id)
+        // Categories dropdown
+        $categories = Category::whereNull('parent_id')
             ->orderBy('name')
             ->get();
+
+        // Subcategories dropdown
+        $subCategories = collect();
+
+        if ($request->filled('category_id')) {
+            $subCategories = Category::where('parent_id', $request->category_id)
+                ->orderBy('name')
+                ->get();
+        }
+
+        // Search
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Category Filter
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // Sub Category Filter
+        if ($request->filled('subcategory_id')) {
+            $query->where('subcategory_id', $request->subcategory_id);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'id');
+        $sortOrder = $request->get('sort_order', 'desc');
+
+        $allowedSorts = [
+            'id',
+            'name',
+            'price',
+            'status'
+        ];
+
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        $products = $query
+            ->paginate(10)
+            ->appends($request->all());
+
+        return view('admin.products.index', compact(
+            'products',
+            'categories',
+            'subCategories'
+        ));
     }
-
-    // Search
-    if ($request->filled('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%');
-    }
-
-    // Category Filter
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-
-    // Sub Category Filter
-    if ($request->filled('subcategory_id')) {
-        $query->where('subcategory_id', $request->subcategory_id);
-    }
-
-    // Sorting
-    $sortBy = $request->get('sort_by', 'id');
-    $sortOrder = $request->get('sort_order', 'desc');
-
-    $allowedSorts = [
-        'id',
-        'name',
-        'price',
-        'status'
-    ];
-
-    if (in_array($sortBy, $allowedSorts)) {
-        $query->orderBy($sortBy, $sortOrder);
-    }
-
-    $products = $query
-        ->paginate(10)
-        ->appends($request->all());
-
-    return view('admin.products.index', compact(
-        'products',
-        'categories',
-        'subCategories'
-    ));
-}
 
     public function create()
     {
@@ -343,6 +343,16 @@ class ProductController extends Controller
                 }
             }
 
+
+            if ($request->filled('suggestions')) {
+                foreach ($request->suggestions as $keyword) {
+                    $keyword = trim($keyword);
+                    if ($keyword !== '') {
+                        $product->keywords()->create(['keyword' => $keyword]);
+                    }
+                }
+            }
+
             /*
             |--------------------------------------------------------------------------
             | Product Attributes
@@ -472,64 +482,66 @@ class ProductController extends Controller
 
         // ✅ Existing variants grouped by type, so the edit form can
         // rebuild each of the (up to) 4 independent tables separately.
-$existingVariantsByType = [];
+        $existingVariantsByType = [];
 
-foreach (self::VARIANT_TYPES as $type) {
+        foreach (self::VARIANT_TYPES as $type) {
 
-    $existingVariantsByType[$type] = $product->variants
-        ->where('type', $type)
-        ->map(function ($variant) {
+            $existingVariantsByType[$type] = $product->variants
+                ->where('type', $type)
+                ->map(function ($variant) {
 
-            return [
-
-                'id' => $variant->id,
-
-                'sku' => $variant->sku,
-
-                'mrp' => $variant->mrp,
-
-                'discount_type' => $variant->discount_type,
-
-                'discount' => $variant->discount,
-
-                'price' => $variant->price,
-
-                'stock' => $variant->stock,
-
-                'image' => $variant->image,
-
-                // ✅ so the edit form can pre-check "Not offered" and grey out
-                // the row on initial render, not just after a manual toggle
-                'is_available' => (bool) $variant->is_available,
-
-                'images' => $variant->images->map(function ($img) {
                     return [
-                        'id' => $img->id,
-                        'image' => $img->image,
-                        'thumb' => $img->thumb,
-                        'is_default' => $img->is_default,
+
+                        'id' => $variant->id,
+
+                        'sku' => $variant->sku,
+
+                        'mrp' => $variant->mrp,
+
+                        'discount_type' => $variant->discount_type,
+
+                        'discount' => $variant->discount,
+
+                        'price' => $variant->price,
+
+                        'stock' => $variant->stock,
+
+                        'image' => $variant->image,
+
+                        // ✅ so the edit form can pre-check "Not offered" and grey out
+                        // the row on initial render, not just after a manual toggle
+                        'is_available' => (bool) $variant->is_available,
+
+                        'images' => $variant->images->map(function ($img) {
+                            return [
+                                'id' => $img->id,
+                                'image' => $img->image,
+                                'thumb' => $img->thumb,
+                                'is_default' => $img->is_default,
+                            ];
+                        })->values(),
+
+                        'variant_name' => $variant->values
+                            ->map(function ($v) {
+                                return $v->attributeValue->value;
+                            })
+                            ->implode(' / '),
+
+                        'attribute_value_ids' => $variant->values
+                            ->pluck('attribute_value_id')
+                            ->toArray(),
+
                     ];
-                })->values(),
 
-                'variant_name' => $variant->values
-                    ->map(function ($v) {
-                        return $v->attributeValue->value;
-                    })
-                    ->implode(' / '),
-
-                'attribute_value_ids' => $variant->values
-                    ->pluck('attribute_value_id')
-                    ->toArray(),
-
-            ];
-
-        })
-        ->values();
-}
+                })
+                ->values();
+        }
 
         $collections = Collection::where('status', 1)
             ->orderBy('sort_order')
             ->get();
+
+        $existingKeywords = $product->keywords->pluck('keyword')->toArray();
 
         return view(
             'admin.products.edit',
@@ -542,14 +554,15 @@ foreach (self::VARIANT_TYPES as $type) {
                 'selectedOccasions',
                 'occasions',
                 'existingVariantsByType',
-                'collections'
+                'collections',
+                'existingKeywords'
             )
         );
     }
 
     public function update(Request $request, Product $product)
     {
-       
+
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
@@ -757,6 +770,17 @@ foreach (self::VARIANT_TYPES as $type) {
                 }
             }
 
+            $product->keywords()->delete();
+
+            if ($request->filled('suggestions')) {
+                foreach ($request->suggestions as $keyword) {
+                    $keyword = trim($keyword);
+                    if ($keyword !== '') {
+                        $product->keywords()->create(['keyword' => $keyword]);
+                    }
+                }
+            }
+
 
             /*
             |--------------------------------------------------------------------------
@@ -878,43 +902,43 @@ foreach (self::VARIANT_TYPES as $type) {
         return 'variants_' . $type;
     }
 
-   protected function fillVariantFieldsForType(ProductVariant $variant, string $type, array $data, Request $request, int $index): void
-{
-    // ✅ applies to every type — checked "Not offered" in the form means
-    // is_available = false; unchecked (or absent) means true. This is what
-    // the storefront's stock-matching query filters on.
-    $variant->is_available = !isset($data['excluded']);
+    protected function fillVariantFieldsForType(ProductVariant $variant, string $type, array $data, Request $request, int $index): void
+    {
+        // ✅ applies to every type — checked "Not offered" in the form means
+        // is_available = false; unchecked (or absent) means true. This is what
+        // the storefront's stock-matching query filters on.
+        $variant->is_available = !isset($data['excluded']);
 
-    switch ($type) {
+        switch ($type) {
 
-        case ProductVariant::TYPE_PRICE:
-            $variant->fill([
-                'mrp' => $data['mrp'] ?? 0,
-                'discount_type' => $data['discount_type'] ?? 'amount',
-                'discount' => $data['discount'] ?? 0,
-                'price' => $data['price'] ?? 0,
-            ]);
-            break;
+            case ProductVariant::TYPE_PRICE:
+                $variant->fill([
+                    'mrp' => $data['mrp'] ?? 0,
+                    'discount_type' => $data['discount_type'] ?? 'amount',
+                    'discount' => $data['discount'] ?? 0,
+                    'price' => $data['price'] ?? 0,
+                ]);
+                break;
 
-        case ProductVariant::TYPE_STOCK:
-            $variant->fill([
-                'stock' => $data['stock'] ?? 0,
-            ]);
-            break;
+            case ProductVariant::TYPE_STOCK:
+                $variant->fill([
+                    'stock' => $data['stock'] ?? 0,
+                ]);
+                break;
 
-        case ProductVariant::TYPE_SKU:
-            $variant->fill([
-                'sku' => $data['sku'] ?? null,
-            ]);
-            break;
+            case ProductVariant::TYPE_SKU:
+                $variant->fill([
+                    'sku' => $data['sku'] ?? null,
+                ]);
+                break;
 
-        case ProductVariant::TYPE_IMAGE:
-            // Multiple images per variant are handled AFTER save() in
-            // createVariantsForType() / syncVariantsForType(), since
-            // ProductVariantImage rows need a real variant_id to attach to.
-            break;
+            case ProductVariant::TYPE_IMAGE:
+                // Multiple images per variant are handled AFTER save() in
+                // createVariantsForType() / syncVariantsForType(), since
+                // ProductVariantImage rows need a real variant_id to attach to.
+                break;
+        }
     }
-}
 
     /**
      * Stores newly-uploaded images for an image-type variant. Existing
@@ -1119,7 +1143,7 @@ foreach (self::VARIANT_TYPES as $type) {
 
         return $slug;
     }
-    
+
     private function resolveSlugOnUpdate(Product $product, ?string $requestedSlug, string $name): string
     {
         $source = $requestedSlug ?: $name;
@@ -1132,6 +1156,23 @@ foreach (self::VARIANT_TYPES as $type) {
 
         // Only regenerate + check uniqueness if it actually changed.
         return $this->generateUniqueSlug($source, $product->id);
+    }
+
+    public function suggestionKeywords(Request $request)
+    {
+        $query = trim($request->get('q', ''));
+
+        if ($query === '') {
+            return response()->json([]);
+        }
+
+        $keywords = \App\Models\ProductKeyword::where('keyword', 'like', "%{$query}%")
+            ->distinct()
+            ->orderBy('keyword')
+            ->limit(15)
+            ->pluck('keyword');
+
+        return response()->json($keywords);
     }
 
 }

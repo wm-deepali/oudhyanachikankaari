@@ -79,6 +79,7 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::get('/occasions', 'occasions')->name('occasions');
         Route::get('/categories', 'categories')->name('categories');
 
+        Route::get('/search', 'searchResults')->name('search');
 
         // Category-based listing (unchanged)
         Route::get('/products/{slug}', 'productListing')->name('products.listing');
@@ -244,6 +245,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('gifting-occasions', GiftingOccasionController::class);
 
         // product routes
+        Route::get('/products/suggestion-keywords', [ProductController::class, 'suggestionKeywords'])->name('products.suggestion-keywords');
         Route::view('/products/media-library', 'admin.products.media-library')->name('products.media-library');
         Route::get('products/subcategories/{category}', [ProductController::class, 'subcategories'])->name('products.subcategories');
         Route::get('products/category-attributes/{category}', [ProductController::class, 'categoryAttributes'])->name('products.category-attributes');
@@ -425,14 +427,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('customers/addresses/export', [CustomerAddressController::class, 'export'])->name('customers.addresses.export');
 
         // Customers routes
-   Route::get('customers/customer-wishlist', [CustomerWishlistController::class, 'index'])->name('customers.customer-wishlist');
-       Route::get('customers/{customer}/wishlist-detail', [CustomerWishlistController::class, 'show'])
-    ->name('customers.customer-wishlist-detail');
-    Route::delete('customers/{customer}/wishlist/clear', [CustomerWishlistController::class, 'clearWishlist'])
-    ->name('customers.wishlist.clear');
-    Route::delete('/wishlist/{wishlistId}', [\App\Http\Controllers\Admin\CustomerWishlistController::class, 'removeItem']);
-    
-    
+        Route::get('customers/customer-wishlist', [CustomerWishlistController::class, 'index'])->name('customers.customer-wishlist');
+        Route::get('customers/{customer}/wishlist-detail', [CustomerWishlistController::class, 'show'])
+            ->name('customers.customer-wishlist-detail');
+        Route::delete('customers/{customer}/wishlist/clear', [CustomerWishlistController::class, 'clearWishlist'])
+            ->name('customers.wishlist.clear');
+        Route::delete('/wishlist/{wishlistId}', [\App\Http\Controllers\Admin\CustomerWishlistController::class, 'removeItem']);
+
+
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');

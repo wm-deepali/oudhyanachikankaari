@@ -235,14 +235,43 @@ class FrontController extends Controller
             return response()->json([]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Matching Keywords (admin-entered "Enter Suggestions" tags)
+        |--------------------------------------------------------------------------
+        | Distinct keyword strings whose text matches the query — shown as
+        | tappable suggestion chips. Selecting one re-searches using that
+        | exact keyword.
+        */
+        $keywords = \App\Models\ProductKeyword::where('keyword', 'like', "%{$query}%")
+            ->distinct()
+            ->orderBy('keyword')
+            ->take(8)
+            ->pluck('keyword');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Products — matched either by name OR by an attached keyword tag
+        |--------------------------------------------------------------------------
+        */
         $products = Product::with('images')
             ->visible()
-            ->where('name', 'LIKE', "%{$query}%")
-            ->take(5)
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                    ->orWhereHas('keywords', function ($kq) use ($query) {
+                        $kq->where('keyword', 'LIKE', "%{$query}%");
+                    });
+            })
+            ->distinct()
+            ->take(6)
             ->get([
                 'id',
                 'name',
-                'slug'
+                'slug',
+                'price',
+                'mrp',
+                'discount',
+                'discount_type',
             ])
             ->map(function ($product) {
                 return [
@@ -250,6 +279,10 @@ class FrontController extends Controller
                     'name' => $product->name,
                     'slug' => $product->slug,
                     'image' => $product->display_image, // accessor
+                    'price' => $product->price,
+                    'mrp' => $product->mrp,
+                    'discount' => $product->discount,
+                    'discount_type' => $product->discount_type,
                 ];
             });
 
@@ -282,22 +315,11 @@ class FrontController extends Controller
                 ];
             });
 
-        // Occasions
-        $occasions = GiftingOccasion::where('status', 1)
-            ->where('title', 'LIKE', "%{$query}%")
-            ->take(5)
-            ->get([
-                'id',
-                'title',
-                'slug',
-                'image'
-            ]);
-
         return response()->json([
+            'keywords' => $keywords,
             'products' => $products,
             'categories' => $categories,
             'subcategories' => $subCategories,
-            'occasions' => $occasions,
         ]);
     }
 
@@ -349,6 +371,45 @@ class FrontController extends Controller
         }
 
         return $query;
+    }
+
+    public function searchResults(Request $request)
+    {
+        $query = trim($request->q ?? '');
+
+        $categories = Category::where('status', 1)->whereNull('parent_id')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
+
+        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])
+            ->visible();
+
+        if ($query !== '') {
+            $products->where(function ($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('short_description', 'LIKE', "%{$query}%")
+                    ->orWhere('description', 'LIKE', "%{$query}%")
+                    ->orWhere('sku', 'LIKE', "%{$query}%")
+                    ->orWhereHas('keywords', function ($kq) use ($query) {
+                        $kq->where('keyword', 'LIKE', "%{$query}%");
+                    });
+            });
+        }
+
+        $products = $products->latest()->paginate(12);
+
+        return view('front-pages.products', [
+            'category' => null,
+            'subcategories' => collect(),
+            'categories' => $categories,
+            'products' => $products,
+            'collections' => $collections,
+            'occasions' => $occasions,
+            'contextType' => 'search',
+            'contextModel' => null,
+            'pageTitle' => $query !== '' ? 'Search results for "' . $query . '"' : 'Search results',
+            'searchQuery' => $query,
+        ]);
     }
 
     public function productListing(Request $request, $slug)

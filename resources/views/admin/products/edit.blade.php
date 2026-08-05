@@ -943,15 +943,109 @@
                 grid-template-columns: 1fr;
             }
         }
-        .variant-row-excluded {
-    opacity: 0.55;
-    background: #fafafa;
-}
 
-.variant-row-excluded input,
-.variant-row-excluded select {
-    background: #f1f2f4;
-}
+        .variant-row-excluded {
+            opacity: 0.55;
+            background: #fafafa;
+        }
+
+        .variant-row-excluded input,
+        .variant-row-excluded select {
+            background: #f1f2f4;
+        }
+
+        /* ── Tag input (Search Suggestions) ─────────────────────────── */
+        .tag-input-wrap {
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            background: var(--surface);
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .tag-input-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(48, 61, 137, .12);
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid #c7cdf5;
+            border-radius: 20px;
+            padding: 4px 6px 4px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tag-remove {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            padding: 2px 4px;
+            border-radius: 50%;
+        }
+
+        .tag-remove:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .tag-input-field {
+            flex: 1;
+            min-width: 140px;
+            border: none;
+            outline: none;
+            font-size: 13.5px;
+            font-family: var(--font);
+            padding: 4px 0;
+            background: transparent;
+        }
+
+        .tag-suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+
+        .tag-suggestion-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tag-suggestion-item:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
     </style>
 
     <div class="app-content content container-fluid">
@@ -1432,6 +1526,27 @@
                             </div>
                         </div>
 
+                        <!-- Search Suggestions -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h5>Search Suggestions</h5>
+                            </div>
+                            <div class="section-card-body">
+                                <div class="field-group" style="margin:0">
+                                    <label class="field-label">Enter Suggestions</label>
+                                    <div class="tag-input-wrap" id="suggestionsWrap">
+                                        <div class="tag-list" id="suggestionsTagList"></div>
+                                        <input type="text" id="suggestionsInput" class="tag-input-field"
+                                            placeholder="Type a keyword and press space…" autocomplete="off">
+                                        <div class="tag-suggestions-dropdown" id="suggestionsDropdown"></div>
+                                    </div>
+                                    <div id="suggestionsHidden"></div>
+                                    <div class="field-hint">Press spacebar after typing a keyword to add it as a tag.
+                                        These power the header search suggestions.</div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div><!-- /right column -->
 
                 </div><!-- /edit-layout -->
@@ -1472,7 +1587,8 @@
     */
     let selectedAttributeValues = @json($selectedAttributeValues);
     let existingVariantsByType = @json($existingVariantsByType);
-let storageBaseUrl = "{{ asset('storage') }}"; // ✅ matches main image asset() pattern
+    let storageBaseUrl = "{{ asset('storage') }}"; // ✅ matches main image asset() pattern
+    let initialSuggestions = @json($existingKeywords ?? []);
 
     CKEDITOR.config.versionCheck = false;
     CKEDITOR.replace('description');
@@ -1513,60 +1629,60 @@ let storageBaseUrl = "{{ asset('storage') }}"; // ✅ matches main image asset()
     | being rendered (and will be deleted server-side on save, same as
     | before); combinations that are still checked keep their data.
     */
- let variantDataByType = { price: {}, image: {}, stock: {}, sku: {} };
+    let variantDataByType = { price: {}, image: {}, stock: {}, sku: {} };
 
-['price', 'image', 'stock', 'sku'].forEach(function (type) {
-    (existingVariantsByType[type] || []).forEach(function (variant) {
-        let key = comboKey(variant.attribute_value_ids);
-        variantDataByType[type][key] = variant;
+    ['price', 'image', 'stock', 'sku'].forEach(function (type) {
+        (existingVariantsByType[type] || []).forEach(function (variant) {
+            let key = comboKey(variant.attribute_value_ids);
+            variantDataByType[type][key] = variant;
+        });
     });
-});
 
     let variantImageFiles = {};
 
-$(document).on('change', '.variant-image-input', function (e) {
-    const prefix = $(this).data('prefix');
-    if (!variantImageFiles[prefix]) variantImageFiles[prefix] = [];
+    $(document).on('change', '.variant-image-input', function (e) {
+        const prefix = $(this).data('prefix');
+        if (!variantImageFiles[prefix]) variantImageFiles[prefix] = [];
 
-    const files = Array.from(e.target.files);
-    if ((variantImageFiles[prefix].length + files.length) > 6) {
-        alert('Maximum 6 images allowed per variant');
-        return;
-    }
+        const files = Array.from(e.target.files);
+        if ((variantImageFiles[prefix].length + files.length) > 6) {
+            alert('Maximum 6 images allowed per variant');
+            return;
+        }
 
-    files.forEach(file => variantImageFiles[prefix].push(file));
-    renderVariantImagePreview(prefix);
-});
+        files.forEach(file => variantImageFiles[prefix].push(file));
+        renderVariantImagePreview(prefix);
+    });
 
-function renderVariantImagePreview(prefix) {
-    const $container = $('.variant-image-preview[data-prefix="' + prefix + '"]');
-    $container.html('');
+    function renderVariantImagePreview(prefix) {
+        const $container = $('.variant-image-preview[data-prefix="' + prefix + '"]');
+        $container.html('');
 
-    (variantImageFiles[prefix] || []).forEach(function (file, index) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            $container.append(`
+        (variantImageFiles[prefix] || []).forEach(function (file, index) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $container.append(`
                 <div class="thumb-box" style="width:50px;height:50px;">
                     <img src="${e.target.result}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
                     <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeVariantImage('${prefix}', ${index})">×</button>
                 </div>
             `);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-function removeVariantImage(prefix, index) {
-    variantImageFiles[prefix].splice(index, 1);
-    renderVariantImagePreview(prefix);
-}
-
-function removeExistingVariantImage(id) {
-    if (confirm('Remove this variant image?')) {
-        $('#variant-img-' + id).remove();
-        $('<input>').attr({ type: 'hidden', name: 'delete_variant_images[]', value: id }).appendTo('form');
+            };
+            reader.readAsDataURL(file);
+        });
     }
-}
+
+    function removeVariantImage(prefix, index) {
+        variantImageFiles[prefix].splice(index, 1);
+        renderVariantImagePreview(prefix);
+    }
+
+    function removeExistingVariantImage(id) {
+        if (confirm('Remove this variant image?')) {
+            $('#variant-img-' + id).remove();
+            $('<input>').attr({ type: 'hidden', name: 'delete_variant_images[]', value: id }).appendTo('form');
+        }
+    }
 
     function comboKey(ids) {
         return ids.map(String).slice().sort(function (a, b) { return Number(a) - Number(b); }).join(',');
@@ -1653,12 +1769,12 @@ function removeExistingVariantImage(id) {
         document.getElementById('videos').files = videoTransfer.files;
 
         $('.variant-image-input').each(function () {
-        const prefix = $(this).data('prefix');
-        const dt = new DataTransfer();
-        (variantImageFiles[prefix] || []).forEach(file => dt.items.add(file));
-        this.files = dt.files;
-        this.name = prefix + '[images][]';
-    });
+            const prefix = $(this).data('prefix');
+            const dt = new DataTransfer();
+            (variantImageFiles[prefix] || []).forEach(file => dt.items.add(file));
+            this.files = dt.files;
+            this.name = prefix + '[images][]';
+        });
     });
 
     // ── Video handling ─────────────────────────────────────────────
@@ -1916,52 +2032,52 @@ function removeExistingVariantImage(id) {
      * captured (existing DB rows, or values typed in during this session)
      * for combinations that are still selected.
      */
- function renderVariantsForType(type) {
-    captureVariantType(type);
+    function renderVariantsForType(type) {
+        captureVariantType(type);
 
-    let groups = {};
-    $('.attribute-value:checked').each(function () {
-        if ($(this).data('variant') != 1) return;
-        if ($(this).data(type + '-dependent') != 1) return;
+        let groups = {};
+        $('.attribute-value:checked').each(function () {
+            if ($(this).data('variant') != 1) return;
+            if ($(this).data(type + '-dependent') != 1) return;
 
-        let attributeId = $(this).data('attribute-id');
-        if (!groups[attributeId]) groups[attributeId] = [];
-        groups[attributeId].push({ id: $(this).val(), name: $(this).data('value-name') });
-    });
+            let attributeId = $(this).data('attribute-id');
+            if (!groups[attributeId]) groups[attributeId] = [];
+            groups[attributeId].push({ id: $(this).val(), name: $(this).data('value-name') });
+        });
 
-    let groupArr = Object.values(groups);
-    let $existingCard = $('#variant-table-' + type).closest('.section-card');
+        let groupArr = Object.values(groups);
+        let $existingCard = $('#variant-table-' + type).closest('.section-card');
 
-    if (groupArr.length === 0) {
-        if ($existingCard.length) $existingCard.remove();
-        return;
+        if (groupArr.length === 0) {
+            if ($existingCard.length) $existingCard.remove();
+            return;
+        }
+
+        let combinations = cartesian(groupArr);
+        let rows = '';
+
+        combinations.forEach(function (combo, index) {
+            if (!Array.isArray(combo)) combo = [combo];
+            let ids = combo.map(c => c.id);
+            let names = combo.map(c => c.name).join(' / ');
+            let key = comboKey(ids);
+            let data = variantDataByType[type][key] || {};
+            rows += buildVariantRow(type, index, key, names, ids, data);
+        });
+
+        let wrap = variantTableWrap(type, headColsForType(type), rows);
+
+        if ($existingCard.length) {
+            $existingCard.replaceWith(wrap);
+        } else {
+            $('#variant-container').append(wrap);
+        }
     }
 
-    let combinations = cartesian(groupArr);
-    let rows = '';
+    function variantTableWrap(type, headHtml, rows) {
+        let titleMap = { price: 'Price Variants', image: 'Image Variants', stock: 'Stock Variants', sku: 'SKU Variants' };
 
-    combinations.forEach(function (combo, index) {
-        if (!Array.isArray(combo)) combo = [combo];
-        let ids = combo.map(c => c.id);
-        let names = combo.map(c => c.name).join(' / ');
-        let key = comboKey(ids);
-        let data = variantDataByType[type][key] || {};
-        rows += buildVariantRow(type, index, key, names, ids, data);
-    });
-
-    let wrap = variantTableWrap(type, headColsForType(type), rows);
-
-    if ($existingCard.length) {
-        $existingCard.replaceWith(wrap);
-    } else {
-        $('#variant-container').append(wrap);
-    }
-}
-
-function variantTableWrap(type, headHtml, rows) {
-    let titleMap = { price: 'Price Variants', image: 'Image Variants', stock: 'Stock Variants', sku: 'SKU Variants' };
-
-    return `<div class="section-card" style="margin-bottom:16px">
+        return `<div class="section-card" style="margin-bottom:16px">
         <div class="section-card-header"><h5>${titleMap[type]}</h5></div>
         <div class="section-card-body" style="padding:0;overflow-x:auto">
             <table class="table table-bordered" style="margin:0" id="variant-table-${type}">
@@ -1971,7 +2087,7 @@ function variantTableWrap(type, headHtml, rows) {
         </div>
         <div class="variant-note">Tick "Not offered" for a combination that doesn't exist (e.g. Red isn't available in Small) — it stays saved but hidden from customers. Leave it unchecked with Stock = 0 for a combination that's temporarily sold out.</div>
     </div>`;
-}
+    }
 
 
     /**
@@ -1980,65 +2096,65 @@ function variantTableWrap(type, headHtml, rows) {
      * (browsers won't let us read a real value from them, and we don't want
      * to overwrite an in-progress file selection with a blank).
      */
-   function captureVariantType(type) {
-    $(`.variant-row[data-type="${type}"]`).each(function () {
-        let $row = $(this);
-        let key = $row.data('key');
-        if (!key) return;
+    function captureVariantType(type) {
+        $(`.variant-row[data-type="${type}"]`).each(function () {
+            let $row = $(this);
+            let key = $row.data('key');
+            if (!key) return;
 
-        let data = variantDataByType[type][key] || {};
+            let data = variantDataByType[type][key] || {};
 
-        $row.find('[data-field]').each(function () {
-            if ($(this).attr('type') === 'file') return;
-            let field = $(this).data('field');
+            $row.find('[data-field]').each(function () {
+                if ($(this).attr('type') === 'file') return;
+                let field = $(this).data('field');
 
-            // ✅ checkboxes need their checked state, not .val()
-            if ($(this).attr('type') === 'checkbox') {
-                if (field === 'excluded') {
-                    data.is_available = !$(this).is(':checked');
+                // ✅ checkboxes need their checked state, not .val()
+                if ($(this).attr('type') === 'checkbox') {
+                    if (field === 'excluded') {
+                        data.is_available = !$(this).is(':checked');
+                    }
+                    return;
                 }
-                return;
-            }
 
-            data[field] = $(this).val();
+                data[field] = $(this).val();
+            });
+
+            variantDataByType[type][key] = data;
         });
-
-        variantDataByType[type][key] = data;
-    });
-}
+    }
 
     function cartesian(arr) {
         if (arr.length === 1) return arr[0].map(item => [item]);
         return arr.reduce((a, b) => a.flatMap(d => b.map(e => [].concat(d, e))));
     }
 
-function headColsForType(type) {
-    let head = '<th>Variant</th>';
-    if (type === 'sku') head += '<th>SKU</th>';
-    if (type === 'price') head += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
-    if (type === 'stock') head += '<th>Stock</th>';
-    if (type === 'image') head += '<th>Image</th>';
-    head += '<th>Available</th>'; // ✅ replaces the remove-button column
-    return head;
-}
+    function headColsForType(type) {
+        let head = '<th>Variant</th>';
+        if (type === 'sku') head += '<th>SKU</th>';
+        if (type === 'price') head += '<th>MRP</th><th>Discount Type</th><th>Discount</th><th>Final Price</th>';
+        if (type === 'stock') head += '<th>Stock</th>';
+        if (type === 'image') head += '<th>Image</th>';
+        head += '<th>Available</th>'; // ✅ replaces the remove-button column
+        return head;
+    }
 
-function buildVariantRow(type, index, key, names, comboIds, data) {
-    data = data || {};
-    let prefix = `variants_${type}[${index}]`;
-    let isExcluded = data.is_available === false;
+    function buildVariantRow(type, index, key, names, comboIds, data) {
+        data = data || {};
+        let prefix = `variants_${type}[${index}]`;
+        let isExcluded = data.is_available === false;
 
-    let row = `<tr class="variant-row${isExcluded ? ' variant-row-excluded' : ''}" data-type="${type}" data-key="${key}">
+        let row = `<tr class="variant-row${isExcluded ? ' variant-row-excluded' : ''}" data-type="${type}" data-key="${key}">
     <td>
         <span class="variant-name-cell">${names}</span>
         <input type="hidden" data-field="id" name="${prefix}[id]" value="${data.id || ''}">
     </td>`;
 
-    if (type === 'sku') {
-        row += `<td><input type="text" data-field="sku" name="${prefix}[sku]" class="form-control" value="${data.sku || ''}"></td>`;
-    }
+        if (type === 'sku') {
+            row += `<td><input type="text" data-field="sku" name="${prefix}[sku]" class="form-control" value="${data.sku || ''}"></td>`;
+        }
 
-    if (type === 'price') {
-        row += `
+        if (type === 'price') {
+            row += `
         <td><input type="number" step="0.01" data-field="mrp" name="${prefix}[mrp]" class="form-control" value="${data.mrp || ''}"></td>
         <td>
             <select data-field="discount_type" name="${prefix}[discount_type]" class="form-control">
@@ -2048,23 +2164,23 @@ function buildVariantRow(type, index, key, names, comboIds, data) {
         </td>
         <td><input type="number" step="0.01" data-field="discount" name="${prefix}[discount]" class="form-control" value="${data.discount || ''}"></td>
         <td><input type="number" step="0.01" data-field="price" name="${prefix}[price]" class="form-control" value="${data.price || ''}" readonly></td>`;
-    }
+        }
 
-    if (type === 'stock') {
-        row += `<td><input type="number" data-field="stock" name="${prefix}[stock]" class="form-control" value="${data.stock || ''}"></td>`;
-    }
+        if (type === 'stock') {
+            row += `<td><input type="number" data-field="stock" name="${prefix}[stock]" class="form-control" value="${data.stock || ''}"></td>`;
+        }
 
-    if (type === 'image') {
-        let existingImagesHtml = '';
-        (data.images || []).forEach(function (img) {
-            existingImagesHtml += `
+        if (type === 'image') {
+            let existingImagesHtml = '';
+            (data.images || []).forEach(function (img) {
+                existingImagesHtml += `
                 <div class="thumb-box" id="variant-img-${img.id}" style="width:50px;height:50px;">
                     <img src="${storageBaseUrl}/${img.image}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
                     <button type="button" class="thumb-remove" style="width:16px;height:16px;font-size:9px;" onclick="removeExistingVariantImage(${img.id})">×</button>
                 </div>`;
-        });
+            });
 
-        row += `<td style="min-width:220px">
+            row += `<td style="min-width:220px">
             <div class="media-grid" style="margin-bottom:6px;">${existingImagesHtml}</div>
             <div class="upload-area variant-image-upload" style="padding:10px;">
                 <input type="file" class="variant-image-input" data-prefix="${prefix}" multiple accept="image/*">
@@ -2073,16 +2189,16 @@ function buildVariantRow(type, index, key, names, comboIds, data) {
             </div>
             <div class="variant-image-preview media-grid" data-prefix="${prefix}" style="margin-top:6px;"></div>
         </td>`;
-    }
+        }
 
-    comboIds.forEach(function (id) {
-        row += `<input type="hidden" data-field="values" name="${prefix}[values][]" value="${id}">`;
-    });
+        comboIds.forEach(function (id) {
+            row += `<input type="hidden" data-field="values" name="${prefix}[values][]" value="${id}">`;
+        });
 
-    // ✅ "Not offered" checkbox — pre-checked if this variant was previously
-    // saved with is_available = false, so the exclusion survives reload
-    // (this fixes the original bug: nothing here depends on in-memory state)
-    row += `<td style="text-align:center">
+        // ✅ "Not offered" checkbox — pre-checked if this variant was previously
+        // saved with is_available = false, so the exclusion survives reload
+        // (this fixes the original bug: nothing here depends on in-memory state)
+        row += `<td style="text-align:center">
         <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;white-space:nowrap;justify-content:center;">
             <input type="checkbox" data-field="excluded" name="${prefix}[excluded]"
                 ${isExcluded ? 'checked' : ''} onchange="toggleVariantRowStyle(this)">
@@ -2090,14 +2206,14 @@ function buildVariantRow(type, index, key, names, comboIds, data) {
         </label>
     </td>`;
 
-    row += `</tr>`;
-    return row;
-}
+        row += `</tr>`;
+        return row;
+    }
 
-// ✅ visually grey out a row when marked "Not offered"
-function toggleVariantRowStyle(checkbox) {
-    $(checkbox).closest('tr').toggleClass('variant-row-excluded', checkbox.checked);
-}
+    // ✅ visually grey out a row when marked "Not offered"
+    function toggleVariantRowStyle(checkbox) {
+        $(checkbox).closest('tr').toggleClass('variant-row-excluded', checkbox.checked);
+    }
 
 
     // Variant price calc — matches on the suffix so it works regardless of
@@ -2114,6 +2230,101 @@ function toggleVariantRowStyle(checkbox) {
             row.find('input[name$="[price]"]').val(finalPrice.toFixed(2));
         }
     );
+
+    /* ── Search Suggestions (tag input, spacebar-to-add, with autocomplete) ── */
+    (function () {
+        const input = document.getElementById('suggestionsInput');
+        const tagList = document.getElementById('suggestionsTagList');
+        const hiddenWrap = document.getElementById('suggestionsHidden');
+        const dropdown = document.getElementById('suggestionsDropdown');
+        const wrap = document.getElementById('suggestionsWrap');
+
+        let tags = Array.isArray(initialSuggestions) ? initialSuggestions.slice() : [];
+        let fetchTimer = null;
+
+        function renderTags() {
+            tagList.innerHTML = '';
+            hiddenWrap.innerHTML = '';
+            tags.forEach(function (tag, i) {
+                tagList.insertAdjacentHTML('beforeend',
+                    `<span class="tag-chip">${tag}<button type="button" class="tag-remove" data-index="${i}">×</button></span>`);
+                hiddenWrap.insertAdjacentHTML('beforeend',
+                    `<input type="hidden" name="suggestions[]" value="${tag.replace(/"/g, '&quot;')}">`);
+            });
+        }
+
+        function addTag(value) {
+            value = value.trim();
+            if (!value) return;
+            if (tags.some(t => t.toLowerCase() === value.toLowerCase())) {
+                input.value = '';
+                dropdown.style.display = 'none';
+                return;
+            }
+            tags.push(value);
+            renderTags();
+            input.value = '';
+            dropdown.style.display = 'none';
+        }
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === ' ' || e.code === 'Space') {
+                e.preventDefault();
+                addTag(input.value);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                addTag(input.value);
+            } else if (e.key === 'Backspace' && input.value === '' && tags.length) {
+                tags.pop();
+                renderTags();
+            }
+        });
+
+        tagList.addEventListener('click', function (e) {
+            if (e.target.classList.contains('tag-remove')) {
+                let idx = +e.target.dataset.index;
+                tags.splice(idx, 1);
+                renderTags();
+            }
+        });
+
+        input.addEventListener('input', function () {
+            clearTimeout(fetchTimer);
+            let q = input.value.trim();
+
+            if (!q) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            fetchTimer = setTimeout(function () {
+                $.get("{{ route('admin.products.suggestion-keywords') }}", { q: q }, function (res) {
+                    let matches = res.filter(k => !tags.some(t => t.toLowerCase() === k.toLowerCase()));
+
+                    if (matches.length) {
+                        dropdown.innerHTML = matches.map(k => `<div class="tag-suggestion-item">${k}</div>`).join('');
+                        dropdown.style.display = 'block';
+                    } else {
+                        dropdown.style.display = 'none';
+                    }
+                });
+            }, 200);
+        });
+
+        dropdown.addEventListener('click', function (e) {
+            if (e.target.classList.contains('tag-suggestion-item')) {
+                addTag(e.target.textContent);
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        renderTags();
+    })();
 </script>
 
 @include('admin.footer')
