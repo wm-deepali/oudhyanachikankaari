@@ -654,6 +654,7 @@ function addToCart(productId, minQty, btnEl) {
             if (response.status) {
                 Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
                 $('.cart-count').text(response.cart_count);
+                 fireTrackingEvents(response.tracking_events);
                 refreshMiniCart(response);
 
                 if ($btn) {
@@ -699,6 +700,7 @@ function addToCart(productId, minQty, btnEl) {
                             });
 
                             $('.wishlist-count').text(response.wishlist_count);
+                             fireTrackingEvents(response.tracking_events);
 
                         } else {
 

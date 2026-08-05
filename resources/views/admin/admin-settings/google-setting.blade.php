@@ -90,7 +90,7 @@
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','<span id="gtmIdInPreview">GTM-XXXXXX</span>');&lt;/script&gt;
+})(window,document,'script','dataLayer','<span id="gtmIdInPreview">{{ $google_setting->gtm_container_id ?? 'GTM-XXXXXX' }}</span>');&lt;/script&gt;
 &lt;!-- End Google Tag Manager --&gt;</pre>
                 </div>
 
@@ -187,20 +187,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
                 <p class="settings-section-desc">Choose which GA4 e-commerce events fire automatically on your store.</p>
 
                 <div class="events-grid">
-                    @php
-                        $ga4Events = [
-                            ['key'=>'ga4_ev_view_item',       'label'=>'view_item',          'desc'=>'Product detail page viewed'],
-                            ['key'=>'ga4_ev_add_to_cart',     'label'=>'add_to_cart',         'desc'=>'Item added to cart'],
-                            ['key'=>'ga4_ev_remove_from_cart','label'=>'remove_from_cart',    'desc'=>'Item removed from cart'],
-                            ['key'=>'ga4_ev_begin_checkout',  'label'=>'begin_checkout',      'desc'=>'Checkout started'],
-                            ['key'=>'ga4_ev_add_payment',     'label'=>'add_payment_info',    'desc'=>'Payment step completed'],
-                            ['key'=>'ga4_ev_purchase',        'label'=>'purchase',            'desc'=>'Order successfully placed'],
-                            ['key'=>'ga4_ev_refund',          'label'=>'refund',              'desc'=>'Refund issued on an order'],
-                            ['key'=>'ga4_ev_search',          'label'=>'search',              'desc'=>'Site search performed'],
-                            ['key'=>'ga4_ev_login',           'label'=>'login',               'desc'=>'Customer logged in'],
-                            ['key'=>'ga4_ev_sign_up',         'label'=>'sign_up',             'desc'=>'New customer registered'],
-                        ];
-                    @endphp
+                  @php
+    $ga4Events = [
+        ['key'=>'ga4_ev_view_item',       'label'=>'view_item',          'desc'=>'Product detail page viewed'],
+        ['key'=>'ga4_ev_add_to_cart',     'label'=>'add_to_cart',         'desc'=>'Item added to cart'],
+        ['key'=>'ga4_ev_remove_from_cart','label'=>'remove_from_cart',    'desc'=>'Item removed from cart'],
+        ['key'=>'ga4_ev_begin_checkout',  'label'=>'begin_checkout',      'desc'=>'Checkout started'],
+        ['key'=>'ga4_ev_purchase',        'label'=>'purchase',            'desc'=>'Order successfully placed'],
+        ['key'=>'ga4_ev_refund',          'label'=>'refund',              'desc'=>'Refund issued on an order'],
+        ['key'=>'ga4_ev_login',           'label'=>'login',               'desc'=>'Customer logged in'],
+        ['key'=>'ga4_ev_sign_up',         'label'=>'sign_up',             'desc'=>'New customer registered'],
+    ];
+@endphp
                     @foreach($ga4Events as $ev)
                     <div class="event-chip">
                         <label class="toggle-switch" style="width:32px;height:18px">
@@ -351,7 +349,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
                         <span class="field-hint">Paste only the <code>content</code> value from the meta tag Google gives you. We inject it automatically.</span>
                         <div class="code-preview-block" style="margin-top:12px">
                             <div class="code-preview-label"><i class="fa-solid fa-code"></i> Auto-injected in &lt;head&gt;</div>
-                            <pre class="code-preview">&lt;meta name="google-site-verification" content="<span id="gscMetaPreview">YOUR_VALUE</span>" /&gt;</pre>
+                            <pre class="code-preview">&lt;meta name="google-site-verification" content="<span id="gscMetaPreview">{{ $google_setting->gsc_meta_content ?? 'YOUR_VALUE' }}</span>" /&gt;</pre>
                         </div>
                     </div>
 
@@ -463,20 +461,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
                 <p class="settings-section-desc">Choose which Meta standard events fire automatically.</p>
 
                 <div class="events-grid">
-                    @php
-                        $metaEvents = [
-                            ['key'=>'meta_ev_page_view',      'label'=>'PageView',          'desc'=>'Every page load'],
-                            ['key'=>'meta_ev_view_content',   'label'=>'ViewContent',       'desc'=>'Product page viewed'],
-                            ['key'=>'meta_ev_add_to_cart',    'label'=>'AddToCart',         'desc'=>'Item added to cart'],
-                            ['key'=>'meta_ev_add_to_wishlist','label'=>'AddToWishlist',     'desc'=>'Item wishlisted'],
-                            ['key'=>'meta_ev_initiate_checkout','label'=>'InitiateCheckout','desc'=>'Checkout started'],
-                            ['key'=>'meta_ev_add_payment',    'label'=>'AddPaymentInfo',    'desc'=>'Payment step completed'],
-                            ['key'=>'meta_ev_purchase',       'label'=>'Purchase',          'desc'=>'Order placed successfully'],
-                            ['key'=>'meta_ev_lead',           'label'=>'Lead',              'desc'=>'Contact / enquiry form submitted'],
-                            ['key'=>'meta_ev_complete_reg',   'label'=>'CompleteRegistration','desc'=>'New customer registered'],
-                            ['key'=>'meta_ev_search',         'label'=>'Search',            'desc'=>'Site search performed'],
-                        ];
-                    @endphp
+                   @php
+    $metaEvents = [
+        ['key'=>'meta_ev_page_view',      'label'=>'PageView',          'desc'=>'Every page load'],
+        ['key'=>'meta_ev_view_content',   'label'=>'ViewContent',       'desc'=>'Product page viewed'],
+        ['key'=>'meta_ev_add_to_cart',    'label'=>'AddToCart',         'desc'=>'Item added to cart'],
+        ['key'=>'meta_ev_add_to_wishlist','label'=>'AddToWishlist',     'desc'=>'Item wishlisted'],
+        ['key'=>'meta_ev_initiate_checkout','label'=>'InitiateCheckout','desc'=>'Checkout started'],
+        ['key'=>'meta_ev_purchase',       'label'=>'Purchase',          'desc'=>'Order placed successfully'],
+        ['key'=>'meta_ev_lead',           'label'=>'Lead',              'desc'=>'Contact / enquiry form submitted'],
+        ['key'=>'meta_ev_complete_reg',   'label'=>'CompleteRegistration','desc'=>'New customer registered'],
+    ];
+@endphp
                     @foreach($metaEvents as $ev)
                     <div class="event-chip">
                         <label class="toggle-switch" style="width:32px;height:18px">
@@ -585,10 +581,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
         <button type="button" class="btn-test" onclick="verifyPixels()">
             <i class="fa fa-vial"></i> Verify Tags
         </button>
-        <a href="#" class="btn-secondary-dash">
-   Discard Changes
-</a>
-        <button type="submit" class="btn-primary-dash" onclick="saveSettings(this)">
+        <a href="{{ route('admin.admin-setting.index', ['tab' => 'tracking']) }}" class="btn-secondary-dash">
+            Discard Changes
+        </a>
+        <button type="submit" class="btn-primary-dash">
             <i class="fa fa-save"></i> Save Tracking Settings
         </button>
     </div>
@@ -597,7 +593,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
 
 <!-- ── Google Setting Page — Scoped Styles ── -->
 <style>
-    /* Platform header strip */
     .gs-platform-header {
         display: flex;
         align-items: center;
@@ -634,7 +629,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
         margin-top: 2px;
     }
 
-    /* Code preview block */
     .code-preview-block {
         background: #0d1117;
         border-radius: var(--radius-sm);
@@ -673,7 +667,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
         font-weight: 700;
     }
 
-    /* Events grid */
     .events-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -713,7 +706,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
         margin-top: 3px;
     }
 
-    /* Quick-add chips */
     .quick-add-grid {
         display: flex;
         flex-wrap: wrap;
@@ -743,7 +735,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&amp;l='+l:'';j.async=true;j.src=
         color: var(--accent);
     }
 
-    /* Toggle track sizing override for small toggles inside event chips */
     .events-grid .toggle-track::after {
         width: 12px;
         height: 12px;

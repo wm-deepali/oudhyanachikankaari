@@ -464,6 +464,15 @@
        value="{{ old('maximum_discount', $coupon->maximum_discount) }}">
                                 </div>
 
+<div class="field-group">
+    <label class="field-label">
+        Minimum Order Quantity
+    </label>
+
+    <input type="number" min="1" name="minimum_order_quantity" class="field-input"
+        value="{{ old('minimum_order_quantity', $coupon->minimum_order_quantity) }}">
+
+</div>
                             </div>
                         </div>
 

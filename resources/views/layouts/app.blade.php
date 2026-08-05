@@ -7,8 +7,8 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php
-    require_once app_path('Helpers/seo.php');
-    $seo = getSeo();
+        require_once app_path('Helpers/seo.php');
+        $seo = getSeo();
     @endphp
 
     <title>
@@ -18,7 +18,7 @@
     <meta name="description" content="{{ $seo->meta_description ?? $general?->tagline }}">
 
     @if($seo && $seo->scripts)
-    {!! $seo->scripts !!}
+        {!! $seo->scripts !!}
     @endif
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -41,12 +41,17 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
+        
+         @include('layouts.tracking-head')
+         
 </head>
 
 
 
 <body>
 
+ @include('layouts.tracking-body-top')
+ 
     <!-- pre loader area start -->
     <div id="loading">
         <div id="loading-center">
@@ -95,7 +100,7 @@
                 <div class="row">
                     <div class="col-xl-12">
                         <div class="aq-search-input p-relative mb-60">
-                            <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off">
+                            <div>
                                 <div class="aq-search-input-wrap">
                                     <input type="text" class="searchInput" name="q"
                                         placeholder="Search Suites, Kurta, Ethnic wears..." />
@@ -104,9 +109,256 @@
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </button>
 
-                                    <div class="searchSuggestions search-suggestions"></div>
+                                    <div class="searchSuggestions search-suggestions custom-search-suggestions">
+                                        <div class="cs-container">
+                                            <div class="cs-left">
+                                                <h5 class="cs-heading">SUGGESTIONS</h5>
+                                                <ul class="cs-list">
+                                                    <li>blue <strong>kurta</strong> set</li>
+                                                    <li><strong>kurta</strong></li>
+                                                    <li>mens <strong>kurta</strong></li>
+                                                    <li>chikankari <strong>kurta</strong></li>
+                                                    <li><strong>kurta</strong> set</li>
+                                                    <li>pink mul chanderi chikankari <strong>kurta</strong></li>
+                                                    <li>mukaish <strong>kurta</strong></li>
+                                                    <li>kamdani <strong>kurta</strong></li>
+                                                </ul>
+                                            </div>
+
+                                            <div class="cs-right">
+                                                <div class="cs-tabs">
+                                                    <div class="cs-tab active">PRODUCTS</div>
+                                                    <div class="cs-tab">COLLECTIONS</div>
+                                                </div>
+
+                                                <div class="cs-products-row">
+                                                    <div class="cs-product">
+                                                        <div class="cs-product-title">GREY MUL CHANDERI STRAIGHT ...
+                                                        </div>
+                                                        <div class="cs-product-price">MRP ₹ 12,000.00</div>
+                                                    </div>
+                                                    <div class="cs-product">
+                                                        <div class="cs-product-title">ROSE PINK TISSUE CHIKANKARI...
+                                                        </div>
+                                                        <div class="cs-product-price">MRP ₹ 21,000.00</div>
+                                                    </div>
+                                                    <!-- Product 3 -->
+                                                    <div class="cs-product">
+                                                        <div class="cs-save-badge">SAVE ₹9,000.00</div>
+                                                        <div class="cs-product-title">CREAM MUL CHANDERI CHIKANKA...
+                                                        </div>
+                                                        <div class="cs-product-price">MRP ₹ 16,000.00 <span
+                                                                class="cs-old-price">MRP ₹ 25,000.00</span></div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="cs-view-all-wrapper">
+                                                    <a href="#" class="cs-view-all-btn">VIEW ALL RESULTS</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <style>
+                                        .custom-search-suggestions {
+                                            background: #ffffff;
+                                            width: 100vw;
+                                            position: fixed;
+                                            z-index: 99999;
+                                            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+                                            padding: 30px 0;
+                                            display: none;
+                                            border: 1px solid #eaeaea;
+                                            border-top: none;
+                                            font-family: 'Inter', sans-serif;
+                                        }
+
+                                        .aq-search-input-wrap:focus-within .custom-search-suggestions {}
+
+                                        .custom-search-suggestions .cs-container {
+                                            display: flex;
+                                            gap: 40px;
+                                            text-align: left;
+                                            max-width: 1200px;
+                                            width: 100%;
+                                            margin: 0 auto;
+                                            padding: 0 10%;
+                                        }
+
+                                        .custom-search-suggestions .cs-left {
+                                            flex: 0 0 28%;
+                                        }
+
+                                        .custom-search-suggestions .cs-heading {
+                                            font-size: 12px;
+                                            color: #888;
+                                            letter-spacing: 1px;
+                                            text-transform: uppercase;
+                                            border-bottom: 1px solid #eaeaea;
+                                            padding-bottom: 12px;
+                                            margin-bottom: 20px;
+                                            font-weight: 500;
+                                        }
+
+                                        .custom-search-suggestions .cs-list {
+                                            list-style: none;
+                                            padding: 0;
+                                            margin: 0;
+                                        }
+
+                                        .custom-search-suggestions .cs-list li {
+                                            font-size: 14px;
+                                            color: #333;
+                                            padding: 8px 0;
+                                            cursor: pointer;
+                                        }
+
+                                        .custom-search-suggestions .cs-list li:hover {
+                                            color: #000;
+                                        }
+
+                                        .custom-search-suggestions .cs-list li strong {
+                                            font-weight: 700;
+                                            color: #000;
+                                        }
+
+                                        .custom-search-suggestions .cs-right {
+                                            flex: 1;
+                                            min-width: 0;
+                                            /* Prevents flex blowout on mobile */
+                                        }
+
+                                        .custom-search-suggestions .cs-tabs {
+                                            display: flex;
+                                            gap: 35px;
+                                            border-bottom: 1px solid #eaeaea;
+                                            margin-bottom: 35px;
+                                        }
+
+                                        .custom-search-suggestions .cs-tab {
+                                            font-size: 12px;
+                                            color: #888;
+                                            letter-spacing: 1px;
+                                            text-transform: uppercase;
+                                            padding-bottom: 12px;
+                                            cursor: pointer;
+                                            font-weight: 600;
+                                            position: relative;
+                                        }
+
+                                        .custom-search-suggestions .cs-tab.active {
+                                            color: #000;
+                                        }
+
+                                        .custom-search-suggestions .cs-tab.active::after {
+                                            content: '';
+                                            position: absolute;
+                                            bottom: -1px;
+                                            left: 0;
+                                            width: 100%;
+                                            height: 2px;
+                                            background: #000;
+                                        }
+
+                                        .custom-search-suggestions .cs-products-row {
+                                            display: grid;
+                                            grid-template-columns: repeat(3, 1fr);
+                                            gap: 20px;
+                                            margin-bottom: 50px;
+                                        }
+
+                                        .custom-search-suggestions .cs-product {
+                                            text-align: center;
+                                            position: relative;
+                                            padding: 15px 5px;
+                                        }
+
+                                        .custom-search-suggestions .cs-product-title {
+                                            font-size: 13px;
+                                            color: #333;
+                                            margin-bottom: 8px;
+                                            font-weight: 500;
+                                            line-height: 1.4;
+                                        }
+
+                                        .custom-search-suggestions .cs-product-price {
+                                            font-size: 13px;
+                                            color: #666;
+                                        }
+
+                                        .custom-search-suggestions .cs-old-price {
+                                            text-decoration: line-through;
+                                            color: #aaa;
+                                            margin-left: 8px;
+                                        }
+
+                                        .custom-search-suggestions .cs-save-badge {
+                                            position: absolute;
+                                            top: -15px;
+                                            right: 15px;
+                                            background: #2a2a2a;
+                                            color: #fff;
+                                            font-size: 10px;
+                                            padding: 4px 10px;
+                                            letter-spacing: 1px;
+                                            font-weight: 600;
+                                        }
+
+                                        .custom-search-suggestions .cs-view-all-wrapper {
+                                            text-align: center;
+                                        }
+
+                                        .custom-search-suggestions .cs-view-all-btn {
+                                            display: inline-block;
+                                            background: #c98f9d;
+                                            color: #fff;
+                                            text-decoration: none;
+                                            padding: 14px 35px;
+                                            font-size: 12px;
+                                            letter-spacing: 1.5px;
+                                            text-transform: uppercase;
+                                            font-weight: 500;
+                                            transition: background 0.3s ease;
+                                        }
+
+                                        .custom-search-suggestions .cs-view-all-btn:hover {
+                                            background: #b07886;
+                                            color: #fff;
+                                        }
+
+                                        /* Mobile Responsive Design */
+                                        @media (max-width: 768px) {
+                                            .custom-search-suggestions {
+                                                padding: 20px 0;
+                                            }
+
+                                            .custom-search-suggestions .cs-container {
+                                                flex-direction: column;
+                                                gap: 20px;
+                                            }
+
+                                            .custom-search-suggestions .cs-left {
+                                                flex: 0 0 auto;
+                                            }
+
+                                            .custom-search-suggestions .cs-products-row {
+                                                display: grid;
+                                                grid-template-columns: repeat(2, 1fr);
+                                                gap: 10px;
+                                                margin-bottom: 25px;
+                                                padding-bottom: 0;
+                                            }
+
+                                            .custom-search-suggestions .aq-product-img {
+                                                height: 180px !important;
+                                            }
+
+                                            .custom-search-suggestions .aq-product-content h4 a {
+                                                font-size: 12px !important;
+                                            }
+                                        }
+                                    </style>
                                 </div>
-                            </form>
+                            </div>
 
                         </div>
                     </div>
@@ -117,9 +369,9 @@
                             <h4 class="aq-search-cat-title mb-35">Popular Searches</h4>
                             <div class="aq-search-cat">
                                 @foreach($popularCategories as $category)
-                                <a href="{{ route('products.listing', $category->slug) }}">
-                                    {{ $category->name }}
-                                </a>
+                                    <a href="{{ route('products.listing', $category->slug) }}">
+                                        {{ $category->name }}
+                                    </a>
                                 @endforeach
                             </div>
                         </div>
@@ -135,40 +387,40 @@
 
                                 @forelse($recentProducts as $product)
 
-                                <div class="col">
-                                    <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                        <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
-                                            <a href="{{ route('product.details', $product->slug) }}">
+                                                            <div class="col">
+                                                                <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
+                                                                    <div class="aq-product-thumb aq-img-hover-wrap p-relative">
+                                                                        <a href="{{ route('product.details', $product->slug) }}">
 
-                                                <img class="lazyload aq-product-img"
-                                                    src="{{ asset('storage/' . $product->display_image) }}"
-                                                    alt="{{ $product->name }}" loading="lazy" />
+                                                                            <img class="lazyload aq-product-img"
+                                                                                src="{{ asset('storage/' . $product->display_image) }}"
+                                                                                alt="{{ $product->name }}" loading="lazy" />
 
-                                                <img class="aq-img-hover lazyload"
-                                                    src="{{ asset('storage/' . $product->display_image) }}"
-                                                    alt="{{ $product->name }}" loading="lazy" />
-                                            </a>
-                                        </div>
-                                        <div class="aq-product-content">
-                                            <span class="aqf-product-3-category">Premium Hampers</span>
-                                            <h4 class="aq-product-title mb-5">
-                                                <a href="{{ route('product.details', $product->slug) }}">
-                                                    {{ $product->name }}</a>
-                                            </h4>
-                                            <div class="aq-product-price">
-                                                <ins><span class="aq-product-new-price">${{
-                                                        number_format($product->price, 2) }}</span></ins>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                                                            <img class="aq-img-hover lazyload"
+                                                                                src="{{ asset('storage/' . $product->display_image) }}"
+                                                                                alt="{{ $product->name }}" loading="lazy" />
+                                                                        </a>
+                                                                    </div>
+                                                                    <div class="aq-product-content">
+                                                                        <span class="aqf-product-3-category">Premium Hampers</span>
+                                                                        <h4 class="aq-product-title mb-5">
+                                                                            <a href="{{ route('product.details', $product->slug) }}">
+                                                                                {{ $product->name }}</a>
+                                                                        </h4>
+                                                                        <div class="aq-product-price">
+                                                                            <ins><span class="aq-product-new-price">${{
+                                    number_format($product->price, 2) }}</span></ins>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
 
 
                                 @empty
 
-                                <div class="col-12">
-                                    <p>No recently viewed products found.</p>
-                                </div>
+                                    <div class="col-12">
+                                        <p>No recently viewed products found.</p>
+                                    </div>
 
                                 @endforelse
 
@@ -421,259 +673,298 @@
     <!-- Modal -->
 
     {{--
-====================================================================
-MOBILE DRILL-DOWN MENU — replace ONLY the existing block:
+    ====================================================================
+    MOBILE DRILL-DOWN MENU — replace ONLY the existing block:
 
     <div class="aq-offcanvas-wrap"> ... </div>
 
-with the block below.
+    with the block below.
 
-DOES NOT TOUCH:
-- Top offer bar
-- Logo / search header
-- Desktop nav (.aq-header-bottom-area) — completely untouched
-- Cart / wishlist / quickview scripts
-- Existing hamburger open trigger classes (.aq-offcanvas-wrap.opened, .body-overlay.opened)
-  -> so your existing open/close JS keeps working as-is.
+    DOES NOT TOUCH:
+    - Top offer bar
+    - Logo / search header
+    - Desktop nav (.aq-header-bottom-area) — completely untouched
+    - Cart / wishlist / quickview scripts
+    - Existing hamburger open trigger classes (.aq-offcanvas-wrap.opened, .body-overlay.opened)
+    -> so your existing open/close JS keeps working as-is.
 
-Only new things added: new markup inside offcanvas, new CSS (scoped
-under .aq-offcanvas-wrap so nothing leaks to desktop), new JS scoped
-to drill-down behaviour only.
-====================================================================
---}}
+    Only new things added: new markup inside offcanvas, new CSS (scoped
+    under .aq-offcanvas-wrap so nothing leaks to desktop), new JS scoped
+    to drill-down behaviour only.
+    ====================================================================
+    --}}
 
-<!-- offcanvas area start -->
-<div class="aq-offcanvas-wrap">
+    <!-- offcanvas area start -->
+    <div class="aq-offcanvas-wrap">
 
-    <!-- top row: logo + close (UNCHANGED from your original) -->
-    <div class="aq-offcanvas-top d-flex align-items-center justify-content-between">
-        <div class="aq-offcanvas-logo">
-            <a href="{{ url('/') }}">
-                <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
-                    alt="{{ $general?->site_name }}">
-                <div>{{ $general?->tagline ?? "" }}</div>
-            </a>
+        <!-- top row: logo + close (UNCHANGED from your original) -->
+        <div class="aq-offcanvas-top d-flex align-items-center justify-content-between">
+            <div class="aq-offcanvas-logo">
+                <a href="{{ url('/') }}">
+                    <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
+                        alt="{{ $general?->site_name }}">
+                    <div>{{ $general?->tagline ?? "" }}</div>
+                </a>
+            </div>
+            <button type="button" class="aq-offcanvas-close" aria-label="Close Menu"
+                style="cursor: pointer; z-index: 99;"
+                onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.remove('opened'); document.querySelector('.body-overlay')?.classList.remove('opened');">
+                <i class="fal fa-times" style="font-size: 20px;font-weight:700;"></i>
+            </button>
         </div>
-        <button type="button" class="aq-offcanvas-close" aria-label="Close Menu"
-            style="cursor: pointer; z-index: 99;"
-            onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.remove('opened'); document.querySelector('.body-overlay')?.classList.remove('opened');">
-            <i class="fal fa-times" style="font-size: 20px;font-weight:700;"></i>
-        </button>
-    </div>
 
-    <!-- NEW: drill-down menu panels -->
-    <div class="aq-mm-viewport">
+        <!-- NEW: drill-down menu panels -->
+        <div class="aq-mm-viewport">
 
-        <!-- LEVEL 0 : root -->
-        <div class="aq-mm-panel is-active" data-panel="mm-root">
-            <ul class="aq-mm-list">
-                <li class="aq-mm-item">
-                    <a href="{{ route('home') }}">Home</a>
-                </li>
-                <li class="aq-mm-item">
-                    <a href="{{ route('about-us') }}">Our Heritage</a>
-                </li>
+            <!-- LEVEL 0 : root -->
+            <div class="aq-mm-panel is-active" data-panel="mm-root">
+                <ul class="aq-mm-list">
+                    <li class="aq-mm-item">
+                        <a href="{{ route('home') }}">Home</a>
+                    </li>
+                    <li class="aq-mm-item">
+                        <a href="{{ route('about-us') }}">Our Heritage</a>
+                    </li>
 
-                <li class="aq-mm-item has-children" data-open="mm-curation">
+                    <li class="aq-mm-item has-children" data-open="mm-curation">
+                        <span>Chikankari Luxury Curation</span>
+                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                            <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </li>
+
+                    @foreach($navbarCategories as $category)
+                        <li class="aq-mm-item {{ $category->children->count() ? 'has-children' : '' }}"
+                            @if($category->children->count()) data-open="mm-cat-{{ $category->id }}" @endif>
+                            @if($category->children->count())
+                                <span>{{ $category->name }}</span>
+                                <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                                    <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            @else
+                                <a href="{{ route('products.listing', $category->slug) }}">{{ $category->name }}</a>
+                            @endif
+                        </li>
+                    @endforeach
+
+                    <li class="aq-mm-item">
+                        <a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End of Season Sale</a>
+                    </li>
+                    <li class="aq-mm-item">
+                        <a href="{{ route('contact-us') }}">Contact</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- LEVEL 1 : Chikankari Luxury Curation -> attribute list -->
+            <div class="aq-mm-panel" data-panel="mm-curation">
+                <div class="aq-mm-panel-header" data-back>
+                    <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                        <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
                     <span>Chikankari Luxury Curation</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
+                </div>
+                <ul class="aq-mm-list">
+                    @forelse($headerAttributes as $attribute)
+                        <li class="aq-mm-item has-children" data-open="mm-attr-{{ $attribute->id }}">
+                            <span>Shop By {{ $attribute->name }}</span>
+                            <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                                <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                        </li>
+                    @empty
+                        <li class="aq-mm-item"><span>No Attributes Found</span></li>
+                    @endforelse
 
-                @foreach($navbarCategories as $category)
-                <li class="aq-mm-item {{ $category->children->count() ? 'has-children' : '' }}"
-                    @if($category->children->count()) data-open="mm-cat-{{ $category->id }}" @endif>
-                    @if($category->children->count())
-                        <span>{{ $category->name }}</span>
-                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    @else
-                        <a href="{{ route('products.listing', $category->slug) }}">{{ $category->name }}</a>
-                    @endif
-                </li>
-                @endforeach
+                    <li class="aq-mm-item has-children" data-open="mm-collections">
+                        <span>Shop By Collections</span>
+                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                            <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </li>
 
-                <li class="aq-mm-item">
-                    <a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End of Season Sale</a>
-                </li>
-                <li class="aq-mm-item">
-                    <a href="{{ route('contact-us') }}">Contact</a>
-                </li>
-            </ul>
-        </div>
+                    <li class="aq-mm-item has-children" data-open="mm-pricerange">
+                        <span>Price Range</span>
+                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                            <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </li>
 
-        <!-- LEVEL 1 : Chikankari Luxury Curation -> attribute list -->
-        <div class="aq-mm-panel" data-panel="mm-curation">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Chikankari Luxury Curation</span>
+                    <li class="aq-mm-item has-children" data-open="mm-occasions">
+                        <span>Shop By Occasions</span>
+                        <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                            <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </li>
+                </ul>
             </div>
-            <ul class="aq-mm-list">
-                @forelse($headerAttributes as $attribute)
-                <li class="aq-mm-item has-children" data-open="mm-attr-{{ $attribute->id }}">
-                    <span>Shop By {{ $attribute->name }}</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No Attributes Found</span></li>
-                @endforelse
 
-                <li class="aq-mm-item has-children" data-open="mm-collections">
+            <!-- LEVEL 2 : one panel per attribute -> its values -->
+            @foreach($headerAttributes as $attribute)
+                <div class="aq-mm-panel" data-panel="mm-attr-{{ $attribute->id }}">
+                    <div class="aq-mm-panel-header" data-back>
+                        <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                            <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        <span>Shop By {{ $attribute->name }}</span>
+                    </div>
+                    <ul class="aq-mm-list">
+                        @forelse($attribute->values as $value)
+                            <li class="aq-mm-item">
+                                <a
+                                    href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">{{ $value->value }}</a>
+                            </li>
+                        @empty
+                            <li class="aq-mm-item"><span>No {{ $attribute->name }} Found</span></li>
+                        @endforelse
+                    </ul>
+                </div>
+            @endforeach
+
+            <!-- LEVEL 2 : Collections -->
+            <div class="aq-mm-panel" data-panel="mm-collections">
+                <div class="aq-mm-panel-header" data-back>
+                    <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                        <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
                     <span>Shop By Collections</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
+                </div>
+                <ul class="aq-mm-list">
+                    @foreach($headerCollections as $collection)
+                        <li class="aq-mm-item">
+                            <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
 
-                <li class="aq-mm-item has-children" data-open="mm-pricerange">
+            <!-- LEVEL 2 : Price Range -->
+            <div class="aq-mm-panel" data-panel="mm-pricerange">
+                <div class="aq-mm-panel-header" data-back>
+                    <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                        <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
                     <span>Price Range</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
+                </div>
+                <ul class="aq-mm-list">
+                    @foreach(config('price_ranges') as $band)
+                        <li class="aq-mm-item">
+                            <a href="{{ route('price.listing', $band['slug']) }}">{{ $band['label'] }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
 
-                <li class="aq-mm-item has-children" data-open="mm-occasions">
+            <!-- LEVEL 2 : Occasions -->
+            <div class="aq-mm-panel" data-panel="mm-occasions">
+                <div class="aq-mm-panel-header" data-back>
+                    <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                        <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
                     <span>Shop By Occasions</span>
-                    <svg class="aq-mm-chevron" width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </li>
-            </ul>
-        </div>
-
-        <!-- LEVEL 2 : one panel per attribute -> its values -->
-        @foreach($headerAttributes as $attribute)
-        <div class="aq-mm-panel" data-panel="mm-attr-{{ $attribute->id }}">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By {{ $attribute->name }}</span>
+                </div>
+                <ul class="aq-mm-list">
+                    @forelse($headerOccasions as $occasion)
+                        <li class="aq-mm-item">
+                            <a href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
+                        </li>
+                    @empty
+                        <li class="aq-mm-item"><span>No Occasions Found</span></li>
+                    @endforelse
+                </ul>
             </div>
-            <ul class="aq-mm-list">
-                @forelse($attribute->values as $value)
-                <li class="aq-mm-item">
-                    <a href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">{{ $value->value }}</a>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No {{ $attribute->name }} Found</span></li>
-                @endforelse
-            </ul>
-        </div>
-        @endforeach
 
-        <!-- LEVEL 2 : Collections -->
-        <div class="aq-mm-panel" data-panel="mm-collections">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By Collections</span>
+            <!-- LEVEL 1 : category -> subcategory panels (Women's Wear, Men's Wear, etc.) -->
+            @foreach($navbarCategories as $category)
+                @if($category->children->count())
+                    <div class="aq-mm-panel" data-panel="mm-cat-{{ $category->id }}">
+                        <div class="aq-mm-panel-header" data-back>
+                            <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+                                <path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <span>{{ $category->name }}</span>
+                        </div>
+                        <ul class="aq-mm-list">
+                            <li class="aq-mm-item">
+                                <a href="{{ route('products.listing', $category->slug) }}"><strong>View All
+                                        {{ $category->name }}</strong></a>
+                            </li>
+                            @foreach($category->children as $subcategory)
+                                <li class="aq-mm-item">
+                                    <a
+                                        href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">{{ $subcategory->name }}</a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            @endforeach
+
+        </div>
+        <!-- /drill-down menu panels -->
+
+        <!-- bottom row (UNCHANGED from your original) -->
+        <div class="aq-offcanvas-bottom">
+            <div class="aq-offcanvas-btn-wrap d-flex justify-content-between align-items-center">
+                <a class="aq-offcanvas-btn" href="{{ route('user.login') }}">Login</a>
+                <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('wishlist.index') }}">Wishlist</a>
             </div>
-            <ul class="aq-mm-list">
-                @foreach($headerCollections as $collection)
-                <li class="aq-mm-item">
-                    <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
-
-        <!-- LEVEL 2 : Price Range -->
-        <div class="aq-mm-panel" data-panel="mm-pricerange">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Price Range</span>
-            </div>
-            <ul class="aq-mm-list">
-                @foreach(config('price_ranges') as $band)
-                <li class="aq-mm-item">
-                    <a href="{{ route('price.listing', $band['slug']) }}">{{ $band['label'] }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
-
-        <!-- LEVEL 2 : Occasions -->
-        <div class="aq-mm-panel" data-panel="mm-occasions">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>Shop By Occasions</span>
-            </div>
-            <ul class="aq-mm-list">
-                @forelse($headerOccasions as $occasion)
-                <li class="aq-mm-item">
-                    <a href="{{ route('occasions.listing', $occasion->slug) }}">{{ $occasion->title }}</a>
-                </li>
-                @empty
-                <li class="aq-mm-item"><span>No Occasions Found</span></li>
-                @endforelse
-            </ul>
-        </div>
-
-        <!-- LEVEL 1 : category -> subcategory panels (Women's Wear, Men's Wear, etc.) -->
-        @foreach($navbarCategories as $category)
-        @if($category->children->count())
-        <div class="aq-mm-panel" data-panel="mm-cat-{{ $category->id }}">
-            <div class="aq-mm-panel-header" data-back>
-                <svg width="8" height="14" viewBox="0 0 8 14" fill="none"><path d="M7 1L1 7L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span>{{ $category->name }}</span>
-            </div>
-            <ul class="aq-mm-list">
-                <li class="aq-mm-item">
-                    <a href="{{ route('products.listing', $category->slug) }}"><strong>View All {{ $category->name }}</strong></a>
-                </li>
-                @foreach($category->children as $subcategory)
-                <li class="aq-mm-item">
-                    <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">{{ $subcategory->name }}</a>
-                </li>
-                @endforeach
-            </ul>
-        </div>
-        @endif
-        @endforeach
-
-    </div>
-    <!-- /drill-down menu panels -->
-
-    <!-- bottom row (UNCHANGED from your original) -->
-    <div class="aq-offcanvas-bottom">
-        <div class="aq-offcanvas-btn-wrap d-flex justify-content-between align-items-center">
-            <a class="aq-offcanvas-btn" href="{{ route('user.login') }}">Login</a>
-            <a class="aq-offcanvas-btn btn-black-bg" href="{{ route('wishlist.index') }}">Wishlist</a>
         </div>
     </div>
-</div>
-<!-- offcanvas area end -->
+    <!-- offcanvas area end -->
 
 
 
 
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- Body Overlay -->
     <div class="body-overlay"
@@ -734,7 +1025,8 @@ to drill-down behaviour only.
                     <a href="{{ route('wishlist.index') }}">
                         <div class="aq-bottom-menu-item">
                             <button class="p-relative">
-                              <span class="count-box wishlist-count">{{ \App\Models\Wishlist::current()->count() }}</span>
+                                <span
+                                    class="count-box wishlist-count">{{ \App\Models\Wishlist::current()->count() }}</span>
                                 <i>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="15" viewBox="0 0 18 15"
                                         fill="none">
@@ -751,7 +1043,7 @@ to drill-down behaviour only.
                 <div class="col">
                     <div class="aq-bottom-menu-item aq-cart-btn">
                         <button class="p-relative">
-                           <span class="count-box cart-count">{{ $globalCartCount }}</span>
+                            <span class="count-box cart-count">{{ $globalCartCount }}</span>
                             <i>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="17" height="14" viewBox="0 0 17 14"
                                     fill="none">
@@ -784,27 +1076,27 @@ to drill-down behaviour only.
 
                 @foreach($announcements as $announcement)
 
-                <div class="offer-item {{ $loop->first ? 'active' : '' }}">
+                    <div class="offer-item {{ $loop->first ? 'active' : '' }}">
 
-                    @if($announcement->link)
+                        @if($announcement->link)
 
-                    <a href="{{ $announcement->link }}" style="color: inherit; text-decoration:none;">
+                            <a href="{{ $announcement->link }}" style="color: inherit; text-decoration:none;">
 
-                        <span>
-                            {{ $announcement->title }}
-                        </span>
+                                <span>
+                                    {{ $announcement->title }}
+                                </span>
 
-                    </a>
+                            </a>
 
-                    @else
+                        @else
 
-                    <span>
-                        {{ $announcement->title }}
-                    </span>
+                            <span>
+                                {{ $announcement->title }}
+                            </span>
 
-                    @endif
+                        @endif
 
-                </div>
+                    </div>
 
                 @endforeach
 
@@ -826,11 +1118,14 @@ to drill-down behaviour only.
                             style="position: relative; background: transparent; border: none; padding: 0; color: #1c1c1c; cursor: pointer; z-index: 99;"
                             onclick="document.querySelector('.aq-offcanvas-wrap')?.classList.add('opened'); document.querySelector('.body-overlay')?.classList.add('opened');">
                             <i>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"
-                                    viewBox="0 0 24 24" fill="none">
-                                    <path d="M4 12H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    <path d="M4 6H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    <path d="M4 18H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+                                    fill="none">
+                                    <path d="M4 12H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M4 6H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <path d="M4 18H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                        stroke-linejoin="round" />
                                 </svg>
                             </i>
                         </button>
@@ -844,7 +1139,7 @@ to drill-down behaviour only.
     ? asset('storage/' . $general->logo)
     : asset('assets/img/corporate/Oudhyana_img/logo.png') }}" alt="{{ $general?->site_name }}">
 
-                                <div class=" d-md-block">
+                                <div class=" d-md-block p-0">
                                     {{ $general?->tagline ?? '' }}
                                 </div>
                             </a>
@@ -852,7 +1147,7 @@ to drill-down behaviour only.
                     </div>
                     <div class="col-xl-7 col-lg-6 col-md-6 d-none d-md-block">
                         <div class="aq-header-search-form" style="position: relative;">
-                            <form action="{{ route('search.suggestions') }}" method="GET" autocomplete="off"
+                            <div
                                 style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 30px; background: #fff; overflow: hidden; padding: 2px 2px 2px 20px;">
                                 <input class="searchInput" name="q" type="text"
                                     placeholder="Search Suits, Kurta, Ethnic Wears..."
@@ -861,7 +1156,7 @@ to drill-down behaviour only.
                                     style="background: #c98f9d; color: #fff; border: none; border-radius: 50px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 10px; margin-right: 2px;"><i
                                         class="fa fa-search"></i></button>
                                 <div class="searchSuggestions search-suggestions"></div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                     <div class="col-xl-2 col-lg-3 col-md-3 col-3">
@@ -881,54 +1176,66 @@ to drill-down behaviour only.
                                     </button>
                                 </li>
                                 <li class="aq-header-top-login d-none d-md-inline-block">
-    @auth('customer')
-        <a href="{{ route('user.dashboard.index') }}" aria-label="My Account"
-           style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
-            <i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
-                    <path d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </i>
-        </a>
-    @else
-        <a href="{{ route('user.login') }}" aria-label="Login"
-           style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
-            <i>
-                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20" viewBox="0 0 19 20" fill="none">
-                    <path d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
-                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </i>
-        </a>
-    @endauth
-</li>
+                                    @auth('customer')
+                                        <a href="{{ route('user.dashboard.index') }}" aria-label="My Account"
+                                            style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
+                                            <i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20"
+                                                    viewBox="0 0 19 20" fill="none">
+                                                    <path
+                                                        d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
+                                                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
+                                                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('user.login') }}" aria-label="Login"
+                                            style="position: relative; background: transparent; border: none; padding: 0; display:flex;">
+                                            <i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="19" height="20"
+                                                    viewBox="0 0 19 20" fill="none">
+                                                    <path
+                                                        d="M9.5 9.5C11.9853 9.5 14 7.48528 14 5C14 2.51472 11.9853 0.5 9.5 0.5C7.01472 0.5 5 2.51472 5 5C5 7.48528 7.01472 9.5 9.5 9.5Z"
+                                                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                    <path
+                                                        d="M17.5 19.5C17.5 15.634 13.9706 12.5 9.5 12.5C5.02944 12.5 1.5 15.634 1.5 19.5"
+                                                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round" />
+                                                </svg>
+                                            </i>
+                                        </a>
+                                    @endauth
+                                </li>
                                 <li class="aq-header-top-wishlist d-none d-md-inline-block">
-                                    <button class="aq-wishlist-btn" aria-label="Wishlist"
-                                        style="position: relative; background: transparent; border: none; padding: 0;">
-                                        <span class="count-box wishlist-count"
-                                            style="background: #c98f9d; color: #fff;">
-                                            {{ \App\Models\Wishlist::current()->count() }}
-                                        </span>
-                                        <i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20"
-                                                viewBox="0 0 21 20" fill="none">
-                                                <path
-                                                    d="M6.50726 4.80303C5.44195 5.14334 4.68503 6.09974 4.59044 7.22502M10.4856 18.6038C12.6562 17.2679 14.6755 15.6957 16.5073 13.9152C17.7951 12.633 18.7756 11.0698 19.3735 9.3454C20.4494 6.00032 19.1927 2.17084 15.6755 1.03753C13.827 0.442448 11.8081 0.782566 10.2505 1.95149C8.69225 0.783989 6.67412 0.443991 4.82552 1.03753C1.30833 2.17084 0.0425004 6.00032 1.11845 9.3454C1.71636 11.0698 2.69679 12.633 3.98465 13.9152C5.81647 15.6957 7.83575 17.2679 10.0064 18.6038L10.2414 18.75L10.4856 18.6038Z"
-                                                    stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </svg>
-                                        </i>
-                                    </button>
+                                    <a href="{{ route('wishlist.index') }}">
+                                        <button class="aq-wishlist-btn" aria-label="Wishlist"
+                                            style="position: relative; background: transparent; border: none; padding: 0;">
+                                            <span class="count-box wishlist-count"
+                                                style="background: #c98f9d; color: #fff;">
+                                                {{ \App\Models\Wishlist::current()->count() }}
+                                            </span>
+                                            <i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="20"
+                                                    viewBox="0 0 21 20" fill="none">
+                                                    <path
+                                                        d="M6.50726 4.80303C5.44195 5.14334 4.68503 6.09974 4.59044 7.22502M10.4856 18.6038C12.6562 17.2679 14.6755 15.6957 16.5073 13.9152C17.7951 12.633 18.7756 11.0698 19.3735 9.3454C20.4494 6.00032 19.1927 2.17084 15.6755 1.03753C13.827 0.442448 11.8081 0.782566 10.2505 1.95149C8.69225 0.783989 6.67412 0.443991 4.82552 1.03753C1.30833 2.17084 0.0425004 6.00032 1.11845 9.3454C1.71636 11.0698 2.69679 12.633 3.98465 13.9152C5.81647 15.6957 7.83575 17.2679 10.0064 18.6038L10.2414 18.75L10.4856 18.6038Z"
+                                                        stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
+                                                        stroke-linejoin="round"></path>
+                                                </svg>
+                                            </i>
+                                        </button>
+                                    </a>
                                 </li>
                                 <li class="aq-header-top-cart aq-cart-btn">
                                     <button aria-label="Shopping Cart"
                                         style="position: relative; background: transparent; border: none; padding: 0;">
-                                       
+
 
                                         <span class="count-box cart-count" style="background: #c98f9d; color: #fff;">
                                             {{ $globalCartCount }}
@@ -1017,47 +1324,47 @@ to drill-down behaviour only.
 
                                                     @forelse($headerAttributes as $attribute)
 
-                                                    <div class="aq-corp-megamenu-col">
-                                                        <h6 class="aq-corp-megamenu-heading">
-                                                            Shop By {{ $attribute->name }}
-                                                        </h6>
+                                                        <div class="aq-corp-megamenu-col">
+                                                            <h6 class="aq-corp-megamenu-heading">
+                                                                Shop By {{ $attribute->name }}
+                                                            </h6>
 
-                                                        <ul>
-                                                            @forelse($attribute->values as $value)
+                                                            <ul>
+                                                                @forelse($attribute->values as $value)
 
-                                                            <li>
-                                                                <a
-                                                                    href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">
-                                                                    {{ $value->value }}
-                                                                </a>
-                                                            </li>
+                                                                    <li>
+                                                                        <a
+                                                                            href="{{ route('attribute.listing', [$attribute->slug, $value->slug]) }}">
+                                                                            {{ $value->value }}
+                                                                        </a>
+                                                                    </li>
 
-                                                            @empty
+                                                                @empty
 
-                                                            <li>
-                                                                <a href="#">
-                                                                    No {{ $attribute->name }} Found
-                                                                </a>
-                                                            </li>
+                                                                    <li>
+                                                                        <a href="#">
+                                                                            No {{ $attribute->name }} Found
+                                                                        </a>
+                                                                    </li>
 
-                                                            @endforelse
-                                                        </ul>
-                                                    </div>
+                                                                @endforelse
+                                                            </ul>
+                                                        </div>
 
                                                     @empty
 
-                                                    <div class="aq-corp-megamenu-col">
-                                                        <h6 class="aq-corp-megamenu-heading">
-                                                            Attributes
-                                                        </h6>
-                                                        <ul>
-                                                            <li>
-                                                                <a href="#">
-                                                                    No Attributes Found
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
+                                                        <div class="aq-corp-megamenu-col">
+                                                            <h6 class="aq-corp-megamenu-heading">
+                                                                Attributes
+                                                            </h6>
+                                                            <ul>
+                                                                <li>
+                                                                    <a href="#">
+                                                                        No Attributes Found
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
 
                                                     @endforelse
 
@@ -1070,10 +1377,10 @@ to drill-down behaviour only.
 
                                                             @foreach($headerCollections as $collection)
 
-                                                            <li><a
-                                                                    href="{{ route('collections.listing', $collection->slug) }}">{{
-                                                                    $collection->name }}</a>
-                                                            </li>
+                                                                                                                    <li><a
+                                                                                                                            href="{{ route('collections.listing', $collection->slug) }}">{{
+                                                                $collection->name }}</a>
+                                                                                                                    </li>
 
                                                             @endforeach
 
@@ -1084,9 +1391,9 @@ to drill-down behaviour only.
                                                         <h6 class="aq-corp-megamenu-heading">Price Range</h6>
                                                         <ul>
                                                             @foreach(config('price_ranges') as $band)
-                                                            <li><a href="{{ route('price.listing', $band['slug']) }}">{{
-                                                                    $band['label'] }}</a>
-                                                            </li>
+                                                                                                                    <li><a href="{{ route('price.listing', $band['slug']) }}">{{
+                                                                $band['label'] }}</a>
+                                                                                                                    </li>
                                                             @endforeach
                                                         </ul>
                                                     </div>
@@ -1096,16 +1403,16 @@ to drill-down behaviour only.
 
                                                             @forelse($headerOccasions as $occasion)
 
-                                                            <li><a
-                                                                    href="{{ route('occasions.listing', $occasion->slug) }}">{{
-                                                                    $occasion->title }}</a>
-                                                            </li>
+                                                                                                                    <li><a
+                                                                                                                            href="{{ route('occasions.listing', $occasion->slug) }}">{{
+                                                                $occasion->title }}</a>
+                                                                                                                    </li>
 
                                                             @empty
 
-                                                            <li>
-                                                                <a href="#">No Occasions Found</a>
-                                                            </li>
+                                                                <li>
+                                                                    <a href="#">No Occasions Found</a>
+                                                                </li>
 
                                                             @endforelse
 
@@ -1121,36 +1428,35 @@ to drill-down behaviour only.
 
                                     @foreach($navbarCategories as $category)
 
-                                    <li class="has-dropdown">
+                                        <li class="has-dropdown">
 
-                                        <a href="{{ route('products.listing', $category->slug) }}">
-                                            {{ $category->name }}
-                                        </a>
+                                            <a href="{{ route('products.listing', $category->slug) }}">
+                                                {{ $category->name }}
+                                            </a>
 
-                                        @if($category->children->count())
+                                            @if($category->children->count())
 
-                                        <ul class="submenu">
+                                                <ul class="submenu">
 
-                                            @foreach($category->children as $subcategory)
+                                                    @foreach($category->children as $subcategory)
 
-                                            <li>
-                                                <a
-                                                    href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
-                                                    {{ $subcategory->name }}
-                                                </a>
-                                            </li>
+                                                        <li>
+                                                            <a
+                                                                href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
+                                                                {{ $subcategory->name }}
+                                                            </a>
+                                                        </li>
 
-                                            @endforeach
+                                                    @endforeach
 
-                                        </ul>
+                                                </ul>
 
-                                        @endif
+                                            @endif
 
-                                    </li>
+                                        </li>
 
                                     @endforeach
-                                    <li><a
-                                            href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End
+                                    <li><a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End
                                             of Season Sale</a></li>
                                     <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
@@ -1390,52 +1696,53 @@ to drill-down behaviour only.
                                 <div class="aq-footer-logo-luxury mb-35">
                                     <a href="{{ route('home') }}">
                                         @if(!empty($general?->logo))
-                                        <img src="{{ asset('storage/' . $general->logo) }}"
-                                            alt="{{ $general?->site_name }}"
-                                            style="filter: brightness(0) invert(1); width: 180px;">
+                                            <img src="{{ asset('storage/' . $general->logo) }}"
+                                                alt="{{ $general?->site_name }}"
+                                                style="filter: brightness(0) invert(1); width: 180px;">
                                         @endif
                                     </a>
                                 </div>
                                 @if(!empty($general?->footer_description))
-                                <p class="aq-footer-intro-text">
-                                    {!! $general->footer_description !!}
-                                </p>
+                                    <p class="aq-footer-intro-text">
+                                        {!! $general->footer_description !!}
+                                    </p>
                                 @endif
                                 <div class="aq-footer-social-luxury mt-40">
-                                    
+
                                     @if($general?->whatsapp)
-    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank" class="social-icon">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
-@endif
+                                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}"
+                                            target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-whatsapp"></i>
+                                        </a>
+                                    @endif
                                     @if($general?->facebook)
-                                    <a href="{{ $general->facebook }}" target="_blank" class="social-icon">
-                                        <i class="fa-brands fa-facebook-f"></i>
-                                    </a>
+                                        <a href="{{ $general->facebook }}" target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-facebook-f"></i>
+                                        </a>
                                     @endif
 
                                     @if($general?->twitter)
-                                    <a href="{{ $general->twitter }}" target="_blank" class="social-icon">
-                                        <i class="fa-brands fa-twitter"></i>
-                                    </a>
+                                        <a href="{{ $general->twitter }}" target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-twitter"></i>
+                                        </a>
                                     @endif
 
                                     @if($general?->linkedin)
-                                    <a href="{{ $general->linkedin }}" target="_blank" class="social-icon">
-                                        <i class="fa-brands fa-linkedin-in"></i>
-                                    </a>
+                                        <a href="{{ $general->linkedin }}" target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-linkedin-in"></i>
+                                        </a>
                                     @endif
 
                                     @if($general?->instagram)
-                                    <a href="{{ $general->instagram }}" target="_blank" class="social-icon">
-                                        <i class="fa-brands fa-instagram"></i>
-                                    </a>
+                                        <a href="{{ $general->instagram }}" target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-instagram"></i>
+                                        </a>
                                     @endif
 
                                     @if($general?->youtube)
-                                    <a href="{{ $general->youtbe }}" target="_blank" class="social-icon">
-                                        <i class="fa-brands fa-youtube"></i>
-                                    </a>
+                                        <a href="{{ $general->youtube }}" target="_blank" class="social-icon">
+                                            <i class="fa-brands fa-youtube"></i>
+                                        </a>
                                     @endif
                                 </div>
 
@@ -1453,7 +1760,8 @@ to drill-down behaviour only.
                                 <ul class="aq-footer-menu-luxury">
                                     <li><a href="{{ route('about-us') }}"><i class="fa-solid fa-chevron-right"></i>
                                             Our Heritage</a></li>
-                                    <li><a href="{{ route('colour.chart') }}"><i class="fa-solid fa-chevron-right"></i> Colour Chart</a></li>
+                                    <li><a href="{{ route('colour.chart') }}"><i class="fa-solid fa-chevron-right"></i>
+                                            Colour Chart</a></li>
                                     <li><a href="{{ route('contact-us') }}"><i class="fa-solid fa-chevron-right"></i>
                                             Contact Us</a></li>
                                     <li><a href="{{ route('blogs') }}"><i class="fa-solid fa-chevron-right"></i>
@@ -1474,9 +1782,9 @@ to drill-down behaviour only.
                                             Shop All Collections</a></li>
                                     @foreach($headerCollections as $collection)
 
-                                    <li><a href="{{ route('collections.listing', $collection->slug) }}"><i
-                                                class="fa-solid fa-chevron-right"></i>{{ $collection->name }}</a>
-                                    </li>
+                                        <li><a href="{{ route('collections.listing', $collection->slug) }}"><i
+                                                    class="fa-solid fa-chevron-right"></i>{{ $collection->name }}</a>
+                                        </li>
 
                                     @endforeach
 
@@ -1498,7 +1806,7 @@ to drill-down behaviour only.
                                         <div class="aq-contact-content-luxury">
                                             <h6>ADDRESS</h6>
                                             @if(!empty($general?->business_address))
-                                            <p>{{ $general->business_address }}</p>
+                                                <p>{{ $general->business_address }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1510,7 +1818,7 @@ to drill-down behaviour only.
                                         <div class="aq-contact-content-luxury">
                                             <h6>PHONE</h6>
                                             @if(!empty($general?->phone))
-                                            <p>{{ $general->phone }}</p>
+                                                <p>{{ $general->phone }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1524,14 +1832,14 @@ to drill-down behaviour only.
                                         <div class="aq-contact-content-luxury">
                                             <h6>WHATSAPP</h6>
                                             @if(!empty($general?->whatsapp))
-                                            <p>
-                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}"
-                                                    target="_blank">
+                                                <p>
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}"
+                                                        target="_blank">
 
-                                                    {{ $general->whatsapp }}
+                                                        {{ $general->whatsapp }}
 
-                                                </a>
-                                            </p>
+                                                    </a>
+                                                </p>
                                             @endif
                                         </div>
                                     </div>
@@ -1543,7 +1851,7 @@ to drill-down behaviour only.
                                         <div class="aq-contact-content-luxury">
                                             <h6>EMAIL</h6>
                                             @if(!empty($general?->support_email))
-                                            <p>{{ $general->support_email }}</p>
+                                                <p>{{ $general->support_email }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -1562,8 +1870,8 @@ to drill-down behaviour only.
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-policy-links text-center mb-20 mt-10">
                                 @foreach($footerPages as $page)
-                                <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
-                                    {{ $page->heading }}</a>
+                                    <a href="{{ route('dynamic.page', \Illuminate\Support\Str::slug($page->page_name)) }}">
+                                        {{ $page->heading }}</a>
                                 @endforeach
                             </div>
                         </div>
@@ -1611,12 +1919,12 @@ to drill-down behaviour only.
         <div class="footer_whatspp">
 
             @if(!empty($general?->whatsapp))
-            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank"
-                class="social-whatspp" title="WhatsApp">
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $general->whatsapp) }}" target="_blank"
+                    class="social-whatspp" title="WhatsApp">
 
-                <i class="fa-brands fa-whatsapp"></i>
+                    <i class="fa-brands fa-whatsapp"></i>
 
-            </a>
+                </a>
             @endif
 
         </div>
@@ -1850,121 +2158,182 @@ to drill-down behaviour only.
             }
         }
     </style>
-    {{-- ==================================================================
-     NEW CSS — paste inside your existing <style> block (or a new one)
-     Scoped entirely under .aq-offcanvas-wrap so desktop is untouched.
-     ================================================================== --}}
-<style>
-    /* Reset the old empty-nav wrap so it doesn't fight with new panels */
-    .aq-offcanvas-menu-wrap { display: none !important; }
 
-    .aq-offcanvas-wrap {
-        background: #1c1c1c;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        width: 380px !important;
-    }
+    <style>
+        /* Reset the old empty-nav wrap so it doesn't fight with new panels */
+        .aq-offcanvas-menu-wrap {
+            display: none !important;
+        }
 
-    .aq-offcanvas-top {
-        background: #1c1c1c;   /* ← ye line add karo */
-        padding: 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        flex-shrink: 0;
-    }
-    .aq-offcanvas-logo img { filter: brightness(0) invert(1); width: 130px; }
-    .aq-offcanvas-logo a div {
-    font-family: 'Georgia', serif;
-    font-style: italic;
-    font-size: 11px;
-    color: #ffffff !important;
-    margin-top: 4px;
-}
-    .aq-offcanvas-close { background: transparent; border: none; color: #fff; }
+        .aq-offcanvas-wrap {
+            background: #1c1c1c;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            width: 380px !important;
+        }
 
-    .aq-mm-viewport {
-        position: relative;
-        flex: 1 1 auto;
-        overflow: hidden;
-    }
+        .aq-offcanvas-top {
+            background: #1c1c1c;
+            /* ← ye line add karo */
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
 
-    .aq-mm-panel {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        transform: translateX(100%);
-        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-        background: #1c1c1c;
-        padding: 10px 20px 30px;
-    }
-    .aq-mm-panel.is-active { transform: translateX(0); z-index: 2; }
-    .aq-mm-panel.is-prev   { transform: translateX(-100%); z-index: 1; }
+        .aq-offcanvas-logo img {
+            filter: brightness(0) invert(1);
+            width: 130px;
+        }
 
-    .aq-mm-panel-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 16px 0;
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    margin-bottom: 6px;
-}
-.aq-mm-panel-header span { color: #fff; font-size: 14px; font-weight: 600; }
+        .aq-offcanvas-logo a div {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 11px;
+            color: #ffffff !important;
+            margin-top: 4px;
+        }
 
-    .aq-mm-list { list-style: none; margin: 0; padding: 0; margin-top:130px; }
+        .aq-offcanvas-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+        }
 
-    .aq-mm-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        padding: 15px 2px;
-        cursor: pointer;
-    }
-    .aq-mm-item a, .aq-mm-item > span {
-        color: #f2f2f2;
-        text-decoration: none;
-        font-size: 14px;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        flex: 1;
-    }
-    .aq-mm-item.has-children > span { color: #f2f2f2; }
-    .aq-mm-chevron { color: rgba(255,255,255,0.5); flex-shrink: 0; }
+        .aq-mm-viewport {
+            position: relative;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
 
-    .aq-offcanvas-bottom { flex-shrink: 0; padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-    .aq-offcanvas-btn-wrap .aq-offcanvas-btn {
-        flex: 1;
-        text-align: center;
-        padding: 12px;
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.3);
-        text-decoration: none;
-        font-size: 13px;
-        text-transform: uppercase;
-    }
-    .aq-offcanvas-btn-wrap .aq-offcanvas-btn.btn-black-bg { background: #fff; color: #1c1c1c; border-color: #fff; margin-left: 10px; 
+        .aq-mm-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #1c1c1c;
+            padding: 10px 20px 30px;
+        }
+
+        .aq-mm-panel.is-active {
+            transform: translateX(0);
+            z-index: 2;
+        }
+
+        .aq-mm-panel.is-prev {
+            transform: translateX(-100%);
+            z-index: 1;
+        }
+
+        .aq-mm-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 16px 0;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 6px;
+        }
+
+        .aq-mm-panel-header span {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .aq-mm-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            margin-top: 130px;
+        }
+
+        .aq-mm-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px 2px;
+            cursor: pointer;
+        }
+
+        .aq-mm-item a,
+        .aq-mm-item>span {
+            color: #f2f2f2;
+            text-decoration: none;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .aq-mm-item.has-children>span {
+            color: #f2f2f2;
+        }
+
+        .aq-mm-chevron {
+            color: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        .aq-offcanvas-bottom {
+            flex-shrink: 0;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .aq-offcanvas-btn-wrap .aq-offcanvas-btn {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .aq-offcanvas-btn-wrap .aq-offcanvas-btn.btn-black-bg {
+            background: #fff;
+            color: #1c1c1c;
+            border-color: #fff;
+            margin-left: 10px;
+
+        }
+
+        .aq-offcanvas-wrap .aq-mm-panel-header {
+            position: relative !important;
+        }
+
+        .aq-offcanvas-wrap .aq-mm-panel-header svg {
+            position: static !important;
+            display: inline-block !important;
+            width: 8px !important;
+            height: 14px !important;
+            flex-shrink: 0 !important;
+        }
+
+
+        .aq-product-content {
+            margin-top: 10px;
+        }
         
-    }
+        
+        .aq-product-thumb {
    
-    .aq-offcanvas-wrap .aq-mm-panel-header {
-    position: relative !important;
+     background-color: white; 
+    
 }
-.aq-offcanvas-wrap .aq-mm-panel-header svg {
-    position: static !important;
-    display: inline-block !important;
-    width: 8px !important;
-    height: 14px !important;
-    flex-shrink: 0 !important;
-}
-</style>
+    </style>
 
 
 
@@ -1988,53 +2357,53 @@ to drill-down behaviour only.
 
 
     @if(session('success_general'))
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
 
-            const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
-            const drawerForm = document.getElementById("aqDrawerForm");
-            const drawerSuccess = document.getElementById("aqDrawerSuccess");
+                const drawerWrap = document.getElementById("aqEnquiryDrawerWrap");
+                const drawerForm = document.getElementById("aqDrawerForm");
+                const drawerSuccess = document.getElementById("aqDrawerSuccess");
 
-            // Open drawer
-            if (drawerWrap) {
-                drawerWrap.classList.add("active");
-            }
-
-            // Hide form
-            if (drawerForm) {
-                drawerForm.classList.add("hidden");
-            }
-
-            // Show success state
-            setTimeout(() => {
-                if (drawerSuccess) {
-                    drawerSuccess.classList.add("active");
+                // Open drawer
+                if (drawerWrap) {
+                    drawerWrap.classList.add("active");
                 }
-            }, 250);
 
-        });
-    </script>
+                // Hide form
+                if (drawerForm) {
+                    drawerForm.classList.add("hidden");
+                }
+
+                // Show success state
+                setTimeout(() => {
+                    if (drawerSuccess) {
+                        drawerSuccess.classList.add("active");
+                    }
+                }, 250);
+
+            });
+        </script>
     @endif
 
     @if($errors->generalForm->any())
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
 
-            const drawerWrap = document.getElementById('aqEnquiryDrawerWrap');
+                const drawerWrap = document.getElementById('aqEnquiryDrawerWrap');
 
-            if (drawerWrap) {
-                drawerWrap.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
+                if (drawerWrap) {
+                    drawerWrap.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
 
-            Swal.fire({
-                icon: 'error',
-                title: 'Validation Error',
-                html: `{!! implode('<br>', $errors->generalForm->all()) !!}`
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: `{!! implode('<br>', $errors->generalForm->all()) !!}`
+                });
+
             });
-
-        });
-    </script>
+        </script>
     @endif
 
     <!-- Bulk Orders Submission Handler & Drawer Controller -->
@@ -2160,7 +2529,7 @@ to drill-down behaviour only.
 
     </script>
 
-  <script>
+    <script>
         $(document).ready(function () {
 
             const storagePath = "{{ asset('storage') }}";
@@ -2195,105 +2564,162 @@ to drill-down behaviour only.
                         q: query
                     },
                     success: function (response) {
+                        let leftHtml = '';
+                        let productsHtml = '';
+                        let collectionsHtml = '';
 
-                        let html = '';
+                        let suggestionsList = [];
 
-                        // Products
-                        if (response.products?.length) {
-
-                            html += '<div class="section-title">Products</div>';
-
-                            response.products.forEach(item => {
-
-                                let image = item.image || noImage;
-
-                                html += `
-                            <a href="${baseUrl}/product/${item.slug}" class="d-flex align-items-center gap-2">
-                                <img src="${image}"
-                                     width="40"
-                                     height="40"
-                                     style="object-fit:cover;border-radius:6px;">
-                                <span>${item.name}</span>
-                            </a>
-                        `;
-                            });
-                        }
-
-                        // Categories
                         if (response.categories?.length) {
-
-                            html += '<div class="section-title">Categories</div>';
-
                             response.categories.forEach(item => {
-
-                                let image = item.image
-                                    ? `${storagePath}/${item.image}`
-                                    : noImage;
-
-                                html += `
-                            <a href="${baseUrl}/category/${item.slug}" class="d-flex align-items-center gap-2">
-                                <img src="${image}"
-                                     width="40"
-                                     height="40"
-                                     style="object-fit:cover;border-radius:6px;">
-                                <span>${item.name}</span>
-                            </a>
-                        `;
+                                suggestionsList.push({ name: item.name, link: `${baseUrl}/category/${item.slug}` });
                             });
                         }
-
-                        // Sub Categories
                         if (response.subcategories?.length) {
-
-                            html += '<div class="section-title">Sub Categories</div>';
-
                             response.subcategories.forEach(item => {
-
-                                let image = item.image
-                                    ? `${storagePath}/${item.image}`
-                                    : noImage;
-
-                                html += `
-                            <a href="${baseUrl}/category/${item.parent_slug}?subcategory=${item.slug}"
-                               class="d-flex align-items-center gap-2">
-                                <img src="${image}"
-                                     width="40"
-                                     height="40"
-                                     style="object-fit:cover;border-radius:6px;">
-                                <span>${item.name}</span>
-                            </a>
-                        `;
+                                suggestionsList.push({ name: item.name, link: `${baseUrl}/category/${item.parent_slug}?subcategory=${item.slug}` });
                             });
                         }
-
-                        // Occasions
                         if (response.occasions?.length) {
-
-                            html += '<div class="section-title">Occasions</div>';
-
                             response.occasions.forEach(item => {
-
-                                let image = item.image
-                                    ? `${storagePath}/${item.image}`
-                                    : noImage;
-
-                                html += `
-                            <a href="${baseUrl}/products?occasion=${item.slug}"
-                               class="d-flex align-items-center gap-2">
-                                <img src="${image}"
-                                     width="40"
-                                     height="40"
-                                     style="object-fit:cover;border-radius:6px;">
-                                <span>${item.title}</span>
-                            </a>
-                        `;
+                                suggestionsList.push({ name: item.title, link: `${baseUrl}/products?occasion=${item.slug}` });
                             });
                         }
+                        if (suggestionsList.length) {
+                            leftHtml += '<ul class="cs-list">';
+                            suggestionsList.forEach(s => {
+                                leftHtml += `<li><a href="${s.link}" style="color:inherit;text-decoration:none;display:block;padding:3px 0;">${s.name}</a></li>`;
+                            });
+                            leftHtml += '</ul>';
+                        } else {
+                            leftHtml += '<p style="font-size:13px;color:#999;padding:10px 0;">No suggestions found.</p>';
+                        }
 
-                        suggestionsBox.html(
-                            html ||
-                            `<div class="p-3 text-center">No results found</div>`
-                        ).show();
+                        if (response.products?.length) {
+                            productsHtml += '<div class="cs-products-row">';
+                            response.products.slice(0, 3).forEach(item => {
+                                let imgUrl = item.image || noImage;
+                                productsHtml += `
+                                <div class="aq-product-item aq-product-main mb-20" data-lazy="true" style="text-align:left;">
+                                    <div class="aq-product-thumb aq-img-hover-wrap p-relative ">
+                                        ${item.discount > 0 ? `
+                                        <div class="aq-product-badge">
+                                            <span class="clr-sale">${item.discount_type === 'percentage' ? '-' + item.discount + '%' : '₹' + (item.discount || '') + ' OFF'}</span>
+                                        </div>` : ''}
+                                        <div class="aq-product-action">
+                                            <button type="button" class="aq-product-action-btn aq-tooltip"
+                                                data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
+                                                onclick="loadQuickView(${item.id || 0})">
+                                                <i class="fa-regular fa-eye"></i>
+                                                <span class="aq-tooltip-item">Quick View</span>
+                                            </button>
+                                            <button type="button" onclick="addToWishlist(${item.id || 0})"
+                                                class="aq-product-action-btn aq-wishlist-btn aq-tooltip">
+                                                <i class="fa-regular fa-heart"></i>
+                                                <span class="aq-tooltip-item">Add To Wishlist</span>
+                                            </button>
+                                        </div>
+                                        <a href="${baseUrl}/product/${item.slug}">
+                                            <img class="lazyload aq-product-img" src="${imgUrl}" alt="${item.name}" />
+                                        </a>
+                                    </div>
+                                    <div class="aq-product-content">
+                                        <h4 class="aq-product-title mb-10" style="font-size:14px;">
+                                            <a href="${baseUrl}/product/${item.slug}">${item.name}</a>
+                                        </h4>
+                                        <div class="aq-product-price">
+                                            <ins>
+                                                <span class="aq-product-new-price">₹${item.price || ''}</span>
+                                            </ins>
+                                            ${(item.mrp && item.mrp > item.price) ? `
+                                            <del>
+                                                <span class="aq-product-old-price">₹${item.mrp}</span>
+                                            </del>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                            });
+                            productsHtml += '</div>';
+                        } else {
+                            productsHtml += '<p style="font-size:14px;color:#999;text-align:center;padding:40px 0;">No products found.</p>';
+                        }
+
+                        if (response.categories?.length) {
+                            collectionsHtml += '<div class="cs-products-row">';
+                            response.categories.slice(0, 3).forEach(item => {
+                                let imgUrl = item.image ? `${storagePath}/${item.image}` : noImage;
+                                collectionsHtml += `
+                                <div class="aq-product-item aq-product-main mb-20" data-lazy="true" style="text-align:left;">
+                                    <div class="aq-product-thumb aq-img-hover-wrap p-relative">
+                                        <a href="${baseUrl}/category/${item.slug}">
+                                            <img class="lazyload aq-product-img" src="${imgUrl}" alt="${item.name}" style="height:220px;object-fit:cover;width:100%;border-radius:8px;" />
+                                        </a>
+                                    </div>
+                                    <div class="aq-product-content">
+                                        <h4 class="aq-product-title mb-10" style="font-size:14px;">
+                                            <a href="${baseUrl}/category/${item.slug}">${item.name}</a>
+                                        </h4>
+                                        <div class="aq-product-price">
+                                            <span class="aq-product-new-price" style="color:#666;">Collection</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+                            });
+                            collectionsHtml += '</div>';
+                        } else {
+                            collectionsHtml += '<p style="font-size:14px;color:#999;text-align:center;padding:40px 0;">No collections found.</p>';
+                        }
+
+                        let queryParam = encodeURIComponent(query);
+                        let finalHtml = `
+                        <div class="cs-container">
+                            <div class="cs-left">
+                                <h5 class="cs-heading">SUGGESTIONS</h5>
+                                ${leftHtml}
+                            </div>
+                            <div class="cs-right">
+                                <div class="cs-tabs">
+                                    <div class="cs-tab active" data-target="products">PRODUCTS</div>
+                                    <div class="cs-tab" data-target="collections">COLLECTIONS</div>
+                                </div>
+                                
+                                <div class="cs-tab-content" id="cs-tab-products">
+                                    ${productsHtml}
+                                </div>
+                                <div class="cs-tab-content" id="cs-tab-collections" style="display:none;">
+                                    ${collectionsHtml}
+                                </div>
+                                
+                                <div class="cs-view-all-wrapper">
+                                    <a href="${baseUrl}/search?q=${queryParam}" class="cs-view-all-btn">VIEW ALL RESULTS</a>
+                                </div>
+                            </div>
+                        </div>
+                        `;
+
+                        if (response.products?.length || suggestionsList.length) {
+                            suggestionsBox.html(finalHtml).show();
+                            if (!suggestionsBox.hasClass('custom-search-suggestions')) {
+                                suggestionsBox.addClass('custom-search-suggestions');
+                            }
+
+                            // Calculate dynamic offset to force 100vw centered exactly on screen
+                            let inputElement = suggestionsBox.closest('.aq-header-search-form');
+                            let inputRect = inputElement[0].getBoundingClientRect();
+                            suggestionsBox.css({
+                                'position': 'fixed',
+                                'left': '0',
+                                'top': (inputRect.bottom + 10) + 'px',
+                                'width': '100vw'
+                            });
+
+                        } else {
+                            suggestionsBox.removeClass('custom-search-suggestions').html(
+                                `<div class="p-3 text-center">No results found</div>`
+                            ).show();
+                        }
                     },
                     error: function (xhr, status) {
                         if (status !== 'abort') {
@@ -2303,80 +2729,98 @@ to drill-down behaviour only.
                 });
             });
 
+            $(window).on('scroll', function () {
+                $('.searchSuggestions.custom-search-suggestions').hide();
+            });
+
+            // Tab switching logic
+            $(document).on('click', '.cs-tab', function (e) {
+                e.preventDefault();
+                let target = $(this).data('target');
+
+                // Update active class
+                $(this).closest('.cs-tabs').find('.cs-tab').removeClass('active');
+                $(this).addClass('active');
+
+                // Toggle content
+                $(this).closest('.cs-right').find('.cs-tab-content').hide();
+                $(this).closest('.cs-right').find('#cs-tab-' + target).fadeIn(200);
+            });
+
             // Hide suggestions when clicking outside
             $(document).on('click', function (e) {
-                if (!$(e.target).closest('.aq-header-search-form').length) {
+                if (!$(e.target).closest('.aq-header-search-form').length && !$(e.target).closest('.custom-search-suggestions').length) {
                     $('.searchSuggestions').hide();
                 }
             });
 
         });
     </script>
- <script>
-    // Swaps fresh mini-cart HTML/count/subtotal into the DOM after any
-    // cart AJAX call, from any page — no reload needed.
-    function refreshMiniCart(data) {
-        if (typeof data.mini_cart_html !== 'undefined') {
-            const body = document.querySelector('.aq-cartmini-body');
-            if (body) body.innerHTML = data.mini_cart_html;
-        }
-        if (typeof data.cart_count !== 'undefined') {
-            document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cart_count);
-        }
-        if (typeof data.cart_subtotal !== 'undefined') {
-            const subtotalEl = document.getElementById('miniCartSubtotal');
-            if (subtotalEl) subtotalEl.textContent = '₹' + data.cart_subtotal;
-        }
-    }
-
-    // Delegated on the static wrapper (never replaced) so remove/qty
-    // buttons keep working even after refreshMiniCart() swaps their
-    // parent .aq-cartmini-body's innerHTML.
-    document.addEventListener('click', function (e) {
-
-        const removeBtn = e.target.closest('.aq-cartmini-area .remove-cart-item');
-        if (removeBtn) {
-            const itemId = removeBtn.getAttribute('data-id');
-
-            fetch("{{ url('cart/remove') }}/" + itemId, {
-            method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Removed!',
-                    text: data.message,
-                    timer: 1200,
-                    showConfirmButton: false
-                });
-                refreshMiniCart(data);
-            });
-            return;
+    <script>
+        // Swaps fresh mini-cart HTML/count/subtotal into the DOM after any
+        // cart AJAX call, from any page — no reload needed.
+        function refreshMiniCart(data) {
+            if (typeof data.mini_cart_html !== 'undefined') {
+                const body = document.querySelector('.aq-cartmini-body');
+                if (body) body.innerHTML = data.mini_cart_html;
+            }
+            if (typeof data.cart_count !== 'undefined') {
+                document.querySelectorAll('.cart-count').forEach(el => el.textContent = data.cart_count);
+            }
+            if (typeof data.cart_subtotal !== 'undefined') {
+                const subtotalEl = document.getElementById('miniCartSubtotal');
+                if (subtotalEl) subtotalEl.textContent = '₹' + data.cart_subtotal;
+            }
         }
 
-        const qtyBtn = e.target.closest('.aq-cartmini-area .update-cart-qty');
-        if (qtyBtn) {
-            const itemId = qtyBtn.getAttribute('data-id');
-            const action = qtyBtn.getAttribute('data-action');
+        // Delegated on the static wrapper (never replaced) so remove/qty
+        // buttons keep working even after refreshMiniCart() swaps their
+        // parent .aq-cartmini-body's innerHTML.
+        document.addEventListener('click', function (e) {
 
-            fetch("{{ route('cart.update.quantity') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ item_id: itemId, action: action })
-            })
-            .then(res => res.json())
-            .then(data => refreshMiniCart(data));
-        }
-    });
-</script>
+            const removeBtn = e.target.closest('.aq-cartmini-area .remove-cart-item');
+            if (removeBtn) {
+                const itemId = removeBtn.getAttribute('data-id');
+
+                fetch("{{ url('cart/remove') }}/" + itemId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Removed!',
+                            text: data.message,
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                        refreshMiniCart(data);
+                    });
+                return;
+            }
+
+            const qtyBtn = e.target.closest('.aq-cartmini-area .update-cart-qty');
+            if (qtyBtn) {
+                const itemId = qtyBtn.getAttribute('data-id');
+                const action = qtyBtn.getAttribute('data-action');
+
+                fetch("{{ route('cart.update.quantity') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ item_id: itemId, action: action })
+                })
+                    .then(res => res.json())
+                    .then(data => refreshMiniCart(data));
+            }
+        });
+    </script>
 
     <script>
         const quickViewBaseUrl = "{{ route('product.quickview', ['id' => '__ID__']) }}";
@@ -2527,17 +2971,17 @@ to drill-down behaviour only.
                     quantity: quantity
                 },
                 success: function (response) {
-    if (response.status) {
-        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-        $('.cart-count').text(response.cart_count);
-        refreshMiniCart(response);          // ← add this
-        if (buyNow) {
-            window.location.href = "{{ route('cart') }}";
-        }
-    } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
-    }
-},
+                    if (response.status) {
+                        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                        $('.cart-count').text(response.cart_count);
+                        refreshMiniCart(response);          // ← add this
+                        if (buyNow) {
+                            window.location.href = "{{ route('cart') }}";
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
+                    }
+                },
                 error: function (xhr) {
                     Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON?.message ?? 'Something went wrong.' });
                 }
@@ -2567,7 +3011,7 @@ to drill-down behaviour only.
             background: #fff;
             border: 1px solid #ddd;
             border-radius: 10px;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
             z-index: 9999;
             display: none;
@@ -2578,7 +3022,7 @@ to drill-down behaviour only.
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 15px;
+            /* padding: 10px 15px;s */
             color: #333;
             text-decoration: none;
         }
@@ -2651,99 +3095,113 @@ to drill-down behaviour only.
             }
         });
     </script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    try {
-        var viewport = document.querySelector('.aq-mm-viewport');
-        if (!viewport) return;
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var viewport = document.querySelector('.aq-mm-viewport');
+                if (!viewport) return;
 
-        var stack = ['mm-root'];
+                var stack = ['mm-root'];
 
-        function getPanel(id) {
-            return viewport.querySelector('.aq-mm-panel[data-panel="' + id + '"]');
-        }
-
-        // now takes explicit fromId/toId — no more relying on stack timing
-        function goTo(fromId, toId, direction) {
-            var current = getPanel(fromId);
-            var target = getPanel(toId);
-            if (!target || !current || current === target) return;
-
-            if (direction === 'forward') {
-                target.style.transform = 'translateX(100%)';
-                target.scrollTop = 0;
-                target.classList.add('is-active');
-                requestAnimationFrame(function () {
-                    current.classList.add('is-prev');
-                    current.classList.remove('is-active');
-                    target.style.transform = '';
-                });
-            } else {
-                current.classList.add('is-prev-out');
-                target.classList.remove('is-prev');
-                target.classList.add('is-active');
-                target.scrollTop = 0;
-                requestAnimationFrame(function () {
-                    current.classList.remove('is-active', 'is-prev-out');
-                });
-            }
-        }
-
-        function bindTap(el, handler) {
-            var lastFired = 0;
-            function fire(e) {
-                var now = Date.now();
-                if (now - lastFired < 400) return;
-                lastFired = now;
-                handler(e);
-            }
-            el.addEventListener('touchend', function (e) {
-                e.preventDefault();
-                fire(e);
-            }, { passive: false });
-            el.addEventListener('click', fire);
-        }
-
-        viewport.querySelectorAll('[data-open]').forEach(function (el) {
-            bindTap(el, function () {
-                var targetId = el.getAttribute('data-open');
-                if (!targetId) return;
-                var fromId = stack[stack.length - 1];   // capture BEFORE pushing
-                stack.push(targetId);
-                goTo(fromId, targetId, 'forward');
-            });
-        });
-
-        viewport.querySelectorAll('[data-back]').forEach(function (el) {
-            bindTap(el, function () {
-                if (stack.length > 1) {
-                    var fromId = stack.pop();           // panel we're leaving
-                    var toId = stack[stack.length - 1];  // panel we're going back to
-                    goTo(fromId, toId, 'back');
+                function getPanel(id) {
+                    return viewport.querySelector('.aq-mm-panel[data-panel="' + id + '"]');
                 }
-            });
-        });
 
-        function resetMenu() {
-            viewport.querySelectorAll('.aq-mm-panel').forEach(function (p) {
-                p.classList.remove('is-active', 'is-prev', 'is-prev-out');
-                p.style.transform = '';
-                p.scrollTop = 0;
-            });
-            getPanel('mm-root').classList.add('is-active');
-            stack = ['mm-root'];
-        }
+                // now takes explicit fromId/toId — no more relying on stack timing
+                function goTo(fromId, toId, direction) {
+                    var current = getPanel(fromId);
+                    var target = getPanel(toId);
+                    if (!target || !current || current === target) return;
 
-        document.querySelectorAll('.aq-offcanvas-close, .body-overlay').forEach(function (el) {
-            bindTap(el, function () {
-                setTimeout(resetMenu, 350);
-            });
+                    if (direction === 'forward') {
+                        target.style.transform = 'translateX(100%)';
+                        target.scrollTop = 0;
+                        target.classList.add('is-active');
+                        requestAnimationFrame(function () {
+                            current.classList.add('is-prev');
+                            current.classList.remove('is-active');
+                            target.style.transform = '';
+                        });
+                    } else {
+                        current.classList.add('is-prev-out');
+                        target.classList.remove('is-prev');
+                        target.classList.add('is-active');
+                        target.scrollTop = 0;
+                        requestAnimationFrame(function () {
+                            current.classList.remove('is-active', 'is-prev-out');
+                        });
+                    }
+                }
+
+                function bindTap(el, handler) {
+                    var lastFired = 0;
+                    function fire(e) {
+                        var now = Date.now();
+                        if (now - lastFired < 400) return;
+                        lastFired = now;
+                        handler(e);
+                    }
+                    el.addEventListener('touchend', function (e) {
+                        e.preventDefault();
+                        fire(e);
+                    }, { passive: false });
+                    el.addEventListener('click', fire);
+                }
+
+                viewport.querySelectorAll('[data-open]').forEach(function (el) {
+                    bindTap(el, function () {
+                        var targetId = el.getAttribute('data-open');
+                        if (!targetId) return;
+                        var fromId = stack[stack.length - 1];   // capture BEFORE pushing
+                        stack.push(targetId);
+                        goTo(fromId, targetId, 'forward');
+                    });
+                });
+
+                viewport.querySelectorAll('[data-back]').forEach(function (el) {
+                    bindTap(el, function () {
+                        if (stack.length > 1) {
+                            var fromId = stack.pop();           // panel we're leaving
+                            var toId = stack[stack.length - 1];  // panel we're going back to
+                            goTo(fromId, toId, 'back');
+                        }
+                    });
+                });
+
+                function resetMenu() {
+                    viewport.querySelectorAll('.aq-mm-panel').forEach(function (p) {
+                        p.classList.remove('is-active', 'is-prev', 'is-prev-out');
+                        p.style.transform = '';
+                        p.scrollTop = 0;
+                    });
+                    getPanel('mm-root').classList.add('is-active');
+                    stack = ['mm-root'];
+                }
+
+                document.querySelectorAll('.aq-offcanvas-close, .body-overlay').forEach(function (el) {
+                    bindTap(el, function () {
+                        setTimeout(resetMenu, 350);
+                    });
+                });
+            } catch (err) {
+                console.error('Drill-down menu init failed:', err);
+            }
         });
-    } catch (err) {
-        console.error('Drill-down menu init failed:', err);
+        
+        function fireTrackingEvents(events) {
+    if (!events) return;
+
+    if (events.ga4 && typeof gtag === 'function') {
+        gtag('event', events.ga4.name, events.ga4.params);
     }
-});
-</script>
+
+    if (events.meta && typeof fbq === 'function') {
+        fbq('track', events.meta.name, events.meta.params);
+    }
+}
+    </script>
+    
+@include('layouts.tracking-body-bottom')
 
 </body>
 

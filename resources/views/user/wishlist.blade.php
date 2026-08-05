@@ -18,7 +18,15 @@
 
         <div class="aq-wishlist-grid" id="wishlist-grid">
             @foreach($wishlists as $item)
-                @php $product = $item->product; @endphp
+              @php $product = $item->product; @endphp
+
+@php
+    $stockVariants = $product->variants->where('type', 'stock');
+    $wishlistStock = $stockVariants->count()
+        ? $stockVariants->sum('stock')
+        : $product->stock;
+    $isSoldOut = $wishlistStock < $product->min_qty;
+@endphp
 
                 <div class="aq-wishlist-card" id="wl-card-{{ $item->id }}">
 
@@ -33,12 +41,24 @@
 
                     {{-- Product image + Move to Cart overlay --}}
                     <div class="aq-wishlist-img-wrapper">
-                        <img
-                            src="{{ $product->display_image ?? asset('assets/img/placeholder.png') }}"
-                            alt="{{ $product->name }}"
-                            loading="lazy">
+                      <img
+    src="{{ $product->display_image ?? asset('assets/img/placeholder.png') }}"
+    alt="{{ $product->name }}"
+    loading="lazy">
+
+@if($isSoldOut)
+    <span class="aq-wishlist-soldout-badge"
+        style="position:absolute;top:10px;left:10px;background:#b3261e;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;padding:3px 10px;border-radius:4px;letter-spacing:.3px;z-index:2;">
+        Sold Out
+    </span>
+@endif
 
                         <div class="aq-wishlist-overlay">
+                             @if($isSoldOut)
+        <span class="aq-btn-cart-overlay" style="background:#999;cursor:not-allowed;pointer-events:none;">
+            Sold Out
+        </span>
+    @else
                             <button
                                 class="aq-btn-cart-overlay"
                                 data-url="{{ route('wishlist.moveToCart', $product->id) }}"
@@ -46,6 +66,7 @@
                                 data-name="{{ $product->name }}">
                                 Move to Cart
                             </button>
+                            @endif
                         </div>
                     </div>
 

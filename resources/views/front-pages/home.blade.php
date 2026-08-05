@@ -312,7 +312,7 @@
                     <div class="tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab"
                             tabindex="0">
-                            <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-1">
+                            <div class="row row-cols-xl-4 row-cols-lg-4 row-cols-md-2 row-cols-sm-2 row-cols-1">
 
                                 @foreach($newArrivalProducts as $product)
                                     <div class="col">
@@ -623,7 +623,7 @@
 
         <section class="aqf-pastel-features-section pt-40 pb-40">
             <div class="container custom-fluid-container">
-                <div class="row g-4">
+                <div class="row g-4 aqf-pastel-inner ">
 
                     @foreach($featureCards as $card)
 
@@ -702,7 +702,7 @@
                                 <div class="aqf-deals-slider-main pt-60 pb-40">
                                     <div class="aqf-deals-slider-top mb-15">
                                         <div class="row">
-                                            <div class="col-xl-8 col-lg-8 col-md-6">
+                                            <div class="col-xl-8 col-lg-8 col-md-8">
                                                 <div class="aq-product-3-top-right mb-15">
                                                     <div class="aqf-deals-countbox d-flex align-items-center">
                                                         <div class="aqf-deals-tag-premium">
@@ -714,7 +714,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-xl-4 col-lg-4 col-md-6">
+                                            <div class="col-xl-4 col-lg-4 col-md-4">
                                                 <div
                                                     class="aqf-deals-slider-arrow d-flex justify-content-start justify-content-md-end align-items-center mb-15 mr-60">
                                                     <button class="aqf-deals-prev">
@@ -743,10 +743,17 @@
                                     <div class="aqf-deals-slider-wrap fix">
                                         <div class="swiper aqf-deals-slider-active">
                                             <div class="swiper-wrapper">
-                                                @foreach($saleProducts as $product)
+                                               @foreach($saleProducts as $product)
 
                                                     <div class="swiper-slide">
                                                         <div class="aq-product-item aq-product-main " data-lazy="true">
+
+                                                            @php
+                                                                $availableStock = $product->variants->where('type', 'stock')->count()
+                                                                    ? $product->variants->where('type', 'stock')->sum('stock')
+                                                                    : $product->stock;
+                                                            @endphp
+
                                                             <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
                                                                 @if($product->discount > 0)
                                                                     <div class="aq-product-badge">
@@ -764,7 +771,7 @@
                                                                     </div>
                                                                 @endif
                                                                 <div class="aq-product-action">
-                                                                    @if($product->stock >= $product->min_qty)
+                                                                    @if($availableStock >= $product->min_qty)
                                                                         <button type="button"
                                                                             onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)"
                                                                             class="aq-product-action-btn aq-tooltip">
@@ -849,6 +856,7 @@
                                                                         {{ $product->name }}
                                                                     </a>
                                                                 </h4>
+                                                                @if($availableStock >= $product->min_qty)
                                                                 <div class="aq-product-price">
                                                                     <ins>
                                                                         <span class="aq-product-new-price">
@@ -863,6 +871,7 @@
                                                                         </del>
                                                                     @endif
                                                                 </div>
+                                                                @endif
 
                                                             </div>
                                                         </div>
@@ -1075,16 +1084,17 @@
 
                     <div class="aq-luxury-tabs-wrapper">
                         <div class="row align-items-center">
-                            <div class="col-xl-3 col-lg-3">
+                            <div class="col-xl-3 col-lg-3 col-md-12">
                                 <div class="aq-luxury-tab-nav nav flex-column nav-pills" id="luxury-tabs" role="tablist"
                                     aria-orientation="vertical">
 
                                     @foreach($featuredCategories as $index => $category)
-
-                                        <button class="aq-luxury-tab-card {{ $index == 0 ? 'active' : '' }}"
+<button class="aq-luxury-tab-card {{ $index == 0 ? 'active' : '' }}"
                                             id="tab-{{ $category->id }}-tab" data-bs-toggle="pill"
                                             data-bs-target="#tab-{{ $category->id }}" type="button" role="tab"
-                                            aria-controls="tab-executive" aria-selected="true">
+                                            aria-controls="tab-executive" aria-selected="true"
+                                            data-slug="{{ $category->slug }}"
+                                            data-name="{{ $category->name }}">
 
                                             <span class="aq-luxury-tab-title">
                                                 {{ $category->name }}
@@ -1116,7 +1126,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xl-9 col-lg-9">
+                            <div class="col-xl-9 col-lg-9 col-md-12">
                                 <div class="tab-content aq-luxury-tab-content" id="luxury-tabsContent">
 
                                     @foreach($featuredCategories as $index => $category)
@@ -1128,7 +1138,7 @@
                                                 <div class="row g-4">
 
                                                     @foreach($category->products->take(6) as $product)
-                                                        <div class="col-md-4">
+                                                        <div class="col-lg-4 col-md-6">
                                                             <div class="aq-luxury-item-card">
                                                                 <div class="aq-luxury-item-img">
                                                                     <img src="{{ asset($product->display_image) }}"
@@ -1161,14 +1171,10 @@
                             </div>
                         </div>
 
-                        <div class="mt-40 text-center ">
-                            <a href="{{ route('products.listing', $category->slug) }}" class="aq-btn-luxury">
-
-
-                                Explore {{ $category->name }}
-
+                       <div class="mt-40 text-center ">
+                            <a href="{{ route('products.listing', $featuredCategories->first()->slug) }}" class="aq-btn-luxury" id="luxuryExploreBtn">
+                                Explore {{ $featuredCategories->first()->name }}
                                 <i class="fa-solid fa-arrow-right-long ml-10"></i>
-
                             </a>
                         </div>
                     </div>
@@ -1704,7 +1710,7 @@
 
                     @foreach($whyCards as $index => $card)
 
-                        <div class="col-xl-4 col-md-6 col-12">
+                        <div class="col-xl-4 col-md-4 col-12">
 
                             <div class="aqf-why-card"
                                 style="background: #fff; padding: 40px 30px; border-radius: 8px; border: 1px solid var(--aq-color-cream-dark); transition: all 0.3s ease;">
@@ -1821,6 +1827,17 @@
 
         <script>
 
+document.querySelectorAll('.aq-luxury-tab-card').forEach(function (tabBtn) {
+    tabBtn.addEventListener('shown.bs.tab', function (e) {
+        const slug = e.target.dataset.slug;
+        const name = e.target.dataset.name;
+        const exploreBtn = document.getElementById('luxuryExploreBtn');
+        if (exploreBtn) {
+            exploreBtn.href = "{{ url('products') }}/" + slug;
+            exploreBtn.innerHTML = 'Explore ' + name + ' <i class="fa-solid fa-arrow-right-long ml-10"></i>';
+        }
+    });
+});
             function addToCart(productId, quantity, btnEl) {
 
     const $btn = btnEl ? $(btnEl) : null;
@@ -1848,6 +1865,7 @@
                 });
 
                 $('.cart-count').text(response.cart_count);
+                 fireTrackingEvents(response.tracking_events); 
                 refreshMiniCart(response);
 
                 if ($tooltipText) {
@@ -1891,7 +1909,7 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             });
-
+fireTrackingEvents(response.tracking_events);
                             $('.wishlist-count').text(response.wishlist_count);
 
                         } else {

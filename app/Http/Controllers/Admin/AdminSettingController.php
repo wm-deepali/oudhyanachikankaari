@@ -12,10 +12,11 @@ use App\Models\SmtpSetting;
 use App\Models\PaymentSetting;
 use App\Models\Setting;
 use App\Models\Courier;
+use App\Models\GoogleSetting;
 
 class AdminSettingController extends Controller
 {
-    // 🔹 Show form
+    // ðŸ”¹ Show form
 
     public function index(Request $request)
     {
@@ -29,6 +30,8 @@ class AdminSettingController extends Controller
         $couriers = Courier::latest()->get();
 
         $activeTab = $request->tab ?? 'general';
+        
+        $google_setting = GoogleSetting::current(); // 👈 new
 
         return view(
             'admin.admin-settings.index',
@@ -39,12 +42,13 @@ class AdminSettingController extends Controller
                 'general',
                 'states',
                 'couriers',
+                'google_setting',
                 'activeTab'
             )
         );
     }
 
-    // 🔹 Save settings
+    // ðŸ”¹ Save settings
     public function invoiceSettingStore(Request $request)
     {
         $rules = [
@@ -130,7 +134,7 @@ class AdminSettingController extends Controller
             ->with('success', 'Invoice & GST settings updated successfully.');
     }
 
-    // 🔥 Generate Invoice Number (SAFE VERSION)
+    // ðŸ”¥ Generate Invoice Number (SAFE VERSION)
     public static function generateInvoiceNumber()
     {
         return DB::transaction(function () {
@@ -377,6 +381,63 @@ class AdminSettingController extends Controller
                 'success',
                 'Courier deleted successfully.'
             );
+    }
+
+    public function googleSettingStore(Request $request)
+    {
+        $request->validate([
+            'gtm_container_id' => 'nullable|string|max:50',
+            'ga4_measurement_id' => 'nullable|string|max:50',
+            'gads_conversion_id' => 'nullable|string|max:50',
+            'meta_pixel_id' => 'nullable|string|max:50',
+            'gsc_verify_method' => 'nullable|in:meta,file,dns',
+            'gads_currency' => 'nullable|string|max:5',
+        ]);
+
+        $checkboxFields = [
+            'gtm_enabled',
+            'gtm_all_pages',
+            'gtm_datalayer_events',
+            'ga4_enabled',
+            'ga4_ev_view_item',
+            'ga4_ev_add_to_cart',
+            'ga4_ev_remove_from_cart',
+            'ga4_ev_begin_checkout',
+            'ga4_ev_add_payment',
+            'ga4_ev_purchase',
+            'ga4_ev_refund',
+            'ga4_ev_search',
+            'ga4_ev_login',
+            'ga4_ev_sign_up',
+            'gads_enabled',
+            'gads_enhanced_conversions',
+            'gads_send_order_value',
+            'gsc_auto_sitemap',
+            'meta_enabled',
+            'meta_ev_page_view',
+            'meta_ev_view_content',
+            'meta_ev_add_to_cart',
+            'meta_ev_add_to_wishlist',
+            'meta_ev_initiate_checkout',
+            'meta_ev_add_payment',
+            'meta_ev_purchase',
+            'meta_ev_lead',
+            'meta_ev_complete_reg',
+            'meta_ev_search',
+            'meta_advanced_matching',
+        ];
+
+        $data = $request->except(['_token']);
+
+        foreach ($checkboxFields as $field) {
+            $data[$field] = $request->boolean($field);
+        }
+
+        GoogleSetting::updateOrCreate(['id' => 1], $data);
+
+        return redirect()
+            ->route('admin.admin-setting.index', ['tab' => 'tracking'])
+            ->with('success', 'Tracking settings saved successfully.');
     }
 
 }

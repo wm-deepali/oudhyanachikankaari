@@ -19,13 +19,14 @@
         </div>
     </div>
 
-    <!-- Mode toggle -->
-    <div class="info-banner amber">
+
+<!-- Mode toggle -->
+   <div class="info-banner amber" id="modeBanner">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <div>You are currently in <strong>Test Mode</strong>. Payments will not be captured. Switch to Live Mode only
+        <div id="modeBannerText">You are currently in <strong>Test Mode</strong>. Payments will not be captured. Switch to Live Mode only
             when you are ready to accept real payments.</div>
     </div>
-
+    
     <div class="settings-section">
         <div class="settings-section-title"><i class="fa-solid fa-toggle-on"></i> Mode</div>
         <div class="toggle-row" style="padding:14px 0">

@@ -134,7 +134,6 @@ class EmailDispatcher
                     $msg->cc($cc);
                 }
             });
-
             return ['success' => true, 'response' => "Email sent to {$to}"];
 
         } catch (\Throwable $e) {

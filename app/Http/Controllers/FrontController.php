@@ -861,7 +861,10 @@ class FrontController extends Controller
                     ->orWhereColumn('used_count', '<', 'usage_limit');
             })
             ->orderByDesc('discount_value')
-            ->get(['code', 'discount_type', 'discount_value', 'minimum_order_amount', 'maximum_discount']);
+            ->get(['code', 'discount_type', 'discount_value', 'minimum_order_amount', 'maximum_discount', 'minimum_order_quantity']);
+
+        // Pixel/GA view_item event — rendered as an inline script tag on the product-detail view
+        $viewItemScript = \App\Services\Tracking\PixelTracker::viewItemScript($product);
 
         return view('front-pages.product-detail', compact(
             'product',
@@ -873,7 +876,8 @@ class FrontController extends Controller
             'avgRating',
             'reviewsCount',
             'setting',
-            'activeCoupons'
+            'activeCoupons',
+            'viewItemScript' // 👈 new
         ));
     }
 
@@ -1161,7 +1165,9 @@ class FrontController extends Controller
             'message' => $request->message,
         ]);
 
-        return back()->with('success', 'Enquiry sent successfully!');
+        return back()
+            ->with('success', 'Enquiry sent successfully!')
+            ->with('fire_lead_event', 'Contact Us Form'); // 👈 new
     }
 
 
@@ -1212,7 +1218,9 @@ class FrontController extends Controller
             'source' => $request->source,
         ]);
 
-        return back()->with('success_general', 'Enquiry submitted successfully!');
+        return back()
+            ->with('success_general', 'Enquiry submitted successfully!')
+            ->with('fire_lead_event', 'General Enquiry Form'); // 👈 new
     }
 
 
@@ -1286,10 +1294,9 @@ class FrontController extends Controller
             'catalogue' => $filePath,
         ]);
 
-        return back()->with(
-            'success',
-            'Bulk enquiry submitted successfully!'
-        );
+        return back()
+            ->with('success', 'Bulk enquiry submitted successfully!')
+            ->with('fire_lead_event', 'Bulk Enquiry Form'); // 👈 new
     }
 
     public function occasions(Request $request)

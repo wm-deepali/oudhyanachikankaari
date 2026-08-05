@@ -15,12 +15,15 @@ class Coupon extends Model
 
         'minimum_order_amount',
         'maximum_discount',
+        'minimum_order_quantity',
 
         'start_date',
         'end_date',
 
         'usage_limit',
         'used_count',
+        'customer_type',
+        'visibility',
 
         'status',
     ];

@@ -911,6 +911,10 @@
         });
 
     </script>
-
+@if(!empty($beginCheckoutScript))
+<script>
+    {!! $beginCheckoutScript !!}
+</script>
+@endif
 
 @endsection

@@ -145,7 +145,7 @@
 
     /* card footer actions */
     .sp-card-footer { padding:10px 14px 14px; display:flex; gap:8px; }
-    .sp-card-action-btn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; border-radius:var(--radius-md); font-size:12.5px; font-weight:600; font-family:var(--font); cursor:pointer; border:1px solid; transition:all .12s; }
+    .sp-card-action-btn { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:34px; border-radius:var(--radius-md); font-size:12.5px; font-weight:600; font-family:var(--font); cursor:pointer; border:1px solid; transition:all .12s; text-decoration:none; }
     .sp-card-action-btn.view-btn  { background:var(--navy-light); color:var(--navy); border-color:var(--navy-border); }
     .sp-card-action-btn.view-btn:hover  { background:var(--navy); color:#fff; }
     .sp-card-action-btn.order-btn { background:var(--green-bg); color:var(--green); border-color:var(--green-border); }
@@ -206,36 +206,40 @@
                 <div>
                     <h1 class="sp-title">Wishlist Detail</h1>
                     <div class="sp-crumb">
-                        <a href="#">Dashboard</a><span class="sp-crumb-sep">›</span>
-                        <a href="#">Customers</a><span class="sp-crumb-sep">›</span>
-                        <a href="#">Wishlists</a><span class="sp-crumb-sep">›</span>
-                        <span>Priya Sharma</span>
+                        <a href="{{ route('admin.dashboard') }}">Dashboard</a><span class="sp-crumb-sep">›</span>
+                        <a href="{{ route('admin.customers.index') }}">Customers</a><span class="sp-crumb-sep">›</span>
+                        <a href="{{ route('admin.customers.customer-wishlist') }}">Wishlists</a><span class="sp-crumb-sep">›</span>
+                        <span>{{ $customer->name }}</span>
                     </div>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-                    <button class="sp-btn sp-btn-secondary"><i class="fa fa-download"></i> Export</button>
-                    <button class="sp-btn sp-btn-red" onclick="clearAll()"><i class="fa fa-trash"></i> Clear Wishlist</button>
+                    <a href="{{ route('admin.customers.customer-wishlist-detail', ['customer' => $customer->id, 'export' => 1]) }}" class="sp-btn sp-btn-secondary"><i class="fa fa-download"></i> Export</a>
+                    <button class="sp-btn sp-btn-red" onclick="clearAll({{ $customer->id }}, '{{ $customer->name }}')"><i class="fa fa-trash"></i> Clear Wishlist</button>
                 </div>
             </div>
 
             <!-- Customer identity bar -->
             <div class="sp-identity">
                 <div class="sp-identity-left">
-                    <div class="sp-av" style="background:#303d89">PS</div>
+                    <div class="sp-av" style="background:{{ $avatarColor }}">{{ $initials }}</div>
                     <div>
-                        <div class="sp-identity-name">Priya Sharma</div>
-                        <div class="sp-identity-email">priya.sharma@gmail.com &nbsp;·&nbsp; +91 98765 43210</div>
+                        <div class="sp-identity-name">{{ $customer->name }}</div>
+                        <div class="sp-identity-email">{{ $customer->email }} &nbsp;·&nbsp; {{ $customer->phone ?? 'N/A' }}</div>
                         <div class="sp-identity-meta">
-                            <span class="sp-meta-chip navy"><i class="fa fa-heart" style="font-size:10px"></i> 14 Wishlist Items</span>
-                            <span class="sp-meta-chip green"><i class="fa fa-rupee-sign" style="font-size:10px"></i> ₹38,400 Total Value</span>
-                            <span class="sp-meta-chip amber"><i class="fa fa-fire" style="font-size:10px"></i> Hot Customer</span>
-                            <span class="sp-meta-chip red"><i class="fa fa-exclamation-circle" style="font-size:10px"></i> 3 Out of Stock</span>
+                            <span class="sp-meta-chip navy"><i class="fa fa-heart" style="font-size:10px"></i> {{ $totalItems }} Wishlist Items</span>
+                            <span class="sp-meta-chip green"><i class="fa fa-rupee-sign" style="font-size:10px"></i> ₹{{ number_format($totalValue) }} Total Value</span>
+                            @if($heat === 'hot')
+                                <span class="sp-meta-chip amber"><i class="fa fa-fire" style="font-size:10px"></i> Hot Customer</span>
+                            @endif
+                            @if($outOfStock > 0)
+                                <span class="sp-meta-chip red"><i class="fa fa-exclamation-circle" style="font-size:10px"></i> {{ $outOfStock }} Out of Stock</span>
+                            @endif
                         </div>
                     </div>
                 </div>
                 <div class="sp-identity-right">
-                    <a href="#" class="sp-btn sp-btn-secondary"><i class="fa fa-user"></i> View Profile</a>
-                    <a href="#" class="sp-btn sp-btn-navy"><i class="fa fa-shopping-bag"></i> View Orders</a>
+                    <a href="{{ route('admin.customers.show', $customer->id) }}" class="sp-btn sp-btn-secondary"><i class="fa fa-user"></i> View Profile</a>
+                    <a href="{{ route('admin.orders.index', ['customer' => $customer->id]) }}" class="sp-btn sp-btn-navy"><i class="fa fa-shopping-bag"></i> View Orders</a>
                 </div>
             </div>
 
@@ -243,27 +247,27 @@
             <div class="sp-kpi-strip">
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Total Items</span><div class="sp-kpi-icon ic-navy"><i class="fa fa-heart"></i></div></div>
-                    <div class="sp-kpi-value">14</div>
+                    <div class="sp-kpi-value">{{ $totalItems }}</div>
                     <div class="sp-kpi-sub">In wishlist</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Total Value</span><div class="sp-kpi-icon ic-green"><i class="fa fa-rupee-sign"></i></div></div>
-                    <div class="sp-kpi-value">₹38,400</div>
+                    <div class="sp-kpi-value">₹{{ number_format($totalValue) }}</div>
                     <div class="sp-kpi-sub">Combined MRP</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">In Stock</span><div class="sp-kpi-icon ic-green"><i class="fa fa-check-circle"></i></div></div>
-                    <div class="sp-kpi-value">11</div>
+                    <div class="sp-kpi-value">{{ $inStock }}</div>
                     <div class="sp-kpi-sub">Available now</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Out of Stock</span><div class="sp-kpi-icon ic-red"><i class="fa fa-times-circle"></i></div></div>
-                    <div class="sp-kpi-value">3</div>
+                    <div class="sp-kpi-value">{{ $outOfStock }}</div>
                     <div class="sp-kpi-sub">Unavailable</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Oldest Added</span><div class="sp-kpi-icon ic-amber"><i class="fa fa-clock"></i></div></div>
-                    <div class="sp-kpi-value" style="font-size:16px">42 days</div>
+                    <div class="sp-kpi-value" style="font-size:16px">{{ $oldestDays }} days</div>
                     <div class="sp-kpi-sub">ago</div>
                 </div>
             </div>
@@ -293,7 +297,7 @@
                         </select>
                     </div>
                     <div class="sp-toolbar-right">
-                        <span style="font-size:12.5px;color:var(--text-hint);margin-right:4px"><span id="itemCount">14</span> items</span>
+                        <span style="font-size:12.5px;color:var(--text-hint);margin-right:4px"><span id="itemCount">{{ $totalItems }}</span> items</span>
                         <div class="sp-view-toggle">
                             <button class="sp-view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid view"><i class="fa fa-th-large"></i></button>
                             <button class="sp-view-btn" id="listViewBtn" onclick="setView('list')" title="List view"><i class="fa fa-list"></i></button>
@@ -301,228 +305,81 @@
                     </div>
                 </div>
 
+                @if($items->isEmpty())
+                    <div class="sp-empty">
+                        <div class="sp-empty-icon"><i class="fa fa-heart"></i></div>
+                        <div class="sp-empty-title">No items in wishlist</div>
+                        <div class="sp-empty-sub">{{ $customer->name }} hasn't added any products yet.</div>
+                    </div>
+                @else
+
                 <!-- ══ GRID VIEW ══ -->
                 <div class="sp-grid-view" id="gridView">
                     <div class="sp-grid" id="productGrid">
-
-                        <!-- Card 1 -->
-                        <div class="sp-product-card" data-name="chikankari anarkali set" data-stock="in" data-price="3200" data-added="2 hours ago">
-                            <span class="sp-stock-badge in">In Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/f0e6d3/888888?text=Chikankari+Anarkali" alt="Chikankari Anarkali Set">
+                        @foreach($items as $item)
+                        @php $product = $item->product; @endphp
+                        <div class="sp-product-card"
+                             data-name="{{ strtolower($product->name) }}"
+                             data-stock="{{ $item->stockStatus }}"
+                             data-price="{{ $product->price }}"
+                             data-added="{{ $item->addedAt }}">
+                            <span class="sp-stock-badge {{ $item->stockStatus }}">{{ $item->stockLabel }}</span>
+                            <button class="sp-card-remove" onclick="removeItem(this, {{ $item->wishlist_id }})" title="Remove from wishlist"><i class="fa fa-times"></i></button>
+                            <div class="sp-card-img-wrap" @if($item->stockStatus === 'out') style="position:relative" @endif>
+                                @if($product->display_image)
+                                    <img src="{{ $product->display_image }}" alt="{{ $product->name }}" @if($item->stockStatus === 'out') style="filter:grayscale(30%)opacity(.8)" @endif>
+                                @else
+                                    <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-disabled)"><i class="fa fa-image fa-2x"></i></div>
+                                @endif
+                                @if($item->stockStatus === 'out')
+                                    <div style="position:absolute;inset:0;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center">
+                                        <span style="background:rgba(192,57,43,.9);color:#fff;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px">Out of Stock</span>
+                                    </div>
+                                @endif
                             </div>
                             <div class="sp-card-body">
-                                <div class="sp-card-category">Anarkali Sets</div>
-                                <div class="sp-card-name">Chikankari Anarkali Set — Ivory White with Thread Work</div>
-                                <div class="sp-card-sku">SKU: CHK-ANK-001</div>
+                                <div class="sp-card-category">{{ optional($product->category)->name ?? 'Uncategorized' }}</div>
+                                <div class="sp-card-name">{{ $product->name }}</div>
+                                <div class="sp-card-sku">SKU: {{ $product->sku ?? $product->product_code }}</div>
                                 <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹3,200</span>
-                                    <span class="sp-price-original">₹4,000</span>
-                                    <span class="sp-price-discount">20% off</span>
+                                    <span class="sp-price-current" @if($item->stockStatus === 'out') style="color:var(--text-hint)" @endif>₹{{ number_format($product->price) }}</span>
+                                    @if($item->hasDiscount)
+                                        <span class="sp-price-original">₹{{ number_format($product->mrp) }}</span>
+                                        <span class="sp-price-discount">{{ $item->discountPercent }}% off</span>
+                                    @endif
                                 </div>
-                                <div class="sp-card-variants">
-                                    <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
-                                    <span class="sp-variant-dot selected" style="background:#f5f0e8" title="Ivory"></span>
-                                    <span class="sp-variant-dot" style="background:#c4b5e8" title="Lavender"></span>
-                                    <span class="sp-variant-dot" style="background:#f8d4d4" title="Pink"></span>
-                                    <span class="sp-variant-more">+2 more</span>
+                                @if($item->colorVariants->isNotEmpty())
+                                    <div class="sp-card-variants">
+                                        <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
+                                       @foreach($item->colorVariants->take(3) as $vi => $colorValue)
+    <span class="sp-variant-dot {{ $vi === 0 ? 'selected' : '' }}" style="background:{{ $colorValue->hex_code ?? '#ccc' }}" title="{{ $colorValue->value ?? '' }}"></span>
+@endforeach
+                                        @if($item->colorVariants->count() > 3)
+                                            <span class="sp-variant-more">+{{ $item->colorVariants->count() - 3 }} more</span>
+                                        @endif
+                                    </div>
+                                @endif
+                                <div class="sp-card-added" @if($item->stockStatus === 'low') style="color:var(--amber)" @elseif($item->stockStatus === 'out') style="color:var(--red)" @endif>
+                                    <i class="fa {{ $item->stockStatus === 'out' ? 'fa-times-circle' : ($item->stockStatus === 'low' ? 'fa-exclamation-triangle' : 'fa-clock') }}"></i>
+                                    @if($item->stockStatus === 'out')
+                                        Out of stock · Added {{ $item->addedAt->diffForHumans() }}
+                                    @elseif($item->stockStatus === 'low')
+                                        {{ $item->stockLabel }}! Added {{ $item->addedAt->diffForHumans() }}
+                                    @else
+                                        Added {{ $item->addedAt->diffForHumans() }} · {{ $item->addedAt->format('d M, g:i A') }}
+                                    @endif
                                 </div>
-                                <div class="sp-card-added"><i class="fa fa-clock"></i> Added 2 hours ago · Today, 10:42 AM</div>
                             </div>
                             <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
+                                <a href="{{ route('product.details', $product->slug) }}" target="_blank" class="sp-card-action-btn view-btn"><i class="fa fa-eye"></i> View</a>
+                                @if($item->stockStatus === 'out')
+                                    <button class="sp-card-action-btn" style="flex:1;background:var(--bg);color:var(--text-hint);border-color:var(--border);cursor:not-allowed" disabled>Unavailable</button>
+                                @else
+                                    <button class="sp-card-action-btn order-btn" onclick="createOrder({{ $product->id }}, {{ $customer->id }})"><i class="fa fa-shopping-bag"></i> Order</button>
+                                @endif
                             </div>
                         </div>
-
-                        <!-- Card 2 -->
-                        <div class="sp-product-card" data-name="lucknowi kurta set" data-stock="in" data-price="2800" data-added="1 day ago">
-                            <span class="sp-stock-badge in">In Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/e8d5c4/888888?text=Lucknowi+Kurta" alt="Lucknowi Kurta Set">
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Kurta Sets</div>
-                                <div class="sp-card-name">Lucknowi Kurta Set with Palazzo — Pastel Blue</div>
-                                <div class="sp-card-sku">SKU: LKW-KRT-014</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹2,800</span>
-                                    <span class="sp-price-original">₹3,200</span>
-                                    <span class="sp-price-discount">12% off</span>
-                                </div>
-                                <div class="sp-card-variants">
-                                    <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
-                                    <span class="sp-variant-dot selected" style="background:#b8d4e8" title="Pastel Blue"></span>
-                                    <span class="sp-variant-dot" style="background:#e8d4b8" title="Peach"></span>
-                                    <span class="sp-variant-more">+1 more</span>
-                                </div>
-                                <div class="sp-card-added"><i class="fa fa-clock"></i> Added 1 day ago · Yesterday, 3:15 PM</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 3 — Low Stock -->
-                        <div class="sp-product-card" data-name="bakhiya shadow work dupatta" data-stock="low" data-price="1200" data-added="3 days ago">
-                            <span class="sp-stock-badge low">Low Stock · 2 left</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/d4ecd4/888888?text=Bakhiya+Dupatta" alt="Bakhiya Dupatta">
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Dupattas</div>
-                                <div class="sp-card-name">Bakhiya Shadow Work Dupatta — Forest Green</div>
-                                <div class="sp-card-sku">SKU: BKH-DPT-007</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹1,200</span>
-                                </div>
-                                <div class="sp-card-variants">
-                                    <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
-                                    <span class="sp-variant-dot selected" style="background:#4a8c5a" title="Forest Green"></span>
-                                    <span class="sp-variant-dot" style="background:#8c4a4a" title="Maroon"></span>
-                                    <span class="sp-variant-dot" style="background:#4a5a8c" title="Navy"></span>
-                                </div>
-                                <div class="sp-card-added" style="color:var(--amber)"><i class="fa fa-exclamation-triangle"></i> Only 2 left! Added 3 days ago</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 4 — Out of Stock -->
-                        <div class="sp-product-card" data-name="zardozi embroidered saree" data-stock="out" data-price="5800" data-added="5 days ago">
-                            <span class="sp-stock-badge out">Out of Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap" style="position:relative">
-                                <img src="https://via.placeholder.com/300x200/e8d4f8/888888?text=Zardozi+Saree" alt="Zardozi Saree" style="filter:grayscale(30%)opacity(.8)">
-                                <div style="position:absolute;inset:0;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center">
-                                    <span style="background:rgba(192,57,43,.9);color:#fff;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px">Out of Stock</span>
-                                </div>
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Sarees</div>
-                                <div class="sp-card-name">Zardozi Embroidered Saree — Royal Maroon</div>
-                                <div class="sp-card-sku">SKU: ZRD-SAR-022</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current" style="color:var(--text-hint)">₹5,800</span>
-                                </div>
-                                <div class="sp-card-added" style="color:var(--red)"><i class="fa fa-times-circle"></i> Out of stock · Added 5 days ago</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn" style="flex:1;background:var(--bg);color:var(--text-hint);border-color:var(--border);cursor:not-allowed" disabled>Unavailable</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 5 -->
-                        <div class="sp-product-card" data-name="georgette anarkali suit" data-stock="in" data-price="3600" data-added="6 days ago">
-                            <span class="sp-stock-badge in">In Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/f8d4d4/888888?text=Georgette+Suit" alt="Georgette Anarkali">
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Anarkali Sets</div>
-                                <div class="sp-card-name">Georgette Anarkali Suit — Navy Blue with Embroidery</div>
-                                <div class="sp-card-sku">SKU: GEO-ANK-031</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹3,600</span>
-                                    <span class="sp-price-original">₹4,500</span>
-                                    <span class="sp-price-discount">20% off</span>
-                                </div>
-                                <div class="sp-card-variants">
-                                    <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
-                                    <span class="sp-variant-dot selected" style="background:#2c3e6b" title="Navy"></span>
-                                    <span class="sp-variant-dot" style="background:#6b2c2c" title="Wine"></span>
-                                </div>
-                                <div class="sp-card-added"><i class="fa fa-clock"></i> Added 6 days ago · 18 Jun, 11:20 AM</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 6 — Out of Stock -->
-                        <div class="sp-product-card" data-name="mukaish work kurta" data-stock="out" data-price="2400" data-added="8 days ago">
-                            <span class="sp-stock-badge out">Out of Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap" style="position:relative">
-                                <img src="https://via.placeholder.com/300x200/e8e0d4/888888?text=Mukaish+Kurta" alt="Mukaish Kurta" style="filter:grayscale(30%)opacity(.8)">
-                                <div style="position:absolute;inset:0;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center"><span style="background:rgba(192,57,43,.9);color:#fff;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px">Out of Stock</span></div>
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Kurtas</div>
-                                <div class="sp-card-name">Mukaish Work Straight Kurta — Off White</div>
-                                <div class="sp-card-sku">SKU: MKS-KRT-018</div>
-                                <div class="sp-card-price-row"><span class="sp-price-current" style="color:var(--text-hint)">₹2,400</span></div>
-                                <div class="sp-card-added" style="color:var(--red)"><i class="fa fa-times-circle"></i> Out of stock · Added 8 days ago</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn" style="flex:1;background:var(--bg);color:var(--text-hint);border-color:var(--border);cursor:not-allowed" disabled>Unavailable</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 7 -->
-                        <div class="sp-product-card" data-name="organza saree" data-stock="in" data-price="4200" data-added="10 days ago">
-                            <span class="sp-stock-badge in">In Stock</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/fce4d4/888888?text=Organza+Saree" alt="Organza Saree">
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Sarees</div>
-                                <div class="sp-card-name">Organza Saree with Chikankari Border — Blush Pink</div>
-                                <div class="sp-card-sku">SKU: ORG-SAR-009</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹4,200</span>
-                                    <span class="sp-price-original">₹5,000</span>
-                                    <span class="sp-price-discount">16% off</span>
-                                </div>
-                                <div class="sp-card-variants">
-                                    <span style="font-size:11px;color:var(--text-hint);margin-right:2px">Colors:</span>
-                                    <span class="sp-variant-dot selected" style="background:#f4b8c0" title="Blush Pink"></span>
-                                    <span class="sp-variant-dot" style="background:#f0e8b8" title="Ivory"></span>
-                                    <span class="sp-variant-dot" style="background:#b8c8f4" title="Lilac"></span>
-                                </div>
-                                <div class="sp-card-added"><i class="fa fa-clock"></i> Added 10 days ago · 14 Jun, 9:05 AM</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
-                            </div>
-                        </div>
-
-                        <!-- Card 8 — Low Stock -->
-                        <div class="sp-product-card" data-name="banarasi silk dupatta" data-stock="low" data-price="1800" data-added="14 days ago">
-                            <span class="sp-stock-badge low">Low Stock · 3 left</span>
-                            <button class="sp-card-remove" onclick="removeItem(this)" title="Remove from wishlist"><i class="fa fa-times"></i></button>
-                            <div class="sp-card-img-wrap">
-                                <img src="https://via.placeholder.com/300x200/f8ecd4/888888?text=Banarasi+Dupatta" alt="Banarasi Dupatta">
-                            </div>
-                            <div class="sp-card-body">
-                                <div class="sp-card-category">Dupattas</div>
-                                <div class="sp-card-name">Banarasi Silk Dupatta with Zari Work — Golden</div>
-                                <div class="sp-card-sku">SKU: BNR-DPT-041</div>
-                                <div class="sp-card-price-row">
-                                    <span class="sp-price-current">₹1,800</span>
-                                    <span class="sp-price-original">₹2,200</span>
-                                    <span class="sp-price-discount">18% off</span>
-                                </div>
-                                <div class="sp-card-added" style="color:var(--amber)"><i class="fa fa-exclamation-triangle"></i> Only 3 left! Added 14 days ago</div>
-                            </div>
-                            <div class="sp-card-footer">
-                                <button class="sp-card-action-btn view-btn" onclick="viewProduct()"><i class="fa fa-eye"></i> View</button>
-                                <button class="sp-card-action-btn order-btn" onclick="createOrder()"><i class="fa fa-shopping-bag"></i> Order</button>
-                            </div>
-                        </div>
-
+                        @endforeach
                     </div>
                 </div>
 
@@ -543,75 +400,74 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">01</span></td>
-                                <td><div class="sp-list-product"><img class="sp-list-thumb" src="https://via.placeholder.com/52x40/f0e6d3/888?text=K" alt=""><div class="sp-list-product-info"><div class="name">Chikankari Anarkali Set — Ivory White</div><div class="sku">SKU: CHK-ANK-001</div></div></div></td>
-                                <td style="font-size:12.5px;color:var(--text-secondary)">Anarkali Sets</td>
-                                <td><strong>₹3,200</strong><br><span style="font-size:11.5px;color:var(--text-hint);text-decoration:line-through">₹4,000</span></td>
-                                <td><span style="font-size:12px;font-weight:700;color:var(--green)">20% off</span></td>
-                                <td><span class="sp-pill in-stock"><i class="fa fa-circle" style="font-size:7px"></i>In Stock</span></td>
-                                <td><span style="font-size:12px;color:var(--text-secondary)">5 colors · 4 sizes</span></td>
-                                <td><div style="font-size:12.5px;color:var(--text-secondary)">Today, 10:42 AM<br><span style="font-size:11px;color:var(--text-hint)">2 hours ago</span></div></td>
-                                <td><div class="sp-list-acts" style="justify-content:center"><a href="#" class="sp-act-btn view" title="View Product"><i class="fa fa-eye"></i></a><button class="sp-act-btn order" title="Create Order"><i class="fa fa-shopping-bag"></i></button><button class="sp-act-btn del" title="Remove from wishlist" onclick="this.closest('tr').remove()"><i class="fa fa-times"></i></button></div></td>
-                            </tr>
-                            <tr>
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">02</span></td>
-                                <td><div class="sp-list-product"><img class="sp-list-thumb" src="https://via.placeholder.com/52x40/e8d5c4/888?text=L" alt=""><div class="sp-list-product-info"><div class="name">Lucknowi Kurta Set with Palazzo</div><div class="sku">SKU: LKW-KRT-014</div></div></div></td>
-                                <td style="font-size:12.5px;color:var(--text-secondary)">Kurta Sets</td>
-                                <td><strong>₹2,800</strong><br><span style="font-size:11.5px;color:var(--text-hint);text-decoration:line-through">₹3,200</span></td>
-                                <td><span style="font-size:12px;font-weight:700;color:var(--green)">12% off</span></td>
-                                <td><span class="sp-pill in-stock"><i class="fa fa-circle" style="font-size:7px"></i>In Stock</span></td>
-                                <td><span style="font-size:12px;color:var(--text-secondary)">3 colors · 5 sizes</span></td>
-                                <td><div style="font-size:12.5px;color:var(--text-secondary)">Yesterday, 3:15 PM<br><span style="font-size:11px;color:var(--text-hint)">1 day ago</span></div></td>
-                                <td><div class="sp-list-acts" style="justify-content:center"><a href="#" class="sp-act-btn view"><i class="fa fa-eye"></i></a><button class="sp-act-btn order"><i class="fa fa-shopping-bag"></i></button><button class="sp-act-btn del" onclick="this.closest('tr').remove()"><i class="fa fa-times"></i></button></div></td>
-                            </tr>
-                            <tr>
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">03</span></td>
-                                <td><div class="sp-list-product"><img class="sp-list-thumb" src="https://via.placeholder.com/52x40/d4ecd4/888?text=B" alt=""><div class="sp-list-product-info"><div class="name">Bakhiya Shadow Work Dupatta</div><div class="sku">SKU: BKH-DPT-007</div></div></div></td>
-                                <td style="font-size:12.5px;color:var(--text-secondary)">Dupattas</td>
-                                <td><strong>₹1,200</strong></td>
-                                <td><span style="font-size:12px;color:var(--text-hint)">—</span></td>
-                                <td><span class="sp-pill low-stock"><i class="fa fa-circle" style="font-size:7px"></i>Low Stock · 2 left</span></td>
-                                <td><span style="font-size:12px;color:var(--text-secondary)">3 colors · 1 size</span></td>
-                                <td><div style="font-size:12.5px;color:var(--text-secondary)">21 Jun, 4:30 PM<br><span style="font-size:11px;color:var(--text-hint)">3 days ago</span></div></td>
-                                <td><div class="sp-list-acts" style="justify-content:center"><a href="#" class="sp-act-btn view"><i class="fa fa-eye"></i></a><button class="sp-act-btn order"><i class="fa fa-shopping-bag"></i></button><button class="sp-act-btn del" onclick="this.closest('tr').remove()"><i class="fa fa-times"></i></button></div></td>
-                            </tr>
-                            <tr>
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">04</span></td>
-                                <td><div class="sp-list-product"><img class="sp-list-thumb" src="https://via.placeholder.com/52x40/e8d4f8/888?text=Z" alt="" style="filter:grayscale(40%)opacity(.7)"><div class="sp-list-product-info"><div class="name">Zardozi Embroidered Saree — Maroon</div><div class="sku">SKU: ZRD-SAR-022</div></div></div></td>
-                                <td style="font-size:12.5px;color:var(--text-secondary)">Sarees</td>
-                                <td><strong style="color:var(--text-hint)">₹5,800</strong></td>
-                                <td><span style="font-size:12px;color:var(--text-hint)">—</span></td>
-                                <td><span class="sp-pill out-stock"><i class="fa fa-circle" style="font-size:7px"></i>Out of Stock</span></td>
-                                <td><span style="font-size:12px;color:var(--text-secondary)">2 colors</span></td>
-                                <td><div style="font-size:12.5px;color:var(--text-secondary)">19 Jun, 2:10 PM<br><span style="font-size:11px;color:var(--text-hint)">5 days ago</span></div></td>
-                                <td><div class="sp-list-acts" style="justify-content:center"><a href="#" class="sp-act-btn view"><i class="fa fa-eye"></i></a><button class="sp-act-btn" style="cursor:not-allowed;opacity:.4" disabled title="Out of stock"><i class="fa fa-shopping-bag"></i></button><button class="sp-act-btn del" onclick="this.closest('tr').remove()"><i class="fa fa-times"></i></button></div></td>
-                            </tr>
-                            <tr>
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">05</span></td>
-                                <td><div class="sp-list-product"><img class="sp-list-thumb" src="https://via.placeholder.com/52x40/fce4d4/888?text=O" alt=""><div class="sp-list-product-info"><div class="name">Organza Saree with Chikankari Border</div><div class="sku">SKU: ORG-SAR-009</div></div></div></td>
-                                <td style="font-size:12.5px;color:var(--text-secondary)">Sarees</td>
-                                <td><strong>₹4,200</strong><br><span style="font-size:11.5px;color:var(--text-hint);text-decoration:line-through">₹5,000</span></td>
-                                <td><span style="font-size:12px;font-weight:700;color:var(--green)">16% off</span></td>
-                                <td><span class="sp-pill in-stock"><i class="fa fa-circle" style="font-size:7px"></i>In Stock</span></td>
-                                <td><span style="font-size:12px;color:var(--text-secondary)">3 colors</span></td>
-                                <td><div style="font-size:12.5px;color:var(--text-secondary)">14 Jun, 9:05 AM<br><span style="font-size:11px;color:var(--text-hint)">10 days ago</span></div></td>
-                                <td><div class="sp-list-acts" style="justify-content:center"><a href="#" class="sp-act-btn view"><i class="fa fa-eye"></i></a><button class="sp-act-btn order"><i class="fa fa-shopping-bag"></i></button><button class="sp-act-btn del" onclick="this.closest('tr').remove()"><i class="fa fa-times"></i></button></div></td>
-                            </tr>
+                        @foreach($items as $index => $item)
+                        @php $product = $item->product; @endphp
+                        <tr>
+                            <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span></td>
+                            <td>
+                                <div class="sp-list-product">
+                                    @if($product->display_image)
+                                        <img class="sp-list-thumb" src="{{ $product->display_image }}" alt="">
+                                    @else
+                                        <div class="sp-list-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-disabled)"><i class="fa fa-image"></i></div>
+                                    @endif
+                                    <div class="sp-list-product-info">
+                                        <div class="name">{{ $product->name }}</div>
+                                        <div class="sku">SKU: {{ $product->sku ?? $product->product_code }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-size:12.5px;color:var(--text-secondary)">{{ optional($product->category)->name ?? 'Uncategorized' }}</td>
+                            <td>
+                                <strong>₹{{ number_format($product->price) }}</strong>
+                                @if($item->hasDiscount)
+                                    <br><span style="font-size:11.5px;color:var(--text-hint);text-decoration:line-through">₹{{ number_format($product->mrp) }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($item->hasDiscount)
+                                    <span style="font-size:12px;font-weight:700;color:var(--green)">{{ $item->discountPercent }}% off</span>
+                                @else
+                                    <span style="font-size:12px;color:var(--text-hint)">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($item->stockStatus === 'in')
+                                    <span class="sp-pill in-stock"><i class="fa fa-circle" style="font-size:7px"></i>In Stock</span>
+                                @elseif($item->stockStatus === 'low')
+                                    <span class="sp-pill low-stock"><i class="fa fa-circle" style="font-size:7px"></i>{{ $item->stockLabel }}</span>
+                                @else
+                                    <span class="sp-pill out-stock"><i class="fa fa-circle" style="font-size:7px"></i>Out of Stock</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span style="font-size:12px;color:var(--text-secondary)">
+                                    {{ $item->colorVariants->count() ? $item->colorVariants->count().' colors' : '—' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-size:12.5px;color:var(--text-secondary)">
+                                    {{ $item->addedAt->format('d M, g:i A') }}<br>
+                                    <span style="font-size:11px;color:var(--text-hint)">{{ $item->addedAt->diffForHumans() }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="sp-list-acts" style="justify-content:center">
+                                    <a href="{{ route('product.details', $product->slug) }}" target="_blank" class="sp-act-btn view" title="View Product"><i class="fa fa-eye"></i></a>
+                                    @if($item->stockStatus === 'out')
+                                        <button class="sp-act-btn" style="cursor:not-allowed;opacity:.4" disabled title="Out of stock"><i class="fa fa-shopping-bag"></i></button>
+                                    @else
+                                        <button class="sp-act-btn order" title="Create Order" onclick="createOrder({{ $product->id }}, {{ $customer->id }})"><i class="fa fa-shopping-bag"></i></button>
+                                    @endif
+                                    <button class="sp-act-btn del" title="Remove from wishlist" onclick="removeItem(this.closest('tr'), {{ $item->wishlist_id }})"><i class="fa fa-times"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <div class="sp-pag">
-                    <span class="sp-pag-info">Showing 8 of 14 items</span>
-                    <div class="sp-pag-btns">
-                        <button class="sp-pag-btn" disabled><i class="fa fa-chevron-left"></i></button>
-                        <button class="sp-pag-btn active">1</button>
-                        <button class="sp-pag-btn">2</button>
-                        <button class="sp-pag-btn"><i class="fa fa-chevron-right"></i></button>
-                    </div>
-                </div>
+                @endif
 
             </div>
         </div>
@@ -665,29 +521,57 @@ function sortCards(val) {
         if (val === 'price-high') return parseInt(b.dataset.price) - parseInt(a.dataset.price);
         if (val === 'price-low')  return parseInt(a.dataset.price) - parseInt(b.dataset.price);
         if (val === 'name') return a.dataset.name.localeCompare(b.dataset.name);
-        return 0;
+        if (val === 'oldest') return new Date(a.dataset.added) - new Date(b.dataset.added);
+        return new Date(b.dataset.added) - new Date(a.dataset.added); // newest
     });
     cards.forEach(c => grid.appendChild(c));
 }
 
-/* ── Remove card ── */
-function removeItem(btn) {
-    const card = btn.closest('.sp-product-card');
-    card.style.transition = 'opacity .2s, transform .2s';
-    card.style.opacity = '0'; card.style.transform = 'scale(.95)';
-    setTimeout(() => card.remove(), 200);
+/* ── Remove single item ── */
+function removeItem(el, wishlistId) {
+    fetch(`{{ url('admin/wishlist') }}/${wishlistId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    }).then(res => res.json()).then(() => {
+        const card = el.closest('.sp-product-card') || el.closest('tr');
+        card.style.transition = 'opacity .2s, transform .2s';
+        card.style.opacity = '0';
+        setTimeout(() => card.remove(), 200);
+    });
 }
 
 /* ── Clear all ── */
-function clearAll() {
-    Swal.fire({ title:'Clear entire wishlist?', text:"All 14 items saved by Priya Sharma will be removed permanently.", icon:'warning', showCancelButton:true, confirmButtonColor:'#c0392b', cancelButtonColor:'#6d7175', confirmButtonText:'Yes, Clear All' })
-    .then(r => { if (r.isConfirmed) {
-        document.querySelectorAll('#productGrid .sp-product-card').forEach(c => c.remove());
-        Swal.fire({ icon:'success', title:'Wishlist Cleared!', timer:1600, showConfirmButton:false });
-    }});
+function clearAll(customerId, name) {
+    Swal.fire({
+        title: 'Clear entire wishlist?',
+        text: `All items saved by ${name} will be removed permanently.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c0392b',
+        cancelButtonColor: '#6d7175',
+        confirmButtonText: 'Yes, Clear All'
+    }).then(r => {
+        if (r.isConfirmed) {
+            fetch(`{{ url('admin/customers') }}/${customerId}/wishlist/clear`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json()).then(() => {
+                Swal.fire({ icon: 'success', title: 'Wishlist Cleared!', timer: 1600, showConfirmButton: false })
+                    .then(() => location.reload());
+            });
+        }
+    });
 }
 
-/* ── Placeholders ── */
-function viewProduct()  { Swal.fire({ icon:'info',  title:'View Product', text:'Navigate to product detail page.', timer:1400, showConfirmButton:false }); }
-function createOrder()  { Swal.fire({ icon:'success', title:'Create Order', text:'Redirect to create order for this customer.', timer:1400, showConfirmButton:false }); }
+/* ── Create order placeholder ── */
+function createOrder(productId, customerId) {
+    Swal.fire({ icon: 'success', title: 'Create Order', text: 'Redirect to create order for this customer.', timer: 1400, showConfirmButton: false });
+    // e.g. window.location = `/admin/orders/create?customer=${customerId}&product=${productId}`;
+}
 </script>

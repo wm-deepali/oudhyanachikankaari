@@ -39,6 +39,11 @@ class StockService
                 $variant->save();
 
                 $after = $variant->stock;
+
+                // Keep the parent product's `stock` column in sync with its
+                // stock-type variants — anything reading $product->stock
+                // directly (detail page, exports, etc.) stays correct.
+                $this->syncProductStockFromVariants($product);
             } else {
                 $product = Product::whereKey($product->id)->lockForUpdate()->first();
 
@@ -97,6 +102,11 @@ class StockService
                 $variant->save();
 
                 $after = $variant->stock;
+
+                // Keep the parent product's `stock` column in sync with its
+                // stock-type variants — anything reading $product->stock
+                // directly (detail page, exports, etc.) stays correct.
+                $this->syncProductStockFromVariants($product);
             } else {
                 // Locks the row so two simultaneous orders can't both pass a stock
                 // check against the same starting quantity and oversell the product.
@@ -153,6 +163,11 @@ class StockService
 
                 $variant->stock = $newStock;
                 $variant->save();
+
+                // Keep the parent product's `stock` column in sync with its
+                // stock-type variants — anything reading $product->stock
+                // directly (detail page, exports, etc.) stays correct.
+                $this->syncProductStockFromVariants($product);
             } else {
                 $product = Product::whereKey($product->id)->lockForUpdate()->first();
 
@@ -276,6 +291,30 @@ class StockService
         if ((bool) $product->status !== $shouldBeActive) {
             $product->update(['status' => $shouldBeActive]);
         }
+    }
+
+    /**
+     * Keeps the parent product's `stock` column in sync as the sum of its
+     * stock-type variants. Called after any variant-level credit/debit/set
+     * so `product.stock` never goes stale relative to its variants — e.g.
+     * the product detail page, exports, and anything else that reads
+     * `$product->stock` directly (without checking variants) stays correct.
+     *
+     * NOTE: verify `product_id` is the correct FK column name on your
+     * product_variants table before relying on this.
+     */
+    protected function syncProductStockFromVariants(Product $product): void
+    {
+        $total = ProductVariant::where('product_id', $product->id)
+            ->where('type', 'stock')
+            ->sum('stock');
+
+        if ($product->stock !== $total) {
+            $product->stock = $total;
+            $product->save();
+        }
+
+        $this->syncListingVisibility($product);
     }
 
     /**

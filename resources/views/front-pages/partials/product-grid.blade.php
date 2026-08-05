@@ -2,6 +2,7 @@
 
                                 <div class="aq-product-card" data-category="onboarding" data-price="1899">
                                     <div class="aq-product-card-top">
+                                         <a href="{{ route('product.details', $product->slug) }}">
                                         <div class="aq-product-media-wrapper">
 
                                             @php 
@@ -29,6 +30,7 @@
                                                 <span class="aq-media-dot"></span>
                                             </div>
                                         </div>
+                                        </a>
                                         @if($product->collections->isNotEmpty())
     <div class="aq-product-badges">
         <span class="aq-product-badge bestseller">
@@ -64,7 +66,7 @@
     </button>
 </div>
                                     </div>
-                                    <div class="aq-product-card-info">
+                                   <div class="aq-product-card-info">
                                         <span class="aq-product-card-brand-name">
                                             {{ $product->subcategory->name ?? $product->category->name ?? '' }}
                                         </span>
@@ -77,6 +79,14 @@
                                             style="font-family: Inter, sans-serif; font-size:12px; color:#777; margin-bottom:12px;">
                                             {{ Str::limit(strip_tags($product->short_description), 80) }}
                                         </p>
+
+                                        @php
+                                            $availableStock = $product->variants->where('type', 'stock')->count()
+                                                ? $product->variants->where('type', 'stock')->sum('stock')
+                                                : $product->stock;
+                                        @endphp
+
+                                        @if($availableStock >= $product->min_qty)
                                         <div class="aq-product-card-price-group">
                                             <span class="aq-product-card-price">
                                                 ₹{{ number_format($product->price, 0) }}
@@ -92,22 +102,19 @@
                                                 </span>
                                             @endif
                                         </div>
+                                        @endif
+
                                        @php
-    $listingAttributes = \App\Models\CategoryAttribute::where('category_id', $product->category_id)
-        ->where('show_on_listing', 1)
-        ->pluck('attribute_id')
-        ->toArray();
+                                            $listingAttributes = \App\Models\CategoryAttribute::where('category_id', $product->category_id)
+                                                ->where('show_on_listing', 1)
+                                                ->pluck('attribute_id')
+                                                ->toArray();
 
-    $listingValues = $product->attributeValues
-        ->whereIn('attribute_id', $listingAttributes);
+                                            $listingValues = $product->attributeValues
+                                                ->whereIn('attribute_id', $listingAttributes);
 
-    $groupedValues = $listingValues->groupBy('attribute_id');
-
-
-            $availableStock = $product->variants->count()
-        ? $product->variants->sum('stock')
-        : $product->stock;
-@endphp
+                                            $groupedValues = $listingValues->groupBy('attribute_id');
+                                        @endphp
 
 @if($groupedValues->count())
     @foreach($groupedValues as $attributeValues)
@@ -128,7 +135,6 @@
         <button class="aq-product-card-cta"
             onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)">
         <i class="fa-solid fa-cart-shopping"></i>
-        {{ $availableStock }}
         Add to Cart
     </button>
    @else
@@ -141,10 +147,8 @@
 @endif
 </div>
 
-                              
                                     </div>
                                 </div>
-
                             @empty
 
                                 <div class="col-12 text-center">

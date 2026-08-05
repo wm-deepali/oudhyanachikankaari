@@ -831,23 +831,23 @@
                         onclick="switchTab('couriers', this)">
                         <i class="fa-solid fa-truck"></i> Courier Management
                     </button>
+                    <button class="tab-btn {{ $activeTab == 'tracking' ? 'active' : '' }}"
+    onclick="switchTab('tracking', this)">
+    <i class="fa-brands fa-google"></i> Tracking &amp; Pixels
+</button>
                <!--   <button class="tab-btn {{ $activeTab == 'whatsapp' ? 'active' : '' }}"
                         onclick="switchTab('whatsapp', this)">
                         <i class="fa-solid fa-truck"></i> WhatsApp Setting
-                    </button>
-                    <button class="tab-btn {{ $activeTab == 'google-setting' ? 'active' : '' }}"
-                        onclick="switchTab('google-setting', this)">
-                        <i class="fa-solid fa-truck"></i> Google Setting
-                    </button>  -->
-              {{--        <button class="tab-btn {{ $activeTab == 'delivery-setting' ? 'active' : '' }}"
+                    </button>  
+                     <button class="tab-btn {{ $activeTab == 'delivery-setting' ? 'active' : '' }}"
                         onclick="switchTab('delivery-setting', this)">
                         <i class="fa-solid fa-truck"></i> Delivery Setting
-                    </button> --}}
+                    </button>
                     
-                   {{--   <button class="tab-btn {{ $activeTab == 'sme-api' ? 'active' : '' }}"
+                    <button class="tab-btn {{ $activeTab == 'sme-api' ? 'active' : '' }}"
                         onclick="switchTab('sms-api', this)">
                         <i class="fa-solid fa-truck"></i> SMS API
-                    </button> --}}
+                    </button> -->
                 </div>
 
                 <!-- ══════════════════════════════════
@@ -896,8 +896,10 @@
                      <!-- ══════════════════════════════════
                      TAB 7 — GOOGLE SETTING
                 ══════════════════════════════════ -->
-   {{--     <div class="tab-panel {{ $activeTab == 'google-setting' ? 'active' : '' }}" id="tab-google-setting">
-                    @include('admin.admin-settings.google-setting') </div> --}}
+
+<div class="tab-panel {{ $activeTab == 'tracking' ? 'active' : '' }}" id="tab-tracking">
+    @include('admin.admin-settings.google-setting')
+</div>
                     
                <!-- ══════════════════════════════════
                      TAB 8 — DELIVERY SETTING
@@ -957,15 +959,32 @@
     // ── Razorpay mode toggle ──
     function toggleMode(checkbox) {
         const pill = document.getElementById('modePill');
+        const banner = document.getElementById('modeBanner');
+        const bannerText = document.getElementById('modeBannerText');
+
         if (checkbox.checked) {
             pill.textContent = 'Live Mode';
             pill.className = 'mode-pill mode-live';
+
+            banner.className = 'info-banner green';
+            bannerText.innerHTML = 'You are currently in <strong>Live Mode</strong>. Real payments will be captured from customers.';
         } else {
             pill.textContent = 'Test Mode';
             pill.className = 'mode-pill mode-test';
+
+            banner.className = 'info-banner amber';
+            bannerText.innerHTML = 'You are currently in <strong>Test Mode</strong>. Payments will not be captured. Switch to Live Mode only when you are ready to accept real payments.';
         }
     }
 
+    // Page load pe DB ki actual value ke hisaab se sync karo
+    document.addEventListener('DOMContentLoaded', function () {
+        const liveToggle = document.getElementById('liveToggle');
+        if (liveToggle) {
+            toggleMode(liveToggle);
+        }
+    });
+    
     // ── Invoice number preview ──
     function updatePreview() {
         const prefix = document.getElementById('invPrefix').value || 'INV';

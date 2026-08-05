@@ -170,5 +170,42 @@
         </section>
     </main>
 
+    {{-- Pixel/GA tracking — this form is a plain POST redirect (not AJAX), so
+         the controller flashes fire_login_event / fire_signup_event to the
+         session and we fire the corresponding event here once the page
+         reloads on success. Covers both the email/password form above and
+         the Google OAuth redirect (both land back on a page carrying this
+         flash via CustomerAuthController). --}}
+    @if(session('fire_login_event'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof fireTrackingEvents === 'function') {
+                    try {
+                        fireTrackingEvents([{ type: 'gtag', name: 'login', params: {} }]);
+                    } catch (err) {
+                        console.error('Tracking event failed (ignored):', err);
+                    }
+                }
+            });
+        </script>
+    @endif
+
+    @if(session('fire_signup_event'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof fireTrackingEvents === 'function') {
+                    try {
+                        fireTrackingEvents([{
+                            type: 'gtag',
+                            name: 'sign_up',
+                            params: { method: @json(session('fire_signup_event')) }
+                        }]);
+                    } catch (err) {
+                        console.error('Tracking event failed (ignored):', err);
+                    }
+                }
+            });
+        </script>
+    @endif
 
 @endsection

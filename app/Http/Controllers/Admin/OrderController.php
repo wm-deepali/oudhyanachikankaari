@@ -16,73 +16,85 @@ use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
-    {
-        // ── KPI counts ────────────────────────────────────────
-        $kpi = [
-            'total' => Order::count(),
-            'pending' => Order::where('status', 'pending')->count(),
-            'shipped' => Order::where('status', 'shipped')->count(),
-            'delivered' => Order::where('status', 'delivered')->count(),
-        ];
+   public function index(Request $request)
+{
+    // ── Customer filter (used when viewing orders from a customer's wishlist/profile) ──
+    $customerId = $request->input('customer');
 
-        // ── Tab counts ────────────────────────────────────────
-        $tabCounts = [
-            'all' => Order::count(),
-            'new' => Order::where('status', 'new')->count(),
-            'processing' => Order::where('status', 'processing')->count(),
-            'shipped' => Order::where('status', 'shipped')->count(),
-            'delivered' => Order::where('status', 'delivered')->count(),
-            'cancelled' => Order::where('status', 'cancelled')->count(),
-        ];
+    // ── KPI counts ────────────────────────────────────────
+    $kpi = [
+        'total' => Order::when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'pending' => Order::where('status', 'pending')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'shipped' => Order::where('status', 'shipped')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'delivered' => Order::where('status', 'delivered')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+    ];
 
-        // ── Base query ────────────────────────────────────────
-        $query = Order::with(['items', 'customer'])
-            ->latest();
+    // ── Tab counts ────────────────────────────────────────
+    $tabCounts = [
+        'all' => Order::when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'new' => Order::where('status', 'new')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'processing' => Order::where('status', 'processing')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'shipped' => Order::where('status', 'shipped')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'delivered' => Order::where('status', 'delivered')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+        'cancelled' => Order::where('status', 'cancelled')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
+    ];
 
-        // ── Status tab filter ─────────────────────────────────
-        $activeTab = $request->input('tab', 'all');
-        if ($activeTab !== 'all') {
-            $query->where('status', $activeTab);
-        }
+    // ── Base query ────────────────────────────────────────
+    $query = Order::with(['items', 'customer'])
+        ->latest();
 
-        // ── Search (order number, name, email) ────────────────
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('order_number', 'like', "%{$search}%")
-                    ->orWhere('customer_name', 'like', "%{$search}%")
-                    ->orWhere('customer_email', 'like', "%{$search}%");
-            });
-        }
-
-        // ── Payment status filter ─────────────────────────────
-        if ($payment = $request->input('payment')) {
-            $query->where('payment_status', $payment);
-        }
-
-        // ── Date range filter ─────────────────────────────────
-        if ($from = $request->input('from_date')) {
-            $query->whereDate('created_at', '>=', $from);
-        }
-        if ($to = $request->input('to_date')) {
-            $query->whereDate('created_at', '<=', $to);
-        }
-
-        // ── Paginate ──────────────────────────────────────────
-        $orders = $query->paginate(25)->withQueryString();
-
-        return view('admin.orders.index', compact(
-            'orders',
-            'kpi',
-            'tabCounts',
-            'activeTab'
-        ));
+    // ── Customer filter ────────────────────────────────────
+    if ($customerId) {
+        $query->where('customer_id', $customerId);
     }
+
+    // ── Status tab filter ─────────────────────────────────
+    $activeTab = $request->input('tab', 'all');
+    if ($activeTab !== 'all') {
+        $query->where('status', $activeTab);
+    }
+
+    // ── Search (order number, name, email) ────────────────
+    if ($search = $request->input('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('order_number', 'like', "%{$search}%")
+                ->orWhere('customer_name', 'like', "%{$search}%")
+                ->orWhere('customer_email', 'like', "%{$search}%");
+        });
+    }
+
+    // ── Payment status filter ─────────────────────────────
+    if ($payment = $request->input('payment')) {
+        $query->where('payment_status', $payment);
+    }
+
+    // ── Date range filter ─────────────────────────────────
+    if ($from = $request->input('from_date')) {
+        $query->whereDate('created_at', '>=', $from);
+    }
+    if ($to = $request->input('to_date')) {
+        $query->whereDate('created_at', '<=', $to);
+    }
+
+    // ── Paginate ──────────────────────────────────────────
+    $orders = $query->paginate(25)->withQueryString();
+
+    return view('admin.orders.index', compact(
+        'orders',
+        'kpi',
+        'tabCounts',
+        'activeTab'
+    ));
+}
 
     // ── Export CSV ────────────────────────────────────────────
     public function export(Request $request)
     {
         $query = Order::with('items')->latest();
+
+  if ($customerId = $request->input('customer')) {
+        $query->where('customer_id', $customerId);
+    }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {

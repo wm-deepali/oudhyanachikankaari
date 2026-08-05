@@ -190,6 +190,17 @@
                 </div>
             </div>
 
+            {{-- ── Customer filter banner ── --}}
+            @if(request('customer'))
+                @php $filteredCustomer = \App\Models\Customer::find(request('customer')); @endphp
+                @if($filteredCustomer)
+                    <div style="background:var(--accent-light);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-primary)">
+                        <span>Showing orders for <strong>{{ $filteredCustomer->name }}</strong></span>
+                        <a href="{{ route('admin.orders.index') }}" style="color:var(--accent);font-weight:600;text-decoration:none">Clear filter ✕</a>
+                    </div>
+                @endif
+            @endif
+
             {{-- ── Main card ── --}}
             <div class="orders-card">
 
@@ -217,7 +228,8 @@
                 {{-- Filter bar --}}
                 <div class="filter-bar">
                     <form method="GET" action="{{ route('admin.orders.index') }}">
-                        <input type="hidden" name="tab" value="{{ $activeTab }}">
+                      <input type="hidden" name="tab" value="{{ $activeTab }}">
+<input type="hidden" name="customer" value="{{ request('customer') }}">
                         <div class="filter-row">
                             <div class="filter-group" style="flex:1">
                                 <label>Search</label>
@@ -408,6 +420,7 @@
                         @else
                             No orders found
                         @endif
+                        
                     </div>
                     <div style="display:flex;gap:6px">
                         @if($orders->onFirstPage())

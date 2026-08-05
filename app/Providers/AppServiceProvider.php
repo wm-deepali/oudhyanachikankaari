@@ -12,6 +12,7 @@ use App\Models\Collection;
 use App\Models\GiftingOccasion;
 use App\Models\Category;
 use App\Models\Attribute;
+use App\Models\GoogleSetting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -95,6 +96,9 @@ class AppServiceProvider extends ServiceProvider
             })
             ->pluck('product_id')
             ->toArray();
+            
+             $googleSetting = GoogleSetting::current(); // 👈 new
+             
             $view->with(
                 [
                     'globalCartCount' => $count,
@@ -107,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
                     'navbarCategories' => $navbarCategories,
                     'general' => $general,
                     'wishlistIds' => $wishlistIds,
+                    'googleSetting' => $googleSetting, // 👈 new
                 ]
             );
         });

@@ -128,13 +128,13 @@
                 <div>
                     <h1 class="sp-title">Customer Wishlists</h1>
                     <div class="sp-crumb">
-                        <a href="#">Dashboard</a><span class="sp-crumb-sep">›</span>
-                        <a href="#">Customers</a><span class="sp-crumb-sep">›</span>
+                        <a href="{{ route('admin.dashboard') }}">Dashboard</a><span class="sp-crumb-sep">›</span>
+                        <a href="{{ route('admin.customers.index') }}">Customers</a><span class="sp-crumb-sep">›</span>
                         <span>Wishlists</span>
                     </div>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
-                    <button class="sp-btn sp-btn-secondary"><i class="fa fa-download"></i> Export CSV</button>
+                    <a href="{{ route('admin.customers.customer-wishlist', array_merge(request()->query(), ['export' => 1])) }}" class="sp-btn sp-btn-secondary"><i class="fa fa-download"></i> Export CSV</a>
                 </div>
             </div>
 
@@ -142,22 +142,22 @@
             <div class="sp-kpi-strip">
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Customers with Wishlist</span><div class="sp-kpi-icon ic-navy"><i class="fa fa-heart"></i></div></div>
-                    <div class="sp-kpi-value">1,284</div>
-                    <div class="sp-kpi-sub">Of 4,210 total customers</div>
+                    <div class="sp-kpi-value">{{ number_format($totalCustomersWithWishlist) }}</div>
+                    <div class="sp-kpi-sub">Of {{ number_format($totalCustomers) }} total customers</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Total Wishlist Items</span><div class="sp-kpi-icon ic-red"><i class="fa fa-list"></i></div></div>
-                    <div class="sp-kpi-value">9,741</div>
+                    <div class="sp-kpi-value">{{ number_format($totalItems) }}</div>
                     <div class="sp-kpi-sub">Across all wishlists</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Avg. Items / Customer</span><div class="sp-kpi-icon ic-amber"><i class="fa fa-chart-bar"></i></div></div>
-                    <div class="sp-kpi-value">7.6</div>
+                    <div class="sp-kpi-value">{{ $avgItemsPerCustomer }}</div>
                     <div class="sp-kpi-sub">Items per wishlist</div>
                 </div>
                 <div class="sp-kpi">
                     <div class="sp-kpi-top"><span class="sp-kpi-label">Total Wishlist Value</span><div class="sp-kpi-icon ic-green"><i class="fa fa-rupee-sign"></i></div></div>
-                    <div class="sp-kpi-value">₹48.2L</div>
+                    <div class="sp-kpi-value">₹{{ number_format($totalValue / 100000, 1) }}L</div>
                     <div class="sp-kpi-sub">Combined product value</div>
                 </div>
             </div>
@@ -166,25 +166,32 @@
             <div class="sp-card">
                 <div class="sp-toolbar">
                     <div class="sp-toolbar-left">
-                        <div class="sp-search-wrap">
-                            <i class="fa fa-search sp-search-ico"></i>
-                            <input type="text" class="sp-search" placeholder="Search customer…" oninput="filterTable(this.value)">
-                        </div>
-                        <select class="sp-filter-sel" onchange="filterHeat(this.value)">
-                            <option value="">All Activity</option>
-                            <option value="hot">Hot (10+ items)</option>
-                            <option value="warm">Warm (4–9 items)</option>
-                            <option value="cool">Cool (1–3 items)</option>
-                        </select>
-                        <select class="sp-filter-sel">
-                            <option>Sort: Last Added</option>
-                            <option>Sort: Most Items</option>
-                            <option>Sort: Highest Value</option>
-                            <option>Sort: Name A–Z</option>
-                        </select>
-                    </div>
+    <form method="GET" action="{{ route('admin.customers.customer-wishlist') }}" style="display:flex;gap:8px;flex-wrap:wrap" id="wlFilterForm">
+        <div class="sp-search-wrap">
+            <i class="fa fa-search sp-search-ico"></i>
+            <input type="text" name="search" class="sp-search" placeholder="Search customer…" value="{{ request('search') }}">
+        </div>
+        <select class="sp-filter-sel" name="heat" onchange="this.form.submit()">
+            <option value="">All Activity</option>
+            <option value="hot" {{ request('heat') === 'hot' ? 'selected' : '' }}>Hot (10+ items)</option>
+            <option value="warm" {{ request('heat') === 'warm' ? 'selected' : '' }}>Warm (4–9 items)</option>
+            <option value="cool" {{ request('heat') === 'cool' ? 'selected' : '' }}>Cool (1–3 items)</option>
+        </select>
+        <select class="sp-filter-sel" name="sort" onchange="this.form.submit()">
+            <option value="last_added" {{ request('sort', 'last_added') === 'last_added' ? 'selected' : '' }}>Sort: Last Added</option>
+            <option value="most_items" {{ request('sort') === 'most_items' ? 'selected' : '' }}>Sort: Most Items</option>
+            <option value="highest_value" {{ request('sort') === 'highest_value' ? 'selected' : '' }}>Sort: Highest Value</option>
+            <option value="name_az" {{ request('sort') === 'name_az' ? 'selected' : '' }}>Sort: Name A–Z</option>
+        </select>
+    </form>
+    @if(request()->filled('search') || request()->filled('heat') || (request()->filled('sort') && request('sort') !== 'last_added'))
+        <a href="{{ route('admin.customers.customer-wishlist') }}" class="sp-btn sp-btn-secondary" style="height:34px;padding:0 12px;">
+            <i class="fa fa-times"></i> Clear Filters
+        </a>
+    @endif
+</div>
                     <div class="sp-toolbar-right">
-                        <span style="font-size:12.5px;color:var(--text-hint)"><span id="rowCount">12</span> customers</span>
+                        <span style="font-size:12.5px;color:var(--text-hint)"><span id="rowCount">{{ $customers->total() }}</span> customers</span>
                     </div>
                 </div>
 
@@ -203,127 +210,88 @@
                             </tr>
                         </thead>
                         <tbody id="wlTbody">
-
-                            <tr data-name="priya sharma" data-heat="hot">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#01</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#303d89">PS</div><div><div class="sp-av-name">Priya Sharma</div><div class="sp-av-email">priya.sharma@gmail.com</div></div></div></td>
+                        @forelse($rows as $index => $row)
+                            <tr data-name="{{ strtolower($row->customer->name) }}" data-heat="{{ $row->heat }}">
+                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#{{ str_pad($customers->firstItem() + $index, 2, '0', STR_PAD_LEFT) }}</span></td>
                                 <td>
-                                    <div class="sp-thumb-strip">
-                                        <div class="sp-thumb"><img src="https://via.placeholder.com/36x36/f0e6d3/888?text=K" alt=""></div>
-                                        <div class="sp-thumb"><img src="https://via.placeholder.com/36x36/e8d5c4/888?text=S" alt=""></div>
-                                        <div class="sp-thumb"><img src="https://via.placeholder.com/36x36/d4b8a0/888?text=D" alt=""></div>
-                                        <div class="sp-thumb-more">+11</div>
+                                    <div class="sp-av-wrap">
+                                        <div class="sp-av" style="background:{{ $row->color }}">{{ $row->initials }}</div>
+                                        <div>
+                                            <div class="sp-av-name">{{ $row->customer->name }}</div>
+                                            <div class="sp-av-email">{{ $row->customer->email }}</div>
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="center"><span class="sp-count-badge">14</span></td>
-                                <td><div class="sp-value">₹38,400</div><div class="sp-value-sub">avg ₹2,743</div></td>
-                                <td><span class="sp-heat sp-heat-hot"><i class="fa fa-fire" style="font-size:10px"></i> Hot</span></td>
-                                <td><div class="sp-last-added">2 hours ago<span>Chikankari Anarkali Set</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Priya Sharma','PS','#303d89',14,'₹38,400')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Priya Sharma')"><i class="fa fa-trash"></i></button></div></td>
+                                <td>
+                                    <div class="sp-thumb-strip">
+                                        @foreach($row->recent as $item)
+                                            <div class="sp-thumb">
+                                                @if(optional($item->product)->display_image)
+                                                    <img src="{{ $item->product->display_image }}" alt="">
+                                                @else
+                                                    <i class="fa fa-image"></i>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                        @if($row->itemCount > 3)
+                                            <div class="sp-thumb-more">+{{ $row->itemCount - 3 }}</div>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="center"><span class="sp-count-badge">{{ $row->itemCount }}</span></td>
+                                <td>
+                                    <div class="sp-value">₹{{ number_format($row->totalValue) }}</div>
+                                    <div class="sp-value-sub">avg ₹{{ number_format($row->avgValue) }}</div>
+                                </td>
+                                <td>
+                                    @if($row->heat === 'hot')
+                                        <span class="sp-heat sp-heat-hot"><i class="fa fa-fire" style="font-size:10px"></i> Hot</span>
+                                    @elseif($row->heat === 'warm')
+                                        <span class="sp-heat sp-heat-warm"><i class="fa fa-circle" style="font-size:8px"></i> Warm</span>
+                                    @else
+                                        <span class="sp-heat sp-heat-cool"><i class="fa fa-snowflake" style="font-size:9px"></i> Cool</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="sp-last-added">
+                                        {{ $row->lastAdded ? $row->lastAdded->diffForHumans() : '—' }}
+                                        <span>{{ $row->lastProduct ?? 'N/A' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="sp-actions">
+                                        <a href="{{ route('admin.customers.customer-wishlist-detail', ['customer' => $row->customer->id]) }}" class="sp-act-btn view" title="View Wishlist"><i class="fa fa-eye"></i></a>
+                                        <button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('{{ $row->customer->name }}', {{ $row->customer->id }})"><i class="fa fa-trash"></i></button>
+                                    </div>
+                                </td>
                             </tr>
-
-                            <tr data-name="rahul verma" data-heat="hot">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#02</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#0069d9">RV</div><div><div class="sp-av-name">Rahul Verma</div><div class="sp-av-email">rahul.verma@yahoo.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/c8d4e8/888?text=K" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/b0c4d8/888?text=S" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/98b4c8/888?text=C" alt=""></div><div class="sp-thumb-more">+9</div></div></td>
-                                <td class="center"><span class="sp-count-badge">12</span></td>
-                                <td><div class="sp-value">₹29,850</div><div class="sp-value-sub">avg ₹2,488</div></td>
-                                <td><span class="sp-heat sp-heat-hot"><i class="fa fa-fire" style="font-size:10px"></i> Hot</span></td>
-                                <td><div class="sp-last-added">Yesterday<span>Lucknowi Kurta Set (XL)</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Rahul Verma','RV','#0069d9',12,'₹29,850')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Rahul Verma')"><i class="fa fa-trash"></i></button></div></td>
+                        @empty
+                            <tr>
+                                <td colspan="8" style="text-align:center;padding:40px;color:var(--text-hint)">No wishlists found.</td>
                             </tr>
-
-                            <tr data-name="anjali mehta" data-heat="warm">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#03</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#6d28d9">AM</div><div><div class="sp-av-name">Anjali Mehta</div><div class="sp-av-email">anjali.mehta@gmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/e4d4f0/888?text=S" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/d4c4e0/888?text=D" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/c4b4d0/888?text=K" alt=""></div><div class="sp-thumb-more">+5</div></div></td>
-                                <td class="center"><span class="sp-count-badge">8</span></td>
-                                <td><div class="sp-value">₹21,200</div><div class="sp-value-sub">avg ₹2,650</div></td>
-                                <td><span class="sp-heat sp-heat-warm"><i class="fa fa-circle" style="font-size:8px"></i> Warm</span></td>
-                                <td><div class="sp-last-added">2 days ago<span>Bakhiya Shadow Work Dupatta</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Anjali Mehta','AM','#6d28d9',8,'₹21,200')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Anjali Mehta')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="sneha patel" data-heat="warm">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#04</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#c0392b">SP</div><div><div class="sp-av-name">Sneha Patel</div><div class="sp-av-email">sneha.patel@hotmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/f8d4d4/888?text=A" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/f0c4c4/888?text=K" alt=""></div><div class="sp-thumb-more">+5</div></div></td>
-                                <td class="center"><span class="sp-count-badge">7</span></td>
-                                <td><div class="sp-value">₹17,500</div><div class="sp-value-sub">avg ₹2,500</div></td>
-                                <td><span class="sp-heat sp-heat-warm"><i class="fa fa-circle" style="font-size:8px"></i> Warm</span></td>
-                                <td><div class="sp-last-added">3 days ago<span>Georgette Anarkali Suit</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Sneha Patel','SP','#c0392b',7,'₹17,500')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Sneha Patel')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="deepak gupta" data-heat="warm">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#05</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#007a5e">DG</div><div><div class="sp-av-name">Deepak Gupta</div><div class="sp-av-email">deepak.g@outlook.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/d4ecd4/888?text=K" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/c4dcc4/888?text=S" alt=""></div><div class="sp-thumb-more">+4</div></div></td>
-                                <td class="center"><span class="sp-count-badge">6</span></td>
-                                <td><div class="sp-value">₹15,900</div><div class="sp-value-sub">avg ₹2,650</div></td>
-                                <td><span class="sp-heat sp-heat-warm"><i class="fa fa-circle" style="font-size:8px"></i> Warm</span></td>
-                                <td><div class="sp-last-added">4 days ago<span>Zardozi Embroidered Saree</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Deepak Gupta','DG','#007a5e',6,'₹15,900')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Deepak Gupta')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="meera agarwal" data-heat="warm">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#06</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#2980b9">MA</div><div><div class="sp-av-name">Meera Agarwal</div><div class="sp-av-email">meera.a@gmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/d4e8f8/888?text=D" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/c4d8e8/888?text=K" alt=""></div><div class="sp-thumb-more">+2</div></div></td>
-                                <td class="center"><span class="sp-count-badge">4</span></td>
-                                <td><div class="sp-value">₹9,800</div><div class="sp-value-sub">avg ₹2,450</div></td>
-                                <td><span class="sp-heat sp-heat-warm"><i class="fa fa-circle" style="font-size:8px"></i> Warm</span></td>
-                                <td><div class="sp-last-added">5 days ago<span>Lucknowi Kurti (Blue, M)</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Meera Agarwal','MA','#2980b9',4,'₹9,800')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Meera Agarwal')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="kiran malhotra" data-heat="cool">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#07</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#916a00">KM</div><div><div class="sp-av-name">Kiran Malhotra</div><div class="sp-av-email">kiran.m@gmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/f8ecd4/888?text=S" alt=""></div><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/f0dcc4/888?text=K" alt=""></div><div class="sp-thumb-more">+1</div></div></td>
-                                <td class="center"><span class="sp-count-badge">3</span></td>
-                                <td><div class="sp-value">₹7,200</div><div class="sp-value-sub">avg ₹2,400</div></td>
-                                <td><span class="sp-heat sp-heat-cool"><i class="fa fa-snowflake" style="font-size:9px"></i> Cool</span></td>
-                                <td><div class="sp-last-added">1 week ago<span>Mukaish Work Kurta</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Kiran Malhotra','KM','#916a00',3,'₹7,200')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Kiran Malhotra')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="vikram singh" data-heat="cool">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#08</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#7f8c8d">VS</div><div><div class="sp-av-name">Vikram Singh</div><div class="sp-av-email">vikram.s@rediffmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/e8e8e8/888?text=K" alt=""></div><div class="sp-thumb-more">+1</div></div></td>
-                                <td class="center"><span class="sp-count-badge">2</span></td>
-                                <td><div class="sp-value">₹4,800</div><div class="sp-value-sub">avg ₹2,400</div></td>
-                                <td><span class="sp-heat sp-heat-cool"><i class="fa fa-snowflake" style="font-size:9px"></i> Cool</span></td>
-                                <td><div class="sp-last-added">10 days ago<span>Chikankari Kurta (White)</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Vikram Singh','VS','#7f8c8d',2,'₹4,800')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Vikram Singh')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
-                            <tr data-name="nisha joshi" data-heat="cool">
-                                <td><span style="font-size:11.5px;font-weight:600;color:var(--text-hint);font-family:'SF Mono',monospace">#09</span></td>
-                                <td><div class="sp-av-wrap"><div class="sp-av" style="background:#e67e22">NJ</div><div><div class="sp-av-name">Nisha Joshi</div><div class="sp-av-email">nisha.j@gmail.com</div></div></div></td>
-                                <td><div class="sp-thumb-strip"><div class="sp-thumb"><img src="https://via.placeholder.com/36x36/fce4d4/888?text=S" alt=""></div></div></td>
-                                <td class="center"><span class="sp-count-badge">1</span></td>
-                                <td><div class="sp-value">₹2,950</div><div class="sp-value-sub">avg ₹2,950</div></td>
-                                <td><span class="sp-heat sp-heat-cool"><i class="fa fa-snowflake" style="font-size:9px"></i> Cool</span></td>
-                                <td><div class="sp-last-added">2 weeks ago<span>Organza Saree (Pink)</span></div></td>
-                                <td><div class="sp-actions"><a href="#" class="sp-act-btn view" title="View Wishlist" onclick="goToDetail('Nisha Joshi','NJ','#e67e22',1,'₹2,950')"><i class="fa fa-eye"></i></a><button class="sp-act-btn del" title="Clear Wishlist" onclick="clearWishlist('Nisha Joshi')"><i class="fa fa-trash"></i></button></div></td>
-                            </tr>
-
+                        @endforelse
                         </tbody>
                     </table>
                 </div>
 
                 <div class="sp-pag">
-                    <span class="sp-pag-info">Showing 9 of 1,284 customers</span>
+                    <span class="sp-pag-info">Showing {{ $customers->firstItem() ?? 0 }} to {{ $customers->lastItem() ?? 0 }} of {{ $customers->total() }} customers</span>
                     <div class="sp-pag-btns">
-                        <button class="sp-pag-btn" disabled><i class="fa fa-chevron-left"></i></button>
-                        <button class="sp-pag-btn active">1</button>
-                        <button class="sp-pag-btn">2</button>
-                        <button class="sp-pag-btn">3</button>
-                        <button class="sp-pag-btn">…</button>
-                        <button class="sp-pag-btn">143</button>
-                        <button class="sp-pag-btn"><i class="fa fa-chevron-right"></i></button>
+                        @if ($customers->onFirstPage())
+                            <button class="sp-pag-btn" disabled><i class="fa fa-chevron-left"></i></button>
+                        @else
+                            <a href="{{ $customers->previousPageUrl() }}" class="sp-pag-btn"><i class="fa fa-chevron-left"></i></a>
+                        @endif
+
+                        @foreach ($customers->getUrlRange(max(1, $customers->currentPage() - 2), min($customers->lastPage(), $customers->currentPage() + 2)) as $page => $url)
+                            <a href="{{ $url }}" class="sp-pag-btn {{ $page == $customers->currentPage() ? 'active' : '' }}">{{ $page }}</a>
+                        @endforeach
+
+                        @if ($customers->hasMorePages())
+                            <a href="{{ $customers->nextPageUrl() }}" class="sp-pag-btn"><i class="fa fa-chevron-right"></i></a>
+                        @else
+                            <button class="sp-pag-btn" disabled><i class="fa fa-chevron-right"></i></button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -333,35 +301,29 @@
 </div>
 @include('admin.footer')
 <script>
-function filterTable(v) {
-    v = v.toLowerCase();
-    let c = 0;
-    document.querySelectorAll('#wlTbody tr').forEach(r => {
-        const show = r.dataset.name.includes(v);
-        r.style.display = show ? '' : 'none';
-        if (show) c++;
+
+function clearWishlist(name, customerId) {
+    Swal.fire({
+        title: 'Clear wishlist for ' + name + '?',
+        text: 'All ' + name + "'s saved items will be removed.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c0392b',
+        cancelButtonColor: '#6d7175',
+        confirmButtonText: 'Yes, Clear'
+    }).then(r => {
+        if (r.isConfirmed) {
+            fetch(`{{ url('admin/customers') }}/${customerId}/wishlist/clear`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            }).then(res => res.json()).then(() => {
+                Swal.fire({ icon: 'success', title: 'Cleared!', timer: 1500, showConfirmButton: false })
+                    .then(() => location.reload());
+            });
+        }
     });
-    document.getElementById('rowCount').textContent = c;
-}
-function filterHeat(v) {
-    let c = 0;
-    document.querySelectorAll('#wlTbody tr').forEach(r => {
-        const show = !v || r.dataset.heat === v;
-        r.style.display = show ? '' : 'none';
-        if (show) c++;
-    });
-    document.getElementById('rowCount').textContent = c;
-}
-function clearWishlist(name) {
-    Swal.fire({ title:'Clear wishlist for '+name+'?', text:'All '+name+"'s saved items will be removed.", icon:'warning', showCancelButton:true, confirmButtonColor:'#c0392b', cancelButtonColor:'#6d7175', confirmButtonText:'Yes, Clear' })
-    .then(r => { if(r.isConfirmed) Swal.fire({icon:'success',title:'Cleared!',timer:1500,showConfirmButton:false}); });
-}
-function goToDetail(name,ini,color,count,value) {
-    sessionStorage.setItem('wl_name',name);
-    sessionStorage.setItem('wl_ini',ini);
-    sessionStorage.setItem('wl_color',color);
-    sessionStorage.setItem('wl_count',count);
-    sessionStorage.setItem('wl_value',value);
-    alert('Navigate to: wishlist/detail.blade.php\nCustomer: '+name+' — '+count+' items, '+value);
 }
 </script>

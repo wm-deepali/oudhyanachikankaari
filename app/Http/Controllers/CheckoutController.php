@@ -59,6 +59,9 @@ class CheckoutController extends Controller
         $states = State::orderBy('name')
             ->get();
 
+        // Pixel/GA begin_checkout event — rendered as an inline script tag on the checkout view
+        $beginCheckoutScript = \App\Services\Tracking\PixelTracker::beginCheckoutScript($cart);
+
         return view(
             'front-pages.checkout',
             compact(
@@ -66,7 +69,8 @@ class CheckoutController extends Controller
                 'customer',
                 'addresses',
                 'defaultAddress',
-                'states'
+                'states',
+                'beginCheckoutScript' // 👈 new
             )
         );
     }
@@ -412,6 +416,15 @@ class CheckoutController extends Controller
 
                 DB::commit();
 
+                // 👇 new — Meta CAPI purchase event, dispatched after commit so order is guaranteed saved
+                \App\Jobs\SendMetaCapiPurchase::dispatch(
+                    $order->id,
+                    $request->ip(),
+                    $request->userAgent(),
+                    $request->cookie('_fbp'),
+                    $request->cookie('_fbc'),
+                );
+
                 $this->sendOrderEmails($order);
 
                 return response()->json([
@@ -702,6 +715,15 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // 👇 new — Meta CAPI purchase event
+            \App\Jobs\SendMetaCapiPurchase::dispatch(
+                $order->id,
+                $request->ip(),
+                $request->userAgent(),
+                $request->cookie('_fbp'),
+                $request->cookie('_fbc'),
+            );
+
             $this->sendOrderEmails($order);
 
             return response()->json([
@@ -731,9 +753,12 @@ class CheckoutController extends Controller
 
     public function orderSuccess(Order $order)
     {
+        // Pixel/GA purchase event — rendered as an inline script tag on the thank-you view
+        $purchaseScript = \App\Services\Tracking\PixelTracker::purchaseScript($order);
+
         return view(
             'front-pages.thank-you',
-            compact('order')
+            compact('order', 'purchaseScript') // 👈 new
         );
     }
 

@@ -56,6 +56,8 @@ class CouponController extends Controller
             'usage_limit' => 'nullable|integer|min:1',
 
             'status' => 'nullable|boolean',
+            
+            'minimum_order_quantity' => 'nullable|integer|min:1',
         ]);
 
         $validated['status'] = $request->status ?? 0;
@@ -103,6 +105,8 @@ class CouponController extends Controller
             'usage_limit' => 'nullable|integer|min:1',
 
             'status' => 'nullable|boolean',
+            
+            'minimum_order_quantity' => 'nullable|integer|min:1',
         ]);
 
         $validated['status'] = $request->status ?? 0;

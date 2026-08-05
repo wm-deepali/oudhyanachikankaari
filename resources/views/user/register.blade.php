@@ -262,4 +262,41 @@
         });
     </script>
 
+    {{-- Pixel/GA tracking — this form is a plain POST redirect (not AJAX), so
+         the controller flashes fire_signup_event / fire_login_event to the
+         session. Covers the email/password signup above AND a Google OAuth
+         signup/login that happens to redirect back through this page (e.g.
+         intended URL was the register page). --}}
+    @if(session('fire_signup_event'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof fireTrackingEvents === 'function') {
+                    try {
+                        fireTrackingEvents([{
+                            type: 'gtag',
+                            name: 'sign_up',
+                            params: { method: @json(session('fire_signup_event')) }
+                        }]);
+                    } catch (err) {
+                        console.error('Tracking event failed (ignored):', err);
+                    }
+                }
+            });
+        </script>
+    @endif
+
+    @if(session('fire_login_event'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof fireTrackingEvents === 'function') {
+                    try {
+                        fireTrackingEvents([{ type: 'gtag', name: 'login', params: {} }]);
+                    } catch (err) {
+                        console.error('Tracking event failed (ignored):', err);
+                    }
+                }
+            });
+        </script>
+    @endif
+
 @endsection

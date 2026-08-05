@@ -53,7 +53,8 @@ use App\Http\Controllers\Admin\{
     ProductReportController,
     CustomerReportController,
     EmailTemplateController,
-    CouponEnquiryController
+    CouponEnquiryController,
+    CustomerWishlistController
 };
 
 use Illuminate\Support\Facades\Route;
@@ -400,6 +401,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/settings/general', [AdminSettingController::class, 'generalSettingStore'])->name('settings.general.store');
         Route::post('/settings/courier/store', [AdminSettingController::class, 'courierStore'])->name('couriers.store');
         Route::delete('/settings/courier/{courier}', [AdminSettingController::class, 'courierDelete'])->name('couriers.delete');
+        Route::post('admin-setting/google-setting', [AdminSettingController::class, 'googleSettingStore'])->name('admin-setting.google-setting');
 
         Route::get('/settings/email-templates', [EmailTemplateController::class, 'index'])->name('settings.email-templates.index');
         Route::post('settings/email-templates/test', [EmailTemplateController::class, 'sendTest'])->name('settings.email-templates.test');
@@ -423,8 +425,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('customers/addresses/export', [CustomerAddressController::class, 'export'])->name('customers.addresses.export');
 
         // Customers routes
-        Route::view('customers/customer-wishlist', 'admin.customers.customer-wishlist')->name('customers.customer-wishlist');
-        Route::view('customers/customer-wishlist-detail', 'admin.customers.customer-wishlist-detail')->name('customers.customer-wishlist-detail');
+   Route::get('customers/customer-wishlist', [CustomerWishlistController::class, 'index'])->name('customers.customer-wishlist');
+       Route::get('customers/{customer}/wishlist-detail', [CustomerWishlistController::class, 'show'])
+    ->name('customers.customer-wishlist-detail');
+    Route::delete('customers/{customer}/wishlist/clear', [CustomerWishlistController::class, 'clearWishlist'])
+    ->name('customers.wishlist.clear');
+    Route::delete('/wishlist/{wishlistId}', [\App\Http\Controllers\Admin\CustomerWishlistController::class, 'removeItem']);
+    
+    
         Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');

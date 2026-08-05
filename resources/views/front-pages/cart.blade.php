@@ -158,7 +158,7 @@
 
                             @if($cart && $cart->items->count())
 
-                                <div class="mb-3">
+                                <div class="mb-3" id="couponFormBlock" style="{{ $cart->coupon_code ? 'display:none;' : '' }}">
 
                                     <label class="mb-2 fw-bold">
                                         Coupon Code
@@ -177,22 +177,19 @@
 
                                 </div>
 
-                                @if($cart->coupon_code)
+                                <div id="couponAppliedBox" class="alert alert-success d-flex justify-content-between align-items-center"
+                                    style="{{ $cart->coupon_code ? '' : 'display:none!important;' }}">
 
-                                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+                                    <span>
+                                        Coupon Applied:
+                                        <strong id="couponAppliedCode">{{ $cart->coupon_code }}</strong>
+                                    </span>
 
-                                        <span>
-                                            Coupon Applied:
-                                            <strong>{{ $cart->coupon_code }}</strong>
-                                        </span>
+                                    <button type="button" id="removeCouponBtn" class="btn btn-sm btn-danger">
+                                        Remove
+                                    </button>
 
-                                        <button type="button" id="removeCouponBtn" class="btn btn-sm btn-danger">
-                                            Remove
-                                        </button>
-
-                                    </div>
-
-                                @endif
+                                </div>
 
                             @endif
 
@@ -292,6 +289,53 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+
+        // Fallback if layouts.app doesn't already define this globally —
+        // wires Pixel/GA/Meta CAPI events returned by the cart endpoints.
+        // If layout already defines window.fireTrackingEvents, this is skipped.
+        if (typeof window.fireTrackingEvents !== 'function') {
+            window.fireTrackingEvents = function (events) {
+                if (!events || !Array.isArray(events)) return;
+
+                events.forEach(function (evt) {
+                    try {
+                        if (evt.type === 'gtag' && typeof gtag === 'function') {
+                            gtag('event', evt.name, evt.params || {});
+                        } else if (evt.type === 'fbq' && typeof fbq === 'function') {
+                            fbq('track', evt.name, evt.params || {});
+                        }
+                    } catch (e) {
+                        console.warn('Tracking event failed:', evt, e);
+                    }
+                });
+            };
+        }
+
+        // Shared helper: reflect a coupon that got auto-removed by the
+        // backend (revalidateCoupon) after an add/remove/quantity change.
+        function handleCouponRevalidation(response) {
+
+            if (!response.coupon_removed) {
+                return;
+            }
+
+          document.getElementById('couponAppliedBox')
+    .style.setProperty('display', 'none', 'important');
+            $('#couponFormBlock').show();
+            $('#couponAppliedCode').text('');
+
+            if (response.coupon_message) {
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Coupon Removed',
+                    text: response.coupon_message,
+                    confirmButtonColor: '#C98F9D'
+                });
+
+            }
+        }
+
         $(document).on('click', '.remove-cart-item', function () {
 
             if (!confirm('Remove this item from cart?')) {
@@ -310,10 +354,16 @@
 
                     if (response.status) {
 
+                        fireTrackingEvents(response.tracking_events);
+
                         $('#cart-row-' + itemId).remove();
 
                         $('#summarySubtotal').text(
                             '₹' + Number(response.cart_total).toLocaleString()
+                        );
+
+                        $('#summaryDiscount').text(
+                            '- ₹' + Number(response.discount).toLocaleString()
                         );
 
                         $('#summaryTotal').text(
@@ -323,6 +373,8 @@
                         $('.cart-count').text(
                             response.cart_count
                         );
+
+                        handleCouponRevalidation(response);
 
                         if ($('.aq-cart-item-row').length === 0) {
 
@@ -361,6 +413,8 @@
 
             if (response.status) {
 
+                fireTrackingEvents(response.tracking_events);
+
                 $('.aq-cart-qty-input[data-id="' + itemId + '"]')
                     .val(response.quantity);
 
@@ -376,9 +430,15 @@
                     '₹' + Number(response.cart_total).toLocaleString()
                 );
 
+                $('#summaryDiscount').text(
+                    '- ₹' + Number(response.discount).toLocaleString()
+                );
+
                 $('#summaryTotal').text(
                     '₹' + Number(response.cart_total).toLocaleString()
                 );
+
+                handleCouponRevalidation(response);
 
             } else {
 

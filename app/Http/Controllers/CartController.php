@@ -10,6 +10,8 @@ use App\Models\ProductVariant;
 use App\Models\Coupon;
 use App\Models\AttributeValue;
 use App\Models\ProductAddon;
+use App\Services\Tracking\PixelTracker;
+
 
 class CartController extends Controller
 {
@@ -251,6 +253,23 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         $cart->recalculateTotals();
         $cart->refresh();
 
+        // Adding items can only make a coupon's conditions easier to satisfy,
+        // but a percentage discount amount still needs to track the new subtotal.
+        $couponResult = $this->revalidateCoupon($cart);
+
+        if ($couponResult && $couponResult['removed']) {
+            $cart->recalculateTotals();
+            $cart->refresh();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pixel/GA tracking — add-to-cart event. Price used is the resolved
+        | variant price (or base price), same value the cart line was priced at.
+        |--------------------------------------------------------------------------
+        */
+        $trackingEvents = PixelTracker::addToCart($product, $quantity, $price);
+
         /*
         |--------------------------------------------------------------------------
         | Render mini cart partial — lets the frontend swap the sidebar in
@@ -272,6 +291,10 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
             'cart_total' => $cart->grand_total,
             'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
             'mini_cart_html' => $miniCartHtml,
+            'coupon_removed' => $couponResult['removed'] ?? false,
+            'coupon_message' => $couponResult['message'] ?? null,
+            'discount' => $cart->discount,
+            'tracking_events' => $trackingEvents,
         ]);
     }
 
@@ -302,6 +325,10 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         if ($cart) {
             $cart->recalculateTotals();
             $cart->refresh();
+
+            // Cart may have been touched from another tab/request since the coupon was applied
+            $this->revalidateCoupon($cart);
+            $cart->refresh();
         }
 
         return view(
@@ -326,10 +353,24 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
 
         $cart = $item->cart;
 
+        // capture before delete — product/qty/price won't exist on $item after this
+        $trackingEvents = PixelTracker::removeFromCart(
+            $item->product,
+            $item->quantity,
+            $item->price
+        );
+
         $item->delete();
 
         $cart->recalculateTotals();
         $cart->refresh();
+
+        $couponResult = $this->revalidateCoupon($cart);
+
+        if ($couponResult && $couponResult['removed']) {
+            $cart->recalculateTotals();
+            $cart->refresh();
+        }
 
         $cart->load(['items.product', 'items.imageVariant', 'items.addons']);
         $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();
@@ -341,6 +382,10 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
             'cart_count' => $cart->items()->sum('quantity'),
             'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
             'mini_cart_html' => $miniCartHtml,
+            'coupon_removed' => $couponResult['removed'] ?? false,
+            'coupon_message' => $couponResult['message'] ?? null,
+            'discount' => $cart->discount,
+            'tracking_events' => $trackingEvents,
         ]);
     }
 
@@ -405,6 +450,13 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         $cart->recalculateTotals();
         $cart->refresh();
 
+        $couponResult = $this->revalidateCoupon($cart);
+
+        if ($couponResult && $couponResult['removed']) {
+            $cart->recalculateTotals();
+            $cart->refresh();
+        }
+
         $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
         $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
 
@@ -420,6 +472,9 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
             'cart_count' => $cart->items()->sum('quantity'),
             'cart_subtotal' => number_format($cart->total_amount ?? $cart->items()->sum('total'), 2),
             'mini_cart_html' => $miniCartHtml,
+            'coupon_removed' => $couponResult['removed'] ?? false,
+            'coupon_message' => $couponResult['message'] ?? null,
+            'discount' => $cart->discount,
         ]);
     }
 
@@ -481,6 +536,27 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Minimum Order Quantity Check
+        |--------------------------------------------------------------------------
+        */
+
+        $totalQuantity = $cart->items()->sum('quantity');
+
+        if (
+            $coupon->minimum_order_quantity &&
+            $totalQuantity < $coupon->minimum_order_quantity
+        ) {
+
+            $remainingQty = $coupon->minimum_order_quantity - $totalQuantity;
+
+            return response()->json([
+                'status' => false,
+                'message' => "Add {$remainingQty} more item" . ($remainingQty > 1 ? 's' : '') . " to unlock this coupon (minimum {$coupon->minimum_order_quantity} items required)."
+            ]);
+        }
+
         if ($coupon->discount_type == 'percentage') {
 
             $discount =
@@ -531,6 +607,63 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         return response()->json([
             'status' => true
         ]);
+    }
+
+    /**
+     * Re-check an applied coupon's conditions against the cart's current
+     * subtotal/quantity. Removes the coupon if it no longer qualifies,
+     * and re-syncs a percentage discount's amount if the subtotal shifted.
+     *
+     * Call this after any operation that changes cart contents (add,
+     * remove, quantity update) — right after recalculateTotals()/refresh().
+     */
+    private function revalidateCoupon(Cart $cart): ?array
+    {
+        if (!$cart->coupon_id) {
+            return null;
+        }
+
+        $coupon = Coupon::find($cart->coupon_id);
+
+        if (!$coupon || !$coupon->status) {
+            $cart->update(['coupon_id' => null, 'coupon_code' => null, 'discount' => 0]);
+
+            return [
+                'removed' => true,
+                'message' => 'Your applied coupon is no longer available and has been removed.',
+            ];
+        }
+
+        $subtotal = $cart->subtotal;
+        $totalQuantity = $cart->items()->sum('quantity');
+
+        $amountOk = !$coupon->minimum_order_amount || $subtotal >= $coupon->minimum_order_amount;
+        $qtyOk = !$coupon->minimum_order_quantity || $totalQuantity >= $coupon->minimum_order_quantity;
+
+        if (!$amountOk || !$qtyOk) {
+            $cart->update(['coupon_id' => null, 'coupon_code' => null, 'discount' => 0]);
+
+            return [
+                'removed' => true,
+                'message' => "Coupon \"{$coupon->code}\" was removed — your cart no longer meets its minimum requirement.",
+            ];
+        }
+
+        // Cart still qualifies — but a percentage discount amount needs to
+        // track the new subtotal (flat discounts don't change).
+        if ($coupon->discount_type === 'percentage') {
+            $discount = ($subtotal * $coupon->discount_value) / 100;
+
+            if ($coupon->maximum_discount && $discount > $coupon->maximum_discount) {
+                $discount = $coupon->maximum_discount;
+            }
+
+            if ((float) $discount !== (float) $cart->discount) {
+                $cart->update(['discount' => $discount]);
+            }
+        }
+
+        return ['removed' => false];
     }
 
 }

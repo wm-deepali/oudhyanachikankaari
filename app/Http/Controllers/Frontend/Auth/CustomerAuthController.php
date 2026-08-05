@@ -83,7 +83,8 @@ class CustomerAuthController extends Controller
         // page) instead of always landing on the dashboard after signup.
         return redirect()
             ->intended(route('user.dashboard.index'))
-            ->with('success', 'Registration completed successfully.');
+            ->with('success', 'Registration completed successfully.')
+            ->with('fire_signup_event', 'email_password'); // 👈 new — blade fires Pixel/GA sign_up on this flash
     }
 
 
@@ -109,7 +110,8 @@ class CustomerAuthController extends Controller
 
             return redirect()
                 ->intended(route('user.dashboard.index'))
-                ->with('success', 'Login successful.');
+                ->with('success', 'Login successful.')
+                ->with('fire_login_event', true); // 👈 new — blade fires Pixel/GA login on this flash
         }
 
         return back()
@@ -143,12 +145,21 @@ class CustomerAuthController extends Controller
             ]
         );
 
+        $isNewCustomer = $customer->wasRecentlyCreated; // 👈 new
+
         Auth::guard('customer')->login($customer);
 
         $guestSessionId = session()->getId();
 
         $this->mergeGuestCart($customer, $guestSessionId);
         $this->mergeGuestWishlist($customer, $guestSessionId);
+
+        // 👇 new — flash for session-based tracking, same as email/password paths above
+        if ($isNewCustomer) {
+            session()->flash('fire_signup_event', 'google_oauth');
+        } else {
+            session()->flash('fire_login_event', true);
+        }
 
         return redirect()->intended(route('home'));
     }

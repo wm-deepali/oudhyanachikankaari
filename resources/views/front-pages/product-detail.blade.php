@@ -1,12 +1,21 @@
 @extends('layouts.app')
 @section('content')
 
-    @php
-        // Category/Subcategory size chart — prefer the subcategory's if set,
-        // fall back to the parent category's.
-        $sizeChartImage = optional($product->subcategory)->size_chart_image
-            ?? optional($product->category)->size_chart_image;
-    @endphp
+   @php
+    // Category/Subcategory size chart — prefer the subcategory's if set,
+    // fall back to the parent category's.
+    $sizeChartImage = optional($product->subcategory)->size_chart_image
+        ?? optional($product->category)->size_chart_image;
+
+    // Real availability: if this product has stock-type variants, that's
+    // the source of truth — the base `stock` column can go stale relative
+    // to variants. Falls back to the base column only for products with
+    // no stock variants at all.
+    $stockVariants = $product->variants->where('type', 'stock');
+    $detailStock = $stockVariants->count()
+        ? $stockVariants->sum('stock')
+        : $product->stock;
+@endphp
 
     <style>
 .qty-btn:disabled {
@@ -766,7 +775,8 @@ font-size:15px;
                           
 
                             <!-- Pricing box -->
-                             <div class="aq-details-price-box p-3 mb-25">
+                             <div class="aq-details-price-box p-3 mb-25" id="aqPriceBox"
+                                  style="{{ $detailStock >= $product->min_qty ? '' : 'display:none' }}">
                                 <div class="d-flex flex-column gap-1">
                                     @php
                                         $discount = ($product->mrp > 0 && $product->mrp > $product->price)
@@ -800,6 +810,8 @@ font-size:15px;
                                     </p>
                                 </div>
                             </div>
+
+                          
                             
                             <!-- Promo Discount Box -->
                              <div class="coupon-container" id="couponContainer"></div>
@@ -1030,41 +1042,40 @@ font-size:15px;
                                     <div class="aq-qty-selector luxury-qty d-flex align-items-center justify-content-center gap-3">
                                         <button type="button" class="qty-btn" onclick="aqAdjustQty(-1)"><i
                                                 class="fa-solid fa-minus"></i></button>
+                                  
                                         <input type="number" id="aqDetailQty" value="{{ $product->min_qty }}"
-                                            min="{{ $product->min_qty }}" max="{{ $product->stock }}" />
+    min="{{ $product->min_qty }}" max="{{ $detailStock }}" />
 
-                                        <span id="currentStock" class="d-none">
-                                            {{ $product->stock }}
-                                        </span>
+<span id="currentStock" class="d-none">
+    {{ $detailStock }}
+</span>
                                         <button type="button" class="qty-btn" onclick="aqAdjustQty(1)"><i
                                                 class="fa-solid fa-plus"></i></button>
                                     </div>
-                                    @if($product->stock >= $product->min_qty)
-
-                                        <button type="button"
-                                            class="btn-design-primary aq-add-to-cart-btn"
-                                            onclick="addToCart({{ $product->id }})">
-                                            Add to Cart
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn-design-primary" disabled
-                                            style="background:#999;cursor:not-allowed;">
-                                            Out of Stock
-                                        </button>
-                                    @endif
+                                   @if($detailStock >= $product->min_qty)
+    <button type="button"
+        class="btn-design-primary aq-add-to-cart-btn"
+        onclick="addToCart({{ $product->id }})">
+        Add to Cart
+    </button>
+@else
+    <button type="button" class="btn-design-primary" disabled
+        style="background:#999;cursor:not-allowed;">
+        Out of Stock
+    </button>
+@endif
                                     
-                                    
-                                    @if($product->stock >= $product->min_qty)
-                                    <button class="btn-design-secondary aq-buy-now-btn"
-                                        onclick="addToCart({{ $product->id }})">
-                                        <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Buy it Now
-                                    </button>
-                                @else
-                                    <button class="btn-design-secondary" disabled
-                                        style="cursor:not-allowed;">
-                                        Out of Stock
-                                    </button>
-                                @endif
+                                   @if($detailStock >= $product->min_qty)
+<button class="btn-design-secondary aq-buy-now-btn"
+    onclick="addToCart({{ $product->id }})">
+    <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Buy it Now
+</button>
+@else
+<button class="btn-design-secondary" disabled
+    style="cursor:not-allowed;">
+    Out of Stock
+</button>
+@endif
                                 </div>
                             </div>
                         </div>
@@ -1349,7 +1360,7 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center last_child_hide_in_tabs">
                     @foreach($newArrivals as $newArrival)
 
                         @php
@@ -1423,7 +1434,7 @@ font-size:15px;
                                     </p>
 
                                     <div class="aq-product-card-price-group">
-
+  @if($newArrivalStock >= $newArrival->min_qty)
                                         <span class="aq-product-card-price">
                                             ₹{{ number_format($newArrival->price) }}
                                         </span>
@@ -1436,6 +1447,7 @@ font-size:15px;
                                             <span class="aq-product-card-discount">
     (You Save {{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}% Off)
 </span>
+                                         @endif
                                         @endif
 
                                     </div>
@@ -1450,10 +1462,6 @@ font-size:15px;
 
     $groupedValues = $listingValues->groupBy('attribute_id');
 
-
-            $availableStock = $newArrival->variants->count()
-        ? $newArrival->variants->sum('stock')
-        : $newArrival->stock;
 @endphp
 
 @if($groupedValues->count())
@@ -1504,7 +1512,7 @@ font-size:15px;
                         </div>
                     </div>
                 </div>
-                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center">
+                <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-sm-2 row-cols-2 g-4 justify-content-center last_child_hide_in_tabs">
 
                     @foreach($relatedProducts as $relatedProduct)
 
@@ -1512,6 +1520,9 @@ font-size:15px;
                             $otherImages = $relatedProduct->images
                                 ->where('is_default', 0)
                                 ->values();
+                                 $relatedStock = $relatedProduct->variants->count()
+        ? $relatedProduct->variants->where('type', 'stock')->sum('stock')
+        : $relatedProduct->stock;
                         @endphp
 
                         <div class="col">
@@ -1574,7 +1585,7 @@ font-size:15px;
                                     </p>
 
                                     <div class="aq-product-card-price-group">
-
+ @if($relatedStock >= $relatedProduct->min_qty)
                                         <span class="aq-product-card-price">
                                             ₹{{ number_format($relatedProduct->price) }}
                                         </span>
@@ -1589,6 +1600,7 @@ font-size:15px;
                                                 OFF)
                                             </span>
                                         @endif
+                                        @endif
 
                                         </div>
                                        @php
@@ -1602,10 +1614,6 @@ font-size:15px;
 
     $groupedValues = $listingValues->groupBy('attribute_id');
 
-
-            $availableStock = $relatedProduct->variants->count()
-        ? $relatedProduct->variants->sum('stock')
-        : $relatedProduct->stock;
 @endphp
 
 @if($groupedValues->count())
@@ -1622,11 +1630,7 @@ font-size:15px;
         </a>
     @endforeach
 @endif
-                                   @php
-    $relatedStock = $relatedProduct->variants->count()
-        ? $relatedProduct->variants->where('type', 'stock')->sum('stock')
-        : $relatedProduct->stock;
-@endphp
+
 <div class="aq-product-card-bottom">
     @if($relatedStock >= $relatedProduct->min_qty)
         <button class="aq-product-card-cta"
@@ -1701,9 +1705,20 @@ function renderBestCoupon(totalPriceForCoupon) {
     }
 
     // Sirf woh coupons jinka minimum_order_amount current total se satisfy ho raha hai
-    const eligible = activeCoupons.filter(function (c) {
-        return !c.minimum_order_amount || parseFloat(c.minimum_order_amount) <= totalPriceForCoupon;
-    });
+   const qty = parseInt($('#aqDetailQty').val()) || 1;
+
+const eligible = activeCoupons.filter(function (c) {
+
+    const amountEligible =
+        !c.minimum_order_amount ||
+        parseFloat(c.minimum_order_amount) <= totalPriceForCoupon;
+
+    const quantityEligible =
+        !c.minimum_order_quantity ||
+        qty >= parseInt(c.minimum_order_quantity);
+
+    return amountEligible && quantityEligible;
+});
 
     if (!eligible.length) {
         $container.html('');
@@ -1747,6 +1762,9 @@ function renderBestCoupon(totalPriceForCoupon) {
     if (best.minimum_order_amount) {
         descText += ' on orders above ₹' + Math.round(best.minimum_order_amount).toLocaleString('en-IN');
     }
+    if (best.minimum_order_quantity) {
+    descText += ' | Min Qty: ' + best.minimum_order_quantity;
+}
 
     $container.html(`
         <div class="coupon-card" id="coupon-${best.code}" onclick="copyCouponCode('${best.code}')" style="cursor:pointer;">
@@ -2010,8 +2028,23 @@ $(document).on('click', '.variant-option', function () {
 
             updatePriceDisplay();
 
-            const stockValue = stockVariant ? stockVariant.stock : {{ (int) $product->stock }};
+const stockValue = stockVariant ? stockVariant.stock : {{ (int) $detailStock }};
+            
             $('#currentStock').text(stockValue);
+
+            // ← NAYA ADD KIYA: price box ko stock ke hisaab se toggle karo
+            if (stockValue < {{ (int) $product->min_qty }}) {
+                $('#aqPriceBox').hide();
+                if ($('#aqOutOfStockBox').length === 0) {
+                    $('#aqPriceBox').after('<div class="aq-details-price-box p-3 mb-25" id="aqOutOfStockBox"><span class="aq-details-price" style="color:#999;">Currently Out of Stock</span></div>');
+                } else {
+                    $('#aqOutOfStockBox').show();
+                }
+            } else {
+                $('#aqPriceBox').show();
+                $('#aqOutOfStockBox').hide();
+            }
+
 
             if (stockValue > 0) {
                 $('#aqDetailQty')
@@ -2258,6 +2291,7 @@ function updateQtyButtonStates() {
                         });
 
                         $('.cart-count').text(response.cart_count);
+                        fireTrackingEvents(response.tracking_events); 
                          refreshMiniCart(response);          // ← add this
 
                         if (response.mini_cart_html) {
@@ -2350,6 +2384,7 @@ function addToCartCard(productId, minQty, btnEl) {
             if (response.status) {
                 Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
                 $('.cart-count').text(response.cart_count);
+                 fireTrackingEvents(response.tracking_events);
                 refreshMiniCart(response);
 
                 $btn.html('<i class="fa-solid fa-check"></i> Added to Cart').prop('disabled', true);
@@ -2369,4 +2404,12 @@ function addToCartCard(productId, minQty, btnEl) {
     });
 }
     </script>
+    
+    
+    @if(!empty($viewItemScript))
+<script>
+    {!! $viewItemScript !!}
+</script>
+@endif
+
 @endsection

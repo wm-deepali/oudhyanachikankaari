@@ -548,6 +548,8 @@
 
                                 <th>Min Order</th>
 
+<th>Min Qty</th>
+
                                 <th>Usage</th>
 
                                 <th>Validity</th>
@@ -597,7 +599,9 @@
                                     <td>
                                         ₹{{ number_format($coupon->minimum_order_amount ?? 0, 2) }}
                                     </td>
-
+<td>
+    {{ $coupon->minimum_order_quantity ?? '—' }}
+</td>
                                     <td>
                                         {{ $coupon->used_count }}
                                         /
