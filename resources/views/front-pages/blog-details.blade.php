@@ -12,7 +12,7 @@
                 <i class="fa-regular fa-star"></i>
             </div>
             <div class="aq-catpage-hero-content">
-                <h1 class="aq-catpage-title">{{ $blog->title }}</h1>
+                <h1 class="aq-catpage-title">{{ $blog->h1_heading ?: $blog->title }}</h1>
                 <div class="aq-catpage-breadcrumbs">
                     <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
@@ -30,8 +30,8 @@
                     <div class="col-lg-8">
                         <div class="aq-blog-main-content aq-luxury-card">
                             <div class="aq-blog-featured-img-wrap position-relative">
-                                <img src="{{ asset('storage/' . $blog->image) }}" alt="{{ $blog->title }}"
-                                    class="aq-blog-featured-img">
+                                <img src="{{ asset('storage/' . $blog->image) }}"
+                                    alt="{{ $blog->h1_heading ?: $blog->title }}" class="aq-blog-featured-img">
                             </div>
                             <div class="aq-blog-content-inner">
                                 <h2 class="aq-blog-title display-5 fw-bold">{{ $blog->title }}</h2>
@@ -53,9 +53,9 @@
                                 </div>
 
                                 <div class="aq-blog-body fs-5 text-secondary lh-lg">
-                                   {!! $blog->content !!}
+                                    {!! $blog->content !!}
                                 </div>
-  @php
+                                @php
                                     $shareUrl = urlencode(request()->url());
                                     $shareTitle = urlencode($blog->title);
                                 @endphp
@@ -65,7 +65,7 @@
                                     class="aq-blog-footer mt-5 pt-4 border-top border-light d-flex flex-column flex-md-row justify-content-end align-items-md-center gap-4">
                                     <div class="aq-blog-share d-flex align-items-center gap-3">
                                         <span class="fw-bold text-dark">Share:</span>
-                                          <a href="https://wa.me/?text={{ $shareTitle }}%20{{ $shareUrl }}" target="_blank"
+                                        <a href="https://wa.me/?text={{ $shareTitle }}%20{{ $shareUrl }}" target="_blank"
                                             class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
                                             style="width: 36px; height: 36px;"><i class="fa-brands fa-whatsapp"></i></a>
                                         <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}"
@@ -83,7 +83,7 @@
                                             target="_blank"
                                             class="aq-share-icon rounded-circle bg-light d-flex align-items-center justify-content-center text-dark transition-all hover-gold"
                                             style="width: 36px; height: 36px;"><i class="fa-brands fa-linkedin-in"></i></a>
-                                       
+
                                     </div>
                                 </div>
                             </div>

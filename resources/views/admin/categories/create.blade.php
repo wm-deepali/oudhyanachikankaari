@@ -439,23 +439,82 @@
                             </div>
                         </div>
 
-                        <!-- SEO -->
+                        <!-- SEO & Metadata -->
                         <div class="section-card">
                             <div class="section-card-header">
-                                <h5>SEO</h5>
+                                <h5>SEO &amp; Metadata</h5>
                             </div>
                             <div class="section-card-body">
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input"
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text" name="meta_title" id="meta_title" class="field-input" required
                                         placeholder="Page title for search engines">
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea"
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea"
+                                        required
                                         placeholder="Brief description shown in search results (150–160 chars recommended)"></textarea>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text" name="h1_heading" id="h1_heading" class="field-input" required
+                                        placeholder="Main on-page heading">
+                                    <div class="field-hint">Auto-filled from Name — edit if you want a different on-page
+                                        heading.</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="field-input" id="canonicalDisplay"
+                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+                                        /cat/<span id="canonicalSlug">—</span>
+                                    </div>
+                                    <div class="field-hint">Set automatically from the Slug field. Not editable here.
+                                    </div>
+                                </div>
+
+                                <hr style="margin:18px 0;border:none;border-top:1px solid var(--bg)">
+
+                                <div class="field-group">
+                                    <label class="field-label">OG Title</label>
+                                    <input type="text" name="og_title" id="og_title" class="field-input"
+                                        placeholder="Auto-filled from Meta Title">
+                                    <div class="field-hint">Auto-filled from Meta Title — edit to override for social
+                                        sharing.</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">OG Description</label>
+                                    <textarea name="og_description" id="og_description" class="field-textarea"
+                                        placeholder="Auto-filled from Meta Description"></textarea>
+                                    <div class="field-hint">Auto-filled from Meta Description — edit to override for
+                                        social sharing.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">OG Image</label>
+                                    <div class="file-upload-area" id="ogImageUploadArea" style="padding:16px">
+                                        <input type="file" name="og_image" accept="image/*" id="ogImageInput">
+                                        <div class="upload-icon"><i class="fa fa-share-alt"></i></div>
+                                        <p>Optional — overrides Category Image for social sharing</p>
+                                        <small>PNG, JPG, WEBP — recommended 1200×630</small>
+                                    </div>
+                                    <div id="ogImagePreview" style="display:none;margin-top:10px;text-align:center">
+                                        <img id="ogImagePreviewImg" src="" alt="OG Image preview"
+                                            style="max-width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);">
+                                        <div style="margin-top:6px">
+                                            <button type="button" onclick="clearOgImage()"
+                                                style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:0">
+                                                <i class="fa fa-times"></i> Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="field-hint">Uses the Category Image by default — upload here only for a
+                                        different social-share preview.</div>
                                 </div>
 
                             </div>
@@ -615,6 +674,64 @@
             $('#slug').val(slug);
         }
     });
+
+    // Auto-generate H1 Heading from Name
+    let manualH1 = false;
+
+    $('#h1_heading').on('keyup', function () { manualH1 = true; });
+
+    $('#name').on('keyup', function () {
+        if (!manualH1) {
+            $('#h1_heading').val($(this).val());
+        }
+    });
+
+    // Live canonical preview from slug
+    function updateCanonicalPreview() {
+        const slugVal = $('#slug').val().trim();
+        $('#canonicalSlug').text(slugVal || '—');
+    }
+    $('#slug, #name').on('keyup', updateCanonicalPreview);
+
+    // Auto-fill OG Title from Meta Title
+    let manualOgTitle = false;
+
+    $('#og_title').on('keyup', function () { manualOgTitle = true; });
+
+    $('#meta_title').on('keyup', function () {
+        if (!manualOgTitle) {
+            $('#og_title').val($(this).val());
+        }
+    });
+
+    // Auto-fill OG Description from Meta Description
+    let manualOgDesc = false;
+
+    $('#og_description').on('keyup', function () { manualOgDesc = true; });
+
+    $('#meta_description').on('keyup', function () {
+        if (!manualOgDesc) {
+            $('#og_description').val($(this).val());
+        }
+    });
+
+    document.getElementById('ogImageInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('ogImagePreviewImg').src = e.target.result;
+            document.getElementById('ogImagePreview').style.display = 'block';
+            document.getElementById('ogImageUploadArea').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function clearOgImage() {
+        document.getElementById('ogImageInput').value = '';
+        document.getElementById('ogImagePreview').style.display = 'none';
+        document.getElementById('ogImageUploadArea').style.display = 'block';
+    }
 
     // Image preview
     document.getElementById('imageInput').addEventListener('change', function () {

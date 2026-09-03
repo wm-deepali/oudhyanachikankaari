@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 
- <style>
+    <style>
         .wishlist-active {
             background: #ff4d94 !important;
             color: #fff !important;
@@ -23,11 +23,11 @@
                 <i class="fa-solid fa-gem"></i>
             </div>
             <div class="aq-catpage-hero-content">
-                <h1 class="aq-catpage-title">{{ $category->name ?? $pageTitle ?? '' }}</h1>
+                <h1 class="aq-catpage-title">{{ $contextModel->h1_heading ?? $pageTitle ?? '' }}</h1>
                 <div class="aq-catpage-breadcrumbs">
                     <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
-                    <span>{{ $category->name ?? $pageTitle ?? 'Product Listing' }}</span>
+                    <span>{{ $contextModel->h1_heading ?? $pageTitle ?? 'Product Listing' }}</span>
                 </div>
             </div>
         </section>
@@ -95,8 +95,7 @@
 
                                                     @foreach($categoryAttribute->attribute->values as $value)
 
-                                                        <li class="aq-filter-item"
-                                                            data-filter-type="attribute"
+                                                        <li class="aq-filter-item" data-filter-type="attribute"
                                                             data-attribute-id="{{ $categoryAttribute->attribute->id }}"
                                                             data-value-id="{{ $value->id }}">
 
@@ -194,8 +193,7 @@
                                     <div class="aq-filter-content">
                                         <ul class="aq-filter-list">
                                             @foreach($categories as $cat)
-                                                <li class="aq-filter-item" data-filter-type="category"
-                                                    data-id="{{ $cat->id }}">
+                                                <li class="aq-filter-item" data-filter-type="category" data-id="{{ $cat->id }}">
 
                                                     <div class="aq-filter-checkbox">
                                                         <i class="fa-solid fa-check"></i>
@@ -217,49 +215,50 @@
                                 Reset All Filters
                             </button>
                         </div>
-                        
-                        
-           
 
-{{-- Visual subcategory list --}}
-@if($category)
-    <div class="aq-filter-widget aq-filter-sidebar mt-3 pb-3">
 
-        <button class="aq-filter-header" type="button">
-            <span>Category</span>
-            <i class="fa-solid fa-chevron-down"></i>
-        </button>
 
-        <div class="aq-filter-content">
-            <ul class="aq-filter-list">
 
-                @foreach($subcategories as $subcategory)
+                        {{-- Visual subcategory list --}}
+                        @if($category)
+                            <div class="aq-filter-widget aq-filter-sidebar mt-3 pb-3">
 
-                    <li class="aq-filter-item {{ request('subcategory') == $subcategory->slug ? 'active' : '' }}">
+                                <button class="aq-filter-header" type="button">
+                                    <span>Category</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
 
-                        <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}"
-                            class="d-flex align-items-center justify-content-between w-100 text-decoration-none">
+                                <div class="aq-filter-content">
+                                    <ul class="aq-filter-list">
 
-                            <div class="aq-filter-label">
-                                {{ $subcategory->name }}
-                                <span class="aq-category-count">
-                                    ({{ $subcategory->sub_category_products_count }})
-                                </span>
+                                        @foreach($subcategories as $subcategory)
+
+                                            <li
+                                                class="aq-filter-item {{ request('subcategory') == $subcategory->slug ? 'active' : '' }}">
+
+                                                <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}"
+                                                    class="d-flex align-items-center justify-content-between w-100 text-decoration-none">
+
+                                                    <div class="aq-filter-label">
+                                                        {{ $subcategory->name }}
+                                                        <span class="aq-category-count">
+                                                            ({{ $subcategory->sub_category_products_count }})
+                                                        </span>
+                                                    </div>
+
+                                                    <i class="fa-solid fa-chevron-right"></i>
+
+                                                </a>
+
+                                            </li>
+
+                                        @endforeach
+
+                                    </ul>
+                                </div>
+
                             </div>
-
-                            <i class="fa-solid fa-chevron-right"></i>
-
-                        </a>
-
-                    </li>
-
-                @endforeach
-
-            </ul>
-        </div>
-
-    </div>
-@endif
+                        @endif
                     </div>
 
                     <!-- Right Product Grid -->
@@ -268,10 +267,10 @@
                         <div class="aq-layout-header">
                             <span class="aq-layout-header-title" id="aq-active-category-title">
                                 @if($category)
-                                    {{ request('subcategory')
-                                        ? $subcategories->firstWhere('slug', request('subcategory'))?->name
-                                        : $category->name
-                                    }} Collection
+                                                        {{ request('subcategory')
+                                    ? $subcategories->firstWhere('slug', request('subcategory'))?->name
+                                    : $category->name
+                                                                }} Collection
                                 @else
                                     {{ $pageTitle }} Collection
                                 @endif
@@ -637,93 +636,93 @@
             }
         });
 
-function addToCart(productId, minQty, btnEl) {
+        function addToCart(productId, minQty, btnEl) {
 
-    const $btn = btnEl ? $(btnEl) : null;
-    const originalHTML = $btn ? $btn.html() : null;
+            const $btn = btnEl ? $(btnEl) : null;
+            const originalHTML = $btn ? $btn.html() : null;
 
-    $.ajax({
-        url: "{{ route('cart.add') }}",
-        type: "POST",
-        data: {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            product_id: productId,
-            quantity: minQty
-        },
-        success: function (response) {
-            if (response.status) {
-                Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
-                $('.cart-count').text(response.cart_count);
-                 fireTrackingEvents(response.tracking_events);
-                refreshMiniCart(response);
+            $.ajax({
+                url: "{{ route('cart.add') }}",
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    product_id: productId,
+                    quantity: minQty
+                },
+                success: function (response) {
+                    if (response.status) {
+                        Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+                        $('.cart-count').text(response.cart_count);
+                        fireTrackingEvents(response.tracking_events);
+                        refreshMiniCart(response);
 
-                if ($btn) {
-                    $btn.html('<i class="fa-solid fa-check"></i> Added to Cart').prop('disabled', true);
-                    setTimeout(function () {
-                        $btn.html(originalHTML).prop('disabled', false);
-                    }, 1500);
+                        if ($btn) {
+                            $btn.html('<i class="fa-solid fa-check"></i> Added to Cart').prop('disabled', true);
+                            setTimeout(function () {
+                                $btn.html(originalHTML).prop('disabled', false);
+                            }, 1500);
+                        }
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: response.message ?? 'Unable to add product.' });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                    });
                 }
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: response.message ?? 'Unable to add product.' });
-            }
-        },
-        error: function (xhr) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: xhr.responseJSON?.message ?? 'Something went wrong.'
             });
         }
-    });
-}
-      
 
-         function addToWishlist(productId) {
 
-                $.ajax({
-                    url: "{{ route('wishlist.add') }}",
-                    type: "POST",
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content'),
-                        product_id: productId
-                    },
-                    success: function (response) {
+        function addToWishlist(productId) {
 
-                        if (response.status) {
+            $.ajax({
+                url: "{{ route('wishlist.add') }}",
+                type: "POST",
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    product_id: productId
+                },
+                success: function (response) {
 
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: response.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
+                    if (response.status) {
 
-                            $('.wishlist-count').text(response.wishlist_count);
-                             fireTrackingEvents(response.tracking_events);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
 
-                        } else {
+                        $('.wishlist-count').text(response.wishlist_count);
+                        fireTrackingEvents(response.tracking_events);
 
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message ?? 'Unable to add to wishlist.'
-                            });
-
-                        }
-
-                    },
-                    error: function (xhr) {
+                    } else {
 
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                            text: response.message ?? 'Unable to add to wishlist.'
                         });
 
                     }
-                });
-            }
+
+                },
+                error: function (xhr) {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                    });
+
+                }
+            });
+        }
 
     </script>
 

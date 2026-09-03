@@ -149,6 +149,9 @@
             padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .section-card-header h5 {
@@ -157,6 +160,16 @@
             color: var(--text-primary);
             margin: 0;
             letter-spacing: .01em;
+        }
+
+        .section-card-header .auto-badge {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--accent);
+            background: var(--accent-light);
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: .02em;
         }
 
         .section-card-body {
@@ -216,6 +229,11 @@
             font-family: var(--font);
         }
 
+        .field-textarea {
+            padding: 10px 12px;
+            resize: vertical;
+        }
+
         .field-input:focus,
         .field-select:focus {
             border-color: var(--accent);
@@ -234,7 +252,22 @@
             margin-top: 4px;
         }
 
-        /* ── Slug prefix ── */
+        .char-count {
+            font-size: 11px;
+            color: var(--text-hint);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        .char-count.warn {
+            color: #b8860b;
+        }
+
+        .char-count.over {
+            color: var(--red);
+        }
+
+        /* ── Slug / canonical prefix ── */
         .slug-wrap {
             display: flex;
         }
@@ -254,6 +287,48 @@
 
         .slug-wrap .field-input {
             border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        /* ── Image upload ── */
+        .image-upload {
+            border: 1.5px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            background: var(--bg);
+        }
+
+        .image-upload input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-upload .icon {
+            font-size: 20px;
+            color: var(--text-hint);
+            margin-bottom: 6px;
+        }
+
+        .image-upload .txt {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+        }
+
+        #imagePreviewWrap {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        #imagePreviewWrap img {
+            max-width: 100%;
+            max-height: 140px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
         }
 
         /* ── Toggle rows (right column) ── */
@@ -309,6 +384,23 @@
             box-shadow: 0 0 0 3px rgba(48, 61, 137, .12);
         }
 
+        /* ── Info note (backend-only fields) ── */
+        .info-note {
+            display: flex;
+            gap: 8px;
+            background: var(--accent-light);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .info-note i {
+            color: var(--accent);
+            margin-top: 1px;
+        }
+
         /* ── Action bar ── */
         .action-bar {
             background: var(--surface);
@@ -347,7 +439,7 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('admin.collections.store') }}" id="collectionForm">
+            <form method="POST" action="{{ route('admin.collections.store') }}" id="collectionForm" enctype="multipart/form-data">
                 @csrf
 
                 <div class="create-layout">
@@ -362,23 +454,42 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Name <span class="req">*</span></label>
-                                    <input type="text" name="name" id="name" class="field-input" required>
+                                    <input type="text" name="name" id="name" class="field-input" value="{{ old('name') }}" required>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Slug</label>
                                     <div class="slug-wrap">
                                         <span class="slug-prefix">collection/</span>
-                                        <input type="text" name="slug" id="slug" class="field-input">
+                                        <input type="text" name="slug" id="slug" class="field-input" value="{{ old('slug') }}">
                                     </div>
                                     <div class="field-hint">Auto-generated from name. You can edit manually.</div>
                                 </div>
 
                                 <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text" name="h1_heading" id="h1_heading" class="field-input" value="{{ old('h1_heading') }}" required>
+                                    <div class="field-hint">Auto-filled from name. Shown as the page's main heading — edit if you want different on-page wording.</div>
+                                </div>
+
+                                <div class="field-group">
                                     <label class="field-label">Sort Order</label>
-                                    <input type="number" name="sort_order" class="field-input" value="0"
+                                    <input type="number" name="sort_order" class="field-input" value="{{ old('sort_order', 0) }}"
                                         style="max-width:120px">
                                     <div class="field-hint">Lower numbers appear first.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">Collection Image</label>
+                                    <div class="image-upload" id="imageUploadBox">
+                                        <input type="file" name="image" id="image" accept="image/*">
+                                        <div class="icon"><i class="fa fa-cloud-upload-alt"></i></div>
+                                        <div class="txt">Click or drag an image here</div>
+                                    </div>
+                                    <div id="imagePreviewWrap">
+                                        <img id="imagePreview" src="" alt="">
+                                    </div>
+                                    <div class="field-hint">Recommended 1200×630px. Used as the OG image for social sharing and its filename/alt text is auto-set from the collection name below.</div>
                                 </div>
 
                             </div>
@@ -390,25 +501,65 @@
                         <div class="section-card">
                             <div class="section-card-header">
                                 <h5>SEO Settings</h5>
+                                <span class="auto-badge">Auto-filled</span>
                             </div>
 
                             <div class="section-card-body">
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input"
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text" name="meta_title" id="meta_title" class="field-input"
                                         value="{{ old('meta_title', $collection->meta_title ?? '') }}"
-                                        placeholder="Enter meta title">
+                                        placeholder="Enter meta title" required maxlength="70">
+                                    <div class="char-count" id="metaTitleCount">0 / 60</div>
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea" rows="4"
-                                        placeholder="Enter meta description">{{ old('meta_description', $collection->meta_description ?? '') }}</textarea>
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea" rows="3"
+                                        placeholder="Enter meta description" required maxlength="200">{{ old('meta_description', $collection->meta_description ?? '') }}</textarea>
+                                    <div class="char-count" id="metaDescCount">0 / 160</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="slug-wrap">
+                                        <span class="slug-prefix">{{ url('/collection') }}/</span>
+                                        <input type="text" name="canonical" id="canonical" class="field-input" value="{{ old('canonical') }}">
+                                    </div>
+                                    <div class="field-hint">Auto-set from slug. Edit only if this collection should canonicalize to a different URL.</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">OG Title</label>
+                                    <input type="text" name="og_title" id="og_title" class="field-input" value="{{ old('og_title') }}"
+                                        placeholder="Falls back to Meta Title">
+                                    <div class="field-hint">Auto-filled from Meta Title. Edit to customize for social shares.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">OG Description</label>
+                                    <textarea name="og_description" id="og_description" class="field-textarea" rows="3"
+                                        placeholder="Falls back to Meta Description">{{ old('og_description') }}</textarea>
+                                    <div class="field-hint">Auto-filled from Meta Description. Edit to customize for social shares.</div>
                                 </div>
 
                             </div>
                         </div>
+
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h5>Image Alt Tag</h5>
+                            </div>
+                            <div class="section-card-body">
+                                <div class="field-group" style="margin-bottom:0">
+                                    <input type="text" name="image_alt" id="image_alt" class="field-input" value="{{ old('image_alt') }}"
+                                        placeholder="Auto-filled from collection name">
+                                    <div class="field-hint">Used as the alt attribute on the collection image. Auto-filled from name.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="section-card">
                             <div class="section-card-header">
                                 <h5>Settings</h5>
@@ -447,20 +598,111 @@
 @include('admin.footer')
 
 <script>
+    // ── manual-edit tracking flags: once a user types directly into an
+    // auto-filled field, stop overwriting it from its source field ──
     let manualSlug = false;
+    let manualH1 = false;
+    let manualMetaTitle = false;
+    let manualCanonical = false;
+    let manualOgTitle = false;
+    let manualOgDesc = false;
+    let manualAlt = false;
 
-    $('#slug').on('keyup', function () {
-        manualSlug = true;
+    function slugify(value) {
+        return value
+            .toLowerCase()
+            .trim()
+            .replace(/ /g, '-')
+            .replace(/[^\w-]+/g, '');
+    }
+
+    // Mark fields as manually edited once the user types in them directly
+    $('#slug').on('keyup', function () { manualSlug = true; });
+    $('#h1_heading').on('keyup', function () { manualH1 = true; });
+    $('#meta_title').on('keyup', function () { manualMetaTitle = true; });
+    $('#canonical').on('keyup', function () { manualCanonical = true; });
+    $('#og_title').on('keyup', function () { manualOgTitle = true; });
+    $('#og_description').on('keyup', function () { manualOgDesc = true; });
+    $('#image_alt').on('keyup', function () { manualAlt = true; });
+
+    // Name drives: slug, H1, meta title (if empty), image alt
+    $('#name').on('keyup', function () {
+        const name = $(this).val();
+
+        if (!manualSlug) {
+            const slug = slugify(name);
+            $('#slug').val(slug);
+            if (!manualCanonical) {
+                $('#canonical').val(slug);
+            }
+        }
+
+        if (!manualH1) {
+            $('#h1_heading').val(name);
+        }
+
+        if (!manualMetaTitle) {
+            $('#meta_title').val(name);
+            $('#meta_title').trigger('keyup.count');
+        }
+
+        if (!manualAlt) {
+            $('#image_alt').val(name);
+        }
     });
 
-    $('#name').on('keyup', function () {
-        if (!manualSlug) {
-            let slug = $(this).val()
-                .toLowerCase()
-                .replace(/ /g, '-')
-                .replace(/[^\w-]+/g, '');
-            $('#slug').val(slug);
+    // Slug drives canonical (unless canonical was manually edited)
+    $('#slug').on('keyup', function () {
+        if (!manualCanonical) {
+            $('#canonical').val($(this).val());
         }
+    });
+
+    // Meta Title drives OG Title
+    $('#meta_title').on('keyup', function () {
+        if (!manualOgTitle) {
+            $('#og_title').val($(this).val());
+        }
+    });
+
+    // Meta Description drives OG Description
+    $('#meta_description').on('keyup', function () {
+        if (!manualOgDesc) {
+            $('#og_description').val($(this).val());
+        }
+    });
+
+    // Character counters for meta title / description
+    function updateCharCount(inputSel, countSel, optimal, max) {
+        const len = $(inputSel).val().length;
+        const $count = $(countSel);
+        $count.text(len + ' / ' + optimal);
+        $count.removeClass('warn over');
+        if (len > max) {
+            $count.addClass('over');
+        } else if (len > optimal) {
+            $count.addClass('warn');
+        }
+    }
+
+    $('#meta_title').on('keyup keyup.count', function () {
+        updateCharCount('#meta_title', '#metaTitleCount', 60, 70);
+    });
+
+    $('#meta_description').on('keyup', function () {
+        updateCharCount('#meta_description', '#metaDescCount', 160, 200);
+    });
+
+    // Image preview
+    $('#image').on('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+            $('#imagePreview').attr('src', ev.target.result);
+            $('#imagePreviewWrap').show();
+        };
+        reader.readAsDataURL(file);
     });
 
     $('#collectionForm').on('submit', function () {

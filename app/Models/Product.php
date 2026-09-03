@@ -45,6 +45,7 @@ class Product extends Model
 
         'meta_title',
         'meta_description',
+        'h1_heading',
 
         'status',
 

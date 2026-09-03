@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CollectionController extends Controller
@@ -36,24 +37,43 @@ class CollectionController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255',
-            'meta_title' => 'nullable|max:255',
-            'meta_description' => 'nullable',
+            'h1_heading' => 'required|max:255',
+            'meta_title' => 'required|max:255',
+            'meta_description' => 'required',
+            'slug' => 'nullable|max:255|unique:collections,slug',
+            'canonical' => 'nullable|max:255',
+            'og_title' => 'nullable|max:255',
+            'og_description' => 'nullable',
+            'image_alt' => 'nullable|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $slug = $request->slug
+            ? Str::slug($request->slug)
+            : Str::slug($request->name);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('collections', 'public');
+        }
 
         Collection::create([
             'name' => $request->name,
-            'slug' => $request->slug
-                ? Str::slug($request->slug)
-                : Str::slug($request->name),
-
-            'code' => $request->slug
-                ? Str::slug($request->slug)
-                : Str::slug($request->name),
-
+            'h1_heading' => $request->h1_heading,
+            'slug' => $slug,
+            'code' => $slug,
+            'image' => $imagePath,
+            // falls back to name if left blank
+            'image_alt' => $request->image_alt ?: $request->name,
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            // falls back to slug if left blank
+            'canonical' => $request->canonical ?: $slug,
+            // fall back to meta title/description if left blank
+            'og_title' => $request->og_title ?: $request->meta_title,
+            'og_description' => $request->og_description ?: $request->meta_description,
         ]);
 
         return redirect()
@@ -76,29 +96,47 @@ class CollectionController extends Controller
 
     public function update(Request $request, $id)
     {
+        $collection = Collection::findOrFail($id);
+
         $request->validate([
             'name' => 'required|max:255',
-            'meta_title' => 'nullable|max:255',
-            'meta_description' => 'nullable',
+            'h1_heading' => 'required|max:255',
+            'meta_title' => 'required|max:255',
+            'meta_description' => 'required',
+            'slug' => 'nullable|max:255|unique:collections,slug,' . $collection->id,
+            'canonical' => 'nullable|max:255',
+            'og_title' => 'nullable|max:255',
+            'og_description' => 'nullable',
+            'image_alt' => 'nullable|max:255',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        $collection = Collection::findOrFail($id);
+        $slug = $request->slug
+            ? Str::slug($request->slug)
+            : Str::slug($request->name);
+
+        $imagePath = $collection->image;
+        if ($request->hasFile('image')) {
+            if ($collection->image) {
+                Storage::disk('public')->delete($collection->image);
+            }
+            $imagePath = $request->file('image')->store('collections', 'public');
+        }
 
         $collection->update([
             'name' => $request->name,
-
-            'slug' => $request->slug
-                ? Str::slug($request->slug)
-                : Str::slug($request->name),
-
-            'code' => $request->slug
-                ? Str::slug($request->slug)
-                : Str::slug($request->name),
-
+            'h1_heading' => $request->h1_heading,
+            'slug' => $slug,
+            'code' => $slug,
+            'image' => $imagePath,
+            'image_alt' => $request->image_alt ?: $request->name,
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            'canonical' => $request->canonical ?: $slug,
+            'og_title' => $request->og_title ?: $request->meta_title,
+            'og_description' => $request->og_description ?: $request->meta_description,
         ]);
 
         return redirect()
@@ -112,6 +150,10 @@ class CollectionController extends Controller
     public function destroy($id)
     {
         $collection = Collection::findOrFail($id);
+
+        if ($collection->image) {
+            Storage::disk('public')->delete($collection->image);
+        }
 
         $collection->delete();
 

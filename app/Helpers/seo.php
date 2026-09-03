@@ -38,10 +38,13 @@ function getSeo()
 
         // Product Listing Page (Category/Subcategory)
         case 'products.listing':
-            return Category::where(
-                'slug',
-                request()->route('slug')
-            )->first();
+            $subcategorySlug = request()->query('subcategory');
+
+            if ($subcategorySlug) {
+                return Category::where('slug', $subcategorySlug)->first();
+            }
+
+            return Category::where('slug', request()->route('slug'))->first();
 
         // Product Detail Page
         case 'product.details':
@@ -61,9 +64,9 @@ function getSeo()
         case 'dynamic.page':
             $slug = request()->route('slug');
             return DynamicPage::get()
-            ->first(function ($p) use ($slug) {
-                return Str::slug($p->page_name) === $slug;
-            });
+                ->first(function ($p) use ($slug) {
+                    return Str::slug($p->page_name) === $slug;
+                });
 
 
         default:

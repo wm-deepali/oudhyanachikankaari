@@ -117,6 +117,9 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'meta_title' => 'required|string|max:255',
+            'meta_description' => 'required|string',
+            'h1_heading' => 'required|string|max:255',
         ]);
 
         $image = null;
@@ -143,6 +146,19 @@ class CategoryController extends Controller
             );
         }
 
+        // in store()
+        $ogImage = null;
+
+        if ($request->hasFile('og_image')) {
+            // Recommended OG size ~1200x630 — keep wider than the card image
+            $ogImage = $this->compressAndStore(
+                $request->file('og_image'),
+                'categories/og',
+                1200,
+                80
+            );
+        }
+
         Category::create([
             'name' => $request->name,
             'sub_title' => $request->sub_title,
@@ -154,6 +170,10 @@ class CategoryController extends Controller
 
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            'h1_heading' => $request->h1_heading,
+            'og_title' => $request->og_title,
+            'og_description' => $request->og_description,
+            'og_image' => $ogImage,
             'image' => $image,
             'size_chart_image' => $sizeChartImage,
 
@@ -200,6 +220,9 @@ class CategoryController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'meta_title' => 'required|string|max:255',
+            'meta_description' => 'required|string',
+            'h1_heading' => 'required|string|max:255',
         ]);
 
         $image = $category->image;
@@ -237,6 +260,23 @@ class CategoryController extends Controller
             );
         }
 
+        // in update()
+        $ogImage = $category->og_image;
+
+        if ($request->hasFile('og_image')) {
+
+            if ($category->og_image && Storage::disk('public')->exists($category->og_image)) {
+                Storage::disk('public')->delete($category->og_image);
+            }
+
+            $ogImage = $this->compressAndStore(
+                $request->file('og_image'),
+                'categories/og',
+                1200,
+                80
+            );
+        }
+
         $category->update([
             'name' => $request->name,
             'sub_title' => $request->sub_title,
@@ -248,6 +288,10 @@ class CategoryController extends Controller
 
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            'h1_heading' => $request->h1_heading,
+            'og_title' => $request->og_title,
+            'og_description' => $request->og_description,
+            'og_image' => $ogImage,
             'image' => $image,
             'size_chart_image' => $sizeChartImage,
 
@@ -277,6 +321,10 @@ class CategoryController extends Controller
 
         if ($category->size_chart_image && Storage::disk('public')->exists($category->size_chart_image)) {
             Storage::disk('public')->delete($category->size_chart_image);
+        }
+
+        if ($category->og_image && Storage::disk('public')->exists($category->og_image)) {
+            Storage::disk('public')->delete($category->og_image);
         }
 
         $category->delete();
@@ -326,6 +374,7 @@ class CategoryController extends Controller
             'parent_category',
             'meta_title',
             'meta_description',
+            'h1_heading',
             'is_popular',
             'is_featured',
             'status',
@@ -339,6 +388,7 @@ class CategoryController extends Controller
             '',
             'Corporate Gifts',
             'Corporate Gifts Category',
+            'Corporate Gifts',
             '1',
             '1',
             '1',

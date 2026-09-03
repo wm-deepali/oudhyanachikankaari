@@ -60,8 +60,9 @@
     /* ── Section card ── */
     .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); overflow: hidden; margin-bottom: 16px; }
     .section-card:last-child { margin-bottom: 0; }
-    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
     .section-card-header h5 { font-size: 13px; font-weight: 650; color: var(--text-primary); margin: 0; letter-spacing: .01em; }
+    .section-card-header .auto-badge { font-size: 10.5px; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 3px 8px; border-radius: 20px; letter-spacing: .02em; }
     .section-card-body { padding: 20px; }
 
     /* ── Form fields ── */
@@ -84,8 +85,11 @@
         border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12);
     }
     .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 4px; }
+    .char-count { font-size: 11px; color: var(--text-hint); text-align: right; margin-top: 4px; }
+    .char-count.warn { color: #b8860b; }
+    .char-count.over { color: var(--red); }
 
-    /* ── Slug prefix ── */
+    /* ── Slug / canonical prefix ── */
     .slug-wrap { display: flex; }
     .slug-prefix {
         display: inline-flex; align-items: center; padding: 0 10px;
@@ -137,6 +141,10 @@
     }
     .field-select-sm:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12); }
 
+    /* ── Info note (backend-only fields) ── */
+    .info-note { display: flex; gap: 8px; background: var(--accent-light); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+    .info-note i { color: var(--accent); margin-top: 1px; }
+
     /* ── Action bar ── */
     .action-bar {
         background: var(--surface); border: 1px solid var(--border);
@@ -180,31 +188,37 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Title <span class="req">*</span></label>
-                                    <input type="text" name="title" id="title" class="field-input" required>
+                                    <input type="text" name="title" id="title" class="field-input" value="{{ old('title') }}" required>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Slug</label>
                                     <div class="slug-wrap">
                                         <span class="slug-prefix">occasion/</span>
-                                        <input type="text" name="slug" id="slug" class="field-input">
+                                        <input type="text" name="slug" id="slug" class="field-input" value="{{ old('slug') }}">
                                     </div>
                                     <div class="field-hint">Auto-generated from title. You can edit manually.</div>
                                 </div>
 
                                 <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text" name="h1_heading" id="h1_heading" class="field-input" value="{{ old('h1_heading') }}" required>
+                                    <div class="field-hint">Auto-filled from title. Shown as the page's main heading — edit for different on-page wording.</div>
+                                </div>
+
+                                <div class="field-group">
                                     <label class="field-label">Sub Title</label>
-                                    <input type="text" name="sub_title" class="field-input">
+                                    <input type="text" name="sub_title" class="field-input" value="{{ old('sub_title') }}">
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Short Description</label>
-                                    <textarea name="short_description" class="field-textarea"></textarea>
+                                    <textarea name="short_description" class="field-textarea">{{ old('short_description') }}</textarea>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Font Awesome Icon</label>
-                                    <input type="text" name="icon" id="iconInput" class="field-input" placeholder="e.g. fa-solid fa-gift">
+                                    <input type="text" name="icon" id="iconInput" class="field-input" value="{{ old('icon') }}" placeholder="e.g. fa-solid fa-gift">
                                     <div class="icon-preview-row">
                                         <div class="icon-preview-box" id="iconPreview">
                                             <i class="fa-solid fa-gift"></i>
@@ -220,17 +234,43 @@
 
                         <!-- SEO -->
                         <div class="section-card">
-                            <div class="section-card-header"><h5>SEO</h5></div>
+                            <div class="section-card-header">
+                                <h5>SEO</h5>
+                                <span class="auto-badge">Auto-filled</span>
+                            </div>
                             <div class="section-card-body">
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input">
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text" name="meta_title" id="meta_title" class="field-input" value="{{ old('meta_title') }}" required maxlength="70">
+                                    <div class="char-count" id="metaTitleCount">0 / 60</div>
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea"></textarea>
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea" required maxlength="200">{{ old('meta_description') }}</textarea>
+                                    <div class="char-count" id="metaDescCount">0 / 160</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="slug-wrap">
+                                        <span class="slug-prefix">{{ url('/occasion') }}/</span>
+                                        <input type="text" name="canonical" id="canonical" class="field-input" value="{{ old('canonical') }}">
+                                    </div>
+                                    <div class="field-hint">Auto-set from slug. Edit only if this occasion should canonicalize to a different URL.</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">OG Title</label>
+                                    <input type="text" name="og_title" id="og_title" class="field-input" value="{{ old('og_title') }}" placeholder="Falls back to Meta Title">
+                                    <div class="field-hint">Auto-filled from Meta Title. Edit to customize for social shares.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">OG Description</label>
+                                    <textarea name="og_description" id="og_description" class="field-textarea" placeholder="Falls back to Meta Description">{{ old('og_description') }}</textarea>
+                                    <div class="field-hint">Auto-filled from Meta Description. Edit to customize for social shares.</div>
                                 </div>
 
                             </div>
@@ -260,6 +300,17 @@
                             </div>
                         </div>
 
+                        <!-- Image Alt Tag -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Image Alt Tag</h5></div>
+                            <div class="section-card-body">
+                                <div class="field-group" style="margin-bottom:0">
+                                    <input type="text" name="image_alt" id="image_alt" class="field-input" value="{{ old('image_alt') }}" placeholder="Auto-filled from title">
+                                    <div class="field-hint">Used as the alt attribute on the occasion image. Auto-filled from title.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Settings -->
                         <div class="section-card">
                             <div class="section-card-header"><h5>Settings</h5></div>
@@ -273,6 +324,12 @@
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
                                     </select>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="info-note">
+                                        <i class="fa fa-info-circle"></i>
+                                        <span>Twitter Card and JSON-LD schema markup are generated automatically from the fields above and don't need manual input.</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -297,41 +354,116 @@
 @include('admin.footer')
 
 <script>
-// Slug auto-generate from title
-document.getElementById('title').addEventListener('keyup', function () {
-    document.getElementById('slug').value = this.value
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '');
-});
+    // ── manual-edit tracking: once the admin types directly into an
+    // auto-filled field, stop overwriting it from its source field ──
+    let manualSlug = false;
+    let manualH1 = false;
+    let manualMetaTitle = false;
+    let manualCanonical = false;
+    let manualOgTitle = false;
+    let manualOgDesc = false;
+    let manualAlt = false;
 
-// Icon live preview
-document.getElementById('iconInput').addEventListener('input', function () {
-    const box = document.getElementById('iconPreview');
-    box.innerHTML = this.value.trim()
-        ? `<i class="${this.value.trim()}"></i>`
-        : `<i class="fa-solid fa-gift"></i>`;
-});
+    function slugify(value) {
+        return value.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    }
 
-// Image preview
-document.getElementById('imageInput').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('previewImg').src = e.target.result;
-        document.getElementById('previewName').textContent = file.name;
-        document.getElementById('uploadPlaceholder').style.display = 'none';
-        const prev = document.getElementById('uploadPreview');
-        prev.style.display = 'flex';
-    };
-    reader.readAsDataURL(file);
-});
+    document.getElementById('slug').addEventListener('keyup', () => manualSlug = true);
+    document.getElementById('h1_heading').addEventListener('keyup', () => manualH1 = true);
+    document.getElementById('meta_title').addEventListener('keyup', () => manualMetaTitle = true);
+    document.getElementById('canonical').addEventListener('keyup', () => manualCanonical = true);
+    document.getElementById('og_title').addEventListener('keyup', () => manualOgTitle = true);
+    document.getElementById('og_description').addEventListener('keyup', () => manualOgDesc = true);
+    document.getElementById('image_alt').addEventListener('keyup', () => manualAlt = true);
 
-// Loading button on submit
-document.getElementById('form').addEventListener('submit', function () {
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
-});
+    // Title drives: slug, H1, meta title (if empty), image alt
+    document.getElementById('title').addEventListener('keyup', function () {
+        const title = this.value;
+
+        if (!manualSlug) {
+            const slug = slugify(title);
+            document.getElementById('slug').value = slug;
+            if (!manualCanonical) {
+                document.getElementById('canonical').value = slug;
+            }
+        }
+
+        if (!manualH1) {
+            document.getElementById('h1_heading').value = title;
+        }
+
+        if (!manualMetaTitle) {
+            document.getElementById('meta_title').value = title;
+            updateCharCount('meta_title', 'metaTitleCount', 60, 70);
+        }
+
+        if (!manualAlt) {
+            document.getElementById('image_alt').value = title;
+        }
+    });
+
+    // Slug drives canonical
+    document.getElementById('slug').addEventListener('keyup', function () {
+        if (!manualCanonical) {
+            document.getElementById('canonical').value = this.value;
+        }
+    });
+
+    // Meta Title drives OG Title
+    document.getElementById('meta_title').addEventListener('keyup', function () {
+        if (!manualOgTitle) {
+            document.getElementById('og_title').value = this.value;
+        }
+        updateCharCount('meta_title', 'metaTitleCount', 60, 70);
+    });
+
+    // Meta Description drives OG Description
+    document.getElementById('meta_description').addEventListener('keyup', function () {
+        if (!manualOgDesc) {
+            document.getElementById('og_description').value = this.value;
+        }
+        updateCharCount('meta_description', 'metaDescCount', 160, 200);
+    });
+
+    function updateCharCount(inputId, countId, optimal, max) {
+        const len = document.getElementById(inputId).value.length;
+        const count = document.getElementById(countId);
+        count.textContent = len + ' / ' + optimal;
+        count.classList.remove('warn', 'over');
+        if (len > max) {
+            count.classList.add('over');
+        } else if (len > optimal) {
+            count.classList.add('warn');
+        }
+    }
+
+    // Icon live preview
+    document.getElementById('iconInput').addEventListener('input', function () {
+        const box = document.getElementById('iconPreview');
+        box.innerHTML = this.value.trim()
+            ? `<i class="${this.value.trim()}"></i>`
+            : `<i class="fa-solid fa-gift"></i>`;
+    });
+
+    // Image preview
+    document.getElementById('imageInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('previewName').textContent = file.name;
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            const prev = document.getElementById('uploadPreview');
+            prev.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Loading button on submit
+    document.getElementById('form').addEventListener('submit', function () {
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+    });
 </script>

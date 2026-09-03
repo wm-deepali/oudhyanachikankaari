@@ -35,6 +35,7 @@ class BlogController extends Controller
             'content' => 'required',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
+            'h1_heading' => 'nullable|string|max:255',
         ]);
 
         $slug = Str::slug($request->title);
@@ -72,6 +73,8 @@ class BlogController extends Controller
 
             'meta_description' => $request->meta_description,
 
+            'h1_heading' => $request->h1_heading,
+
             'show_home' => $request->show_home ? 1 : 0,
 
             'status' => $request->status ? 1 : 0
@@ -101,6 +104,7 @@ class BlogController extends Controller
             'content' => 'required',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
+            'h1_heading' => 'nullable|string|max:255',
         ]);
 
         $blog = Blog::findOrFail($id);
@@ -137,6 +141,8 @@ class BlogController extends Controller
             'image' => $imageName,
 
             'short_description' => $request->short_description,
+            
+            'h1_heading' => $request->h1_heading,
 
             'content' => $request->content,
 

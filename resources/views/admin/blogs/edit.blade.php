@@ -16,7 +16,6 @@
         --green:         #007a5e;
         --green-bg:      #e3f1ec;
         --red:           #b22222;
-        --red-bg:        #fce8e8;
         --radius-sm:     8px;
         --radius-md:     12px;
         --shadow-card:   0 1px 3px rgba(0,0,0,.08), 0 0 0 1px var(--border);
@@ -38,29 +37,21 @@
     .blog-identity {
         display: flex; align-items: center; gap: 12px;
         background: var(--surface); border: 1px solid var(--border);
-        border-radius: var(--radius-md); padding: 10px 14px;
+        border-radius: var(--radius-md); padding: 10px 16px;
         box-shadow: var(--shadow-card);
     }
-    .blog-identity-thumb {
-        width: 44px; height: 44px; border-radius: var(--radius-sm);
-        object-fit: cover; border: 1px solid var(--border); flex-shrink: 0;
-    }
+    .blog-identity-thumb { width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
     .blog-identity-icon {
         width: 44px; height: 44px; border-radius: var(--radius-sm);
         background: var(--accent-light); border: 1px solid var(--border);
         display: flex; align-items: center; justify-content: center;
         color: var(--accent); font-size: 18px; flex-shrink: 0;
     }
-    .blog-identity-title { font-size: 14px; font-weight: 650; color: var(--text-primary); max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .blog-identity-id    { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
-
-    /* ── Pills ── */
-    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
-    .pill::before { content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-    .pill-active   { background: var(--green-bg); color: var(--green); }
-    .pill-active::before   { background: var(--green); }
-    .pill-inactive { background: var(--red-bg);   color: var(--red); }
-    .pill-inactive::before { background: var(--red); }
+    .blog-identity-name {
+        font-size: 14px; font-weight: 650; color: var(--text-primary);
+        max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .blog-identity-id { font-size: 12px; color: var(--text-hint); margin-top: 2px; }
 
     /* ── Buttons ── */
     .btn-primary-dash {
@@ -126,31 +117,38 @@
     }
     .slug-wrap .field-input { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 
-    /* ── Image card ── */
-    .current-image-label { font-size: 11px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
-    .current-image-thumb { width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); display: block; }
+    /* ── Image upload ── */
+    .current-image-wrap {
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 12px; background: var(--bg); margin-bottom: 14px;
+        display: flex; align-items: center; gap: 12px;
+    }
+    .current-image-wrap img { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; border: 1px solid var(--border); }
+    .current-image-info { font-size: 12px; color: var(--text-secondary); }
+    .current-image-info strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 2px; }
 
     .upload-area {
         border: 2px dashed var(--border); border-radius: var(--radius-sm);
-        padding: 20px; text-align: center; cursor: pointer;
+        padding: 22px 20px; text-align: center; cursor: pointer;
         transition: border-color .15s, background .15s; position: relative;
     }
     .upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
     .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon  { font-size: 20px; color: var(--text-hint); margin-bottom: 6px; }
+    .upload-icon  { font-size: 24px; color: var(--text-hint); margin-bottom: 8px; }
     .upload-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
     .upload-sub   { font-size: 11.5px; color: var(--text-hint); }
-    .new-preview  { display: none; flex-direction: column; align-items: center; gap: 6px; margin-top: 10px; }
-    .new-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-    .new-preview span { font-size: 11.5px; color: var(--text-hint); }
+    .upload-preview { display: none; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; }
+    .upload-preview img { width: 90px; height: 90px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .upload-preview span { font-size: 12px; color: var(--text-hint); }
 
-    /* ── Toggle rows ── */
+    /* ── Toggle rows (right column) ── */
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--bg); }
     .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
     .toggle-row:first-child { padding-top: 0; }
     .toggle-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
     .toggle-sub   { font-size: 11.5px; color: var(--text-hint); margin-top: 2px; }
 
+    /* Toggle switch */
     .toggle-switch { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
     .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 22px; cursor: pointer; transition: background .2s; }
@@ -188,21 +186,13 @@
                 <!-- Identity chip -->
                 <div class="blog-identity">
                     @if($blog->image)
-                        <img src="{{ asset('uploads/blogs/' . $blog->image) }}"
-                             class="blog-identity-thumb" alt="{{ $blog->title }}">
+                        <img src="{{ asset('storage/' . $blog->image) }}" class="blog-identity-thumb" alt="{{ $blog->title }}">
                     @else
-                        <div class="blog-identity-icon"><i class="fa fa-pen-to-square"></i></div>
+                        <div class="blog-identity-icon"><i class="fa fa-newspaper-o"></i></div>
                     @endif
                     <div>
-                        <div class="blog-identity-title">{{ $blog->title }}</div>
-                        <div class="blog-identity-id">
-                            ID #{{ $blog->id }} &middot;
-                            @if($blog->status)
-                                <span class="pill pill-active">Active</span>
-                            @else
-                                <span class="pill pill-inactive">Inactive</span>
-                            @endif
-                        </div>
+                        <div class="blog-identity-name">{{ $blog->title }}</div>
+                        <div class="blog-identity-id">ID #{{ $blog->id }}</div>
                     </div>
                 </div>
             </div>
@@ -224,8 +214,8 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Title <span class="req">*</span></label>
-                                    <input type="text" name="title" id="title" class="field-input"
-                                           value="{{ $blog->title }}" required>
+                                    <input type="text" name="title" id="title" class="field-input" required
+                                        value="{{ old('title', $blog->title) }}">
                                 </div>
 
                                 <div class="field-group">
@@ -233,14 +223,15 @@
                                     <div class="slug-wrap">
                                         <span class="slug-prefix">blog/</span>
                                         <input type="text" name="slug" id="slug" class="field-input"
-                                               value="{{ $blog->slug }}">
+                                            value="{{ old('slug', $blog->slug) }}">
                                     </div>
-                                    <div class="field-hint">Auto-generated from title. You can edit manually.</div>
+                                    <div class="field-hint">Edit to customise the URL slug.</div>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Short Description</label>
-                                    <textarea name="short_description" class="field-textarea" rows="3">{{ $blog->short_description }}</textarea>
+                                    <textarea name="short_description" class="field-textarea" rows="3"
+                                              placeholder="A brief summary shown on blog listing…">{{ old('short_description', $blog->short_description) }}</textarea>
                                 </div>
 
                             </div>
@@ -252,7 +243,8 @@
                             <div class="section-card-body">
                                 <div class="field-group">
                                     <textarea name="content" class="field-textarea" rows="12"
-                                              style="min-height:280px" required>{{ $blog->content }}</textarea>
+                                              style="min-height:280px" required
+                                              placeholder="Write your blog content here…">{{ old('content', $blog->content) }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -262,61 +254,78 @@
                     <!-- ── RIGHT column ── -->
                     <div>
 
-                        <!-- Image card -->
+                        <!-- Image upload -->
                         <div class="section-card">
                             <div class="section-card-header"><h5>Featured Image</h5></div>
                             <div class="section-card-body">
 
                                 @if($blog->image)
-                                    <div style="margin-bottom:12px">
-                                        <div class="current-image-label">Current Image</div>
-                                        <img src="{{ asset('uploads/blogs/' . $blog->image) }}"
-                                             class="current-image-thumb"
-                                             id="currentThumb"
-                                             alt="{{ $blog->title }}">
+                                    <div class="current-image-wrap" id="currentImageWrap">
+                                        <img src="{{ asset('storage/' . $blog->image) }}" alt="{{ $blog->title }}">
+                                        <div class="current-image-info">
+                                            <strong>Current image</strong>
+                                            Upload a new file below to replace it.
+                                        </div>
                                     </div>
                                 @endif
 
-                                <div class="upload-area">
+                                <div class="upload-area" id="uploadArea">
                                     <input type="file" name="image" id="imageInput" accept="image/*">
                                     <div id="uploadPlaceholder">
                                         <div class="upload-icon"><i class="fa fa-cloud-upload"></i></div>
                                         <div class="upload-label">{{ $blog->image ? 'Replace image' : 'Click to upload image' }}</div>
-                                        <div class="upload-sub">PNG, JPG, WEBP · 1200×630px</div>
+                                        <div class="upload-sub">PNG, JPG, WEBP · recommended 1200×630px</div>
+                                    </div>
+                                    <div class="upload-preview" id="uploadPreview">
+                                        <img id="previewImg" src="" alt="Preview">
+                                        <span id="previewName"></span>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
 
-                                <div class="new-preview" id="newPreview">
-                                    <img id="newPreviewImg" src="" alt="New image">
-                                    <span id="newPreviewName"></span>
+                        <!-- SEO Settings -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h5>SEO Settings</h5>
+                            </div>
+                            <div class="section-card-body">
+
+                                <div class="field-group">
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text"
+                                           name="meta_title"
+                                           id="meta_title"
+                                           class="field-input"
+                                           required
+                                           value="{{ old('meta_title', $blog->meta_title) }}"
+                                           placeholder="Enter meta title">
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description"
+                                              id="meta_description"
+                                              class="field-textarea"
+                                              rows="4"
+                                              required
+                                              placeholder="Enter meta description">{{ old('meta_description', $blog->meta_description) }}</textarea>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text"
+                                           name="h1_heading"
+                                           id="h1_heading"
+                                           class="field-input"
+                                           required
+                                           value="{{ old('h1_heading', $blog->h1_heading) }}"
+                                           placeholder="Main on-page heading">
+                                    <div class="field-hint">Auto-filled from Title — edit if you want a different on-page heading.</div>
                                 </div>
 
                             </div>
                         </div>
-
-                        <div class="section-card">
-    <div class="section-card-header">
-        <h5>SEO Settings</h5>
-    </div>
-    <div class="section-card-body">
-
-        <div class="field-group">
-            <label class="field-label">Meta Title</label>
-            <input type="text"
-                   name="meta_title"
-                   class="field-input"
-                   value="{{ old('meta_title', $blog->meta_title) }}">
-        </div>
-
-        <div class="field-group">
-            <label class="field-label">Meta Description</label>
-            <textarea name="meta_description"
-                      class="field-textarea"
-                      rows="4">{{ old('meta_description', $blog->meta_description) }}</textarea>
-        </div>
-
-    </div>
-</div>
 
                         <!-- Settings -->
                         <div class="section-card">
@@ -329,8 +338,7 @@
                                         <div class="toggle-sub">Publish this blog post</div>
                                     </div>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="status" id="status"
-                                               {{ $blog->status ? 'checked' : '' }}>
+                                        <input type="checkbox" name="status" id="status" {{ old('status', $blog->status) ? 'checked' : '' }}>
                                         <span class="toggle-track"></span>
                                     </label>
                                 </div>
@@ -341,8 +349,7 @@
                                         <div class="toggle-sub">Feature on the storefront homepage</div>
                                     </div>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="show_home" id="show_home"
-                                               {{ $blog->show_home ? 'checked' : '' }}>
+                                        <input type="checkbox" name="show_home" id="show_home" {{ old('show_home', $blog->show_home) ? 'checked' : '' }}>
                                         <span class="toggle-track"></span>
                                     </label>
                                 </div>
@@ -353,13 +360,11 @@
                     </div>
                 </div>
 
-
-
                 <!-- Action bar -->
                 <div class="action-bar">
                     <a href="{{ route('admin.blogs.index') }}" class="btn-secondary-dash">Cancel</a>
                     <button type="submit" id="saveBtn" class="btn-primary-dash">
-                        <i class="fa fa-save"></i> Update Blog
+                        <i class="fa-solid fa-save"></i> Update Blog
                     </button>
                 </div>
 
@@ -372,27 +377,40 @@
 @include('admin.footer')
 
 <script>
-// Slug auto-generate from title
+// Slug auto-generate from title (only if slug hasn't been manually touched)
+let manualSlug = false;
+document.getElementById('slug').addEventListener('keyup', function () { manualSlug = true; });
 document.getElementById('title').addEventListener('keyup', function () {
-    document.getElementById('slug').value = this.value
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '');
+    if (!manualSlug) {
+        document.getElementById('slug').value = this.value
+            .toLowerCase()
+            .replace(/ /g, '-')
+            .replace(/[^\w-]+/g, '');
+    }
 });
 
-// New image preview
+// Auto-generate H1 Heading from Title
+let manualH1 = false;
+document.getElementById('h1_heading').addEventListener('keyup', function () { manualH1 = true; });
+document.getElementById('title').addEventListener('keyup', function () {
+    if (!manualH1) {
+        document.getElementById('h1_heading').value = this.value;
+    }
+});
+
+// Image preview
 document.getElementById('imageInput').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = e => {
-        document.getElementById('newPreviewImg').src = e.target.result;
-        document.getElementById('newPreviewName').textContent = file.name;
-        // Fade current thumb to show it will be replaced
-        const cur = document.getElementById('currentThumb');
-        if (cur) cur.style.opacity = '.4';
-        const prev = document.getElementById('newPreview');
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('previewName').textContent = file.name;
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+        const prev = document.getElementById('uploadPreview');
         prev.style.display = 'flex';
+        const cur = document.getElementById('currentImageWrap');
+        if (cur) cur.style.display = 'none';
     };
     reader.readAsDataURL(file);
 });
@@ -401,6 +419,6 @@ document.getElementById('imageInput').addEventListener('change', function () {
 document.getElementById('blogForm').addEventListener('submit', function () {
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
 });
 </script>

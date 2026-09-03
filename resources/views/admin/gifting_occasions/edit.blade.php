@@ -83,8 +83,9 @@
     /* ── Section card ── */
     .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); overflow: hidden; margin-bottom: 16px; }
     .section-card:last-child { margin-bottom: 0; }
-    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .section-card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
     .section-card-header h5 { font-size: 13px; font-weight: 650; color: var(--text-primary); margin: 0; letter-spacing: .01em; }
+    .section-card-header .auto-badge { font-size: 10.5px; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: 3px 8px; border-radius: 20px; letter-spacing: .02em; }
     .section-card-body { padding: 20px; }
 
     /* ── Form fields ── */
@@ -107,6 +108,9 @@
         border-color: var(--accent); box-shadow: 0 0 0 3px rgba(48,61,137,.12);
     }
     .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 4px; }
+    .char-count { font-size: 11px; color: var(--text-hint); text-align: right; margin-top: 4px; }
+    .char-count.warn { color: #b8860b; }
+    .char-count.over { color: var(--red); }
 
     /* ── Slug prefix ── */
     .slug-wrap { display: flex; }
@@ -176,6 +180,10 @@
     .pill-inactive { background: var(--red-bg);   color: var(--red); }
     .pill-inactive::before { background: var(--red); }
 
+    /* ── Info note (backend-only fields) ── */
+    .info-note { display: flex; gap: 8px; background: var(--accent-light); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; }
+    .info-note i { color: var(--accent); margin-top: 1px; }
+
     /* ── Action bar ── */
     .action-bar {
         background: var(--surface); border: 1px solid var(--border);
@@ -206,7 +214,7 @@
                 <!-- Identity chip -->
                 <div class="occ-identity">
                     @if($occasion->image)
-                        <img src="{{ asset('storage/' . $occasion->image) }}" class="occ-identity-thumb" alt="{{ $occasion->title }}">
+                        <img src="{{ asset('storage/' . $occasion->image) }}" class="occ-identity-thumb" alt="{{ $occasion->image_alt ?: $occasion->title }}">
                     @else
                         <div class="occ-identity-icon">
                             <i class="{{ $occasion->icon ?: 'fa-solid fa-gift' }}"></i>
@@ -245,7 +253,7 @@
                                 <div class="field-group">
                                     <label class="field-label">Title <span class="req">*</span></label>
                                     <input type="text" name="title" id="title"
-                                        value="{{ $occasion->title }}" class="field-input" required>
+                                        value="{{ old('title', $occasion->title) }}" class="field-input" required>
                                 </div>
 
                                 <div class="field-group">
@@ -253,26 +261,33 @@
                                     <div class="slug-wrap">
                                         <span class="slug-prefix">occasion/</span>
                                         <input type="text" name="slug" id="slug"
-                                            value="{{ $occasion->slug }}" class="field-input">
+                                            value="{{ old('slug', $occasion->slug) }}" class="field-input">
                                     </div>
                                     <div class="field-hint">Auto-generated from title. You can edit manually.</div>
                                 </div>
 
                                 <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text" name="h1_heading" id="h1_heading"
+                                        value="{{ old('h1_heading', $occasion->h1_heading) }}" class="field-input" required>
+                                    <div class="field-hint">Shown as the page's main heading.</div>
+                                </div>
+
+                                <div class="field-group">
                                     <label class="field-label">Sub Title</label>
                                     <input type="text" name="sub_title"
-                                        value="{{ $occasion->sub_title }}" class="field-input">
+                                        value="{{ old('sub_title', $occasion->sub_title) }}" class="field-input">
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Short Description</label>
-                                    <textarea name="short_description" class="field-textarea">{{ $occasion->short_description }}</textarea>
+                                    <textarea name="short_description" class="field-textarea">{{ old('short_description', $occasion->short_description) }}</textarea>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Font Awesome Icon</label>
                                     <input type="text" name="icon" id="iconInput"
-                                        value="{{ $occasion->icon }}" class="field-input"
+                                        value="{{ old('icon', $occasion->icon) }}" class="field-input"
                                         placeholder="e.g. fa-solid fa-gift">
                                     <div class="icon-preview-row">
                                         <div class="icon-preview-box" id="iconPreviewBox">
@@ -289,18 +304,46 @@
 
                         <!-- SEO -->
                         <div class="section-card">
-                            <div class="section-card-header"><h5>SEO</h5></div>
+                            <div class="section-card-header">
+                                <h5>SEO</h5>
+                                <span class="auto-badge">Auto-filled</span>
+                            </div>
                             <div class="section-card-body">
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title"
-                                        value="{{ $occasion->meta_title }}" class="field-input">
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text" name="meta_title" id="meta_title"
+                                        value="{{ old('meta_title', $occasion->meta_title) }}" class="field-input" required maxlength="70">
+                                    <div class="char-count" id="metaTitleCount">0 / 60</div>
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea">{{ $occasion->meta_description }}</textarea>
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea" required maxlength="200">{{ old('meta_description', $occasion->meta_description) }}</textarea>
+                                    <div class="char-count" id="metaDescCount">0 / 160</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="slug-wrap">
+                                        <span class="slug-prefix">{{ url('/occasion') }}/</span>
+                                        <input type="text" name="canonical" id="canonical"
+                                            value="{{ old('canonical', $occasion->canonical) }}" class="field-input">
+                                    </div>
+                                    <div class="field-hint">Auto-set from slug. Edit only if this occasion should canonicalize to a different URL.</div>
+                                </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">OG Title</label>
+                                    <input type="text" name="og_title" id="og_title"
+                                        value="{{ old('og_title', $occasion->og_title) }}" class="field-input" placeholder="Falls back to Meta Title">
+                                    <div class="field-hint">Auto-filled from Meta Title. Edit to customize for social shares.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">OG Description</label>
+                                    <textarea name="og_description" id="og_description" class="field-textarea" placeholder="Falls back to Meta Description">{{ old('og_description', $occasion->og_description) }}</textarea>
+                                    <div class="field-hint">Auto-filled from Meta Description. Edit to customize for social shares.</div>
                                 </div>
 
                             </div>
@@ -320,7 +363,7 @@
                                     <div class="current-image-wrap">
                                         <div class="current-image-label">Current Image</div>
                                         <img src="{{ asset('storage/' . $occasion->image) }}"
-                                             class="current-image-thumb" alt="{{ $occasion->title }}"
+                                             class="current-image-thumb" alt="{{ $occasion->image_alt ?: $occasion->title }}"
                                              id="currentThumb">
                                     </div>
                                 @endif
@@ -341,6 +384,18 @@
                             </div>
                         </div>
 
+                        <!-- Image Alt Tag -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Image Alt Tag</h5></div>
+                            <div class="section-card-body">
+                                <div class="field-group" style="margin-bottom:0">
+                                    <input type="text" name="image_alt" id="image_alt"
+                                        value="{{ old('image_alt', $occasion->image_alt) }}" class="field-input" placeholder="Auto-filled from title">
+                                    <div class="field-hint">Used as the alt attribute on the occasion image.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Settings -->
                         <div class="section-card">
                             <div class="section-card-header"><h5>Settings</h5></div>
@@ -351,9 +406,15 @@
                                         <div class="toggle-sub">Visibility on storefront</div>
                                     </div>
                                     <select name="status" class="field-select-sm">
-                                        <option value="1" {{ $occasion->status  ? 'selected' : '' }}>Active</option>
-                                        <option value="0" {{ !$occasion->status ? 'selected' : '' }}>Inactive</option>
+                                        <option value="1" {{ old('status', $occasion->status) ? 'selected' : '' }}>Active</option>
+                                        <option value="0" {{ !old('status', $occasion->status) ? 'selected' : '' }}>Inactive</option>
                                     </select>
+                                </div>
+                                <div class="toggle-row">
+                                    <div class="info-note">
+                                        <i class="fa fa-info-circle"></i>
+                                        <span>Twitter Card and JSON-LD schema markup are generated automatically from the fields above and don't need manual input.</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -378,42 +439,113 @@
 @include('admin.footer')
 
 <script>
-// Slug auto-generate from title
-document.getElementById('title').addEventListener('keyup', function () {
-    document.getElementById('slug').value = this.value
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '');
-});
+    // Manual-edit flags start true when a value already exists — editing
+    // Title on an existing occasion won't silently overwrite a Meta Title
+    // (etc.) someone already customized. Only empty fields stay in auto-fill mode.
+    let manualSlug = {{ $occasion->slug ? 'true' : 'false' }};
+    let manualH1 = {{ $occasion->h1_heading ? 'true' : 'false' }};
+    let manualMetaTitle = {{ $occasion->meta_title ? 'true' : 'false' }};
+    let manualCanonical = {{ $occasion->canonical ? 'true' : 'false' }};
+    let manualOgTitle = {{ $occasion->og_title ? 'true' : 'false' }};
+    let manualOgDesc = {{ $occasion->og_description ? 'true' : 'false' }};
+    let manualAlt = {{ $occasion->image_alt ? 'true' : 'false' }};
 
-// Icon live preview
-document.getElementById('iconInput').addEventListener('input', function () {
-    const i = document.getElementById('iconPreviewI');
-    i.className = this.value.trim() || 'fa-solid fa-gift';
-});
+    function slugify(value) {
+        return value.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    }
 
-// New image preview
-document.getElementById('imageInput').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('newPreviewImg').src = e.target.result;
-        document.getElementById('newPreviewName').textContent = file.name;
-        document.getElementById('uploadPlaceholder').style.display = 'none';
-        // hide current thumb if replacing
-        const cur = document.getElementById('currentThumb');
-        if (cur) cur.style.opacity = '.4';
-        const prev = document.getElementById('newPreview');
-        prev.style.display = 'flex';
-    };
-    reader.readAsDataURL(file);
-});
+    document.getElementById('slug').addEventListener('keyup', function () { manualSlug = this.value.length > 0; });
+    document.getElementById('h1_heading').addEventListener('keyup', function () { manualH1 = this.value.length > 0; });
+    document.getElementById('meta_title').addEventListener('keyup', function () { manualMetaTitle = this.value.length > 0; });
+    document.getElementById('canonical').addEventListener('keyup', function () { manualCanonical = this.value.length > 0; });
+    document.getElementById('og_title').addEventListener('keyup', function () { manualOgTitle = this.value.length > 0; });
+    document.getElementById('og_description').addEventListener('keyup', function () { manualOgDesc = this.value.length > 0; });
+    document.getElementById('image_alt').addEventListener('keyup', function () { manualAlt = this.value.length > 0; });
 
-// Loading button on submit
-document.getElementById('editForm').addEventListener('submit', function () {
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
-});
+    document.getElementById('title').addEventListener('keyup', function () {
+        const title = this.value;
+
+        if (!manualSlug) {
+            const slug = slugify(title);
+            document.getElementById('slug').value = slug;
+            if (!manualCanonical) {
+                document.getElementById('canonical').value = slug;
+            }
+        }
+        if (!manualH1) {
+            document.getElementById('h1_heading').value = title;
+        }
+        if (!manualMetaTitle) {
+            document.getElementById('meta_title').value = title;
+            updateCharCount('meta_title', 'metaTitleCount', 60, 70);
+        }
+        if (!manualAlt) {
+            document.getElementById('image_alt').value = title;
+        }
+    });
+
+    document.getElementById('slug').addEventListener('keyup', function () {
+        if (!manualCanonical) {
+            document.getElementById('canonical').value = this.value;
+        }
+    });
+
+    document.getElementById('meta_title').addEventListener('keyup', function () {
+        if (!manualOgTitle) {
+            document.getElementById('og_title').value = this.value;
+        }
+        updateCharCount('meta_title', 'metaTitleCount', 60, 70);
+    });
+
+    document.getElementById('meta_description').addEventListener('keyup', function () {
+        if (!manualOgDesc) {
+            document.getElementById('og_description').value = this.value;
+        }
+        updateCharCount('meta_description', 'metaDescCount', 160, 200);
+    });
+
+    function updateCharCount(inputId, countId, optimal, max) {
+        const len = document.getElementById(inputId).value.length;
+        const count = document.getElementById(countId);
+        count.textContent = len + ' / ' + optimal;
+        count.classList.remove('warn', 'over');
+        if (len > max) {
+            count.classList.add('over');
+        } else if (len > optimal) {
+            count.classList.add('warn');
+        }
+    }
+    // Initial counts on load with existing values
+    updateCharCount('meta_title', 'metaTitleCount', 60, 70);
+    updateCharCount('meta_description', 'metaDescCount', 160, 200);
+
+    // Icon live preview
+    document.getElementById('iconInput').addEventListener('input', function () {
+        const i = document.getElementById('iconPreviewI');
+        i.className = this.value.trim() || 'fa-solid fa-gift';
+    });
+
+    // New image preview
+    document.getElementById('imageInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('newPreviewImg').src = e.target.result;
+            document.getElementById('newPreviewName').textContent = file.name;
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            const cur = document.getElementById('currentThumb');
+            if (cur) cur.style.opacity = '.4';
+            const prev = document.getElementById('newPreview');
+            prev.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Loading button on submit
+    document.getElementById('editForm').addEventListener('submit', function () {
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+    });
 </script>

@@ -213,6 +213,9 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
+            'meta_title' => 'required|string|max:255',
+            'meta_description' => 'required|string',
+            'h1_heading' => 'required|string|max:255',
             'mrp' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'discount_type' => 'nullable|in:amount,percentage',
@@ -222,13 +225,9 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'images.*' => 'nullable|image|max:2048',
-
-            // ✅ new: videos + addon options
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
             'addons.*.price' => 'nullable|numeric|min:0',
-
-            // ✅ new: multiple images per image-type variant
             'variants_image.*.images.*' => 'nullable|image|max:2048',
         ]);
 
@@ -271,6 +270,7 @@ class ProductController extends Controller
 
                 'meta_title' => $request->meta_title,
                 'meta_description' => $request->meta_description,
+                'h1_heading' => $request->h1_heading,
 
                 'status' => $request->status,
             ]);
@@ -566,6 +566,9 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
+            'meta_title' => 'required|string|max:255',
+            'meta_description' => 'required|string',
+            'h1_heading' => 'required|string|max:255',
             'mrp' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'discount_type' => 'nullable|in:amount,percentage',
@@ -575,16 +578,13 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'images.*' => 'nullable|image|max:2048',
-
-            // ✅ new: videos + addon options
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
             'addons.*.price' => 'nullable|numeric|min:0',
-
-            // ✅ new: multiple images per image-type variant + per-image delete
             'variants_image.*.images.*' => 'nullable|image|max:2048',
             'delete_variant_images.*' => 'nullable|integer',
         ]);
+
         DB::beginTransaction();
 
         try {
@@ -624,6 +624,7 @@ class ProductController extends Controller
 
                 'meta_title' => $request->meta_title,
                 'meta_description' => $request->meta_description,
+                'h1_heading' => $request->h1_heading,
 
                 'status' => $request->status,
             ]);

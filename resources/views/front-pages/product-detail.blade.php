@@ -768,8 +768,8 @@ font-size:15px;
                                 {{ $product->subcategory->name ?? $product->category->name }}
                             </span>
                             <h1 class="design-title">
-                                {{ $product->name }}
-                            </h1>
+    {{ $product->h1_heading ?: $product->name }}
+</h1>
                             <!--<span class="design-tax-info">Inclusive of all taxes.</span>-->
 
                           

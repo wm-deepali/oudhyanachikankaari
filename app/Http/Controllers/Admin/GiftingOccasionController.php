@@ -62,8 +62,20 @@ class GiftingOccasionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required'
+            'title' => 'required',
+            'h1_heading' => 'required|max:255',
+            'meta_title' => 'required|max:255',
+            'meta_description' => 'required',
+            'slug' => 'nullable|max:255|unique:gifting_occasions,slug',
+            'canonical' => 'nullable|max:255',
+            'og_title' => 'nullable|max:255',
+            'og_description' => 'nullable',
+            'image_alt' => 'nullable|max:255',
         ]);
+
+        $slug = $request->slug
+            ? Str::slug($request->slug)
+            : Str::slug($request->title);
 
         $image = null;
 
@@ -77,12 +89,20 @@ class GiftingOccasionController extends Controller
 
         GiftingOccasion::create([
             'title' => $request->title,
+            'h1_heading' => $request->h1_heading,
             'sub_title' => $request->sub_title,
             'short_description' => $request->short_description,
-            'slug' => Str::slug($request->title),
+            'slug' => $slug,
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            // falls back to slug if left blank
+            'canonical' => $request->canonical ?: $slug,
+            // fall back to meta title/description if left blank
+            'og_title' => $request->og_title ?: $request->meta_title,
+            'og_description' => $request->og_description ?: $request->meta_description,
             'image' => $image,
+            // falls back to title if left blank
+            'image_alt' => $request->image_alt ?: $request->title,
             'icon' => $request->icon,
             'status' => $request->status ?? 1,
         ]);
@@ -101,8 +121,20 @@ class GiftingOccasionController extends Controller
         $occasion = GiftingOccasion::findOrFail($id);
 
         $request->validate([
-            'title' => 'required'
+            'title' => 'required',
+            'h1_heading' => 'required|max:255',
+            'meta_title' => 'required|max:255',
+            'meta_description' => 'required',
+            'slug' => 'nullable|max:255|unique:gifting_occasions,slug,' . $occasion->id,
+            'canonical' => 'nullable|max:255',
+            'og_title' => 'nullable|max:255',
+            'og_description' => 'nullable',
+            'image_alt' => 'nullable|max:255',
         ]);
+
+        $slug = $request->slug
+            ? Str::slug($request->slug)
+            : Str::slug($request->title);
 
         $image = $occasion->image;
 
@@ -122,14 +154,19 @@ class GiftingOccasionController extends Controller
 
         $occasion->update([
             'title' => $request->title,
+            'h1_heading' => $request->h1_heading,
             'sub_title' => $request->sub_title,
             'short_description' => $request->short_description,
-            'slug' => Str::slug($request->title),
+            'slug' => $slug,
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
+            'canonical' => $request->canonical ?: $slug,
+            'og_title' => $request->og_title ?: $request->meta_title,
+            'og_description' => $request->og_description ?: $request->meta_description,
             'status' => $request->status ?? 1,
             'icon' => $request->icon,
             'image' => $image,
+            'image_alt' => $request->image_alt ?: $request->title,
         ]);
 
         return redirect()->route('admin.gifting-occasions.index')
@@ -221,6 +258,7 @@ class GiftingOccasionController extends Controller
     {
         $headers = [
             'title',
+            'h1_heading',
             'sub_title',
             'short_description',
             'image_name',
@@ -231,6 +269,7 @@ class GiftingOccasionController extends Controller
         ];
 
         $sampleRow = [
+            'Diwali Gifts',
             'Diwali Gifts',
             'Corporate Diwali Gifts',
             'Best Diwali gifting ideas',

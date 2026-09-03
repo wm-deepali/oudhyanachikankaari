@@ -47,6 +47,12 @@
         {!! $seo->scripts !!}
     @endif
 
+    {{-- JSON-LD Structured Data --}}
+    @if(!empty($seoData['jsonLd']))
+        <script type="application/ld+json">
+            {!! json_encode($seoData['jsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endif
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 

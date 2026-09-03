@@ -1252,22 +1252,44 @@
                             </div>
                         </div>
 
-                        <!-- SEO -->
+                        <!-- SEO & Metadata -->
                         <div class="section-card">
                             <div class="section-card-header">
-                                <h5>SEO</h5>
+                                <h5>SEO &amp; Metadata</h5>
                             </div>
                             <div class="section-card-body">
+
                                 <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input"
+                                    <label class="field-label">Meta Title <span class="req">*</span></label>
+                                    <input type="text" name="meta_title" id="meta_title" class="field-input" required
                                         value="{{ old('meta_title') }}">
                                 </div>
+
                                 <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description"
-                                        class="field-textarea">{{ old('meta_description') }}</textarea>
+                                    <label class="field-label">Meta Description <span class="req">*</span></label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea"
+                                        required>{{ old('meta_description') }}</textarea>
                                 </div>
+
+                                <div class="field-group">
+                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
+                                    <input type="text" name="h1_heading" id="h1_heading" class="field-input" required
+                                        value="{{ old('h1_heading') }}" placeholder="Main on-page heading">
+                                    <div class="field-hint">Auto-filled from Product Name — edit if you want a different
+                                        on-page heading.</div>
+                                </div>
+
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="field-input" id="canonicalDisplay"
+                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+                                        /p/<span id="canonicalSlug">—</span>
+                                    </div>
+                                    <div class="field-hint">Set automatically from the Slug field. OG tags, Twitter
+                                        Card, Image Alt Tag and JSON-LD schema are generated automatically — no separate
+                                        input needed.</div>
+                                </div>
+
                             </div>
                         </div>
 
@@ -1349,6 +1371,25 @@
         let slug = $(this).val().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         $('#slug').val(slug);
     });
+
+
+    // Auto-generate H1 Heading from Product Name
+    let manualH1 = false;
+
+    $(document).on('keyup', '#h1_heading', function () { manualH1 = true; });
+
+    $(document).on('keyup', '#product_name', function () {
+        if (!manualH1) {
+            $('#h1_heading').val($(this).val());
+        }
+    });
+
+    // Live canonical preview from slug
+    function updateCanonicalPreview() {
+        const slugVal = $('#slug').val().trim();
+        $('#canonicalSlug').text(slugVal || '—');
+    }
+    $(document).on('keyup', '#slug, #product_name', updateCanonicalPreview);
 
     /* ── Pricing calculator ─────────────────────────────────────── */
     function calcPrice() {
@@ -1979,6 +2020,7 @@
 
         renderTags();
     })();
+
 </script>
 
 @include('admin.footer')
