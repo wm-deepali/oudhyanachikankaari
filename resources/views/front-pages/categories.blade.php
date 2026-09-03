@@ -41,7 +41,7 @@
                     <div class="col-xl-12 col-lg-12 col-md-12 col-12">
                         <div class="aq-creative-title-box">
                             <span class="aq-creative-subtitle">Curated For You</span>
-                            <h4 class="aq-creative-title">Shop by Category</h4>
+                            <h1 class="aq-creative-title">Shop by Category</h1>
                             <div class="aq-creative-title-line"></div>
                         </div>
                     </div>

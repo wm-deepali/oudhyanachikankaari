@@ -26,7 +26,7 @@
                     <!-- Left: Locations -->
                     <div class="col-lg-5">
                         <div class="aq-contact-info-wrapper pe-lg-4">
-                            <h3 class="font-family-heading mb-40">Our Offices</h3>
+                            <h2 class="font-family-heading mb-40">Our Offices</h2>
 
                              @foreach($branches as $branch)
                                 <div class="aq-office-card {{ $loop->first ? 'corporate-card' : '' }} mb-30 p-4">

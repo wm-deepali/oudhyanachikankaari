@@ -1477,7 +1477,7 @@
 
                                                                                         <img loading="lazy"   src="{{ $reel->photo
                                                     ? asset('storage/' . $reel->photo)
-                                                    : asset('assets/img/default-user.webp') }}" alt="{{ $reel->name }}" />
+                                                    : asset('assets/img/default-user.png') }}" alt="{{ $reel->name }}" />
 
                                                                                         <h4 class="aqf-reel-title">
                                                                                             {{ $reel->name }}
@@ -1644,7 +1644,7 @@
                                                                                 <div class="aqf-testimonial-image-creative">
                                                                                     <img loading="lazy"   src="{{ $testimonial->photo
                                             ? asset('storage/' . $testimonial->photo)
-                                            : asset('assets/img/no-image.webp') }}" alt="{{ $testimonial->name }}">
+                                            : asset('assets/img/no-image.png') }}" alt="{{ $testimonial->name }}">
                                                                                 </div>
                                                                                 <div class="aqf-testimonial-content-creative">
                                                                                     <div class="aqf-testimonial-quote-v2">

@@ -49,7 +49,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-palette"></i>
                             </div>
-                            <h4 class="aq-creative-title">Premium Quality & Handcrafting</h4>
+                            <h3 class="aq-creative-title">Premium Quality & Handcrafting</h3>
                             <p class="aq-creative-desc">We offer meticulously curated handcrafted Chikankari apparel that meet high-quality
                                 standards, complemented by premium packaging and bespoke branding solutions.</p>
                             <div class="aq-creative-card-glow"></div>
@@ -61,7 +61,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-truck-fast"></i>
                             </div>
-                            <h4 class="aq-creative-title">Efficient & Reliable Delivery</h4>
+                            <h3 class="aq-creative-title">Efficient & Reliable Delivery</h3>
                             <p class="aq-creative-desc">Our streamlined logistics ensure timely and dependable delivery
                                 across India, with the flexibility to accommodate urgent requirements through expedited
                                 processing.</p>
@@ -74,7 +74,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-leaf"></i>
                             </div>
-                            <h4 class="aq-creative-title">Sustainable Gifting Solutions</h4>
+                            <h3 class="aq-creative-title">Sustainable Gifting Solutions</h3>
                             <p class="aq-creative-desc">We offer a thoughtfully curated range of eco-conscious products
                                 crafted from sustainable materials, enabling your brand to align with responsible and
                                 environmentally mindful practices.</p>
@@ -87,7 +87,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-tags"></i>
                             </div>
-                            <h4 class="aq-creative-title">Cost-Effective Value</h4>
+                            <h3 class="aq-creative-title">Cost-Effective Value</h3>
                             <p class="aq-creative-desc">We deliver optimal value through competitive pricing structures,
                                 ensuring high-quality gifting solutions without compromising on standards, especially
                                 for bulk and recurring requirements.</p>
@@ -100,7 +100,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-certificate"></i>
                             </div>
-                            <h4 class="aq-creative-title">Quality Assurance & Support</h4>
+                            <h3 class="aq-creative-title">Quality Assurance & Support</h3>
                             <p class="aq-creative-desc">Every order undergoes strict quality checks, supported by a
                                 responsive team committed to addressing concerns promptly and ensuring a smooth client
                                 experience.</p>
@@ -113,7 +113,7 @@
                             <div class="aq-creative-icon">
                                 <i class="fa-solid fa-handshake-angle"></i>
                             </div>
-                            <h4 class="aq-creative-title">Dedicated Corporate Assistance</h4>
+                            <h3 class="aq-creative-title">Dedicated Corporate Assistance</h3>
                             <p class="aq-creative-desc">We provide end-to-end support with structured coordination,
                                 including requirement consultation, artwork approvals, and seamless execution from
                                 product selection to final delivery.</p>
@@ -133,9 +133,9 @@
                 <div class="row justify-content-center">
                     <div class="col-xl-8 col-lg-10 text-center">
                         <span class="aq-section-title-sm mb-15 d-inline-block">Begin Your Journey</span>
-                        <h2 class="font-family-heading mb-25">
+                        <h3 class="font-family-heading mb-25">
                             Elevate Your <span>Wardrobe</span>
-                        </h2>
+                        </h3>
                         <p class="mb-45">
                             Explore our exclusive collection of handcrafted Anarkalis, Sarees, and Gowns designed to bring timeless elegance and Chikankari artistry to your style.
                         </p>
@@ -161,9 +161,9 @@
                 <div class="container">
                     <div class="aq-creative-title-box mb-60 pt-30">
                         <span class="aq-creative-subtitle">Trusted Partners</span>
-                        <h2 class="aq-creative-title">
+                        <h3 class="aq-creative-title">
                             Trusted by 500+ Leading Companies
-                        </h2>
+                        </h3>
                         <div class="aq-creative-title-line"></div>
                     </div>
 

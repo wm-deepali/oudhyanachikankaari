@@ -140,6 +140,23 @@
         font-family: var(--font); transition: background .15s; cursor: pointer;
     }
     #seoModal .btn-secondary-dash:hover { background: var(--bg); }
+    #seoModal .img-preview-wrap {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+#seoModal .img-preview-wrap img {
+    width: 56px; height: 56px; object-fit: cover;
+    border-radius: 6px; border: 1px solid var(--border); background: #fff;
+}
+#seoModal .img-preview-wrap .img-preview-label {
+    font-size: 11.5px; color: var(--text-hint); word-break: break-all;
+}
     </style>
 
     <div class="app-content content container-fluid">
@@ -201,16 +218,23 @@
                                     </td>
 
                                     <td>
-                                        <button type="button" class="action-btn edit" title="Edit SEO" onclick="openSeoModal(
-                                                    {{ $page->id }},
-                                                    '{{ $page->page_name }}',
-                                                    '{{ $page->slug }}',
-                                                    `{!! $page->meta_title !!}`,
-                                                    `{!! $page->meta_description !!}`,
-                                                    `{!! $page->scripts !!}`
-                                                )">
-                                            <i class="fa fa-pencil"></i>
-                                        </button>
+                                      <button type="button" class="action-btn edit" title="Edit SEO" onclick="openSeoModal(
+            {{ $page->id }},
+            '{{ $page->page_name }}',
+            '{{ $page->slug }}',
+            `{!! $page->meta_title !!}`,
+            `{!! $page->meta_description !!}`,
+            `{!! $page->scripts !!}`,
+            `{!! $page->canonical_url !!}`,
+            `{!! $page->og_title !!}`,
+            `{!! $page->og_description !!}`,
+            `{{ $page->og_image }}`,
+            `{!! $page->og_url !!}`,
+            `{{ $page->twitter_card }}`,
+            `{{ $page->twitter_image }}`
+        )">
+    <i class="fa fa-pencil"></i>
+</button>
                                     </td>
 
                                 </tr>
@@ -275,6 +299,54 @@
                         <textarea name="meta_description" id="seo_desc" class="field-textarea" rows="3"></textarea>
                     </div>
 
+{{-- modal-body ke andar, meta_description ke baad add karo --}}
+
+<div class="field-group">
+    <label class="field-label">Canonical URL</label>
+    <input type="text" name="canonical_url" id="seo_canonical" class="field-input" placeholder="https://example.com/page">
+</div>
+
+<div class="field-group">
+    <label class="field-label">OG Title</label>
+    <input type="text" name="og_title" id="seo_og_title" class="field-input">
+</div>
+
+<div class="field-group">
+    <label class="field-label">OG Description</label>
+    <textarea name="og_description" id="seo_og_desc" class="field-textarea" rows="3"></textarea>
+</div>
+
+<div class="field-group">
+    <label class="field-label">OG Image</label>
+    <input type="file" name="og_image" id="seo_og_image" class="field-input" accept="image/*" style="padding-top:8px;">
+    <div class="img-preview-wrap" id="seo_og_image_preview_wrap">
+        <img id="seo_og_image_preview" src="" alt="OG Image">
+        <a href="#" target="_blank" id="seo_og_image_link" class="img-preview-label">View full image</a>
+    </div>
+</div>
+
+<div class="field-group">
+    <label class="field-label">OG URL</label>
+    <input type="text" name="og_url" id="seo_og_url" class="field-input" placeholder="https://example.com/page">
+</div>
+
+<div class="field-group">
+    <label class="field-label">Twitter Card</label>
+    <select name="twitter_card" id="seo_twitter_card" class="field-input">
+        <option value="summary_large_image">summary_large_image</option>
+        <option value="summary">summary</option>
+    </select>
+</div>
+
+<div class="field-group">
+    <label class="field-label">Twitter Image</label>
+    <input type="file" name="twitter_image" id="seo_twitter_image" class="field-input" accept="image/*" style="padding-top:8px;">
+    <div class="img-preview-wrap" id="seo_twitter_image_preview_wrap">
+        <img id="seo_twitter_image_preview" src="" alt="Twitter Image">
+        <a href="#" target="_blank" id="seo_twitter_image_link" class="img-preview-label">View full image</a>
+    </div>
+</div>
+
                     {{-- SCRIPTS (ONLY HOME) --}}
                     <div class="field-group" id="scriptBox">
                         <label class="field-label">Scripts (Only for Home Page)</label>
@@ -301,24 +373,59 @@
 {{-- ================= SCRIPT ================= --}}
 <script>
 
-    function openSeoModal(id, name, slug, title, desc, scripts) {
+   function openSeoModal(id, name, slug, title, desc, scripts, canonical, ogTitle, ogDesc, ogImage, ogUrl, twitterCard, twitterImage) {
 
-        $('#seo_slug').val(slug);
-        $('#seo_title').val(title);
-        $('#seo_desc').val(desc);
-        $('#seo_scripts').val(scripts);
+    $('#seo_slug').val(slug);
+    $('#seo_title').val(title);
+    $('#seo_desc').val(desc);
+    $('#seo_scripts').val(scripts);
 
-        // dynamic action
-        $('#seoForm').attr('action', '/admin/seo/' + id);
+    $('#seo_canonical').val(canonical);
+    $('#seo_og_title').val(ogTitle);
+    $('#seo_og_desc').val(ogDesc);
+    $('#seo_og_url').val(ogUrl);
+    $('#seo_twitter_card').val(twitterCard || 'summary_large_image');
 
-        // show scripts only for home
-        if (name === 'Home') {
-            $('#scriptBox').show();
-        } else {
-            $('#scriptBox').hide();
-        }
+    $('#seo_og_image').val('');
+    $('#seo_twitter_image').val('');
 
-        $('#seoModal').modal('show');
+    setImagePreview('og', ogImage);
+    setImagePreview('twitter', twitterImage);
+
+    $('#seoForm').attr('action', '/admin/seo/' + id);
+
+    if (name === 'Home') {
+        $('#scriptBox').show();
+    } else {
+        $('#scriptBox').hide();
     }
+
+    $('#seoModal').modal('show');
+}
+
+function setImagePreview(type, url) {
+    const $wrap = $('#seo_' + type + '_image_preview_wrap');
+    const $img  = $('#seo_' + type + '_image_preview');
+    const $link = $('#seo_' + type + '_image_link');
+
+    if (url) {
+        $img.attr('src', url);
+        $link.attr('href', url);
+        $wrap.css('display', 'flex');
+    } else {
+        $wrap.hide();
+    }
+}
+
+// naya file select karne par turant preview dikhana (upload se pehle)
+$(document).on('change', '#seo_og_image, #seo_twitter_image', function () {
+    const type = this.id === 'seo_og_image' ? 'og' : 'twitter';
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => setImagePreview(type, e.target.result);
+    reader.readAsDataURL(file);
+});
 
 </script>

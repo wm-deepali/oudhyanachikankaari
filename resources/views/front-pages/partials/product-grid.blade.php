@@ -70,11 +70,11 @@
                                         <span class="aq-product-card-brand-name">
                                             {{ $product->subcategory->name ?? $product->category->name ?? '' }}
                                         </span>
-                                        <h4 class="aq-product-card-title">
+                                        <h2 class="aq-product-card-title">
                                             <a href="{{ route('product.details', $product->slug) }}">
                                                 {{ $product->name }}
                                             </a>
-                                        </h4>
+                                        </h2>
                                         <p
                                             style="font-family: Inter, sans-serif; font-size:12px; color:#777; margin-bottom:12px;">
                                             {{ Str::limit(strip_tags($product->short_description), 80) }}

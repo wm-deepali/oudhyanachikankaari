@@ -767,9 +767,9 @@ font-size:15px;
                             <span class="design-brand">
                                 {{ $product->subcategory->name ?? $product->category->name }}
                             </span>
-                            <h2 class="design-title">
+                            <h1 class="design-title">
                                 {{ $product->name }}
-                            </h2>
+                            </h1>
                             <!--<span class="design-tax-info">Inclusive of all taxes.</span>-->
 
                           
@@ -1424,11 +1424,11 @@ font-size:15px;
                                         {{ $newArrival->subcategory->name ?? $newArrival->category->name }}
                                     </span>
 
-                                    <h4 class="aq-product-card-title">
+                                    <h3 class="aq-product-card-title">
                                         <a href="{{ route('product.details', $newArrival->slug) }}">
                                             {{ $newArrival->name }}
                                         </a>
-                                    </h4>
+                                    </h3>
                                     <p class="aq-product-card-desc">
                                         {{ \Illuminate\Support\Str::limit(strip_tags($newArrival->short_description), 80) }}
                                     </p>
@@ -1575,11 +1575,11 @@ font-size:15px;
                                         {{ $relatedProduct->subcategory->name ?? $relatedProduct->category->name }}
                                     </span>
 
-                                    <h4 class="aq-product-card-title">
+                                    <h3 class="aq-product-card-title">
                                         <a href="{{ route('product.details', $relatedProduct->slug) }}">
                                             {{ $relatedProduct->name }}
                                         </a>
-                                    </h4>
+                                    </h3>
                                     <p class="aq-product-card-desc">
                                         {{ \Illuminate\Support\Str::limit(strip_tags($relatedProduct->short_description), 80) }}
                                     </p>
@@ -2406,10 +2406,50 @@ function addToCartCard(productId, minQty, btnEl) {
     </script>
     
     
-    @if(!empty($viewItemScript))
+@if(!empty($viewItemScript))
 <script>
     {!! $viewItemScript !!}
 </script>
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stickyCols = document.querySelectorAll('.aq-sticky-column');
+
+    function updateSmartSticky() {
+        if (window.innerWidth < 992) {
+            stickyCols.forEach(col => col.style.top = '');
+            return;
+        }
+        
+        const vh = window.innerHeight;
+        stickyCols.forEach(col => {
+            const h = col.offsetHeight;
+            if (h > vh - 40) {
+                // If taller than viewport, set a negative top so it scrolls naturally until its bottom is reached
+                col.style.top = (vh - h - 20) + 'px';
+            } else {
+                // If shorter than viewport, stick to the top
+                col.style.top = '20px';
+            }
+        });
+    }
+
+    // Initial setup
+    updateSmartSticky();
+
+    // Update on window resize
+    window.addEventListener('resize', updateSmartSticky);
+    
+    // Update if column height changes (e.g. accordion open/close)
+    if (typeof ResizeObserver !== 'undefined') {
+        const observer = new ResizeObserver(() => updateSmartSticky());
+        stickyCols.forEach(col => observer.observe(col));
+    }
+    
+    // Double check after fonts/images might have loaded
+    setTimeout(updateSmartSticky, 500);
+});
+</script>
 
 @endsection

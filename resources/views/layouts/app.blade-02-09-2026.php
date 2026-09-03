@@ -6,46 +6,46 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
+    
     @php
-        require_once app_path('Helpers/seo.php');
-        $seo = getSeo();
-        $seoData = $seo ? \App\Services\SeoService::build($seo, $general ?? null) : [];
+    require_once app_path('Helpers/seo.php');
+    $seo = getSeo();
+    $seoData = $seo ? \App\Services\SeoService::build($seo, $general ?? null) : [];
     @endphp
 
-    <title>{{ $seoData['metaTitle'] ?? $general?->site_name ?? config('app.name') }}</title>
+<title>{{ $seoData['metaTitle'] ?? $general?->site_name ?? config('app.name') }}</title>
 
-    <meta name="description" content="{{ $seoData['metaDescription'] ?? $general?->tagline }}">
+<meta name="description" content="{{ $seoData['metaDescription'] ?? $general?->tagline }}">
 
-    @if(!empty($seoData['canonicalUrl']))
-        <link rel="canonical" href="{{ $seoData['canonicalUrl'] }}">
-    @endif
+@if(!empty($seoData['canonicalUrl']))
+    <link rel="canonical" href="{{ $seoData['canonicalUrl'] }}">
+@endif
 
-    {{-- Open Graph --}}
-    <meta property="og:type" content="{{ $seoData['ogType'] ?? 'website' }}">
-    <meta property="og:site_name" content="{{ $general?->site_name ?? config('app.name') }}">
-    <meta property="og:title" content="{{ $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
-    @if(!empty($seoData['ogDescription']))
-        <meta property="og:description" content="{{ $seoData['ogDescription'] }}">
-    @endif
-    @if(!empty($seoData['ogImage']))
-        <meta property="og:image" content="{{ $seoData['ogImage'] }}">
-    @endif
-    <meta property="og:url" content="{{ $seoData['ogUrl'] ?? url()->current() }}">
+{{-- Open Graph --}}
+<meta property="og:type" content="{{ $seoData['ogType'] ?? 'website' }}">
+<meta property="og:site_name" content="{{ $general?->site_name ?? config('app.name') }}">
+<meta property="og:title" content="{{ $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
+@if(!empty($seoData['ogDescription']))
+    <meta property="og:description" content="{{ $seoData['ogDescription'] }}">
+@endif
+@if(!empty($seoData['ogImage']))
+    <meta property="og:image" content="{{ $seoData['ogImage'] }}">
+@endif
+<meta property="og:url" content="{{ $seoData['ogUrl'] ?? url()->current() }}">
 
-    {{-- Twitter --}}
-    <meta name="twitter:card" content="{{ $seoData['twitterCard'] ?? 'summary_large_image' }}">
-    <meta name="twitter:title" content="{{ $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
-    @if(!empty($seoData['ogDescription']))
-        <meta name="twitter:description" content="{{ $seoData['ogDescription'] }}">
-    @endif
-    @if(!empty($seoData['twitterImage']))
-        <meta name="twitter:image" content="{{ $seoData['twitterImage'] }}">
-    @endif
+{{-- Twitter --}}
+<meta name="twitter:card" content="{{ $seoData['twitterCard'] ?? 'summary_large_image' }}">
+<meta name="twitter:title" content="{{ $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
+@if(!empty($seoData['ogDescription']))
+    <meta name="twitter:description" content="{{ $seoData['ogDescription'] }}">
+@endif
+@if(!empty($seoData['twitterImage']))
+    <meta name="twitter:image" content="{{ $seoData['twitterImage'] }}">
+@endif
 
-    @if($seo && ($seo->scripts ?? null))
-        {!! $seo->scripts !!}
-    @endif
+@if($seo && ($seo->scripts ?? null))
+    {!! $seo->scripts !!}
+@endif
 
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -56,32 +56,21 @@
 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- Preload Critical Fonts -->
-    <link rel="preload" href="{{ asset('assets/fonts/Satoshi-Regular.woff2') }}" as="font" type="font/woff2"
-        crossorigin>
-    <link rel="preload" href="{{ asset('assets/fonts/Satoshi-Bold.woff2') }}" as="font" type="font/woff2" crossorigin>
-
-    <!-- CSS here (Optimized & Minified) -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/animate.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/nice-select.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/custom-animation.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/font-awesome-pro.min.css') }}" media="print"
-        onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="{{ asset('assets/css/font-awesome-pro.min.css') }}">
-    </noscript>
-    <link rel="stylesheet" href="{{ asset('assets/css/spacing.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/main.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/custom-luxury.min.css') }}">
-
+    <!-- CSS here -->
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/nice-select.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-animation.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/swiper-bundle.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/font-awesome-pro.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ asset('assets/css/spacing.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-luxury.css') }}">
+ 
 
     @include('layouts.tracking-head')
 
@@ -110,7 +99,7 @@
                         </div>
                         <img src="{{ $general?->logo
     ? asset('storage/' . $general->logo)
-    : asset('assets/img/corporate/Oudhyana_img/logo.webp') }}" alt="{{ $general?->site_name ?? config('app.name') }}">
+    : asset('assets/img/corporate/Oudhyana_img/logo.png') }}" alt="{{ $general?->site_name ?? config('app.name') }}">
                     </div>
                     <!-- <h3 class="aq-preloader-title">Oudhyana</h3> -->
                     <!-- <p class="aq-preloader-subtitle">Loading..</p> -->
@@ -517,7 +506,7 @@
                     <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
                     <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
                         <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/nazneen_georgette_kurti.webp') }}"
+                            <img src="{{ asset('assets/img/corporate/nazneen_georgette_kurti.png') }}"
                                 alt="Nazneen Kurti">
                         </a>
                         <div class="aq-wishlist-popup-thumb-info">
@@ -537,7 +526,7 @@
                     <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
                     <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
                         <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/shama_cotton_anarkali.webp') }}"
+                            <img src="{{ asset('assets/img/corporate/shama_cotton_anarkali.png') }}"
                                 alt="Shama Anarkali">
                         </a>
                         <div class="aq-wishlist-popup-thumb-info">
@@ -557,7 +546,7 @@
                     <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
                     <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
                         <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/gallery_unstitched_suit.webp') }}" alt="Gift Box">
+                            <img src="{{ asset('assets/img/corporate/gallery_unstitched_suit.png') }}" alt="Gift Box">
                         </a>
                         <div class="aq-wishlist-popup-thumb-info">
                             <h4 class="aq-wishlist-popup-title"><a href="product-details-default.html">Osette Backpack
@@ -742,7 +731,7 @@
         <div class="aq-offcanvas-top d-flex align-items-center justify-content-between">
             <div class="aq-offcanvas-logo">
                 <a href="{{ url('/') }}">
-                    <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.webp') }}"
+                    <img src="{{ $general?->logo ? asset('storage/' . $general->logo) : asset('assets/img/corporate/Oudhyana_img/logo.png') }}"
                         alt="{{ $general?->site_name }}">
                     <div>{{ $general?->tagline ?? "" }}</div>
                 </a>
@@ -1178,7 +1167,7 @@
                             <a href="{{ url('/') }}">
                                 <img class="mobile-logo-img" style="width: 160px; max-width: 100%; height: auto;" src="{{ $general?->logo
     ? asset('storage/' . $general->logo)
-    : asset('assets/img/corporate/Oudhyana_img/logo.webp') }}" alt="{{ $general?->site_name }}">
+    : asset('assets/img/corporate/Oudhyana_img/logo.png') }}" alt="{{ $general?->site_name }}">
 
                                 <div class=" d-md-block p-0">
                                     {{ $general?->tagline ?? '' }}
@@ -1934,29 +1923,19 @@
             </div>
 
             <!-- Footer Bottom -->
-
             <div class="aq-footer-bottom-luxury">
                 <div class="container">
                     <div class="row align-items-center">
                         <div class="col-md-6 text-center text-md-start">
-                            <p class="copyright-text">
-                                © 2026 <span>Oudhyana Chikankari </span>. All Rights Reserved.
-                            </p>
+                            <p class="copyright-text">Â© 2026 <span>Oudhyana India</span>. All Rights Reserved.</p>
                         </div>
-
                         <div class="col-md-6 text-center text-md-end">
-                            <p class="copyright-create">
-                                Designed &amp; Developed by
-                                <a href="https://www.webmingo.com/" target="_blank" rel="noopener noreferrer">
-                                    Web mingo
-                                </a>
+                            <p class="copyright-create">Designed & Developed by <a href="#" target="_blank">Webmingo</a>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
         <!-- footer area end -->
         <!-- footer area end -->
@@ -2388,21 +2367,21 @@
 
 
 
-    <!-- JS here (Optimized & Minified) -->
-    <script src="{{ asset('assets/js/vendor/jquery.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/bootstrap-bundle.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/swiper-bundle.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/magnific-popup.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/nice-select.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/purecounter.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/isotope-pkgd.min.js') }}" defer></script>
+    <!-- JS here -->
+    <script src="{{ asset('assets/js/vendor/jquery.js') }}" defer></script>
+    <script src="{{ asset('assets/js/bootstrap-bundle.js') }}" defer></script>
+    <script src="{{ asset('assets/js/swiper-bundle.js') }}" defer></script>
+    <script src="{{ asset('assets/js/magnific-popup.js') }}" defer></script>
+    <script src="{{ asset('assets/js/nice-select.js') }}" defer></script>
+    <script src="{{ asset('assets/js/purecounter.js') }}" defer></script>
+    <script src="{{ asset('assets/js/isotope-pkgd.js') }}" defer></script>
     <script src="{{ asset('assets/js/lazysize.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/slider-active.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/imagesloaded-pkgd.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/ajax-form.min.js') }}" defer></script>
-    <script src="{{ asset('assets/js/main.min.js') }}" defer></script>
+    <script src="{{ asset('assets/js/slider-active.js') }}" defer></script>
+    <script src="{{ asset('assets/js/imagesloaded-pkgd.js') }}" defer></script>
+    <script src="{{ asset('assets/js/ajax-form.js') }}" defer></script>
+    <script src="{{ asset('assets/js/main.js') }}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
-    <script src="https://www.google.com/recaptcha/api.js" defer></script>
+    <script src="https://www.google.com/recaptcha/api.js"  defer></script>
 
 
 
@@ -2583,7 +2562,7 @@
         $(document).ready(function () {
 
             const storagePath = "{{ asset('storage') }}";
-            const noImage = "{{ asset('assets/img/no-image.webp') }}";
+            const noImage = "{{ asset('assets/images/no-image.png') }}";
             const baseUrl = "{{ url('/') }}"; // respects subfolder deployment
 
             let searchRequest = null;

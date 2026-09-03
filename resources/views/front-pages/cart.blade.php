@@ -28,7 +28,7 @@
                 <div class="row">
                     <!-- Left: Your Cart -->
                     <div class="col-xl-8 col-lg-8 col-12 mb-40">
-                        <h1 class="aq-cart-title">Your Cart</h1>
+                        <h2 class="aq-cart-title">Your Cart</h2>
                         <div class="aq-cart-items-list" id="aqCartItemsList">
 
                             <!-- Cart Row 1: Bespoke Welcome Kit -->

@@ -411,6 +411,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Orders routes
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/print-labels', [OrderController::class, 'printLabels'])->name('orders.print-labels');
+        Route::post('orders/print-labels/preview', [OrderController::class, 'previewLabels'])->name('orders.preview-labels');
+        Route::post('orders/print-labels/generate', [OrderController::class, 'generateLabels'])->name('orders.generate-labels');
         Route::get('orders/export', [OrderController::class, 'export'])->name('orders.export');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');

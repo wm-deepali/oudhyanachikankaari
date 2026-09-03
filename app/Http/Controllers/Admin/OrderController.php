@@ -2,99 +2,95 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Helpers\MailHelper;
 use App\Http\Controllers\Controller;
-use App\Mail\OrderDeliveredMail;
-use App\Mail\OrderShippedMail;
 use App\Models\Courier;
 use App\Models\InvoiceSetting;
 use App\Models\Order;
 use App\Models\SmtpSetting;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-   public function index(Request $request)
-{
-    // ── Customer filter (used when viewing orders from a customer's wishlist/profile) ──
-    $customerId = $request->input('customer');
+    public function index(Request $request)
+    {
+        // ── Customer filter (used when viewing orders from a customer's wishlist/profile) ──
+        $customerId = $request->input('customer');
 
-    // ── KPI counts ────────────────────────────────────────
-    $kpi = [
-        'total' => Order::when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'pending' => Order::where('status', 'pending')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'shipped' => Order::where('status', 'shipped')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'delivered' => Order::where('status', 'delivered')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-    ];
+        // ── KPI counts ────────────────────────────────────────
+        $kpi = [
+            'total' => Order::when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'pending' => Order::where('status', 'pending')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'shipped' => Order::where('status', 'shipped')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'delivered' => Order::where('status', 'delivered')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+        ];
 
-    // ── Tab counts ────────────────────────────────────────
-    $tabCounts = [
-        'all' => Order::when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'new' => Order::where('status', 'new')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'processing' => Order::where('status', 'processing')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'shipped' => Order::where('status', 'shipped')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'delivered' => Order::where('status', 'delivered')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-        'cancelled' => Order::where('status', 'cancelled')->when($customerId, fn ($q) => $q->where('customer_id', $customerId))->count(),
-    ];
+        // ── Tab counts ────────────────────────────────────────
+        $tabCounts = [
+            'all' => Order::when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'new' => Order::where('status', 'new')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'processing' => Order::where('status', 'processing')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'shipped' => Order::where('status', 'shipped')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'delivered' => Order::where('status', 'delivered')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+            'cancelled' => Order::where('status', 'cancelled')->when($customerId, fn($q) => $q->where('customer_id', $customerId))->count(),
+        ];
 
-    // ── Base query ────────────────────────────────────────
-    $query = Order::with(['items', 'customer'])
-        ->latest();
+        // ── Base query ────────────────────────────────────────
+        $query = Order::with(['items', 'customer'])
+            ->latest();
 
-    // ── Customer filter ────────────────────────────────────
-    if ($customerId) {
-        $query->where('customer_id', $customerId);
+        // ── Customer filter ────────────────────────────────────
+        if ($customerId) {
+            $query->where('customer_id', $customerId);
+        }
+
+        // ── Status tab filter ─────────────────────────────────
+        $activeTab = $request->input('tab', 'all');
+        if ($activeTab !== 'all') {
+            $query->where('status', $activeTab);
+        }
+
+        // ── Search (order number, name, email) ────────────────
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%");
+            });
+        }
+
+        // ── Payment status filter ─────────────────────────────
+        if ($payment = $request->input('payment')) {
+            $query->where('payment_status', $payment);
+        }
+
+        // ── Date range filter ─────────────────────────────────
+        if ($from = $request->input('from_date')) {
+            $query->whereDate('created_at', '>=', $from);
+        }
+        if ($to = $request->input('to_date')) {
+            $query->whereDate('created_at', '<=', $to);
+        }
+
+        // ── Paginate ──────────────────────────────────────────
+        $orders = $query->paginate(25)->withQueryString();
+
+        return view('admin.orders.index', compact(
+            'orders',
+            'kpi',
+            'tabCounts',
+            'activeTab'
+        ));
     }
-
-    // ── Status tab filter ─────────────────────────────────
-    $activeTab = $request->input('tab', 'all');
-    if ($activeTab !== 'all') {
-        $query->where('status', $activeTab);
-    }
-
-    // ── Search (order number, name, email) ────────────────
-    if ($search = $request->input('search')) {
-        $query->where(function ($q) use ($search) {
-            $q->where('order_number', 'like', "%{$search}%")
-                ->orWhere('customer_name', 'like', "%{$search}%")
-                ->orWhere('customer_email', 'like', "%{$search}%");
-        });
-    }
-
-    // ── Payment status filter ─────────────────────────────
-    if ($payment = $request->input('payment')) {
-        $query->where('payment_status', $payment);
-    }
-
-    // ── Date range filter ─────────────────────────────────
-    if ($from = $request->input('from_date')) {
-        $query->whereDate('created_at', '>=', $from);
-    }
-    if ($to = $request->input('to_date')) {
-        $query->whereDate('created_at', '<=', $to);
-    }
-
-    // ── Paginate ──────────────────────────────────────────
-    $orders = $query->paginate(25)->withQueryString();
-
-    return view('admin.orders.index', compact(
-        'orders',
-        'kpi',
-        'tabCounts',
-        'activeTab'
-    ));
-}
 
     // ── Export CSV ────────────────────────────────────────────
     public function export(Request $request)
     {
         $query = Order::with('items')->latest();
 
-  if ($customerId = $request->input('customer')) {
-        $query->where('customer_id', $customerId);
-    }
+        if ($customerId = $request->input('customer')) {
+            $query->where('customer_id', $customerId);
+        }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -363,55 +359,55 @@ class OrderController extends Controller
 
                     foreach ($order->items as $item) {
 
-    // Thumbnail: image variant > product default image > null
-    $thumb = null;
-    if ($item->imageVariant && $item->imageVariant->image) {
-        $thumb = asset('storage/' . $item->imageVariant->image);
-    } elseif ($item->product) {
-        $thumb = $item->product->display_image;
-    }
+                        // Thumbnail: image variant > product default image > null
+                        $thumb = null;
+                        if ($item->imageVariant && $item->imageVariant->image) {
+                            $thumb = asset('storage/' . $item->imageVariant->image);
+                        } elseif ($item->product) {
+                            $thumb = $item->product->display_image;
+                        }
 
-    $imageHtml = $thumb
-        ? "<img src='{$thumb}' alt='{$item->product_name}' style='width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid #d0d8d7;display:block;'>"
-        : "<span style='display:block;width:56px;height:56px;background:#e8efee;border-radius:4px;border:1px solid #d0d8d7;'></span>";
+                        $imageHtml = $thumb
+                            ? "<img src='{$thumb}' alt='{$item->product_name}' style='width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid #d0d8d7;display:block;'>"
+                            : "<span style='display:block;width:56px;height:56px;background:#e8efee;border-radius:4px;border:1px solid #d0d8d7;'></span>";
 
-    // Variant label from selected_attributes snapshot
-    $variantLabel = null;
-    if (!empty($item->selected_attributes)) {
-        $variantLabel = collect($item->selected_attributes)
-            ->map(function ($value, $key) {
-                if (is_array($value)) {
-                    $attrName = $value['attribute'] ?? $value['name'] ?? $key;
-                    $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
-                    return $attrName . ': ' . $attrVal;
-                }
-                return $key . ': ' . $value;
-            })
-            ->join(' · ');
-    }
+                        // Variant label from selected_attributes snapshot
+                        $variantLabel = null;
+                        if (!empty($item->selected_attributes)) {
+                            $variantLabel = collect($item->selected_attributes)
+                                ->map(function ($value, $key) {
+                                    if (is_array($value)) {
+                                        $attrName = $value['attribute'] ?? $value['name'] ?? $key;
+                                        $attrVal = $value['value'] ?? $value['label'] ?? reset($value);
+                                        return $attrName . ': ' . $attrVal;
+                                    }
+                                    return $key . ': ' . $value;
+                                })
+                                ->join(' · ');
+                        }
 
-    $variantHtml = $variantLabel
-        ? "<div style='font-size:11px;color:#7a9e9c;'>{$variantLabel}</div>"
-        : '';
+                        $variantHtml = $variantLabel
+                            ? "<div style='font-size:11px;color:#7a9e9c;'>{$variantLabel}</div>"
+                            : '';
 
-    // SKU: sku variant > snapshot sku > product sku
-    $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
-    $skuHtml = $sku
-        ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
-        : '';
+                        // SKU: sku variant > snapshot sku > product sku
+                        $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
+                        $skuHtml = $sku
+                            ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
+                            : '';
 
-    // Addons — list each one and fold into the line total
-    $addonsTotal = $item->addons->sum('price');
-    $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+                        // Addons — list each one and fold into the line total
+                        $addonsTotal = $item->addons->sum('price');
+                        $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
 
-    $addonsHtml = '';
-    if ($item->addons->isNotEmpty()) {
-        foreach ($item->addons as $addon) {
-            $addonsHtml .= "<div style='font-size:11px;color:#7a9e9c;'>+ {$addon->detail} (₹" . number_format($addon->price, 2) . ")</div>";
-        }
-    }
+                        $addonsHtml = '';
+                        if ($item->addons->isNotEmpty()) {
+                            foreach ($item->addons as $addon) {
+                                $addonsHtml .= "<div style='font-size:11px;color:#7a9e9c;'>+ {$addon->detail} (₹" . number_format($addon->price, 2) . ")</div>";
+                            }
+                        }
 
-    $orderItems .= "
+                        $orderItems .= "
     <div style='display:table;width:100%;border-bottom:1px solid #e6eae9;padding:14px 0;'>
         <div style='display:table-cell;width:60px;vertical-align:middle;padding-right:14px;'>
             {$imageHtml}
@@ -428,7 +424,7 @@ class OrderController extends Controller
         </div>
     </div>
 ";
-}
+                    }
 
                     $shippingAddress = "
         <div>
@@ -632,5 +628,90 @@ class OrderController extends Controller
         return $pdf->download($filename);
     }
 
+    public function printLabels(Request $request)
+    {
+        $query = Order::with(['state', 'city', 'courier']);
+
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $query->whereBetween('created_at', [
+                $request->from_date . ' 00:00:00',
+                $request->to_date . ' 23:59:59',
+            ]);
+        }
+
+        $orders = $query->latest()->get();
+
+        return view('admin.orders.print-labels', compact('orders'));
+    }
+
+    public function previewLabels(Request $request)
+    {
+        $request->validate([
+            'order_ids' => 'required|array|min:1',
+            'order_ids.*' => 'exists:orders,id',
+            'label_size' => 'required|in:A4,A5,A6,A8',
+        ]);
+
+        $orders = Order::with(['state', 'city', 'courier'])
+            ->whereIn('id', $request->order_ids)
+            ->get();
+
+        $setting = InvoiceSetting::first(); // apna actual settings model daal dena
+
+        $grid = $this->labelGridConfig($request->label_size);
+
+        return view('admin.orders.label-preview', [
+            'orders' => $orders,
+            'setting' => $setting,
+            'labelSize' => $request->label_size,
+            'cols' => $grid['cols'],
+        ]);
+    }
+
+    public function generateLabels(Request $request)
+    {
+        $request->validate([
+            'order_ids' => 'required|array|min:1',
+            'order_ids.*' => 'exists:orders,id',
+            'label_size' => 'required|in:A4,A5,A6,A8',
+        ]);
+
+        $orders = Order::with(['state', 'city', 'courier'])
+            ->whereIn('id', $request->order_ids)
+            ->get();
+
+        $setting = InvoiceSetting::first();
+
+        $grid = $this->labelGridConfig($request->label_size);
+        $pages = $orders->chunk($grid['perPage']);
+
+        $pdf = PDF::loadView('admin.orders.label-pdf', [
+            'pages' => $pages,
+            'cols' => $grid['cols'],
+            'setting' => $setting,
+        ]);
+
+        $pdf->setPaper('a4', 'portrait'); // physical paper hamesha A4 hi hota hai
+
+        return $pdf->stream('order-labels-' . now()->format('Y-m-d-His') . '.pdf');
+    }
+
+    private function labelGridConfig(string $size): array
+    {
+        // ── Labels-per-A4-sheet config ──
+        // NOTE: Manager ne explicitly bola "A8 hai to A4 pe 2 print honge" —
+        // ye standard ISO paper-doubling se match nahi karta (jo A8=16 deta),
+        // isliye yahan business decision liya: chhota size bhi sirf 2 labels/sheet
+        // rakha hai (courier scan ke liye readable size zaroori hai).
+        // Agar manager confirm kare exact count, sirf yahan value change karo —
+        // baaki poora system (preview + PDF) automatically adjust ho jaayega.
+        return match ($size) {
+            'A4' => ['perPage' => 1, 'cols' => 1],
+            'A5' => ['perPage' => 2, 'cols' => 2],
+            'A6' => ['perPage' => 4, 'cols' => 2],
+            'A8' => ['perPage' => 2, 'cols' => 2], // manager ke exact instruction ke hisaab se
+            default => ['perPage' => 1, 'cols' => 1],
+        };
+    }
 
 }
