@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html class="no-js" lang="zxx">
+<html class="no-js" lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -21,6 +20,8 @@
         <link rel="canonical" href="{{ $seoData['canonicalUrl'] }}">
     @endif
 
+  <meta name="robots" content="{{ $seoData['metaRobots'] ?? 'noindex, nofollow' }}">
+    
     {{-- Open Graph --}}
     <meta property="og:type" content="{{ $seoData['ogType'] ?? 'website' }}">
     <meta property="og:site_name" content="{{ $general?->site_name ?? config('app.name') }}">
@@ -35,9 +36,9 @@
 
     {{-- Twitter --}}
     <meta name="twitter:card" content="{{ $seoData['twitterCard'] ?? 'summary_large_image' }}">
-    <meta name="twitter:title" content="{{ $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
-    @if(!empty($seoData['ogDescription']))
-        <meta name="twitter:description" content="{{ $seoData['ogDescription'] }}">
+    <meta name="twitter:title" content="{{ $seoData['twitterTitle'] ?? $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
+    @if(!empty($seoData['twitterDescription']) || !empty($seoData['ogDescription']))
+        <meta name="twitter:description" content="{{ $seoData['twitterDescription'] ?? $seoData['ogDescription'] }}">
     @endif
     @if(!empty($seoData['twitterImage']))
         <meta name="twitter:image" content="{{ $seoData['twitterImage'] }}">
@@ -47,12 +48,20 @@
         {!! $seo->scripts !!}
     @endif
 
-    {{-- JSON-LD Structured Data --}}
+       {{-- JSON-LD Structured Data --}}
     @if(!empty($seoData['jsonLd']))
         <script type="application/ld+json">
             {!! json_encode($seoData['jsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
         </script>
     @endif
+    
+    {{-- JSON-LD BreadcrumbList (separate schema block — search engines expect this apart from Product/Article/etc.) --}}
+    @if(!empty($seoData['breadcrumbJsonLd']))
+        <script type="application/ld+json">
+            {!! json_encode($seoData['breadcrumbJsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endif
+
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -449,13 +458,13 @@
                                                                         </a>
                                                                     </div>
                                                                     <div class="aq-product-content">
-                                                                        <span class="aqf-product-3-category">Premium Hampers</span>
+                                                                        <span class="aqf-product-3-category">Premium Collections</span>
                                                                         <h4 class="aq-product-title mb-5">
                                                                             <a href="{{ route('product.details', $product->slug) }}">
                                                                                 {{ $product->name }}</a>
                                                                         </h4>
                                                                         <div class="aq-product-price">
-                                                                            <ins><span class="aq-product-new-price">${{
+                                                                            <ins><span class="aq-product-new-price">₹{{
                                     number_format($product->price, 2) }}</span></ins>
                                                                         </div>
                                                                     </div>
@@ -507,85 +516,7 @@
     </div>
     <!-- Cartmini area -->
 
-    <!-- wishlist popup -->
-    <div class="aq-wishlist-popup-wrap aq-wishlist-popup aq-wishlist-active">
-        <div class="aq-wishlist-popup-top d-flex justify-content-between align-items-center">
-            <div>
-                <span class="aq-wishlist-popup-name">Wishlist</span>
-                <span class="aq-wishlist-popup-count">(2)</span>
-            </div>
-            <span class="aq-wishlist-popup-close aq-wishlist-close"><i class="fa-regular fa-xmark"></i></span>
-        </div>
-        <div class="aq-wishlist-popup-middle">
-            <div
-                class="aq-wishlist-popup-item d-flex justify-content-center justify-content-sm-between align-items-center">
-                <div class="aq-wishlist-popup-thumb-wrap d-flex align-items-center">
-                    <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
-                    <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
-                        <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/nazneen_georgette_kurti.webp') }}"
-                                alt="Nazneen Kurti">
-                        </a>
-                        <div class="aq-wishlist-popup-thumb-info">
-                            <h4 class="aq-wishlist-popup-title"><a href="product-details-default.html">Mosaic Vanity
-                                    Bag</a></h4>
-                            <span class="aq-wishlist-popup-price">₹8,500</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="aq-wishlist-popup-btn">
-                    <button class="aq-btn-black btn-red-bg  btn-h-40">Add to bag</button>
-                </div>
-            </div>
-            <div
-                class="aq-wishlist-popup-item d-flex justify-content-center justify-content-sm-between align-items-center">
-                <div class="aq-wishlist-popup-thumb-wrap d-flex align-items-center">
-                    <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
-                    <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
-                        <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/shama_cotton_anarkali.webp') }}"
-                                alt="Shama Anarkali">
-                        </a>
-                        <div class="aq-wishlist-popup-thumb-info">
-                            <h4 class="aq-wishlist-popup-title"><a href="product-details-default.html">Georgia Mini
-                                    Bag</a></h4>
-                            <span class="aq-wishlist-popup-price">578.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="aq-wishlist-popup-btn">
-                    <button class="aq-btn-black btn-red-bg  btn-h-40">Add to bag</button>
-                </div>
-            </div>
-            <div
-                class="aq-wishlist-popup-item d-flex justify-content-center justify-content-sm-between align-items-center">
-                <div class="aq-wishlist-popup-thumb-wrap d-flex align-items-center">
-                    <span class="aq-wishlist-popup-remove"><i class="fa-regular fa-xmark"></i></span>
-                    <div class="aq-wishlist-popup-thumb  d-flex align-items-center">
-                        <a href="product-details-default.html">
-                            <img src="{{ asset('assets/img/corporate/gallery_unstitched_suit.webp') }}" alt="Gift Box">
-                        </a>
-                        <div class="aq-wishlist-popup-thumb-info">
-                            <h4 class="aq-wishlist-popup-title"><a href="product-details-default.html">Osette Backpack
-                                    Bag</a></h4>
-                            <span class="aq-wishlist-popup-price">578.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="aq-wishlist-popup-btn">
-                    <button class="aq-btn-black btn-red-bg  btn-h-40">Add to bag</button>
-                </div>
-            </div>
-        </div>
-        <div class="aq-wishlist-popup-bottom d-flex justify-content-between align-items-center">
-            <a class="aq-line-anim" href="wishlist.html">Open wishlist page</a>
-            <a class="aq-line-anim" href="product-default.html">Continue shopping</a>
-        </div>
-        <div class="aq-wishlist-popup-text">
-            <p><b>Shama Cotton Anarkali</b> has been added to Wishlist.</p>
-        </div>
-    </div>
-    <!-- wishlist popup -->
+ 
 
 
 
@@ -796,9 +727,11 @@
                         </li>
                     @endforeach
 
-                    <li class="aq-mm-item">
-                        <a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End of Season Sale</a>
-                    </li>
+                    @foreach($navbarCollections as $collection)
+    <li class="aq-mm-item">
+        <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
+    </li>
+@endforeach
                     <li class="aq-mm-item">
                         <a href="{{ route('contact-us') }}">Contact</a>
                     </li>
@@ -951,7 +884,7 @@
                             @foreach($category->children as $subcategory)
                                 <li class="aq-mm-item">
                                     <a
-                                        href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">{{ $subcategory->name }}</a>
+                                        href="{{ route('products.listing', [$category->slug, $subcategory->slug]) }}">{{ $subcategory->name }}</a>
                                 </li>
                             @endforeach
                         </ul>
@@ -1337,8 +1270,8 @@
                             style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Chikan
                             Kurti</a>
                         <a href="#"
-                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Bridal
-                            Lehenga</a>
+                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Chiknakaari
+                            Suits</a>
                         <a href="#"
                             style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Mens
                             Kurta</a>
@@ -1346,8 +1279,8 @@
                             style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Organza
                             Pieces</a>
                         <a href="#"
-                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Bedsheet
-                            Sets</a>
+                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Chikankaari Accesories
+                            </a>
                     </div>
                 </div>
             </div>
@@ -1489,7 +1422,7 @@
 
                                                         <li>
                                                             <a
-                                                                href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}">
+                                                                href="{{ route('products.listing', [$category->slug, $subcategory->slug]) }}">
                                                                 {{ $subcategory->name }}
                                                             </a>
                                                         </li>
@@ -1503,8 +1436,11 @@
                                         </li>
 
                                     @endforeach
-                                    <li><a href="https://oudhyanachikankaari.com/collections/end-of-season-sale">End
-                                            of Season Sale</a></li>
+                                  @foreach($navbarCollections as $collection)
+    <li>
+        <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
+    </li>
+@endforeach
                                     <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
                                 </ul>
@@ -1871,7 +1807,7 @@
                                     </div>
 
                                     <div class="aq-contact-item-luxury d-flex align-items-start gap-3 mb-20">
-                                        <a href="https://wa.me/0000000000" target="_blank">
+                                        <a href="https://wa.me/917388968888" target="_blank">
                                             <div class="aq-contact-icon-box">
                                                 <i class="fa-brands fa-whatsapp"></i>
                                             </div>
@@ -1925,13 +1861,9 @@
 
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-disclaimer mb-20 mt-10">
-                                <p><strong>Disclaimer:</strong> Oudhyana India provides Chikankari Suiting solutions
-                                    only to businesses, institutions, and registered entities. All prices are
-                                    exclusive
-                                    of taxes. Product images are for representation only. Actual product may vary
-                                    slightly. We are not responsible for any typographical errors. All trademarks
-                                    and
-                                    brand names belong to their respective owners.</p>
+                              <p><strong>Disclaimer:</strong> Oudhyana India offers authentic Chikankari clothing and handcrafted apparel for women. 
+                              Product images are for representation purposes only, and the actual product may vary slightly in colour, embroidery, or appearance. 
+                              We are not responsible for any typographical errors. All trademarks and brand names belong to their respective owners.</p>
                             </div>
                         </div>
 
@@ -1954,7 +1886,7 @@
                             <p class="copyright-create">
                                 Designed &amp; Developed by
                                 <a href="https://www.webmingo.com/" target="_blank" rel="noopener noreferrer">
-                                    Web mingo
+                                    Web Mingo
                                 </a>
                             </p>
                         </div>
@@ -2668,11 +2600,11 @@
                                         </h4>
                                         <div class="aq-product-price">
                                             <ins>
-                                                <span class="aq-product-new-price">₹${item.price || ''}</span>
+                                                <span class="aq-product-new-price">₹{item.price || ''}</span>
                                             </ins>
                                             ${(item.mrp && item.mrp > item.price) ? `
                                             <del>
-                                                <span class="aq-product-old-price">₹${item.mrp}</span>
+                                                <span class="aq-product-old-price">₹{item.mrp}</span>
                                             </del>` : ''}
                                         </div>
                                     </div>
@@ -2698,15 +2630,15 @@
                         }
 
                         if (response.subcategories?.length) {
-                            response.subcategories.forEach(item => {
-                                collectionItems.push({
-                                    name: item.name,
-                                    image: item.image,
-                                    link: `${baseUrl}/products/${item.parent_slug}?subcategory=${item.slug}`,
-                                    label: 'Subcategory'
-                                });
-                            });
-                        }
+    response.subcategories.forEach(item => {
+        collectionItems.push({
+            name: item.name,
+            image: item.image,
+            link: `${baseUrl}/products/${item.parent_slug}/${item.slug}`,
+            label: 'Subcategory'
+        });
+    });
+}
 
                         if (collectionItems.length) {
                             collectionsHtml += '<div class="cs-products-row">';
@@ -2724,7 +2656,7 @@
                     <a href="${item.link}">${item.name}</a>
                 </h4>
                 <div class="aq-product-price">
-                    <span class="aq-product-new-price" style="color:#666;">${item.label}</span>
+                    <span class="aq-product-new-price" style="color:#666;">₹{item.label}</span>
                 </div>
             </div>
         </div>

@@ -362,6 +362,20 @@
                 padding: 16px;
             }
         }
+        
+        /* ── Current/auto image panel ───────────────────────────── */
+.current-image-wrap {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 12px; background: var(--bg); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+}
+.current-image-wrap img {
+    width: 64px; height: 64px; border-radius: var(--radius-sm);
+    object-fit: cover; border: 1px solid var(--border);
+}
+.current-image-info { font-size: 12px; color: var(--text-secondary); }
+.current-image-info strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 2px; }
+
     </style>
 
     <div class="app-content content container-fluid">
@@ -417,6 +431,12 @@
                                     <input type="text" name="sub_title" class="field-input"
                                         placeholder="Short description shown below the title">
                                 </div>
+                                <div class="field-group">
+    <label class="field-label">Description</label>
+    <textarea name="description" id="description" class="field-textarea" rows="6"
+        placeholder="Detailed content shown on the category page, below the product listing">{{ old('description') }}</textarea>
+    <div class="field-hint">Optional — shows on the front-end category page below the product cards.</div>
+</div>
 
                                 <div class="field-group">
                                     <label class="field-label">Parent Category</label>
@@ -468,16 +488,24 @@
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Canonical URL</label>
-                                    <div class="field-input" id="canonicalDisplay"
-                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
-                                        /cat/<span id="canonicalSlug">—</span>
-                                    </div>
-                                    <div class="field-hint">Set automatically from the Slug field. Not editable here.
-                                    </div>
-                                </div>
+    <label class="field-label">Canonical URL</label>
+    <div class="field-input" id="canonicalDisplay"
+        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+        /cat/<span id="canonicalSlug">—</span>
+    </div>
+    <div class="field-hint">Set automatically from the Slug field. Not editable here.</div>
+</div>
 
-                                <hr style="margin:18px 0;border:none;border-top:1px solid var(--bg)">
+<div class="field-group">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" class="field-select">
+        <option value="index_follow">Index, Follow (crawl this page)</option>
+        <option value="noindex_unfollow">No Index, Unfollow (don't crawl)</option>
+    </select>
+    <div class="field-hint">Set to No Index for categories with very few products or low SEO value — they'll also be excluded from the sitemap.</div>
+</div>
+
+<hr style="margin:18px 0;border:none;border-top:1px solid var(--bg)">
 
                                 <div class="field-group">
                                     <label class="field-label">OG Title</label>
@@ -495,27 +523,36 @@
                                         social sharing.</div>
                                 </div>
 
-                                <div class="field-group" style="margin-bottom:0">
-                                    <label class="field-label">OG Image</label>
-                                    <div class="file-upload-area" id="ogImageUploadArea" style="padding:16px">
-                                        <input type="file" name="og_image" accept="image/*" id="ogImageInput">
-                                        <div class="upload-icon"><i class="fa fa-share-alt"></i></div>
-                                        <p>Optional — overrides Category Image for social sharing</p>
-                                        <small>PNG, JPG, WEBP — recommended 1200×630</small>
-                                    </div>
-                                    <div id="ogImagePreview" style="display:none;margin-top:10px;text-align:center">
-                                        <img id="ogImagePreviewImg" src="" alt="OG Image preview"
-                                            style="max-width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);">
-                                        <div style="margin-top:6px">
-                                            <button type="button" onclick="clearOgImage()"
-                                                style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:0">
-                                                <i class="fa fa-times"></i> Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="field-hint">Uses the Category Image by default — upload here only for a
-                                        different social-share preview.</div>
-                                </div>
+                               <div class="field-group" style="margin-bottom:0">
+    <label class="field-label">OG Image</label>
+
+    <div class="current-image-wrap" id="ogImageAutoWrap" style="display:none">
+        <img id="ogAutoImg" src="" alt="Category image used for OG">
+        <div class="current-image-info">
+            <strong>Auto-filled from Category Image</strong>
+            Upload a file below only if you want a different image for social sharing.
+        </div>
+    </div>
+
+    <div class="file-upload-area" id="ogImageUploadArea" style="padding:16px">
+        <input type="file" name="og_image" accept="image/*" id="ogImageInput">
+        <div class="upload-icon"><i class="fa fa-share-alt"></i></div>
+        <p>Optional override — leave blank to use Category Image</p>
+        <small>PNG, JPG, WEBP — recommended 1200×630</small>
+    </div>
+
+    <div id="ogImagePreview" style="display:none;margin-top:10px;text-align:center">
+        <img id="ogImagePreviewImg" src="" alt="OG Image preview"
+            style="max-width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);">
+        <div style="margin-top:6px">
+            <button type="button" onclick="clearOgImage()"
+                style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:0">
+                <i class="fa fa-times"></i> Remove override
+            </button>
+        </div>
+    </div>
+    <div class="field-hint">Uses the Category Image automatically — upload here only for a different social-share preview.</div>
+</div>
 
                             </div>
                         </div>
@@ -658,8 +695,13 @@
 </div>
 
 @include('admin.footer')
-
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
+
+if (typeof CKEDITOR !== 'undefined') {
+    CKEDITOR.replace('description');
+}
+
     // Auto-generate slug from name
     let manualSlug = false;
 
@@ -713,44 +755,64 @@
         if (!manualOgDesc) {
             $('#og_description').val($(this).val());
         }
-    });
+    })
+    
+let ogOverridden = false;
+let hasMainImage = false;
 
-    document.getElementById('ogImageInput').addEventListener('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('ogImagePreviewImg').src = e.target.result;
-            document.getElementById('ogImagePreview').style.display = 'block';
-            document.getElementById('ogImageUploadArea').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    });
+document.getElementById('imageInput').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    hasMainImage = true;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('uploadArea').style.display = 'none';
 
-    function clearOgImage() {
-        document.getElementById('ogImageInput').value = '';
-        document.getElementById('ogImagePreview').style.display = 'none';
-        document.getElementById('ogImageUploadArea').style.display = 'block';
+        if (!ogOverridden) {
+            document.getElementById('ogAutoImg').src = e.target.result;
+            document.getElementById('ogImageAutoWrap').style.display = 'flex';
+        }
+    };
+    reader.readAsDataURL(file);
+});
+
+
+document.getElementById('ogImageInput').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    ogOverridden = true;
+    document.getElementById('ogImageAutoWrap').style.display = 'none';
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById('ogImagePreviewImg').src = e.target.result;
+        document.getElementById('ogImagePreview').style.display = 'block';
+        document.getElementById('ogImageUploadArea').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
+
+
+function clearOgImage() {
+    ogOverridden = false;
+    document.getElementById('ogImageInput').value = '';
+    document.getElementById('ogImagePreview').style.display = 'none';
+    document.getElementById('ogImageUploadArea').style.display = 'block';
+    if (hasMainImage) {
+        document.getElementById('ogImageAutoWrap').style.display = 'flex';
     }
+}
 
-    // Image preview
-    document.getElementById('imageInput').addEventListener('change', function () {
-        const file = this.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('imagePreview').style.display = 'block';
-            document.getElementById('uploadArea').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-    });
-
-    function clearImage() {
-        document.getElementById('imageInput').value = '';
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('uploadArea').style.display = 'block';
+function clearImage() {
+    document.getElementById('imageInput').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+    hasMainImage = false;
+    if (!ogOverridden) {
+        document.getElementById('ogImageAutoWrap').style.display = 'none';
     }
+}
 
     document.getElementById('sizeChartInput').addEventListener('change', function () {
 

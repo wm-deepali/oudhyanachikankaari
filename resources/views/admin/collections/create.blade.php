@@ -420,6 +420,56 @@
                 padding: 16px;
             }
         }
+        
+        /* ── Switch ── */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.switch input[type="checkbox"] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch .slider {
+    position: absolute;
+    inset: 0;
+    background: #c9cccf;
+    border-radius: 22px;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.switch .slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+.switch input:checked + .slider {
+    background: var(--accent);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(18px);
+}
+
+.switch input:focus-visible + .slider {
+    box-shadow: 0 0 0 3px rgba(48, 61, 137, .25);
+}
     </style>
 
     <div class="app-content content container-fluid">
@@ -505,30 +555,49 @@
                             </div>
 
                             <div class="section-card-body">
-
+<div class="toggle-row">
+    <div>
+        <div class="toggle-label">Show in Main Navbar</div>
+        <div class="toggle-sub">Display this collection in the site menu</div>
+    </div>
+    <label class="switch">
+        <input type="hidden" name="show_in_navbar" value="0">
+        <input type="checkbox" name="show_in_navbar" value="1"
+            {{ old('show_in_navbar') ? 'checked' : '' }}>
+        <span class="slider"></span>
+    </label>
+</div>
                                 <div class="field-group">
                                     <label class="field-label">Meta Title <span class="req">*</span></label>
-                                    <input type="text" name="meta_title" id="meta_title" class="field-input"
-                                        value="{{ old('meta_title', $collection->meta_title ?? '') }}"
-                                        placeholder="Enter meta title" required maxlength="70">
+                                   <input type="text" name="meta_title" id="meta_title" class="field-input"
+    value="{{ old('meta_title') }}" placeholder="Enter meta title" required maxlength="70">
                                     <div class="char-count" id="metaTitleCount">0 / 60</div>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Meta Description <span class="req">*</span></label>
-                                    <textarea name="meta_description" id="meta_description" class="field-textarea" rows="3"
-                                        placeholder="Enter meta description" required maxlength="200">{{ old('meta_description', $collection->meta_description ?? '') }}</textarea>
+                                   <textarea name="meta_description" id="meta_description" class="field-textarea" rows="3"
+    placeholder="Enter meta description" required maxlength="200">{{ old('meta_description') }}</textarea>
                                     <div class="char-count" id="metaDescCount">0 / 160</div>
                                 </div>
 
                                 <div class="field-group">
                                     <label class="field-label">Canonical URL</label>
                                     <div class="slug-wrap">
-                                        <span class="slug-prefix">{{ url('/collection') }}/</span>
+                                        <span class="slug-prefix">{{ url('/collections') }}/</span>
                                         <input type="text" name="canonical" id="canonical" class="field-input" value="{{ old('canonical') }}">
                                     </div>
                                     <div class="field-hint">Auto-set from slug. Edit only if this collection should canonicalize to a different URL.</div>
                                 </div>
+                                
+                                <div class="field-group" style="margin-bottom:0">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" id="meta_status" class="field-select">
+        <option value="index_follow">Index, Follow (crawl this page)</option>
+        <option value="noindex_unfollow">No Index, Unfollow (don't crawl)</option>
+    </select>
+    <div class="field-hint">Set to No Index for a collection with very few products — it'll also be excluded from the sitemap.</div>
+</div>
 
                                 <div class="field-group">
                                     <label class="field-label">OG Title</label>
@@ -575,6 +644,18 @@
                                         <option value="0">Inactive</option>
                                     </select>
                                 </div>
+                                <div class="toggle-row">
+    <div>
+        <div class="toggle-label">Show in Main Navbar</div>
+        <div class="toggle-sub">Display this collection in the site menu</div>
+    </div>
+    <label class="switch">
+        <input type="hidden" name="show_in_navbar" value="0">
+        <input type="checkbox" name="show_in_navbar" value="1"
+            {{ old('show_in_navbar') ? 'checked' : '' }}>
+        <span class="slider"></span>
+    </label>
+</div>
                             </div>
                         </div>
                     </div>

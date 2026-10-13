@@ -10,53 +10,49 @@ class Product extends Model
     use SoftDeletes;
 
     protected $fillable = [
-
         'category_id',
         'subcategory_id',
-
         'name',
         'slug',
-
         'sku',
         'product_code',
-
         'short_description',
         'description',
         'delivery_returns',
         'fabric_care',
-
         // ✅ new Content-tab fields
         'shipping_delivery',
         'exchange_policy',
         'customization_assistance',
-
         'mrp',
         'discount_type',
         'discount',
         'price',
-
         'stock',
         'min_qty',
-
         'delivery_time',
-
         'quality',
         'pan_india',
-
         'meta_title',
         'meta_description',
         'h1_heading',
-
         'status',
 
+        // ✅ new SEO/social fields — Index/No-Index + auto-generated OG/Twitter meta
+        'meta_status',
+        'og_title',
+        'og_description',
+        'og_image',
+        'twitter_card',
+        'twitter_title',
+        'twitter_description',
+        'twitter_image',
     ];
 
     protected $casts = [
-
         'status' => 'boolean',
         'quality' => 'boolean',
         'pan_india' => 'boolean',
-
     ];
 
     public function category()
@@ -172,5 +168,4 @@ class Product extends Model
     {
         return $this->hasMany(ProductKeyword::class);
     }
-
 }

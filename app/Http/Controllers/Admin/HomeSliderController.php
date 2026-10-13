@@ -31,49 +31,34 @@ class HomeSliderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-
-            'image' => [
-                'required',
-                'image',
-                'mimes:jpg,jpeg,png,webp',
-                'max:5120',
-            ],
-
-            'link' => [
-                'nullable',
-                'url'
-            ],
-
-            'sort_order' => [
-                'nullable',
-                'integer',
-                'min:0'
-            ],
-
-            'status' => [
-                'required',
-                'in:0,1'
-            ]
-
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'mobile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'link' => ['nullable', 'url'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'status' => ['required', 'in:0,1'],
         ]);
 
-        $image = null;
+        $image = $this->compressAndStore(
+            $request->file('image'),
+            'home-sliders'
+        );
 
-        if ($request->hasFile('image')) {
+        $mobileImage = null;
 
-            $image = $this->compressAndStore(
-                $request->file('image'),
-                'home-sliders'
+        if ($request->hasFile('mobile_image')) {
+            $mobileImage = $this->compressAndStore(
+                $request->file('mobile_image'),
+                'home-sliders/mobile',
+                1080
             );
         }
 
         HomeSlider::create([
-
             'image' => $image,
+            'mobile_image' => $mobileImage,
             'link' => $request->link,
             'sort_order' => $request->sort_order ?? 0,
-            'status' => $request->status
-
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -85,53 +70,26 @@ class HomeSliderController extends Controller
     {
         $slider = HomeSlider::findOrFail($id);
 
-        return view(
-            'admin.home.sliders.edit',
-            compact('slider')
-        );
+        return view('admin.home.sliders.edit', compact('slider'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-
-            'image' => [
-                'nullable',
-                'image',
-                'mimes:jpg,jpeg,png,webp',
-                'max:5120',
-            ],
-
-            'link' => [
-                'nullable',
-                'url'
-            ],
-
-            'sort_order' => [
-                'nullable',
-                'integer',
-                'min:0'
-            ],
-
-            'status' => [
-                'required',
-                'in:0,1'
-            ]
-
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'mobile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'link' => ['nullable', 'url'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'status' => ['required', 'in:0,1'],
         ]);
 
         $slider = HomeSlider::findOrFail($id);
 
         $image = $slider->image;
+        $mobileImage = $slider->mobile_image;
 
         if ($request->hasFile('image')) {
-
-            if (
-                $slider->image &&
-                Storage::disk('public')->exists($slider->image)
-            ) {
-                Storage::disk('public')->delete($slider->image);
-            }
+            $this->deleteFile($slider->image);
 
             $image = $this->compressAndStore(
                 $request->file('image'),
@@ -139,13 +97,22 @@ class HomeSliderController extends Controller
             );
         }
 
-        $slider->update([
+        if ($request->hasFile('mobile_image')) {
+            $this->deleteFile($slider->mobile_image);
 
+            $mobileImage = $this->compressAndStore(
+                $request->file('mobile_image'),
+                'home-sliders/mobile',
+                1080
+            );
+        }
+
+        $slider->update([
             'image' => $image,
+            'mobile_image' => $mobileImage,
             'link' => $request->link,
             'sort_order' => $request->sort_order ?? 0,
-            'status' => $request->status
-
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -157,12 +124,8 @@ class HomeSliderController extends Controller
     {
         $slider = HomeSlider::findOrFail($id);
 
-        if (
-            $slider->image &&
-            Storage::disk('public')->exists($slider->image)
-        ) {
-            Storage::disk('public')->delete($slider->image);
-        }
+        $this->deleteFile($slider->image);
+        $this->deleteFile($slider->mobile_image);
 
         $slider->delete();
 
@@ -171,10 +134,16 @@ class HomeSliderController extends Controller
         ]);
     }
 
+    private function deleteFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
     /**
-     * ✅ Compress & store an uploaded image as WebP.
-     * Sliders render as a full-width hero banner, so keep width generous —
-     * unlike category cards these are the largest images on the site.
+     * Compress & store an uploaded image as WebP.
+     * Desktop sliders default to 1920px wide; mobile ones pass a smaller maxWidth.
      */
     private function compressAndStore(
         UploadedFile $file,

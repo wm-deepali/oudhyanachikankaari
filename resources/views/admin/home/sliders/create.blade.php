@@ -103,6 +103,11 @@
     .action-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 14px 20px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
     @media(max-width:768px) { .detail-page { padding: 16px; } }
+    
+    .img-preview { display: none; margin-top: 12px; }
+.img-preview img { width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.img-preview button { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; padding: 0; margin-top: 6px; }
+
     </style>
 
     <div class="app-content content container-fluid">
@@ -135,29 +140,40 @@
                     <!-- LEFT -->
                     <div>
 
-                        <!-- Image upload -->
-                        <div class="section-card">
-                            <div class="section-card-header"><h5>Slider Image</h5></div>
-                            <div class="section-card-body">
+                        <!-- Desktop image -->
+<div class="section-card">
+    <div class="section-card-header"><h5>Desktop Image</h5></div>
+    <div class="section-card-body">
+        <div class="upload-zone" id="uploadZone_image">
+            <input type="file" name="image" id="input_image" accept=".jpg,.jpeg,.png,.webp" required>
+            <div class="uz-icon"><i class="fa fa-cloud-upload"></i></div>
+            <div class="uz-title">Click or drag desktop image here</div>
+            <div class="uz-sub">JPG, PNG, WEBP &nbsp;·&nbsp; Recommended: 2048 × 730 px &nbsp;·&nbsp; Max 5 MB</div>
+        </div>
+        <div class="img-preview" id="preview_image">
+            <img src="" alt="Desktop preview">
+            <div><button type="button" onclick="clearPreview('image')"><i class="fa fa-times"></i> Remove</button></div>
+        </div>
+    </div>
+</div>
 
-                                <div class="upload-zone" id="uploadZone">
-                                    <input type="file" name="image" id="imageInput" accept=".jpg,.jpeg,.png,.webp" required>
-                                    <div class="uz-icon"><i class="fa fa-cloud-upload"></i></div>
-                                    <div class="uz-title">Click or drag image here</div>
-                                    <div class="uz-sub">JPG, PNG, WEBP &nbsp;·&nbsp; Recommended: 2048 × 730 px &nbsp;·&nbsp; Max 5 MB</div>
-                                </div>
-
-                                <div id="imgPreview">
-                                    <img id="previewImg" src="" alt="Preview">
-                                    <div>
-                                        <button type="button" onclick="clearPreview()">
-                                            <i class="fa fa-times"></i> Remove
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+<!-- Mobile image -->
+<div class="section-card">
+    <div class="section-card-header"><h5>Mobile Image</h5></div>
+    <div class="section-card-body">
+        <div class="upload-zone" id="uploadZone_mobile_image">
+            <input type="file" name="mobile_image" id="input_mobile_image" accept=".jpg,.jpeg,.png,.webp">
+            <div class="uz-icon"><i class="fa fa-mobile"></i></div>
+            <div class="uz-title">Click or drag mobile image here</div>
+            <div class="uz-sub">JPG, PNG, WEBP &nbsp;·&nbsp; Recommended: 800 × 1000 px &nbsp;·&nbsp; Max 5 MB</div>
+        </div>
+        <div class="img-preview" id="preview_mobile_image">
+            <img src="" alt="Mobile preview">
+            <div><button type="button" onclick="clearPreview('mobile_image')"><i class="fa fa-times"></i> Remove</button></div>
+        </div>
+        <div class="field-hint">Optional — agar khali chhodoge to mobile pe desktop image hi dikhegi.</div>
+    </div>
+</div>
 
                         <!-- Link -->
                         <div class="section-card">
@@ -232,21 +248,27 @@
 @include('admin.footer')
 
 <script>
-document.getElementById('imageInput').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('previewImg').src = e.target.result;
-        document.getElementById('imgPreview').style.display = 'block';
-        document.getElementById('uploadZone').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+['image', 'mobile_image'].forEach(key => {
+    document.getElementById('input_' + key).addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.querySelector('#preview_' + key + ' img').src = e.target.result;
+            document.getElementById('preview_' + key).style.display = 'block';
+            document.getElementById('uploadZone_' + key).style.display = 'none';
+            const cur = document.getElementById('current_' + key);
+            if (cur) cur.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
 });
 
-function clearPreview() {
-    document.getElementById('imageInput').value = '';
-    document.getElementById('imgPreview').style.display = 'none';
-    document.getElementById('uploadZone').style.display = 'block';
+function clearPreview(key) {
+    document.getElementById('input_' + key).value = '';
+    document.getElementById('preview_' + key).style.display = 'none';
+    document.getElementById('uploadZone_' + key).style.display = 'block';
+    const cur = document.getElementById('current_' + key);
+    if (cur) cur.style.display = 'flex';
 }
 </script>

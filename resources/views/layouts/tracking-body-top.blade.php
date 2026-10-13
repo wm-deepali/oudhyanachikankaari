@@ -15,3 +15,4 @@ src="https://www.facebook.com/tr?id={{ $googleSetting->meta_pixel_id }}&ev=PageV
 @if($googleSetting->custom_body_top_scripts)
 {!! $googleSetting->custom_body_top_scripts !!}
 @endif
+

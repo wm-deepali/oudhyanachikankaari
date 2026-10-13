@@ -141,7 +141,7 @@
                         </p>
 
                         <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
-                            <a href="product_details.html"
+                            <a href="{{ route('collections.listing', 'new-arrival') }}"
                                 class="aq-cta-btn-primary d-inline-flex align-items-center justify-content-center">
                                 Shop New Arrivals
                             </a>

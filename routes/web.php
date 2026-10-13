@@ -67,6 +67,7 @@ use App\Http\Controllers\User\WishlistController;
 use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\ProductReviewController;
+use App\Http\Controllers\SitemapController;
 
 
 Route::middleware('maintenance.mode')->group(function () {
@@ -81,8 +82,10 @@ Route::middleware('maintenance.mode')->group(function () {
 
         Route::get('/search', 'searchResults')->name('search');
 
-        // Category-based listing (unchanged)
-        Route::get('/products/{slug}', 'productListing')->name('products.listing');
+        // Category / Subcategory listing (merged)
+        // /products/womens-wear                  → category page
+        // /products/womens-wear/unstitched-suits  → subcategory page
+        Route::get('/products/{slug}/{subcategorySlug?}', 'productListing')->name('products.listing');
 
         // Collection-based listing (new)
         Route::get('/collections/{slug}', 'collectionListing')->name('collections.listing');
@@ -92,8 +95,10 @@ Route::middleware('maintenance.mode')->group(function () {
 
         Route::get('/price/{slug}', 'priceRangeListing')->name('price.listing');
 
-        // Attribute-value based listing (new) e.g. /attribute/fabric/cotton
-        Route::get('/attribute/{attributeSlug}/{valueSlug}', 'attributeListing')->name('attribute.listing');
+        // Old attribute URL — 301 redirect to the new clean URL, preserves SEO juice
+        Route::get('/attribute/{attributeSlug}/{valueSlug}', function ($attributeSlug, $valueSlug) {
+            return redirect()->route('attribute.listing', [$attributeSlug, $valueSlug], 301);
+        });
 
         // One shared AJAX endpoint used by all four pages above
         Route::post('/products/filter', 'filterProducts')->name('products.filter');
@@ -209,11 +214,10 @@ Route::middleware('maintenance.mode')->group(function () {
         });
 
     });
-
-
+ 
 });
 
-
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
 
 // Admin Routes list
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -542,3 +546,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 });
+
+Route::get('/{attributeSlug}/{valueSlug}', [FrontController::class, 'attributeListing'])->name('attribute.listing');
+        

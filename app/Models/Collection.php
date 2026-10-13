@@ -17,10 +17,21 @@ class Collection extends Model
         'canonical',
         'og_title',
         'og_description',
+         'meta_status',
+                'og_image',
+                'twitter_card',
+                'twitter_title',
+                'twitter_description',
+                'twitter_image',
         'code',
         'status',
         'sort_order',
+        'show_in_navbar',
     ];
+
+protected $casts = [
+    'show_in_navbar' => 'boolean',
+];
 
     public function products()
     {
@@ -62,7 +73,7 @@ class Collection extends Model
     public function getCanonicalResolvedAttribute()
     {
         return $this->canonical
-            ? url('/collection/' . ltrim($this->canonical, '/'))
-            : url('/collection/' . $this->slug);
+            ? url('/collections/' . ltrim($this->canonical, '/'))
+            : url('/collections/' . $this->slug);
     }
 }

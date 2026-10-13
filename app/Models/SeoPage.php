@@ -8,6 +8,7 @@ class SeoPage extends Model
     protected $fillable = [
         'page_key',
         'page_name',
+        'meta_status',
         'slug',
         'meta_title',
         'meta_description',

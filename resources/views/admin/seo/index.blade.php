@@ -189,14 +189,15 @@
 
                 <div style="overflow-x:auto">
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th style="width:60px">ID</th>
-                                <th>Page</th>
-                                <th>Meta Title</th>
-                                <th style="width:90px">Action</th>
-                            </tr>
-                        </thead>
+                       <thead>
+    <tr>
+        <th style="width:60px">ID</th>
+        <th>Page</th>
+        <th>Meta Title</th>
+        <th style="width:120px">Index Status</th>
+        <th style="width:90px">Action</th>
+    </tr>
+</thead>
                         <tbody>
 
                             @forelse($pages as $page)
@@ -216,23 +217,33 @@
                                             <span class="meta-title-cell text-empty">—</span>
                                         @endif
                                     </td>
-
+<td>
+    @if($page->page_key === 'home')
+        <span class="id-chip" style="background:var(--green-bg);border-color:transparent;color:var(--green);">Index (Locked)</span>
+    @elseif($page->meta_status === 'index_follow')
+        <span class="id-chip" style="background:var(--green-bg);border-color:transparent;color:var(--green);">Index, Follow</span>
+    @else
+        <span class="id-chip" style="background:var(--red-bg);border-color:transparent;color:var(--red);">No Index, Unfollow</span>
+    @endif
+</td>
                                     <td>
-                                      <button type="button" class="action-btn edit" title="Edit SEO" onclick="openSeoModal(
-            {{ $page->id }},
-            '{{ $page->page_name }}',
-            '{{ $page->slug }}',
-            `{!! $page->meta_title !!}`,
-            `{!! $page->meta_description !!}`,
-            `{!! $page->scripts !!}`,
-            `{!! $page->canonical_url !!}`,
-            `{!! $page->og_title !!}`,
-            `{!! $page->og_description !!}`,
-            `{{ $page->og_image }}`,
-            `{!! $page->og_url !!}`,
-            `{{ $page->twitter_card }}`,
-            `{{ $page->twitter_image }}`
-        )">
+                                     <button type="button" class="action-btn edit" title="Edit SEO"
+    data-id="{{ $page->id }}"
+    data-page-name="{{ $page->page_name }}"
+    data-page-key="{{ $page->page_key }}"
+    data-slug="{{ $page->slug }}"
+    data-meta-title="{{ $page->meta_title }}"
+    data-meta-description="{{ $page->meta_description }}"
+    data-scripts="{{ $page->scripts }}"
+    data-canonical-url="{{ $page->canonical_url }}"
+    data-og-title="{{ $page->og_title }}"
+    data-og-description="{{ $page->og_description }}"
+    data-og-image="{{ $page->og_image }}"
+    data-og-url="{{ $page->og_url }}"
+    data-twitter-card="{{ $page->twitter_card }}"
+    data-twitter-image="{{ $page->twitter_image }}"
+    data-meta-status="{{ $page->meta_status }}"
+    onclick="openSeoModalFromButton(this)">
     <i class="fa fa-pencil"></i>
 </button>
                                     </td>
@@ -298,6 +309,15 @@
                         <label class="field-label">Meta Description</label>
                         <textarea name="meta_description" id="seo_desc" class="field-textarea" rows="3"></textarea>
                     </div>
+                    
+                    <div class="field-group" id="metaStatusBox">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" id="seo_meta_status" class="field-input">
+        <option value="index_follow">Index, Follow (crawl this page)</option>
+        <option value="noindex_unfollow">No Index, Unfollow (don't crawl)</option>
+    </select>
+    <div class="field-hint">Pages with very few products or low SEO value can be set to No Index — they'll also be excluded from the sitemap.</div>
+</div>
 
 {{-- modal-body ke andar, meta_description ke baad add karo --}}
 
@@ -371,9 +391,30 @@
 
 
 {{-- ================= SCRIPT ================= --}}
+{{-- ================= SCRIPT ================= --}}
 <script>
 
-   function openSeoModal(id, name, slug, title, desc, scripts, canonical, ogTitle, ogDesc, ogImage, ogUrl, twitterCard, twitterImage) {
+function openSeoModalFromButton(btn) {
+    openSeoModal(
+        btn.dataset.id,
+        btn.dataset.pageName,
+        btn.dataset.pageKey,
+        btn.dataset.slug,
+        btn.dataset.metaTitle,
+        btn.dataset.metaDescription,
+        btn.dataset.scripts,
+        btn.dataset.canonicalUrl,
+        btn.dataset.ogTitle,
+        btn.dataset.ogDescription,
+        btn.dataset.ogImage,
+        btn.dataset.ogUrl,
+        btn.dataset.twitterCard,
+        btn.dataset.twitterImage,
+        btn.dataset.metaStatus
+    );
+}
+
+function openSeoModal(id, name, pageKey, slug, title, desc, scripts, canonical, ogTitle, ogDesc, ogImage, ogUrl, twitterCard, twitterImage, metaStatus) {
 
     $('#seo_slug').val(slug);
     $('#seo_title').val(title);
@@ -385,6 +426,7 @@
     $('#seo_og_desc').val(ogDesc);
     $('#seo_og_url').val(ogUrl);
     $('#seo_twitter_card').val(twitterCard || 'summary_large_image');
+    $('#seo_meta_status').val(metaStatus || 'index_follow');
 
     $('#seo_og_image').val('');
     $('#seo_twitter_image').val('');
@@ -394,10 +436,15 @@
 
     $('#seoForm').attr('action', '/admin/seo/' + id);
 
-    if (name === 'Home') {
+    if (pageKey === 'home') {
         $('#scriptBox').show();
+        // Home is always indexed — lock the dropdown so it can't be changed
+        $('#seo_meta_status').val('index_follow').prop('disabled', true);
+        $('#metaStatusBox .field-hint').text('Home page is always indexed and cannot be set to No Index.');
     } else {
         $('#scriptBox').hide();
+        $('#seo_meta_status').prop('disabled', false);
+        $('#metaStatusBox .field-hint').text("Pages with very few products or low SEO value can be set to No Index — they'll also be excluded from the sitemap.");
     }
 
     $('#seoModal').modal('show');

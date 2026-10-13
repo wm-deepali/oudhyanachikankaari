@@ -46,6 +46,8 @@ class CollectionController extends Controller
             'og_description' => 'nullable',
             'image_alt' => 'nullable|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'meta_status' => 'nullable|in:index_follow,noindex_unfollow',
+            'show_in_navbar' => 'nullable|boolean',
         ]);
 
         $slug = $request->slug
@@ -74,6 +76,13 @@ class CollectionController extends Controller
             // fall back to meta title/description if left blank
             'og_title' => $request->og_title ?: $request->meta_title,
             'og_description' => $request->og_description ?: $request->meta_description,
+            'meta_status' => $request->meta_status ?: 'index_follow',
+'og_image' => $imagePath,
+'twitter_card' => 'summary_large_image',
+'twitter_title' => $request->og_title ?: $request->meta_title,
+'twitter_description' => $request->og_description ?: $request->meta_description,
+'twitter_image' => $imagePath,
+'show_in_navbar' => $request->boolean('show_in_navbar'),
         ]);
 
         return redirect()
@@ -109,6 +118,8 @@ class CollectionController extends Controller
             'og_description' => 'nullable',
             'image_alt' => 'nullable|max:255',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'meta_status' => 'nullable|in:index_follow,noindex_unfollow',
+            'show_in_navbar' => 'nullable|boolean',
         ]);
 
         $slug = $request->slug
@@ -137,6 +148,13 @@ class CollectionController extends Controller
             'canonical' => $request->canonical ?: $slug,
             'og_title' => $request->og_title ?: $request->meta_title,
             'og_description' => $request->og_description ?: $request->meta_description,
+            'meta_status' => $request->meta_status ?: 'index_follow',
+'og_image' => $imagePath,
+'twitter_card' => 'summary_large_image',
+'twitter_title' => $request->og_title ?: $request->meta_title,
+'twitter_description' => $request->og_description ?: $request->meta_description,
+'twitter_image' => $imagePath,
+'show_in_navbar' => $request->boolean('show_in_navbar'),
         ]);
 
         return redirect()

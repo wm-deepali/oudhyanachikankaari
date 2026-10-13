@@ -1259,37 +1259,46 @@
                             </div>
                             <div class="section-card-body">
 
-                                <div class="field-group">
-                                    <label class="field-label">Meta Title <span class="req">*</span></label>
-                                    <input type="text" name="meta_title" id="meta_title" class="field-input" required
-                                        value="{{ old('meta_title') }}">
-                                </div>
+                             <div class="field-group">
+    <label class="field-label">Meta Title</label>
+    <input type="text" name="meta_title" id="meta_title" class="field-input"
+        value="{{ old('meta_title') }}" placeholder="Auto-generated from Product Name">
+    <div class="field-hint" id="titleCharCount">0 / 60 — auto-filled until you edit it</div>
+</div>
 
-                                <div class="field-group">
-                                    <label class="field-label">Meta Description <span class="req">*</span></label>
-                                    <textarea name="meta_description" id="meta_description" class="field-textarea"
-                                        required>{{ old('meta_description') }}</textarea>
-                                </div>
+<div class="field-group">
+    <label class="field-label">Meta Description</label>
+    <textarea name="meta_description" id="meta_description" class="field-textarea"
+        placeholder="Auto-generated from Product Name">{{ old('meta_description') }}</textarea>
+    <div class="field-hint" id="descCharCount">0 / 160 — auto-filled until you edit it</div>
+</div>
 
-                                <div class="field-group">
-                                    <label class="field-label">H1 Heading <span class="req">*</span></label>
-                                    <input type="text" name="h1_heading" id="h1_heading" class="field-input" required
-                                        value="{{ old('h1_heading') }}" placeholder="Main on-page heading">
-                                    <div class="field-hint">Auto-filled from Product Name — edit if you want a different
-                                        on-page heading.</div>
-                                </div>
+<div class="field-group">
+    <label class="field-label">H1 Heading <span class="req">*</span></label>
+    <input type="text" name="h1_heading" id="h1_heading" class="field-input" required
+        value="{{ old('h1_heading') }}" placeholder="Main on-page heading">
+    <div class="field-hint">Auto-filled from Product Name — edit if you want a different on-page heading.</div>
+</div>
 
-                                <div class="field-group" style="margin-bottom:0">
-                                    <label class="field-label">Canonical URL</label>
-                                    <div class="field-input" id="canonicalDisplay"
-                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
-                                        /p/<span id="canonicalSlug">—</span>
-                                    </div>
-                                    <div class="field-hint">Set automatically from the Slug field. OG tags, Twitter
-                                        Card, Image Alt Tag and JSON-LD schema are generated automatically — no separate
-                                        input needed.</div>
-                                </div>
+<div class="field-group">
+    <label class="field-label">Canonical URL</label>
+    <div class="field-input" id="canonicalDisplay"
+        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+        /p/<span id="canonicalSlug">—</span>
+    </div>
+    <div class="field-hint">Set automatically from the Slug field. OG tags, Twitter
+        Card, Image Alt Tag and JSON-LD schema are generated automatically — no separate
+        input needed.</div>
+</div>
 
+<div class="field-group" style="margin-bottom:0">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" class="field-select">
+        <option value="index_follow" {{ old('meta_status', 'index_follow') === 'index_follow' ? 'selected' : '' }}>Index, Follow (crawl this page)</option>
+        <option value="noindex_unfollow" {{ old('meta_status') === 'noindex_unfollow' ? 'selected' : '' }}>No Index, Unfollow (don't crawl)</option>
+    </select>
+    <div class="field-hint">Set to No Index for low-stock or near-duplicate product listings — they'll also be excluded from the sitemap.</div>
+</div>
                             </div>
                         </div>
 
@@ -1384,13 +1393,65 @@
         }
     });
 
-    // Live canonical preview from slug
-    function updateCanonicalPreview() {
-        const slugVal = $('#slug').val().trim();
-        $('#canonicalSlug').text(slugVal || '—');
-    }
-    $(document).on('keyup', '#slug, #product_name', updateCanonicalPreview);
+ // ── Meta Title / Description: auto-fill from Product Name + Fabric,
+// same manual-override pattern as H1 — stops auto-filling once admin edits it ──
+let manualMetaTitle = false;
+let manualMetaDesc = false;
 
+function getFabricName() {
+    // Matches an attribute literally named "Fabric" (case-insensitive).
+    // If a category uses a different attribute name for fabric-type info,
+    // add it here, e.g. name === 'fabric' || name === 'material'
+    let $fabric = $('.attribute-value:checked').filter(function () {
+        let name = ($(this).data('attribute-name') || '').toString().toLowerCase().trim();
+        return name === 'fabric';
+    }).first();
+    return $fabric.length ? $fabric.data('value-name') : '';
+}
+
+function buildAutoMetaTitle() {
+    let name = $('#product_name').val().trim();
+    return name ? name + ' | Oudhyaana Chikankaari' : '';
+}
+
+function buildAutoMetaDescription() {
+    let name = $('#product_name').val().trim();
+    if (!name) return '';
+    let fabric = getFabricName();
+    let fabricPart = fabric ? ' crafted in ' + fabric : '';
+    return 'Shop ' + name + ' at Oudhyaana. Discover authentic handcrafted Lucknowi Chikankari' + fabricPart + '. Explore product details and order online.';
+}
+
+function updateCharCounts() {
+    let title = $('#meta_title').val();
+    let desc = $('#meta_description').val();
+    $('#titleCharCount').text(title.length + ' / 60' + (manualMetaTitle ? '' : ' — auto-filled until you edit it'))
+        .css('color', title.length > 60 ? 'var(--red)' : 'var(--text-hint)');
+    $('#descCharCount').text(desc.length + ' / 160' + (manualMetaDesc ? '' : ' — auto-filled until you edit it'))
+        .css('color', desc.length > 160 ? 'var(--red)' : 'var(--text-hint)');
+}
+
+$(document).on('keyup', '#meta_title', function () { manualMetaTitle = true; updateCharCounts(); });
+$(document).on('keyup', '#meta_description', function () { manualMetaDesc = true; updateCharCounts(); });
+
+$(document).on('keyup change', '#product_name, .attribute-value', function () {
+    if (!manualMetaTitle) $('#meta_title').val(buildAutoMetaTitle());
+    if (!manualMetaDesc) $('#meta_description').val(buildAutoMetaDescription());
+    updateCharCounts();
+});
+
+// Live canonical preview from slug (unchanged)
+function updateCanonicalPreview() {
+    const slugVal = $('#slug').val().trim();
+    $('#canonicalSlug').text(slugVal || '—');
+}
+$(document).on('keyup', '#slug, #product_name', updateCanonicalPreview);
+
+$(document).ready(function () {
+    if (!$('#meta_title').val()) $('#meta_title').val(buildAutoMetaTitle());
+    if (!$('#meta_description').val()) $('#meta_description').val(buildAutoMetaDescription());
+    updateCharCounts();
+});
     /* ── Pricing calculator ─────────────────────────────────────── */
     function calcPrice() {
         let m = +$('#mrp').val() || 0;

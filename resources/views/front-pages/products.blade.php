@@ -10,6 +10,36 @@
         .wishlist-active svg path {
             stroke: #fff !important;
         }
+        .aq-category-description-section {
+    padding: 40px 0 20px;
+    border-top: 1px solid #eee;
+    margin-top: 30px;
+}
+
+.aq-category-description-content {
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #444;
+    max-width: 900px;
+}
+
+.aq-category-description-content h1,
+.aq-category-description-content h2,
+.aq-category-description-content h3 {
+    font-family: inherit;
+    color: #202223;
+    margin: 18px 0 10px;
+}
+
+.aq-category-description-content p {
+    margin-bottom: 12px;
+}
+
+.aq-category-description-content ul,
+.aq-category-description-content ol {
+    margin: 0 0 12px 20px;
+}
     </style>
 
     <main>
@@ -23,11 +53,11 @@
                 <i class="fa-solid fa-gem"></i>
             </div>
             <div class="aq-catpage-hero-content">
-                <h1 class="aq-catpage-title">{{ $contextModel->h1_heading ?? $pageTitle ?? '' }}</h1>
+                <h1 class="aq-catpage-title">{{ $contextModel->h1_heading ??  $contextModel->h1 ?? $pageTitle ?? '' }}</h1>
                 <div class="aq-catpage-breadcrumbs">
                     <a href="{{ route('home') }}">Home</a>
                     <span>/</span>
-                    <span>{{ $contextModel->h1_heading ?? $pageTitle ?? 'Product Listing' }}</span>
+                    <span>{{ $contextModel->h1_heading ??  $contextModel->h1 ??  $pageTitle ?? 'Product Listing' }}</span>
                 </div>
             </div>
         </section>
@@ -220,45 +250,45 @@
 
 
                         {{-- Visual subcategory list --}}
-                        @if($category)
-                            <div class="aq-filter-widget aq-filter-sidebar mt-3 pb-3">
+                    {{-- Visual subcategory list --}}
+@if($category)
+    <div class="aq-filter-widget aq-filter-sidebar mt-3 pb-3">
 
-                                <button class="aq-filter-header" type="button">
-                                    <span>Category</span>
-                                    <i class="fa-solid fa-chevron-down"></i>
-                                </button>
+        <button class="aq-filter-header" type="button">
+            <span>Category</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </button>
 
-                                <div class="aq-filter-content">
-                                    <ul class="aq-filter-list">
+        <div class="aq-filter-content">
+            <ul class="aq-filter-list">
 
-                                        @foreach($subcategories as $subcategory)
+                @foreach($subcategories as $subcategory)
 
-                                            <li
-                                                class="aq-filter-item {{ request('subcategory') == $subcategory->slug ? 'active' : '' }}">
+                    <li class="aq-filter-item {{ $selectedSubcategory && $selectedSubcategory->slug === $subcategory->slug ? 'active' : '' }}">
 
-                                                <a href="{{ route('products.listing', $category->slug) }}?subcategory={{ $subcategory->slug }}"
-                                                    class="d-flex align-items-center justify-content-between w-100 text-decoration-none">
+                        <a href="{{ route('products.listing', [$category->slug, $subcategory->slug]) }}"
+                            class="d-flex align-items-center justify-content-between w-100 text-decoration-none">
 
-                                                    <div class="aq-filter-label">
-                                                        {{ $subcategory->name }}
-                                                        <span class="aq-category-count">
-                                                            ({{ $subcategory->sub_category_products_count }})
-                                                        </span>
-                                                    </div>
-
-                                                    <i class="fa-solid fa-chevron-right"></i>
-
-                                                </a>
-
-                                            </li>
-
-                                        @endforeach
-
-                                    </ul>
-                                </div>
-
+                            <div class="aq-filter-label">
+                                {{ $subcategory->name }}
+                                <span class="aq-category-count">
+                                    ({{ $subcategory->sub_category_products_count }})
+                                </span>
                             </div>
-                        @endif
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </a>
+
+                    </li>
+
+                @endforeach
+
+            </ul>
+        </div>
+
+    </div>
+@endif
                     </div>
 
                     <!-- Right Product Grid -->
@@ -266,15 +296,12 @@
                         <!-- Header filter summary bar -->
                         <div class="aq-layout-header">
                             <span class="aq-layout-header-title" id="aq-active-category-title">
-                                @if($category)
-                                                        {{ request('subcategory')
-                                    ? $subcategories->firstWhere('slug', request('subcategory'))?->name
-                                    : $category->name
-                                                                }} Collection
-                                @else
-                                    {{ $pageTitle }} Collection
-                                @endif
-                            </span>
+    @if($category)
+        {{ $selectedSubcategory ? $selectedSubcategory->name : $category->name }} Collection
+    @else
+        {{ $pageTitle }} Collection
+    @endif
+</span>
                             <div class="aq-layout-header-options">
                                 <button type="button" class="btn btn-outline-dark d-lg-none" id="aq-mobile-filter-open-btn"
                                     style="border-radius: 8px; font-size: 13px; padding: 6px 12px; border: 1px solid #ddd;"
@@ -307,6 +334,16 @@
             </div>
         </section>
 
+<!-- 5.5 Category / Sub Category Description (SEO content block) -->
+        @if($contextType === 'category' && ($contextModel->description ?? null))
+            <section class="aq-category-description-section">
+                <div class="container">
+                    <div class="aq-category-description-content">
+                        {!! $contextModel->description !!}
+                    </div>
+                </div>
+            </section>
+        @endif
 
 
         <!-- 6. Bottom Sticky Category Link Area (For SEO/Footer Links) -->

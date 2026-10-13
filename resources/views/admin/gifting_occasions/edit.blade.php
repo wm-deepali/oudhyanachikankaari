@@ -346,6 +346,14 @@
                                     <div class="field-hint">Auto-filled from Meta Description. Edit to customize for social shares.</div>
                                 </div>
 
+<div class="field-group" style="margin-bottom:0">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" id="meta_status" class="field-select">
+        <option value="index_follow" {{ old('meta_status', $occasion->meta_status ?? 'index_follow') === 'index_follow' ? 'selected' : '' }}>Index, Follow (crawl this page)</option>
+        <option value="noindex_unfollow" {{ old('meta_status', $occasion->meta_status ?? 'index_follow') === 'noindex_unfollow' ? 'selected' : '' }}>No Index, Unfollow (don't crawl)</option>
+    </select>
+    <div class="field-hint">Set to No Index for an occasion with very few products — it'll also be excluded from the sitemap.</div>
+</div>
                             </div>
                         </div>
 

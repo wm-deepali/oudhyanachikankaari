@@ -15,8 +15,22 @@ class AttributeValue extends Model
         'slug',
         'meta_title',
         'meta_description',
+        'h1',
+        'canonical',
+        'meta_status',
+        'og_title',
+        'og_description',
+        'og_image',
+        'twitter_card',
+        'twitter_title',
+        'twitter_description',
+        'twitter_image',
         'sort_order',
-        'status'
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     protected static function booted()

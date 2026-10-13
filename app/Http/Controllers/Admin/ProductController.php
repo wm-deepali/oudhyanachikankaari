@@ -213,8 +213,8 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'meta_title' => 'required|string|max:255',
-            'meta_description' => 'required|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
             'h1_heading' => 'required|string|max:255',
             'mrp' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
@@ -235,6 +235,19 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // ── Meta Title / Description auto-generation ────────────
+            // Fabric value (if selected) feeds both the description and
+            // the meta-title's final tie-breaker fallback.
+            $fabricName = $this->getFabricValueName($request);
+
+            $metaTitle = $request->filled('meta_title')
+                ? $request->meta_title
+                : $this->buildAutoMetaTitle($request->name, $request->product_code, $fabricName);
+
+            $metaDescription = $request->filled('meta_description')
+                ? $request->meta_description
+                : $this->buildAutoMetaDescription($request->name, $fabricName);
 
             $product = Product::create([
                 'category_id' => $request->category_id,
@@ -268,9 +281,10 @@ class ProductController extends Controller
                 'quality' => $request->has('quality'),
                 'pan_india' => $request->has('pan_india'),
 
-                'meta_title' => $request->meta_title,
-                'meta_description' => $request->meta_description,
-                'h1_heading' => $request->h1_heading,
+                'meta_title' => $metaTitle,
+                'meta_description' => $metaDescription,
+                'h1_heading' => $request->h1_heading ?: $request->name,
+                'meta_status' => $request->meta_status ?: 'index_follow',
 
                 'status' => $request->status,
             ]);
@@ -298,6 +312,11 @@ class ProductController extends Controller
                     ]);
                 }
             }
+
+            // ── OG / Twitter autofill ────────────────────────────────
+            // Runs AFTER images are saved, so og_image/twitter_image can
+            // pick up the just-created default image.
+            $this->applySocialMetaFromProduct($product);
 
             /*
             |--------------------------------------------------------------------------
@@ -566,8 +585,8 @@ class ProductController extends Controller
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'meta_title' => 'required|string|max:255',
-            'meta_description' => 'required|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
             'h1_heading' => 'required|string|max:255',
             'mrp' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
@@ -588,6 +607,21 @@ class ProductController extends Controller
         DB::beginTransaction();
 
         try {
+
+            // ── Meta Title / Description auto-generation ────────────
+            // $product->id passed as $ignoreId so the collision check
+            // never treats this product's own existing meta_title as a
+            // duplicate against itself.
+            $fabricName = $this->getFabricValueName($request);
+
+            $metaTitle = $request->filled('meta_title')
+                ? $request->meta_title
+                : $this->buildAutoMetaTitle($request->name, $request->product_code, $fabricName, $product->id);
+
+            $metaDescription = $request->filled('meta_description')
+                ? $request->meta_description
+                : $this->buildAutoMetaDescription($request->name, $fabricName);
+
 
             $product->update([
 
@@ -622,9 +656,10 @@ class ProductController extends Controller
                 'quality' => $request->has('quality'),
                 'pan_india' => $request->has('pan_india'),
 
-                'meta_title' => $request->meta_title,
-                'meta_description' => $request->meta_description,
-                'h1_heading' => $request->h1_heading,
+                'meta_title' => $metaTitle,
+                'meta_description' => $metaDescription,
+                'h1_heading' => $request->h1_heading ?: $request->name,
+                'meta_status' => $request->meta_status ?: 'index_follow',
 
                 'status' => $request->status,
             ]);
@@ -686,6 +721,11 @@ class ProductController extends Controller
                     }
                 }
             }
+
+            // ── OG / Twitter autofill ────────────────────────────────
+            // Runs AFTER all image add/delete/default logic above, so it
+            // always picks up whichever image is the default *now*.
+            $this->applySocialMetaFromProduct($product);
 
             /*
             |--------------------------------------------------------------------------
@@ -1175,5 +1215,103 @@ class ProductController extends Controller
 
         return response()->json($keywords);
     }
+
+    /**
+     * Finds the selected "Fabric" attribute's value name from the submitted
+     * attribute_values[attributeId][] array, so meta title/description and
+     * OG/Twitter text can reference it. Adjust the Attribute/AttributeValue
+     * model names below if yours differ.
+     */
+    private function getFabricValueName(Request $request): ?string
+    {
+        if (!$request->filled('attribute_values')) {
+            return null;
+        }
+
+        foreach ($request->attribute_values as $attributeId => $valueIds) {
+            $attribute = \App\Models\Attribute::find($attributeId);
+
+            if ($attribute && strtolower(trim($attribute->name)) === 'fabric') {
+                $valueId = is_array($valueIds) ? reset($valueIds) : $valueIds;
+                $value = \App\Models\AttributeValue::find($valueId);
+                return $value?->value;
+            }
+        }
+
+        return null;
+    }
+
+    private function metaTitleExists(string $title, ?int $ignoreId = null): bool
+    {
+        return Product::where('meta_title', $title)
+            ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+    }
+
+    /**
+     * "Product Name | Oudhyaana Chikankaari" — falls back to appending
+     * Product Code, then Fabric, only if the plain version collides with
+     * another product's meta_title. $ignoreId excludes the product itself
+     * on update.
+     */
+    private function buildAutoMetaTitle(string $name, ?string $productCode, ?string $fabric, ?int $ignoreId = null): string
+    {
+        $base = $name . ' | Oudhyaana Chikankaari';
+
+        if (!$this->metaTitleExists($base, $ignoreId)) {
+            return $base;
+        }
+
+        if ($productCode) {
+            $withCode = $name . ' | ' . $productCode . ' | Oudhyaana Chikankaari';
+            if (!$this->metaTitleExists($withCode, $ignoreId)) {
+                return $withCode;
+            }
+        }
+
+        if ($fabric) {
+            $withFabric = $name . ' | ' . $fabric . ' | Oudhyaana Chikankaari';
+            if (!$this->metaTitleExists($withFabric, $ignoreId)) {
+                return $withFabric;
+            }
+        }
+
+        // Every fallback collided too — return the base anyway rather than blocking save.
+        return $base;
+    }
+
+    /**
+     * "Shop {Name} at Oudhyaana. Discover authentic handcrafted Lucknowi
+     * Chikankari crafted in {Fabric}. Explore product details and order
+     * online." — the "crafted in {Fabric}" clause is dropped cleanly if
+     * no Fabric attribute value was selected.
+     */
+    private function buildAutoMetaDescription(string $name, ?string $fabric): string
+    {
+        $fabricPart = $fabric ? ' crafted in ' . $fabric : '';
+        return "Shop {$name} at Oudhyaana. Discover authentic handcrafted Lucknowi Chikankari{$fabricPart}. Explore product details and order online.";
+    }
+
+    /**
+     * OG/Twitter fields all inherit from meta title/description + the
+     * product's default image, per spec. Called once the product (and its
+     * images) exist, so og_image/twitter_image have something to point at.
+     */
+    private function applySocialMetaFromProduct(Product $product): void
+    {
+        $default = $product->images()->where('is_default', 1)->first()
+            ?? $product->images()->first();
+
+        $product->update([
+            'og_title' => $product->meta_title,
+            'og_description' => $product->meta_description,
+            'og_image' => $default->image ?? null,
+            'twitter_card' => 'summary_large_image',
+            'twitter_title' => $product->meta_title,
+            'twitter_description' => $product->meta_description,
+            'twitter_image' => $default->image ?? null,
+        ]);
+    }
+
 
 }

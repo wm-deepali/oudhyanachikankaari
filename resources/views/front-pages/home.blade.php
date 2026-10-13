@@ -14,84 +14,49 @@
 
     <main>
 
-        <!-- slider area start -->
-        <div class="aqf-slider-area">
-            <div class="swiper aqf-slider-active p-relative">
-                <div class="swiper-wrapper">
+<!-- slider area start -->
+<div class="aqf-slider-area">
+    <div class="swiper aqf-slider-active p-relative">
+        <div class="swiper-wrapper">
 
-                    @foreach($sliders as $slider)
+            @foreach($sliders as $slider)
+                <div class="swiper-slide">
+                    <div class="aqf-slider-item aqf-slider-height d-flex align-items-center" data-bg-color="#F5F5F5">
+                        <a href="{{ $slider->link ?: '#' }}" class="aq-slider-banner-overlay-link"></a>
 
-                        <!-- Desktop Slider 1 -->
-                        <div class="swiper-slide d-none d-md-block">
-                            <div class="aqf-slider-item aqf-slider-height d-flex align-items-center" data-bg-color="#F5F5F5">
-                                <a href="{{ $slider->link ?: '#' }}" class="aq-slider-banner-overlay-link"></a>
-                                <div class="aqf-slider-thumb include-bg"
-                                    data-background="{{ asset('storage/' . $slider->image) }}">
-                                </div>
-                                <div class="container custom-fluid-container">
-                                    <div class="row align-items-center">
-                                        <div class="col-xl-6 col-lg-7 col-md-8">
-                                            <div class="aqf-slider-content">
-                                                <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
-                                                    {{-- ✅ FIX: was hardcoded to route('categories') — now goes
-                                                    wherever the admin set the link for THIS slide when
-                                                    creating/editing it. Falls back to the categories page
-                                                    only if the admin left the link field empty. --}}
-                                                    <a class="aq-btn-black"
-                                                        href="{{ $slider->link ?: route('categories') }}">Explore
-                                                        Products</a>
-                                                    <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
-                                                        onclick="openGlobalDrawer('home')">Get Bulk
-                                                        Quote</a>
-                                                </div>
-                                            </div>
+                        {{-- Desktop image (md and up) --}}
+                        <div class="aqf-slider-thumb include-bg d-none d-md-block"
+                            data-background="{{ asset('storage/' . $slider->image) }}">
+                        </div>
+
+                        {{-- Mobile image (below md). Falls back to desktop image if not uploaded --}}
+                        <div class="aqf-slider-thumb include-bg d-block d-md-none"
+                            data-background="{{ asset('storage/' . ($slider->mobile_image ?: $slider->image)) }}">
+                        </div>
+
+                        <div class="container custom-fluid-container">
+                            <div class="row align-items-center">
+                                <div class="col-xl-6 col-lg-7 col-md-8">
+                                    <div class="aqf-slider-content">
+                                        <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
+                                            <a class="aq-btn-black"
+                                                href="{{ $slider->link ?: route('categories') }}">Explore Products</a>
+                                            <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
+                                                onclick="openGlobalDrawer('home')">Get Bulk Quote</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                    @endforeach
-
-
-                    @foreach($sliders as $slider)
-
-                        <!-- Mobile Slider 1 -->
-                        <div class="swiper-slide d-block d-md-none">
-                            <div class="aqf-slider-item aqf-slider-height d-flex align-items-center" data-bg-color="#F5F5F5">
-                                <a href="{{ $slider->link ?: '#' }}" class="aq-slider-banner-overlay-link"></a>
-                                <div class="aqf-slider-thumb include-bg"
-                                    data-background="{{ asset('storage/' . $slider->image) }}">
-                                </div>
-                                <div class="container custom-fluid-container">
-                                    <div class="row align-items-center">
-                                        <div class="col-xl-6 col-lg-7 col-md-8">
-                                            <div class="aqf-slider-content">
-                                                <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
-                                                    {{-- ✅ same fix applied to the mobile slide --}}
-                                                    <a class="aq-btn-black"
-                                                        href="{{ $slider->link ?: route('categories') }}">Explore
-                                                        Products</a>
-                                                    <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
-                                                        onclick="openGlobalDrawer('home')">Get Bulk
-                                                        Quote</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    @endforeach
-
-
+                    </div>
                 </div>
-                <div class="aqf-slider-dot"></div>
-            </div>
-        </div>
-        <!-- slider area end -->
+            @endforeach
 
+        </div>
+        <div class="aqf-slider-dot"></div>
+    </div>
+</div>
+<!-- slider area end -->
 
         <!-- text slide area start -->
         <div class="aqf-text-slide-area aqf-text-slide-bdr fix">
@@ -1936,21 +1901,67 @@ fireTrackingEvents(response.tracking_events);
             }
 
         </script>
-
-        <!-- First time popup modal -->
+        
+                <!-- First time popup modal September 2028 -->
         <div id="firstTimeModalOverlay" class="first-time-modal-overlay">
             <div class="first-time-modal">
                 <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
                 <div class="first-time-modal-content">
                     <div class="modal-left-side">
                         <!-- We assume a placeholder or you can replace with correct image path -->
-                        <img loading="lazy"   src="{{ asset('popup/popupimg.webp') }}"
+                        <img loading="lazy"   src="{{ asset('popup/oudhyana-popup.webp') }}"
      alt="Chikankari Arrivals"
      style="background:#e9dcc9;" />
                         <div class="modal-left-text">
                             <!--<span>Discover new</span>-->
                             <!--<h2>Chikankari</h2>-->
                             <!--<span class="arrivals-text">Arrivals</span>-->
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="modal-right-side">
+                        <h3>Don't miss out—our sale is now live</h3>
+                        <p>with discounts up to 30% off <br>for a limited time!</p>
+                        <form id="firstTimeForm" class="first-time-form">
+                            <input type="email" name="email" placeholder="Enter your email address" required>
+                            <div class="phone-input-group">
+                                <div class="country-code">
+                                    <img loading="lazy"   src="https://flagcdn.com/w20/in.png" alt="India">
+                                    <span>+91</span>
+                                    <span class="dropdown-arrow">▾</span>
+                                </div>
+                                <input type="tel" name="phone" placeholder="Enter your phone number" required>
+                            </div>
+                            <label class="whatsapp-optin">
+                                <input type="checkbox" name="whatsapp_optin" checked>
+                                <span>Receive important information and updates on <img loading="lazy"  
+                                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                                        alt="WhatsApp" width="16" height="16"> WhatsApp</span>
+                            </label>
+                            <button type="submit" class="claim-now-btn">CLAIM NOW</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+
+        <!-- First time popup modal Live -->
+        <!--<div id="firstTimeModalOverlay" class="first-time-modal-overlay">
+            <div class="first-time-modal">
+                <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
+                <div class="first-time-modal-content">
+                    <div class="modal-left-side">
+                        <!-- We assume a placeholder or you can replace with correct image path -->
+                     <!--   <img loading="lazy"   src="{{ asset('popup/popupimg.webp') }}"
+     alt="Chikankari Arrivals"
+     style="background:#e9dcc9;" />
+                        <div class="modal-left-text">
+                            <!--<span>Discover new</span>-->
+                            <!--<h2>Chikankari</h2>-->
+                            <!--<span class="arrivals-text">Arrivals</span>
                         </div>
                     </div>
                     <div class="modal-right-side">
@@ -1977,7 +1988,7 @@ fireTrackingEvents(response.tracking_events);
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {

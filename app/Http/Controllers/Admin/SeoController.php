@@ -18,36 +18,38 @@ class SeoController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $page = SeoPage::findOrFail($id);
+{
+    $page = SeoPage::findOrFail($id);
 
-        $data = [
-            'slug'              => $request->slug,
-            'meta_title'        => $request->meta_title,
-            'meta_description'  => $request->meta_description,
-            'canonical_url'     => $request->canonical_url,
-            'og_title'          => $request->og_title,
-            'og_description'    => $request->og_description,
-            'og_url'            => $request->og_url,
-            'twitter_card'      => $request->twitter_card,
-            'scripts'           => $request->scripts,
-        ];
+    $data = [
+        'slug'              => $request->slug,
+        'meta_title'        => $request->meta_title,
+        'meta_description'  => $request->meta_description,
+        'canonical_url'     => $request->canonical_url,
+        'og_title'          => $request->og_title,
+        'og_description'    => $request->og_description,
+        'og_url'            => $request->og_url,
+        'twitter_card'      => $request->twitter_card,
+        'scripts'           => $request->scripts,
+        'meta_status'       => $page->page_key === 'home'
+            ? 'index_follow'          // Home is locked — never allow No Index, even if the field was tampered with client-side
+            : $request->meta_status,
+    ];
 
-        if ($request->hasFile('og_image')) {
-            $data['og_image'] = $this->storeSeoImage($request->file('og_image'), 'og');
-        }
-
-        if ($request->hasFile('twitter_image')) {
-            $data['twitter_image'] = $this->storeSeoImage($request->file('twitter_image'), 'twitter');
-        } elseif ($request->hasFile('og_image')) {
-            // Twitter image OG image jaisa hi rakhna hai agar alag se nahi diya
-            $data['twitter_image'] = $data['og_image'];
-        }
-
-        $page->update($data);
-
-        return back()->with('success', 'SEO Updated Successfully');
+    if ($request->hasFile('og_image')) {
+        $data['og_image'] = $this->storeSeoImage($request->file('og_image'), 'og');
     }
+
+    if ($request->hasFile('twitter_image')) {
+        $data['twitter_image'] = $this->storeSeoImage($request->file('twitter_image'), 'twitter');
+    } elseif ($request->hasFile('og_image')) {
+        $data['twitter_image'] = $data['og_image'];
+    }
+
+    $page->update($data);
+
+    return back()->with('success', 'SEO Updated Successfully');
+}
 
     private function storeSeoImage($file, string $prefix): string
     {

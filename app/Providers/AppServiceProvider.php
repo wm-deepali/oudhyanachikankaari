@@ -57,9 +57,14 @@ class AppServiceProvider extends ServiceProvider
                 ->latest()
                 ->get();
 
-            $collections = Collection::where('status', 1)
-                ->orderBy('sort_order')
-                ->get();
+          $collections = Collection::where('status', 1)
+    ->orderBy('sort_order')
+    ->get();
+
+$navbarCollections = Collection::where('status', 1)
+    ->where('show_in_navbar', 1)
+    ->orderBy('sort_order')
+    ->get();
 
             $headerOccasions = GiftingOccasion::where('status', 1)
                 ->get();
@@ -99,12 +104,15 @@ class AppServiceProvider extends ServiceProvider
             
              $googleSetting = GoogleSetting::current(); // 👈 new
              
+            //  dd($googleSetting->toArray());
+             
             $view->with(
                 [
                     'globalCartCount' => $count,
                     'miniCart' => $cart,
                     'announcements' => $announcements,
                     'headerCollections' => $collections,
+'navbarCollections' => $navbarCollections,
                     'headerOccasions' => $headerOccasions,
                     'menuCategories' => $menuCategories,
                     'headerAttributes' => $headerAttributes,

@@ -500,6 +500,16 @@
                                     </select>
                                 </div>
 
+<div class="toggle-row">
+    <div>
+        <div class="toggle-label">SEO Required</div>
+        <div class="toggle-sub">Auto-generate meta tags for this attribute's values</div>
+    </div>
+    <select name="seo_required" class="field-select-sm">
+        <option value="1" {{ old('seo_required', $attribute->seo_required) ? 'selected' : '' }}>Yes</option>
+        <option value="0" {{ !old('seo_required', $attribute->seo_required) ? 'selected' : '' }}>No</option>
+    </select>
+</div>
                             </div>
                         </div>
 

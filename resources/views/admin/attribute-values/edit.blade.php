@@ -394,9 +394,9 @@
 
                                 <div class="field-group">
                                     <label class="field-label">Attribute <span class="req">*</span></label>
-                                    <select name="attribute_id" class="field-select" required>
+                                    <select name="attribute_id" class="field-select" required id="attributeSelect">
                                         @foreach($attributes as $attribute)
-                                            <option value="{{ $attribute->id }}" data-type="{{ $attribute->type }}" {{ $attributeValue->attribute_id == $attribute->id ? 'selected' : '' }}>
+                                            <option value="{{ $attribute->id }}" data-type="{{ $attribute->type }}" data-seo-required="{{ $attribute->seo_required ? 1 : 0 }}" {{ $attributeValue->attribute_id == $attribute->id ? 'selected' : '' }}>
                                                 {{ $attribute->name }}
                                             </option>
                                         @endforeach
@@ -484,28 +484,45 @@
                     <!-- ── RIGHT column ─────────────────── -->
                     <div>
 
-                        <div class="section-card">
-                            <div class="section-card-header">
-                                <h5>SEO Settings</h5>
-                            </div>
+                       <div class="section-card" id="seoSettingsCard" style="display:none;">
+    <div class="section-card-header">
+        <h5>SEO Settings</h5>
+    </div>
 
-                            <div class="section-card-body">
+    <div class="section-card-body">
 
-                                <div class="field-group">
-                                    <label class="field-label">Meta Title</label>
-                                    <input type="text" name="meta_title" class="field-input"
-                                        value="{{ old('meta_title', $attributeValue->meta_title ?? '') }}"
-                                        placeholder="Enter meta title">
-                                </div>
+        <div class="field-group">
+            <label class="field-label">H1 Heading</label>
+            <input type="text" name="h1" class="field-input"
+                value="{{ old('h1', $attributeValue->h1 ?? '') }}"
+                placeholder="Auto-generated if left blank">
+            <div class="field-hint">Shown as the page heading, e.g. "Red Chikankari Collection".</div>
+        </div>
 
-                                <div class="field-group">
-                                    <label class="field-label">Meta Description</label>
-                                    <textarea name="meta_description" class="field-textarea" rows="4"
-                                        placeholder="Enter meta description">{{ old('meta_description', $attributeValue->meta_description ?? '') }}</textarea>
-                                </div>
+        <div class="field-group">
+            <label class="field-label">Meta Title</label>
+            <input type="text" name="meta_title" class="field-input"
+                value="{{ old('meta_title', $attributeValue->meta_title ?? '') }}"
+                placeholder="Auto-generated if left blank">
+        </div>
 
-                            </div>
-                        </div>
+        <div class="field-group">
+            <label class="field-label">Meta Description</label>
+            <textarea name="meta_description" class="field-textarea" rows="4"
+                placeholder="Auto-generated if left blank">{{ old('meta_description', $attributeValue->meta_description ?? '') }}</textarea>
+        </div>
+
+        <div class="field-group" style="margin-bottom:0">
+            <label class="field-label">Index Status</label>
+            <select name="meta_status" class="field-select">
+                <option value="index_follow" {{ old('meta_status', $attributeValue->meta_status ?? 'index_follow') === 'index_follow' ? 'selected' : '' }}>Index, Follow (crawl this page)</option>
+                <option value="noindex_unfollow" {{ old('meta_status', $attributeValue->meta_status ?? 'index_follow') === 'noindex_unfollow' ? 'selected' : '' }}>No Index, Unfollow (don't crawl)</option>
+            </select>
+            <div class="field-hint">No Index if this value has very few products.</div>
+        </div>
+
+    </div>
+</div>
                         <div class="section-card">
                             <div class="section-card-header">
                                 <h5>Settings</h5>
@@ -558,7 +575,9 @@
 
     function handleAttributeType() {
 
-        let type = $('select[name="attribute_id"] option:selected').data('type');
+        let $selected = $('#attributeSelect option:selected');
+        let type = $selected.data('type');
+        let seoRequired = $selected.data('seo-required') == 1;
 
         $('#imageWrapper').hide();
         $('#hexCodeWrapper').hide();
@@ -570,11 +589,13 @@
         if (type === 'color_swatch') {
             $('#hexCodeWrapper').show();
         }
+
+        $('#seoSettingsCard').toggle(seoRequired);
     }
 
     $(document).ready(function () {
 
-        $('select[name="attribute_id"]').on('change', function () {
+        $('#attributeSelect').on('change', function () {
             handleAttributeType();
         });
 

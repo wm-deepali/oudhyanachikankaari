@@ -170,8 +170,8 @@
                                         <label class="aq-custom-check">
                                             <input type="checkbox" id="registerTerms" required checked>
                                             <span class="checkmark"></span>
-                                            I accept Oudhyana's <a href="term-condition.html">Privacy Policy</a> <span
-                                                class="mx-1">&amp;</span> <a href="term-condition.html">T&Cs</a>.
+                                            I accept Oudhyana's <a href="#">Privacy Policy</a> <span
+                                                class="mx-1">&amp;</span> <a href="#">T&Cs</a>.
                                         </label>
                                     </div>
 

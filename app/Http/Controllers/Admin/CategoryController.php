@@ -120,6 +120,8 @@ class CategoryController extends Controller
             'meta_title' => 'required|string|max:255',
             'meta_description' => 'required|string',
             'h1_heading' => 'required|string|max:255',
+            'meta_status' => 'nullable|in:index_follow,noindex_unfollow',
+            'description' => 'nullable|string',
         ]);
 
         $image = null;
@@ -171,6 +173,7 @@ class CategoryController extends Controller
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'h1_heading' => $request->h1_heading,
+            'meta_status' => $request->meta_status ?? 'index_follow',
             'og_title' => $request->og_title,
             'og_description' => $request->og_description,
             'og_image' => $ogImage,
@@ -189,6 +192,7 @@ class CategoryController extends Controller
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
+            'description' => $request->description,
         ]);
 
         return redirect()->route('admin.categories.index')
@@ -223,6 +227,8 @@ class CategoryController extends Controller
             'meta_title' => 'required|string|max:255',
             'meta_description' => 'required|string',
             'h1_heading' => 'required|string|max:255',
+            'meta_status' => 'nullable|in:index_follow,noindex_unfollow',
+            'description' => 'nullable|string',
         ]);
 
         $image = $category->image;
@@ -289,6 +295,7 @@ class CategoryController extends Controller
             'meta_title' => $request->meta_title,
             'meta_description' => $request->meta_description,
             'h1_heading' => $request->h1_heading,
+            'meta_status' => $request->meta_status ?? 'index_follow',
             'og_title' => $request->og_title,
             'og_description' => $request->og_description,
             'og_image' => $ogImage,
@@ -304,6 +311,7 @@ class CategoryController extends Controller
 
             'status' => $request->status ?? 1,
             'sort_order' => $request->sort_order ?? 0,
+            'description' => $request->description,
         ]);
 
         return redirect($request->redirect ?? route('admin.categories.index'))

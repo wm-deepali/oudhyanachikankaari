@@ -13,12 +13,14 @@ class Attribute extends Model
         'has_values',
         'status',
         'show_in_navbar', // added
+        'seo_required'
     ];
 
     protected $casts = [
         'has_values'     => 'boolean',
         'status'         => 'boolean',
         'show_in_navbar' => 'boolean', // added
+        'seo_required' => 'boolean'
     ];
 
     public function values()

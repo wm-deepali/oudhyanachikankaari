@@ -52,7 +52,7 @@
     .field-group { margin-bottom: 16px; }
     .field-group:last-child { margin-bottom: 0; }
     .field-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: .03em; text-transform: uppercase; margin-bottom: 6px; }
-    .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 4px; line-height: 1.6; }
+    .field-hint { font-size: 11.5px; color: var(--text-hint); margin-top: 8px; line-height: 1.6; }
 
     .field-input, .field-select {
         width: 100%; border: 1px solid var(--border);
@@ -65,6 +65,7 @@
     /* Current image wrap */
     .current-img-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; background: var(--bg); margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
     .current-img-wrap img { width: 120px; height: 75px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); flex-shrink: 0; }
+    .current-img-wrap.is-mobile img { width: 75px; height: 94px; }
     .current-img-info strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 2px; }
     .current-img-info span { font-size: 12px; color: var(--text-secondary); }
 
@@ -77,9 +78,9 @@
     .upload-zone .uz-sub { font-size: 11.5px; color: var(--text-hint); margin-top: 3px; }
 
     /* New preview */
-    #newImgPreview { display: none; margin-top: 12px; }
-    #newImgPreview img { width: 100%; max-height: 160px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
-    #newImgPreview button { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; padding: 0; margin-top: 6px; }
+    .img-preview { display: none; margin-top: 12px; }
+    .img-preview img { width: 100%; max-height: 160px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    .img-preview button { font-size: 12px; color: var(--red); background: none; border: none; cursor: pointer; padding: 0; margin-top: 6px; }
 
     /* Settings sidebar */
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--bg); }
@@ -161,39 +162,48 @@
                     <!-- LEFT -->
                     <div>
 
-                        <!-- Image -->
+                        <!-- Desktop + Mobile Images -->
+                        @foreach ([
+                            'image'        => ['Desktop Image', '2048 × 730 px', 'fa-desktop'],
+                            'mobile_image' => ['Mobile Image',  '800 × 1000 px', 'fa-mobile'],
+                        ] as $key => [$title, $size, $icon])
                         <div class="section-card">
-                            <div class="section-card-header"><h5>Slider Image</h5></div>
+                            <div class="section-card-header"><h5>{{ $title }}</h5></div>
                             <div class="section-card-body">
 
-                                @if($slider->image)
-                                    <div class="current-img-wrap" id="currentImgWrap">
-                                        <img src="{{ asset('storage/'.$slider->image) }}" alt="Current slider">
+                                @if($slider->{$key})
+                                    <div class="current-img-wrap {{ $key === 'mobile_image' ? 'is-mobile' : '' }}" id="current_{{ $key }}">
+                                        <img src="{{ asset('storage/'.$slider->{$key}) }}" alt="Current {{ $title }}">
                                         <div class="current-img-info">
-                                            <strong>Current Image</strong>
+                                            <strong>Current {{ $title }}</strong>
                                             <span>Upload a new file below to replace it.</span>
                                         </div>
                                     </div>
                                 @endif
 
-                                <div class="upload-zone" id="uploadZone">
-                                    <input type="file" name="image" id="imageInput" accept=".jpg,.jpeg,.png,.webp">
-                                    <div class="uz-icon"><i class="fa fa-cloud-upload"></i></div>
-                                    <div class="uz-title">{{ $slider->image ? 'Replace image' : 'Upload image' }}</div>
-                                    <div class="uz-sub">JPG, PNG, WEBP &nbsp;·&nbsp; 2048 × 730 px recommended &nbsp;·&nbsp; Max 5 MB</div>
+                                <div class="upload-zone" id="uploadZone_{{ $key }}">
+                                    <input type="file" name="{{ $key }}" id="input_{{ $key }}" accept=".jpg,.jpeg,.png,.webp">
+                                    <div class="uz-icon"><i class="fa {{ $icon }}"></i></div>
+                                    <div class="uz-title">{{ $slider->{$key} ? 'Replace image' : 'Upload image' }}</div>
+                                    <div class="uz-sub">JPG, PNG, WEBP &nbsp;·&nbsp; {{ $size }} recommended &nbsp;·&nbsp; Max 5 MB</div>
                                 </div>
 
-                                <div id="newImgPreview">
-                                    <img id="previewImg" src="" alt="New preview">
+                                <div class="img-preview" id="preview_{{ $key }}">
+                                    <img src="" alt="New preview">
                                     <div>
-                                        <button type="button" onclick="clearPreview()">
+                                        <button type="button" onclick="clearPreview('{{ $key }}')">
                                             <i class="fa fa-times"></i> Remove
                                         </button>
                                     </div>
                                 </div>
 
+                                @if($key === 'mobile_image')
+                                    <div class="field-hint">Optional — agar mobile image nahi hai to mobile pe desktop image hi dikhegi.</div>
+                                @endif
+
                             </div>
                         </div>
+                        @endforeach
 
                         <!-- Link -->
                         <div class="section-card">
@@ -242,6 +252,17 @@
                             </div>
                         </div>
 
+                        <!-- Image tips -->
+                        <div class="section-card">
+                            <div class="section-card-header"><h5>Image Tips</h5></div>
+                            <div class="section-card-body" style="padding:14px 20px;font-size:12.5px;color:var(--text-secondary);line-height:1.8">
+                                <div>🖥️ <strong style="color:var(--text-primary)">Desktop:</strong> 2048 × 730 px</div>
+                                <div>📱 <strong style="color:var(--text-primary)">Mobile:</strong> 800 × 1000 px</div>
+                                <div>🖼️ <strong style="color:var(--text-primary)">Format:</strong> JPG, PNG or WEBP</div>
+                                <div>⚡ <strong style="color:var(--text-primary)">Max:</strong> 5 MB each</div>
+                            </div>
+                        </div>
+
                         <!-- Record info -->
                         <div class="section-card">
                             <div class="section-card-header"><h5>Record Info</h5></div>
@@ -285,25 +306,27 @@
 @include('admin.footer')
 
 <script>
-document.getElementById('imageInput').addEventListener('change', function () {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('previewImg').src = e.target.result;
-        document.getElementById('newImgPreview').style.display = 'block';
-        document.getElementById('uploadZone').style.display = 'none';
-        const cur = document.getElementById('currentImgWrap');
-        if (cur) cur.style.display = 'none';
-    };
-    reader.readAsDataURL(file);
+['image', 'mobile_image'].forEach(key => {
+    document.getElementById('input_' + key).addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.querySelector('#preview_' + key + ' img').src = e.target.result;
+            document.getElementById('preview_' + key).style.display = 'block';
+            document.getElementById('uploadZone_' + key).style.display = 'none';
+            const cur = document.getElementById('current_' + key);
+            if (cur) cur.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
 });
 
-function clearPreview() {
-    document.getElementById('imageInput').value = '';
-    document.getElementById('newImgPreview').style.display = 'none';
-    document.getElementById('uploadZone').style.display = 'block';
-    const cur = document.getElementById('currentImgWrap');
+function clearPreview(key) {
+    document.getElementById('input_' + key).value = '';
+    document.getElementById('preview_' + key).style.display = 'none';
+    document.getElementById('uploadZone_' + key).style.display = 'block';
+    const cur = document.getElementById('current_' + key);
     if (cur) cur.style.display = 'flex';
 }
 </script>

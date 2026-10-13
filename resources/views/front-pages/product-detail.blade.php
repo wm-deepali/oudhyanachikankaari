@@ -91,6 +91,134 @@
 
         .aq-size-dropdown { max-width: 260px; }
 
+        /* ── Luxury Addons / Choose Your Style Section ─────────────── */
+        .aq-stitching-box {
+            margin-top: 22px;
+            margin-bottom: 25px;
+        }
+        .aq-stitch-card {
+            background: #faf8f5;
+            border: 1px solid #ede6db;
+            border-radius: 10px;
+            padding: 16px 18px;
+            transition: all 0.3s ease;
+        }
+        .aq-stitch-card-header {
+            margin-bottom: 12px;
+        }
+        .aq-addon-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #222;
+            margin: 0 0 3px 0;
+            letter-spacing: 0.2px;
+            font-family: inherit;
+        }
+        .aq-addon-subtitle {
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #777;
+            display: block;
+        }
+        .aq-addon-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 14px;
+        }
+        .aq-addon-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .aq-addon-item:hover {
+            border-color: #c98f9d;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(201, 143, 157, 0.12);
+        }
+        .aq-addon-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            margin: 0;
+        }
+        .aq-custom-checkbox {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            border: 1.5px solid #bbb;
+            border-radius: 4px;
+            background: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+            flex-shrink: 0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .aq-custom-checkbox i {
+            font-size: 10px;
+            color: #fff;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .aq-addon-item input:checked + .aq-custom-checkbox {
+            background-color: #c98f9d;
+            border-color: #c98f9d;
+            box-shadow: 0 0 0 2px rgba(201, 143, 157, 0.25);
+        }
+        .aq-addon-item input:checked + .aq-custom-checkbox i {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .aq-addon-item:has(input:checked) {
+            border-color: #c98f9d;
+            background: #fff9fa;
+        }
+        .aq-addon-text-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 12.5px;
+            line-height: 1.35;
+            color: #333;
+        }
+        .aq-addon-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .aq-addon-price {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #b5904a;
+        }
+
+        @media (max-width: 575.98px) {
+            .aq-addon-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .aq-stitch-card {
+                padding: 14px 12px;
+            }
+            .aq-addon-item {
+                padding: 9px 10px;
+            }
+        }
+
         /* ── Desktop Gallery Layout & Sticky column ────────────────── */
        .aq-sticky-column {
     position: sticky;
@@ -367,6 +495,262 @@ font-size:15px;
     gap: 1.5rem;
 }
 
+/* ── Product Gallery Image Wrap & Lightbox Button ── */
+.aq-gallery-slides .aq-gallery-main-img-wrap {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #fbfbfb;
+    user-select: none;
+}
+.aq-gallery-main-img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: transform 0.3s ease;
+}
+.aq-gallery-slides .aq-gallery-main-img-wrap:hover .aq-gallery-main-img {
+    transform: scale(1.015);
+}
+.aq-gallery-zoom-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 7px 14px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.25s ease;
+    outline: none;
+}
+.aq-gallery-zoom-btn:hover {
+    background: #fff;
+    color: #b5904a;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    transform: translateY(-1px);
+}
+@media (max-width: 991.98px) {
+    .aq-gallery-zoom-btn {
+        top: 10px;
+        right: 10px;
+        padding: 6px 11px;
+        font-size: 11px;
+    }
+}
+
+/* ══════════════════════════════════════════════
+   AQ PRODUCT LIGHTBOX MODAL & CONTROLS
+   ══════════════════════════════════════════════ */
+.aq-lightbox-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
+}
+.aq-lightbox-modal.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+.aq-lightbox-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(26, 30, 26, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: zoom-out;
+}
+.aq-lightbox-dialog {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px 105px 20px;
+    box-sizing: border-box;
+    z-index: 2;
+    pointer-events: none;
+}
+.aq-lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 82vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+.aq-lightbox-img-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 100%;
+    max-height: 82vh;
+}
+.aq-lightbox-img {
+    max-width: 100%;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+    transform: scale(0.96);
+    opacity: 0;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.aq-lightbox-modal.is-open .aq-lightbox-img {
+    transform: scale(1);
+    opacity: 1;
+}
+.aq-lightbox-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 5;
+}
+.aq-lightbox-img-wrapper.is-loading .aq-lightbox-spinner {
+    display: block;
+}
+
+/* Bottom Floating Control Pill (Left Arrow | Close | Right Arrow) */
+.aq-lightbox-controls {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    z-index: 1000002;
+    pointer-events: auto;
+}
+.aq-lightbox-btn {
+    background: #ffffff;
+    color: #1a1a1a;
+    border: none;
+    outline: none;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    user-select: none;
+}
+.aq-lightbox-btn:focus {
+    outline: none;
+}
+.aq-lightbox-btn:hover {
+    background: #ffffff;
+    color: #000000;
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+.aq-lightbox-btn:active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.aq-lightbox-prev,
+.aq-lightbox-next {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+}
+.aq-lightbox-close {
+    width: 52px;
+    height: 52px;
+    font-size: 19px;
+}
+
+.aq-lightbox-counter {
+    position: fixed;
+    top: 24px;
+    left: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 1000002;
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .aq-lightbox-controls {
+        bottom: 22px;
+        gap: 12px;
+    }
+    .aq-lightbox-prev,
+    .aq-lightbox-next {
+        width: 42px;
+        height: 42px;
+        font-size: 14px;
+    }
+    .aq-lightbox-close {
+        width: 48px;
+        height: 48px;
+        font-size: 17px;
+    }
+    .aq-lightbox-dialog {
+        padding: 20px 10px 85px 10px;
+    }
+    .aq-lightbox-content {
+        max-width: 96vw;
+        max-height: 78vh;
+    }
+    .aq-lightbox-img {
+        max-height: 78vh;
+    }
+    .aq-lightbox-counter {
+        top: 16px;
+        left: 16px;
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+}
+
 /* ══════════════════════════════════════════════
    VARIANT AVAILABILITY — diagonal line for "not
    available in this color" + small "Sold Out"
@@ -520,6 +904,7 @@ font-size:15px;
         display: flex;
         flex-direction: column;
         flex: 1;
+        padding: 8px;
     }
 
     .aq-new-arrivals-section .aq-product-card-title,
@@ -583,6 +968,160 @@ font-size:15px;
         font-size: 12px;
     }
 
+}
+
+/* ── Sticky Bottom Cart Bar ────────────────────────────── */
+.sticky-cart-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 -2px 10px #00000026;
+    z-index: 9999;
+    padding: 10px 15px;
+    transform: translateY(100%);
+    transition: transform .3s ease;
+    border-top: 1px solid #f0f0f0;
+}
+.sticky-cart-bar.is-visible {
+    transform: translateY(0px);
+}
+.sticky-cart-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 15px;
+}
+.sticky-cart-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.sticky-cart-thumb {
+    width: 46px;
+    height: 46px;
+    border-radius: 4px;
+    object-fit: cover;
+    border: 1px solid #e8e8e8;
+    flex-shrink: 0;
+}
+.sticky-cart-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.sticky-cart-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 520px;
+    line-height: 1.3;
+}
+.sticky-cart-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+.sticky-cart-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.sticky-cart-btn-add {
+    background-color: #c98f9d;
+    color: #fff;
+    border: none;
+    padding: 9px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+   
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+.sticky-cart-btn-add:hover {
+    background-color: #b5904a;
+    color: #fff;
+}
+.sticky-cart-btn-buy {
+    background-color: #4a4a4a;
+    color: #fff;
+    border: none;
+    padding: 9px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+.sticky-cart-btn-buy:hover {
+    background-color: #222;
+    color: #fff;
+}
+
+@media (max-width: 767.98px) {
+    .sticky-cart-bar {
+        padding: 8px 12px;
+    }
+    .sticky-cart-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .sticky-cart-product {
+        width: 100%;
+        gap: 10px;
+    }
+    .sticky-cart-thumb {
+        width: 40px;
+        height: 40px;
+    }
+    .sticky-cart-title {
+        font-size: 12px;
+        max-width: calc(100vw - 75px);
+    }
+    .sticky-cart-price {
+        font-size: 13px;
+    }
+    .sticky-cart-actions {
+        width: 100%;
+        gap: 8px;
+    }
+    .sticky-cart-btn-add,
+    .sticky-cart-btn-buy {
+        flex: 1;
+        padding: 9px 6px;
+        font-size: 12px;
+        text-align: center;
+        justify-content: center;
+    }
+    .aq-details-suitable-wrap {
+  
+    padding: 12px 14px;
+   
+}
+    
+}
+
+@media (max-width: 430px) {
+   .aq-details-suitable-grid {
+  
+    grid-template-columns: repeat(2,1fr);
+    
+}
 }
     </style>
 
@@ -676,9 +1215,12 @@ font-size:15px;
 
                             <!-- All Images Stacked -->
                             @foreach($product->images as $index => $image)
-                                <div class="aq-gallery-main-img-wrap" id="main-img-{{ $index }}">
+                                <div class="aq-gallery-main-img-wrap js-lightbox-wrap" id="main-img-{{ $index }}" data-index="{{ $index }}">
+                                    <button type="button" class="aq-gallery-zoom-btn" aria-label="Open fullscreen image" data-index="{{ $index }}">
+                                        <i class="fa-solid fa-magnifying-glass-plus"></i> <span>Zoom</span>
+                                    </button>
                                     <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $product->name }}"
-                                        class="aq-gallery-main-img" style="width: 100%; border-radius: 8px; object-fit: cover;" />
+                                        class="aq-gallery-main-img" />
                                 </div>
                             @endforeach
 
@@ -989,50 +1531,30 @@ font-size:15px;
 
 @if($product->addons->isNotEmpty())
 <div class="aq-stitching-box">
-
-    <div class="card aq-stitch-card">
-
-        <div class="card-body">
-
-            <h2 class="aq-title">
-               Choose Add ons?
-            </h2>
-
-            <p class="aq-subtitle">
-                Choose Your Style
-            </p>
-
-            <div class="row g-2">
-
-                @foreach($product->addons as $addon)
-
-                    <div class="col-lg-6">
-
-                        <label class="aq-option">
-
-                            <input type="checkbox" class="aq-addon-option"
-                                data-addon-id="{{ $addon->id }}"
-                                data-addon-price="{{ $addon->price }}">
-
-                            <span class="aq-checkbox"></span>
-
-                            <span class="aq-text">
-                                {{ $addon->detail }}
-                                <strong>(+₹{{ number_format($addon->price, 2) }})</strong>
-                            </span>
-
-                        </label>
-
-                    </div>
-
-                @endforeach
-
-            </div>
-
+    <div class="aq-stitch-card">
+        <div class="aq-stitch-card-header">
+            <h5 class="aq-addon-title">Choose Add ons?</h5>
+            <span class="aq-addon-subtitle">Choose Your Style</span>
         </div>
-
+        <div class="aq-addon-grid">
+            @foreach($product->addons as $addon)
+                <label class="aq-addon-item" for="addon-{{ $addon->id }}">
+                    <input type="checkbox"
+                        id="addon-{{ $addon->id }}"
+                        class="aq-addon-option"
+                        data-addon-id="{{ $addon->id }}"
+                        data-addon-price="{{ $addon->price }}">
+                    <span class="aq-custom-checkbox">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                    <span class="aq-addon-text-wrap">
+                        <span class="aq-addon-name">{{ $addon->detail }}</span>
+                        <span class="aq-addon-price">(+₹{{ number_format($addon->price, 2) }})</span>
+                    </span>
+                </label>
+            @endforeach
+        </div>
     </div>
-
 </div>
 @endif
 
@@ -1657,6 +2179,40 @@ font-size:15px;
 
     </main>
 
+    <!-- Sticky Bottom Cart Bar -->
+    <div class="sticky-cart-bar" id="stickyCartBar">
+        <div class="sticky-cart-container">
+            <div class="sticky-cart-product">
+                <img src="{{ isset($product->images[0]) ? asset('storage/' . ($product->images[0]->thumb ?? $product->images[0]->image)) : $product->display_image }}"
+                     id="stickyBarThumb"
+                     alt="{{ $product->name }}"
+                     class="sticky-cart-thumb" />
+                <div class="sticky-cart-info">
+                    <div class="sticky-cart-title">{{ $product->name }}</div>
+                    <div class="sticky-cart-price" id="stickyBarPrice">Rs. {{ number_format($product->price, 2) }}</div>
+                </div>
+            </div>
+            <div class="sticky-cart-actions">
+                @if($detailStock >= $product->min_qty)
+                    <button type="button"
+                        class="sticky-cart-btn-add aq-add-to-cart-btn"
+                        onclick="addToCart({{ $product->id }})">
+                        Add To Cart
+                    </button>
+                    <button type="button"
+                        class="sticky-cart-btn-buy aq-buy-now-btn"
+                        onclick="addToCart({{ $product->id }})">
+                        Buy Now
+                    </button>
+                @else
+                    <button type="button" class="sticky-cart-btn-add" disabled style="background:#999;cursor:not-allowed;">
+                        Out of Stock
+                    </button>
+                @endif
+            </div>
+        </div>
+    </div>
+
     <!-- Size Chart Modal -->
     @if($sizeChartImage)
     <div class="modal fade" id="sizeChartModal" tabindex="-1" aria-labelledby="sizeChartModalLabel" aria-hidden="true">
@@ -1674,6 +2230,37 @@ font-size:15px;
     </div>
     @endif
 
+    <!-- AQ Product Image Lightbox Modal -->
+    <div class="aq-lightbox-modal" id="aqProductLightbox" aria-hidden="true" role="dialog" aria-label="Product Image Lightbox">
+        <div class="aq-lightbox-backdrop" id="aqLightboxBackdrop"></div>
+        <div class="aq-lightbox-dialog">
+            <div class="aq-lightbox-counter" id="aqLightboxCounter">1 / 1</div>
+            
+            <div class="aq-lightbox-content">
+                <div class="aq-lightbox-img-wrapper" id="aqLightboxImgWrapper">
+                    <img src="" alt="{{ $product->name }}" id="aqLightboxImg" class="aq-lightbox-img" />
+                    <div class="aq-lightbox-spinner" id="aqLightboxSpinner">
+                        <div class="spinner-border text-light" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Floating Controls: Left Arrow, Close 'X' in center, Right Arrow -->
+            <div class="aq-lightbox-controls">
+                <button type="button" class="aq-lightbox-btn aq-lightbox-prev" id="aqLightboxPrev" aria-label="Previous image">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="aq-lightbox-btn aq-lightbox-close" id="aqLightboxClose" aria-label="Close lightbox">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <button type="button" class="aq-lightbox-btn aq-lightbox-next" id="aqLightboxNext" aria-label="Next image">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -2070,6 +2657,7 @@ const stockValue = stockVariant ? stockVariant.stock : {{ (int) $detailStock }};
 } else {
     $('#variant-images-container').html('');
     $('#variant-thumbs-container').html('');
+    $('#stickyBarThumb').attr('src', "{{ isset($product->images[0]) ? asset('storage/' . ($product->images[0]->thumb ?? $product->images[0]->image)) : $product->display_image }}");
     rebuildGalleryDots();   // ← ADD KARO: base images pe wapas dots resync
 }
 
@@ -2085,6 +2673,9 @@ updateComboAvailability();
     if (!images || !images.length) {
         return;
     }
+
+    const firstThumbPath = typeof images[0] === 'string' ? images[0] : (images[0].thumb || images[0].image);
+    $('#stickyBarThumb').attr('src', storageBaseUrl + '/' + firstThumbPath);
 
     images.forEach(function(imageObj, index) {
 
@@ -2104,11 +2695,14 @@ updateComboAvailability();
         `);
 
         $('#variant-images-container').append(`
-            <div class="aq-gallery-main-img-wrap"
-                 id="variant-main-${index}">
+            <div class="aq-gallery-main-img-wrap js-lightbox-wrap"
+                 id="variant-main-${index}" data-index="${index}">
+                <button type="button" class="aq-gallery-zoom-btn" aria-label="Open fullscreen image" data-index="${index}">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i> <span>Zoom</span>
+                </button>
                 <img src="${mainSrc}"
                      class="aq-gallery-main-img"
-                     style="width:100%;border-radius:8px;object-fit:cover;">
+                     alt="{{ $product->name }}">
             </div>
         `);
     });
@@ -2228,6 +2822,7 @@ function updateQtyButtonStates() {
     const totalMrp   = Math.round(qty * unitMrpWithAddons);
 
     $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
+    $('#stickyBarPrice').text('Rs. ' + totalPrice.toLocaleString('en-IN') + '.00');
 
     let discount = 0;
 
@@ -2365,7 +2960,226 @@ function rebuildGalleryDots() {
     slides.forEach(function (slide) { galleryDotsObserver.observe(slide); });
 }
 
-$(document).ready(function () { rebuildGalleryDots(); });
+/* ── AQ Product Image Lightbox Controller ──────────────────────────── */
+let currentLightboxIndex = 0;
+let currentLightboxImages = [];
+let lightboxTouchStartX = 0;
+let lightboxTouchStartY = 0;
+
+function getVisibleGalleryImages() {
+    const variantContainer = document.getElementById('variant-images-container');
+    if (variantContainer && variantContainer.children.length > 0) {
+        const variantImgs = Array.from(variantContainer.querySelectorAll('.aq-gallery-main-img'));
+        if (variantImgs.length > 0) {
+            return variantImgs.map(img => img.getAttribute('src') || img.src).filter(Boolean);
+        }
+    }
+    const container = document.getElementById('aqGallerySlides');
+    if (!container) return [];
+    
+    // Select all main images
+    const imgs = Array.from(container.querySelectorAll('.aq-gallery-main-img'));
+    return imgs.map(img => img.getAttribute('src') || img.src).filter(Boolean);
+}
+
+function openProductLightbox(index, images) {
+    if (!images || !images.length) {
+        images = getVisibleGalleryImages();
+    }
+    if (!images.length) return;
+
+    currentLightboxImages = images;
+    currentLightboxIndex = (index >= 0 && index < images.length) ? index : 0;
+
+    updateLightboxImage();
+
+    const modal = document.getElementById('aqProductLightbox');
+    if (modal) {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeProductLightbox() {
+    const modal = document.getElementById('aqProductLightbox');
+    if (modal) {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+}
+
+function updateLightboxImage() {
+    if (!currentLightboxImages.length) return;
+    
+    const imgEl = document.getElementById('aqLightboxImg');
+    const wrapper = document.getElementById('aqLightboxImgWrapper');
+    const counter = document.getElementById('aqLightboxCounter');
+    const prevBtn = document.getElementById('aqLightboxPrev');
+    const nextBtn = document.getElementById('aqLightboxNext');
+
+    const src = currentLightboxImages[currentLightboxIndex];
+    if (!src || !imgEl) return;
+
+    if (wrapper) wrapper.classList.add('is-loading');
+    imgEl.style.opacity = '0';
+    imgEl.style.transform = 'scale(0.96)';
+
+    const tempImg = new Image();
+    tempImg.onload = function () {
+        imgEl.src = src;
+        imgEl.style.opacity = '1';
+        imgEl.style.transform = 'scale(1)';
+        if (wrapper) wrapper.classList.remove('is-loading');
+    };
+    tempImg.onerror = function () {
+        imgEl.src = src;
+        imgEl.style.opacity = '1';
+        imgEl.style.transform = 'scale(1)';
+        if (wrapper) wrapper.classList.remove('is-loading');
+    };
+    tempImg.src = src;
+
+    if (counter) {
+        counter.textContent = (currentLightboxIndex + 1) + ' / ' + currentLightboxImages.length;
+        counter.style.display = currentLightboxImages.length > 1 ? 'block' : 'none';
+    }
+
+    if (prevBtn) prevBtn.style.display = currentLightboxImages.length > 1 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.style.display = currentLightboxImages.length > 1 ? 'inline-flex' : 'none';
+}
+
+function lightboxNext() {
+    if (currentLightboxImages.length <= 1) return;
+    currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length;
+    updateLightboxImage();
+}
+
+function lightboxPrev() {
+    if (currentLightboxImages.length <= 1) return;
+    currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length;
+    updateLightboxImage();
+}
+
+function initProductLightbox() {
+    const modal = document.getElementById('aqProductLightbox');
+    if (!modal || modal.dataset.lightboxInitialized) return;
+    modal.dataset.lightboxInitialized = 'true';
+
+    // Click on zoom button or image wrap to open lightbox
+    $(document).on('click', '.aq-gallery-main-img-wrap, .aq-gallery-zoom-btn', function (e) {
+        if ($(this).find('video').length > 0 || $(e.target).is('video')) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const wrap = $(this).closest('.aq-gallery-main-img-wrap');
+        const img = wrap.find('.aq-gallery-main-img');
+        if (!img.length) return;
+
+        const clickedSrc = img.attr('src') || img.prop('src');
+        const allImages = getVisibleGalleryImages();
+        let idx = allImages.indexOf(clickedSrc);
+        if (idx === -1) {
+            idx = parseInt(wrap.data('index')) || 0;
+        }
+
+        openProductLightbox(idx, allImages);
+    });
+
+    // Lightbox Controls
+    $('#aqLightboxClose, #aqLightboxBackdrop').on('click', function (e) {
+        e.preventDefault();
+        closeProductLightbox();
+    });
+
+    $('#aqLightboxPrev').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        lightboxPrev();
+    });
+
+    $('#aqLightboxNext').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        lightboxNext();
+    });
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', function (e) {
+        const lightbox = document.getElementById('aqProductLightbox');
+        if (!lightbox || !lightbox.classList.contains('is-open')) return;
+
+        if (e.key === 'Escape' || e.keyCode === 27) {
+            closeProductLightbox();
+        } else if (e.key === 'ArrowRight' || e.keyCode === 39) {
+            lightboxNext();
+        } else if (e.key === 'ArrowLeft' || e.keyCode === 37) {
+            lightboxPrev();
+        }
+    });
+
+    // Touch Swipe Gestures
+    modal.addEventListener('touchstart', function (e) {
+        if (e.touches.length === 1) {
+            lightboxTouchStartX = e.touches[0].clientX;
+            lightboxTouchStartY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    modal.addEventListener('touchend', function (e) {
+        if (e.changedTouches.length === 1) {
+            const deltaX = e.changedTouches[0].clientX - lightboxTouchStartX;
+            const deltaY = e.changedTouches[0].clientY - lightboxTouchStartY;
+            if (Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX < 0) {
+                    lightboxNext(); // swipe left -> next
+                } else {
+                    lightboxPrev(); // swipe right -> prev
+                }
+            } else if (deltaY > 80 && Math.abs(deltaY) > Math.abs(deltaX)) {
+                closeProductLightbox(); // swipe down -> close
+            }
+        }
+    }, { passive: true });
+}
+
+/* ── Sticky Bottom Cart Bar Controller ────────────────────────── */
+function initStickyCartBar() {
+    const bar = document.getElementById('stickyCartBar');
+    if (!bar) return;
+
+    const targetEl = document.querySelector('.aq-add-to-cart-btn') || document.querySelector('.aq-qty-selector');
+
+    function handleScroll() {
+        if (targetEl) {
+            const rect = targetEl.getBoundingClientRect();
+            if (rect.bottom < 0 || window.scrollY > 450) {
+                bar.classList.add('is-visible');
+            } else {
+                bar.classList.remove('is-visible');
+            }
+        } else if (window.scrollY > 450) {
+            bar.classList.add('is-visible');
+        } else {
+            bar.classList.remove('is-visible');
+        }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+}
+
+$(document).ready(function () { 
+    rebuildGalleryDots(); 
+    initProductLightbox();
+    initStickyCartBar();
+});
+window.addEventListener('load', function() {
+    initProductLightbox();
+    initStickyCartBar();
+});
 
 function addToCartCard(productId, minQty, btnEl) {
 

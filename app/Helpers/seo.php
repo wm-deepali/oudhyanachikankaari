@@ -1,5 +1,4 @@
 <?php
-
 use App\Models\SeoPage;
 use App\Models\Blog;
 use App\Models\Product;
@@ -8,13 +7,13 @@ use App\Models\Category;
 use App\Models\DynamicPage;
 use App\Models\GiftingOccasion;
 use App\Models\AttributeValue;
+use Illuminate\Support\Str;
 
 function getSeo()
 {
     $route = optional(request()->route())->getName();
 
     switch ($route) {
-
         // Collection Page
         case 'collections.listing':
             return Collection::where(
@@ -22,12 +21,15 @@ function getSeo()
                 request()->route('slug')
             )->first();
 
-        // Attribute Page
+        // Attribute Page — scoped by BOTH attributeSlug and valueSlug so a
+        // value-slug collision across two different attributes can't
+        // return the wrong record (route is /{attributeSlug}/{valueSlug}).
         case 'attribute.listing':
-            return AttributeValue::where(
-                'slug',
-                request()->route('valueSlug')
-            )->first();
+            return AttributeValue::whereHas('attribute', function ($q) {
+                    $q->where('slug', request()->route('attributeSlug'));
+                })
+                ->where('slug', request()->route('valueSlug'))
+                ->first();
 
         // Blog Detail
         case 'blog.details':
@@ -37,14 +39,28 @@ function getSeo()
             )->first();
 
         // Product Listing Page (Category/Subcategory)
-        case 'products.listing':
-            $subcategorySlug = request()->query('subcategory');
+case 'products.listing':
+    $segments = array_values(array_filter(explode('/', trim(request()->path(), '/'))));
+    array_shift($segments); // drop the leading "products" segment
 
-            if ($subcategorySlug) {
-                return Category::where('slug', $subcategorySlug)->first();
-            }
+    if (empty($segments)) {
+        return null;
+    }
 
-            return Category::where('slug', request()->route('slug'))->first();
+    $category = null;
+    foreach ($segments as $slug) {
+        $query = Category::where('slug', $slug);
+        $query = $category
+            ? $query->where('parent_id', $category->id)
+            : $query->whereNull('parent_id');
+        $category = $query->first();
+
+        if (!$category) {
+            break; // no match at this depth — bad URL, fall through to null
+        }
+    }
+
+    return $category;
 
         // Product Detail Page
         case 'product.details':
@@ -68,25 +84,27 @@ function getSeo()
                     return Str::slug($p->page_name) === $slug;
                 });
 
-
         default:
+    $map = [
+        'home'         => 'home',
+        'categories'   => 'categories',
+        'occasions'    => 'occasions',
+        'cart'         => 'cart',
+        'checkout'     => 'checkout',
+        'about-us'     => 'about',
+        'why-us'       => 'why_choose_us',
+        'contact-us'   => 'contact',
+        'bulk-enquiry' => 'bulk_enquiry',
+        'blogs'        => 'blog',
+        'faqs'         => 'faq',
+    ];
 
-            $map = [
-                'home' => 'home',
-                'categories' => 'categories',
-                'occasions' => 'occasions',
-                'cart' => 'cart',
-                'checkout' => 'checkout',
-                'about-us' => 'about',
-                'why-us' => 'why_choose_us',
-                'contact-us' => 'contact',
-                'bulk-enquiry' => 'bulk_enquiry',
-                'blogs' => 'blog',
-                'faqs' => 'faq',
-            ];
+    if (!isset($map[$route])) {
+        // Unnamed or unmapped route — no real SEO record for this page.
+        // Do NOT fall back to Home; let the caller handle "no SEO found".
+        return null;
+    }
 
-            $key = $map[$route] ?? 'home';
-
-            return SeoPage::where('page_key', $key)->first();
+    return SeoPage::where('page_key', $map[$route])->first();
     }
 }

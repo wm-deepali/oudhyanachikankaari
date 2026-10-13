@@ -18,6 +18,12 @@ class GiftingOccasion extends Model
         'canonical',
         'og_title',
         'og_description',
+        'meta_status',
+                'og_image',
+                'twitter_card',
+                'twitter_title',
+                'twitter_description',
+                'twitter_image',
         'image',
         'image_alt',
         'icon',
@@ -65,7 +71,7 @@ class GiftingOccasion extends Model
     public function getCanonicalResolvedAttribute()
     {
         return $this->canonical
-            ? url('/occasion/' . ltrim($this->canonical, '/'))
-            : url('/occasion/' . $this->slug);
+            ? url('/occasions/' . ltrim($this->canonical, '/'))
+            : url('/occasions/' . $this->slug);
     }
 }

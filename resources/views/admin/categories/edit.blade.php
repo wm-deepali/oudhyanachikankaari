@@ -261,6 +261,13 @@
                                         class="field-input">
                                 </div>
 
+<div class="field-group">
+    <label class="field-label">Description</label>
+    <textarea name="description" id="description" class="field-textarea" rows="6"
+        placeholder="Detailed content shown on the category page, below the product listing">{{ old('description', $category->description) }}</textarea>
+    <div class="field-hint">Optional — shows on the front-end category page below the product cards.</div>
+</div>
+
                                 <div class="field-group">
                                     <label class="field-label">Parent Category</label>
                                     <select name="parent_id" class="field-select">
@@ -313,15 +320,28 @@
                                 </div>
 
                                 <div class="field-group">
-                                    <label class="field-label">Canonical URL</label>
-                                    <div class="field-input" id="canonicalDisplay"
-                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
-                                        /cat/<span id="canonicalSlug">{{ $category->slug }}</span>
-                                    </div>
-                                    <div class="field-hint">Set automatically from the Slug field. Not editable here.</div>
-                                </div>
+    <label class="field-label">Canonical URL</label>
+    <div class="field-input" id="canonicalDisplay"
+        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+        /cat/<span id="canonicalSlug">{{ old('slug', $category->slug) ?: '—' }}</span>
+    </div>
+    <div class="field-hint">Set automatically from the Slug field. Not editable here.</div>
+</div>
 
-                                <hr style="margin:18px 0;border:none;border-top:1px solid var(--bg)">
+<div class="field-group">
+    <label class="field-label">Index Status</label>
+    <select name="meta_status" class="field-select">
+        <option value="index_follow" {{ old('meta_status', $category->meta_status) === 'index_follow' ? 'selected' : '' }}>
+            Index, Follow (crawl this page)
+        </option>
+        <option value="noindex_unfollow" {{ old('meta_status', $category->meta_status) === 'noindex_unfollow' ? 'selected' : '' }}>
+            No Index, Unfollow (don't crawl)
+        </option>
+    </select>
+    <div class="field-hint">Set to No Index for categories with very few products or low SEO value — they'll also be excluded from the sitemap.</div>
+</div>
+
+<hr style="margin:18px 0;border:none;border-top:1px solid var(--bg)">
 
                                 <div class="field-group">
                                     <label class="field-label">OG Title</label>
@@ -338,23 +358,29 @@
                                     <div class="field-hint">Auto-filled from Meta Description — edit to override for social sharing.</div>
                                 </div>
 
-                               <div class="field-group" style="margin-bottom:0">
+                              <div class="field-group" style="margin-bottom:0">
     <label class="field-label">OG Image</label>
 
-    @if($category->og_image)
-        <div class="current-image-wrap" id="currentOgImageWrap">
-            <img src="{{ asset('storage/' . $category->og_image) }}" alt="Current OG image">
-            <div class="current-image-info">
-                <strong>Current override</strong>
-                Upload a new file below to replace it.
-            </div>
+    <div class="current-image-wrap" id="currentOgImageWrap" style="{{ $category->og_image ? '' : 'display:none' }}">
+        <img id="ogOverrideImg" src="{{ $category->og_image ? asset('storage/'.$category->og_image) : '' }}" alt="Current OG image">
+        <div class="current-image-info">
+            <strong>Current override</strong>
+            Upload a new file below to replace it.
         </div>
-    @endif
+    </div>
+
+    <div class="current-image-wrap" id="ogImageAutoWrap" style="{{ (!$category->og_image && $category->image) ? '' : 'display:none' }}">
+        <img id="ogAutoImg" src="{{ $category->image ? asset('storage/'.$category->image) : '' }}" alt="Category image used for OG">
+        <div class="current-image-info">
+            <strong>Auto-filled from Category Image</strong>
+            Upload a file below only if you want a different image for social sharing.
+        </div>
+    </div>
 
     <div class="file-upload-area" id="ogImageUploadArea" style="padding:16px">
         <input type="file" name="og_image" accept="image/*" id="ogImageInput">
         <div class="upload-icon"><i class="fa fa-share-alt"></i></div>
-        <p>{{ $category->og_image ? 'Replace OG image' : 'Optional — overrides Category Image' }}</p>
+        <p>{{ $category->og_image ? 'Replace OG image' : 'Optional override — leave blank to use Category Image' }}</p>
         <small>PNG, JPG, WEBP — recommended 1200×630</small>
     </div>
 
@@ -364,11 +390,11 @@
         <div style="margin-top:6px">
             <button type="button" onclick="clearOgImage()"
                 style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:0">
-                <i class="fa fa-times"></i> Remove
+                <i class="fa fa-times"></i> Remove override
             </button>
         </div>
     </div>
-    <div class="field-hint">Uses the Category Image by default — upload here only for a different social-share preview.</div>
+    <div class="field-hint">Uses the Category Image automatically — upload here only for a different social-share preview.</div>
 </div>
 
                             </div>
@@ -537,8 +563,13 @@
 </div>
 
 @include('admin.footer')
-
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 <script>
+
+if (typeof CKEDITOR !== 'undefined') {
+    CKEDITOR.replace('description');
+}
+
 // Slug auto-generate
 let manualSlug = false;
 
@@ -601,32 +632,38 @@ document.querySelector('form').addEventListener('submit', function () {
     btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating…';
 });
 
+let ogOverridden = {{ $category->og_image ? 'true' : 'false' }};
+let hasMainImage = {{ $category->image ? 'true' : 'false' }};
+
 document.getElementById('ogImageInput').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
+    ogOverridden = true;
+    document.getElementById('currentOgImageWrap').style.display = 'none';
+    document.getElementById('ogImageAutoWrap').style.display = 'none';
     const reader = new FileReader();
     reader.onload = e => {
         document.getElementById('ogImagePreviewImg').src = e.target.result;
         document.getElementById('ogImagePreview').style.display = 'block';
         document.getElementById('ogImageUploadArea').style.display = 'none';
-        const cur = document.getElementById('currentOgImageWrap');
-        if (cur) cur.style.display = 'none';
     };
     reader.readAsDataURL(file);
 });
 
 function clearOgImage() {
+    ogOverridden = false;
     document.getElementById('ogImageInput').value = '';
     document.getElementById('ogImagePreview').style.display = 'none';
     document.getElementById('ogImageUploadArea').style.display = 'block';
-    const cur = document.getElementById('currentOgImageWrap');
-    if (cur) cur.style.display = 'flex';
+    if (hasMainImage) {
+        document.getElementById('ogImageAutoWrap').style.display = 'flex';
+    }
 }
 
-// New image preview
 document.getElementById('imageInput').addEventListener('change', function () {
     const file = this.files[0];
     if (!file) return;
+    hasMainImage = true;
     const reader = new FileReader();
     reader.onload = e => {
         document.getElementById('previewImg').src = e.target.result;
@@ -634,6 +671,11 @@ document.getElementById('imageInput').addEventListener('change', function () {
         document.getElementById('uploadArea').style.display = 'none';
         const cur = document.getElementById('currentImageWrap');
         if (cur) cur.style.display = 'none';
+
+        if (!ogOverridden) {
+            document.getElementById('ogAutoImg').src = e.target.result;
+            document.getElementById('ogImageAutoWrap').style.display = 'flex';
+        }
     };
     reader.readAsDataURL(file);
 });
@@ -644,6 +686,16 @@ function clearNewImage() {
     document.getElementById('uploadArea').style.display = 'block';
     const cur = document.getElementById('currentImageWrap');
     if (cur) cur.style.display = 'flex';
+
+    hasMainImage = {{ $category->image ? 'true' : 'false' }};
+    if (!ogOverridden) {
+        if (hasMainImage) {
+            document.getElementById('ogAutoImg').src = "{{ $category->image ? asset('storage/'.$category->image) : '' }}";
+            document.getElementById('ogImageAutoWrap').style.display = 'flex';
+        } else {
+            document.getElementById('ogImageAutoWrap').style.display = 'none';
+        }
+    }
 }
 
 document.getElementById('sizeChartInput')?.addEventListener('change', function () {

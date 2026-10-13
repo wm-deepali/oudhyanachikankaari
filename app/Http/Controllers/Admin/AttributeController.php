@@ -37,6 +37,7 @@ class AttributeController extends Controller
             'has_values' => 'required|boolean',
             'status' => 'required|boolean',
             'show_in_navbar' => 'required|boolean',
+            'seo_required' => 'required|boolean',
         ]);
 
         Attribute::create([
@@ -46,6 +47,7 @@ class AttributeController extends Controller
             'has_values' => $request->has_values,
             'status' => $request->status,
             'show_in_navbar' => $request->show_in_navbar,
+            'seo_required' => $request->seo_required,
         ]);
 
         return redirect()
@@ -74,6 +76,7 @@ class AttributeController extends Controller
             'has_values' => 'required|boolean',
             'status' => 'required|boolean',
             'show_in_navbar' => 'required|boolean',
+            'seo_required' => 'required|boolean',
         ]);
 
         $attribute->update([
@@ -83,6 +86,7 @@ class AttributeController extends Controller
             'has_values' => $request->has_values,
             'status' => $request->status,
             'show_in_navbar' => $request->show_in_navbar,
+            'seo_required' => $request->seo_required,
         ]);
 
         return redirect()

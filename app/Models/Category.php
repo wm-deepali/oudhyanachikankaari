@@ -14,9 +14,11 @@ class Category extends Model
         'slug',
         'parent_id',
         'sub_title',
+        'description',
         'meta_title',
         'meta_description',
         'h1_heading',
+        'meta_status',
         'og_title',
         'og_description',
         'og_image',
@@ -117,12 +119,24 @@ class Category extends Model
     | Centralised fallback logic so the frontend <head> partial can just call
     | these instead of repeating "og_title ?: meta_title" everywhere.
     */
+public function seoCanonicalUrl(): string
+{
+    return url('/products/' . implode('/', $this->slugPath()));
+}
 
-    // Canonical is always derived from slug â€” never stored, never admin-editable.
-    public function seoCanonicalUrl(): string
-    {
-        return url('/cat/' . $this->slug);
+// Root-to-self slugs, e.g. ['men', 'kurtas', 'chikankari-kurtas'].
+private function slugPath(): array
+{
+    $path = [$this->slug];
+    $node = $this->parent;
+
+    while ($node) {
+        array_unshift($path, $node->slug);
+        $node = $node->parent;
     }
+
+    return $path;
+}
 
     // Admin-editable for categories; falls back to Meta Title if left blank.
     public function seoOgTitle(): ?string
@@ -156,42 +170,25 @@ class Category extends Model
         return $this->name;
     }
 
-    // Minimal CollectionPage + Breadcrumb JSON-LD. Extend as needed per template.
+    /**
+     * CollectionPage JSON-LD ONLY — the BreadcrumbList schema is NOT
+     * generated here anymore. It's handled centrally by
+     * SeoService::breadcrumbForCategory(), which builds the exact same
+     * "Home > Parent > This Category" trail and is what the blade layer
+     * actually reads via $seoData['breadcrumbJsonLd']. Keeping it here
+     * too was producing TWO separate BreadcrumbList schemas on the same
+     * page (one nested in this @graph, one from SeoService) — search
+     * engines don't like duplicate/competing breadcrumb schemas, so this
+     * method now only owns the CollectionPage part.
+     */
     public function seoJsonLd(): array
     {
-        $crumbs = [];
-        $position = 1;
-        $trail = [$this];
-        $node = $this->parent;
-
-        while ($node) {
-            array_unshift($trail, $node);
-            $node = $node->parent;
-        }
-
-        foreach ($trail as $cat) {
-            $crumbs[] = [
-                '@type' => 'ListItem',
-                'position' => $position++,
-                'name' => $cat->name,
-                'item' => url('/cat/' . $cat->slug),
-            ];
-        }
-
         return [
-            '@context' => 'https://schema.org',
-            '@graph' => [
-                [
-                    '@type' => 'CollectionPage',
-                    'name' => $this->h1_heading ?: $this->name,
-                    'description' => $this->meta_description,
-                    'url' => $this->seoCanonicalUrl(),
-                ],
-                [
-                    '@type' => 'BreadcrumbList',
-                    'itemListElement' => $crumbs,
-                ],
-            ],
+            '@context'    => 'https://schema.org',
+            '@type'       => 'CollectionPage',
+            'name'        => $this->h1_heading ?: $this->name,
+            'description' => $this->meta_description,
+            'url'         => $this->seoCanonicalUrl(),
         ];
     }
 }

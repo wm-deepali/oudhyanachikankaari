@@ -99,9 +99,9 @@ class CustomerAuthController extends Controller
 
         if (Auth::guard('customer')->attempt($credentials, $remember)) {
 
-            $customer = Auth::guard('customer')->user();
-
             $guestSessionId = session()->getId();
+
+            $customer = Auth::guard('customer')->user();
 
             $this->mergeGuestCart($customer, $guestSessionId);
             $this->mergeGuestWishlist($customer, $guestSessionId);
@@ -127,42 +127,41 @@ class CustomerAuthController extends Controller
     }
 
 
-    public function handleGoogleCallback()
-    {
-        $googleUser = Socialite::driver('google')->user();
+   public function handleGoogleCallback()
+{
+    $googleUser = Socialite::driver('google')->stateless()->user();
 
-        $customer = Customer::firstOrCreate(
-            [
-                'email' => $googleUser->email,
-            ],
-            [
-                'name' => $googleUser->name,
-                'google_id' => $googleUser->id,
-                'avatar' => $googleUser->avatar,
-                'password' => bcrypt(str()->random(20)),
-                'mobile' => time(),
-                'alternate_mobile' => time() + 1,
-            ]
-        );
+    $customer = Customer::firstOrCreate(
+        [
+            'email' => $googleUser->email,
+        ],
+        [
+            'name'             => $googleUser->name,
+            'google_id'        => $googleUser->id,
+            'avatar'           => $googleUser->avatar,
+            'password'         => bcrypt(str()->random(20)),
+            'mobile'           => null,
+            'alternate_mobile' => null,
+        ]
+    );
 
-        $isNewCustomer = $customer->wasRecentlyCreated; // 👈 new
+    $isNewCustomer = $customer->wasRecentlyCreated;
 
-        Auth::guard('customer')->login($customer);
+    $guestSessionId = session()->getId();
+    Auth::guard('customer')->login($customer);
 
-        $guestSessionId = session()->getId();
 
-        $this->mergeGuestCart($customer, $guestSessionId);
-        $this->mergeGuestWishlist($customer, $guestSessionId);
+    $this->mergeGuestCart($customer, $guestSessionId);
+    $this->mergeGuestWishlist($customer, $guestSessionId);
 
-        // 👇 new — flash for session-based tracking, same as email/password paths above
-        if ($isNewCustomer) {
-            session()->flash('fire_signup_event', 'google_oauth');
-        } else {
-            session()->flash('fire_login_event', true);
-        }
-
-        return redirect()->intended(route('home'));
+    if ($isNewCustomer) {
+        session()->flash('fire_signup_event', 'google_oauth');
+    } else {
+        session()->flash('fire_login_event', true);
     }
+
+    return redirect()->intended(route('home'));
+}
 
     public function logout(Request $request)
     {
