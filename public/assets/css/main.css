@@ -26059,12 +26059,13 @@ only screen and (min-width: 768px) and (max-width: 991px),
 @media (max-width: 991px) {
     .aq-luxury-showcase {
         padding-left: 0;
-        margin-top: 60px;
+        margin-top: 30px;
     }
 
-    .aq-luxury-tabs-wrapper {
-        padding: 30px 12px;
-    }
+   .aq-luxury-tabs-wrapper {
+    padding: 20px 12px;
+    margin: 20px 0px;
+}
 
     .aq-luxury-heading {
         font-size: 36px;
@@ -26244,6 +26245,9 @@ only screen and (min-width: 768px) and (max-width: 991px),
         font-size: 11px;
         letter-spacing: 2px;
     }
+    
+
+   
 }
 
 .aq-section-title-box,
@@ -26823,3 +26827,81 @@ h4.aq-section-title.fs-44.aq-text-white.mb-20 {
 .tab-content.aq-luxury-tab-content::-webkit-scrollbar {
     display: none;
 }
+
+
+
+/* Custom mobile menu inner list styling for 776px to 1080px */
+ 
+    
+}
+@media (min-width: 776px) and (max-width: 1207px) {
+  .aq-mobile-menu-active > ul {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 15px;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    overflow-y: hidden;
+}
+    
+    .aq-mobile-menu-active > ul::-webkit-scrollbar {
+        height: 7px;
+    }
+    
+    .aq-mobile-menu-active > ul::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .aq-mobile-menu-active > ul::-webkit-scrollbar-thumb {
+        background: var(--aq-color-maroon, #C98F9D);
+        border-radius: 10px;
+    }
+    
+    .aq-mobile-menu-active > ul > li {
+        flex: 0 0 auto !important;
+        display: inline-block !important;
+    }
+    
+      .aq-header-menu>nav>ul>li {
+    margin: 0 15px;
+    list-style-type: none;
+    display: inline-block;
+}
+}
+
+
+
+
+
+@media (max-width: 767px) {
+
+ .aq-luxury-showcase {
+      margin-top: 30px;
+    }
+    
+}
+
+
+@media (max-width: 992px) {
+     .aq-luxury-tab-card {
+    padding: 16px 20px;
+      
+}
+
+.aq-luxury-item-img {
+   
+    height: 390px;
+   
+}
+
+.aq-header-menu>nav>ul>li {
+    margin: 0 8px;
+
+}
+}
+
+
+
