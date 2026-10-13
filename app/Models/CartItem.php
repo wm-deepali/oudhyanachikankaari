@@ -25,6 +25,7 @@ class CartItem extends Model
 
         'price',
         'total',
+        'custom_colour_code'
 
     ];
 

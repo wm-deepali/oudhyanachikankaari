@@ -28,6 +28,7 @@ class OrderItem extends Model
 
         'price',
         'total',
+        'custom_colour_code'
     ];
 
     protected $casts = [

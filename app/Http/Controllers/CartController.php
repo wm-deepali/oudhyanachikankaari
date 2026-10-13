@@ -6,6 +6,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use App\Models\ProductVariant;
 use App\Models\Coupon;
 use App\Models\AttributeValue;
@@ -32,60 +33,83 @@ class CartController extends Controller
             'addon_ids' => 'nullable|array',
             'addon_ids.*' => 'integer|exists:product_addons,id',
 
+            'custom_colour_code' => 'nullable|string|max:50',
+
             'quantity' => 'nullable|integer|min:1',
         ]);
 
-      $product = Product::with('variants.values')->findOrFail($request->product_id);
-$quantity = $request->quantity ?? $product->min_qty;
+        $product = Product::with('variants.values')->findOrFail($request->product_id);
+        $quantity = $request->quantity ?? $product->min_qty;
 
-/*
-|--------------------------------------------------------------------------
-| Default-variant resolution — jab koi variant id bheja hi nahi gaya
-| (listing page ka "Add to Cart"), lekin product ke variants hain, to
-| khud-ba-khud ek in-stock combination pick karo.
-|--------------------------------------------------------------------------
-*/
-if (!$request->filled('stock_variant_id') && $product->variants->isNotEmpty()) {
+        /*
+        |--------------------------------------------------------------------------
+        | Custom colour code — sirf tab accept hota hai jab product par
+        | "Colour Customization Allowed" ON ho. Tags hata ke, trim karke,
+        | max 50 chars. Khaali ho to null (matlab original colour).
+        |--------------------------------------------------------------------------
+        */
+        $customColourCode = null;
 
-    $stockVariants = $product->variants->where('type', 'stock');
+        if ($product->colour_customization) {
+            $customColourCode = Str::limit(
+                trim(strip_tags((string) $request->custom_colour_code)),
+                50,
+                ''
+            );
 
-    $defaultStockVariant = $stockVariants->firstWhere('stock', '>', 0)
-        ?? $stockVariants->first();
-
-    if ($defaultStockVariant) {
-
-        $defaultValueIds = $defaultStockVariant->values
-            ->pluck('attribute_value_id')
-            ->sort()
-            ->values()
-            ->toArray();
-
-        $request->merge([
-            'stock_variant_id' => $defaultStockVariant->id,
-            'selected_values' => $defaultValueIds,
-        ]);
-
-        foreach (['price', 'image', 'sku'] as $type) {
-
-            $match = $product->variants
-                ->where('type', $type)
-                ->first(function ($variant) use ($defaultValueIds) {
-                    $ids = $variant->values
-                        ->pluck('attribute_value_id')
-                        ->sort()
-                        ->values()
-                        ->toArray();
-                    return $ids === $defaultValueIds;
-                });
-
-            if ($match) {
-                $request->merge([$type . '_variant_id' => $match->id]);
+            if ($customColourCode === '') {
+                $customColourCode = null;
             }
         }
-    }
-}
 
-$priceVariant = $request->price_variant_id ? ProductVariant::find($request->price_variant_id) : null;
+        /*
+        |--------------------------------------------------------------------------
+        | Default-variant resolution — jab koi variant id bheja hi nahi gaya
+        | (listing page ka "Add to Cart"), lekin product ke variants hain, to
+        | khud-ba-khud ek in-stock combination pick karo.
+        |--------------------------------------------------------------------------
+        */
+        if (!$request->filled('stock_variant_id') && $product->variants->isNotEmpty()) {
+
+            $stockVariants = $product->variants->where('type', 'stock');
+
+            $defaultStockVariant = $stockVariants->firstWhere('stock', '>', 0)
+                ?? $stockVariants->first();
+
+            if ($defaultStockVariant) {
+
+                $defaultValueIds = $defaultStockVariant->values
+                    ->pluck('attribute_value_id')
+                    ->sort()
+                    ->values()
+                    ->toArray();
+
+                $request->merge([
+                    'stock_variant_id' => $defaultStockVariant->id,
+                    'selected_values' => $defaultValueIds,
+                ]);
+
+                foreach (['price', 'image', 'sku'] as $type) {
+
+                    $match = $product->variants
+                        ->where('type', $type)
+                        ->first(function ($variant) use ($defaultValueIds) {
+                            $ids = $variant->values
+                                ->pluck('attribute_value_id')
+                                ->sort()
+                                ->values()
+                                ->toArray();
+                            return $ids === $defaultValueIds;
+                        });
+
+                    if ($match) {
+                        $request->merge([$type . '_variant_id' => $match->id]);
+                    }
+                }
+            }
+        }
+
+        $priceVariant = $request->price_variant_id ? ProductVariant::find($request->price_variant_id) : null;
         $imageVariant = $request->image_variant_id ? ProductVariant::find($request->image_variant_id) : null;
         $stockVariant = $request->stock_variant_id ? ProductVariant::find($request->stock_variant_id) : null;
         $skuVariant = $request->sku_variant_id ? ProductVariant::find($request->sku_variant_id) : null;
@@ -186,7 +210,8 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         | Existing Item — customized lines (with addons) always create a new
         | line rather than merging, so each customization stays distinct.
         | Plain lines (no addons) still merge on identical variant selection,
-        | same as before.
+        | AND identical colour code (alag colour code = alag cart line,
+        | taaki har line ka dye-colour alag track ho).
         |--------------------------------------------------------------------------
         */
         $item = null;
@@ -198,6 +223,11 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
                 ->where('image_variant_id', $imageVariant->id ?? null)
                 ->where('stock_variant_id', $stockVariant->id ?? null)
                 ->where('sku_variant_id', $skuVariant->id ?? null)
+                ->when(
+                    $customColourCode !== null,
+                    fn($q) => $q->where('custom_colour_code', $customColourCode),
+                    fn($q) => $q->whereNull('custom_colour_code')
+                )
                 ->doesntHave('addons')
                 ->first();
         }
@@ -229,6 +259,8 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
                 'sku_variant_id' => $skuVariant->id ?? null,
 
                 'selected_attributes' => $selectedAttributes,
+
+                'custom_colour_code' => $customColourCode,
 
                 'quantity' => $quantity,
                 'price' => $price,
@@ -337,7 +369,7 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         );
     }
 
-   public function remove($id)
+    public function remove($id)
     {
         $item = CartItem::findOrFail($id);
 
@@ -445,7 +477,7 @@ $priceVariant = $request->price_variant_id ? ProductVariant::find($request->pric
         $item->total = $item->quantity * ($item->price + $addonUnitTotal);
         $item->save();
 
-       $cart = $item->cart;
+        $cart = $item->cart;
 
         $cart->recalculateTotals();
         $cart->refresh();

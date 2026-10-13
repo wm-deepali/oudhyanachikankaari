@@ -68,7 +68,7 @@ use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\User\NotificationController;
 use App\Http\Controllers\User\ProductReviewController;
 use App\Http\Controllers\SitemapController;
-
+use App\Http\Controllers\MetaFeedController;
 
 Route::middleware('maintenance.mode')->group(function () {
 
@@ -218,6 +218,7 @@ Route::middleware('maintenance.mode')->group(function () {
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/meta-feed.xml', [MetaFeedController::class, 'show'])->name('meta.feed');
 
 // Admin Routes list
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

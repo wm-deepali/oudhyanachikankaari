@@ -10,12 +10,19 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function ($middleware) {
+    ->withMiddleware(function (Middleware $middleware) {
+
+        // Meta Pixel ki cookies JavaScript set karta hai (Laravel nahi), isliye inhe
+        // decrypt karne ki koshish na ho. Warna $request->cookie('_fbp') / ('_fbc') null aata hai.
+        $middleware->encryptCookies(except: [
+            '_fbp',
+            '_fbc',
+        ]);
+
         $middleware->alias([
             'customer' => \App\Http\Middleware\CustomerAuth::class,
             'maintenance.mode' => \App\Http\Middleware\MaintenanceModeMiddleware::class,
-            'admin.timeout' =>
-                \App\Http\Middleware\AdminSessionTimeout::class,
+            'admin.timeout' => \App\Http\Middleware\AdminSessionTimeout::class,
         ]);
 
         $middleware->web(append: [

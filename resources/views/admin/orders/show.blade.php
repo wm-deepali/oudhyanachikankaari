@@ -782,7 +782,13 @@
                                                         @if($sku)
                                                             <div class="product-sku">SKU: {{ $sku }}</div>
                                                         @endif
-                                                        
+                                                        @if(!empty($item->custom_colour_code))
+                                                            <div class="product-variant" style="margin-top:2px">
+                                                                Custom Colour Code:
+                                                                <strong
+                                                                    style="color:var(--text-primary)">{{ $item->custom_colour_code }}</strong>
+                                                            </div>
+                                                        @endif
                                                         @if($item->addons->isNotEmpty())
                                                             <div class="product-variant" style="margin-top:4px">
                                                                 @foreach($item->addons as $addon)

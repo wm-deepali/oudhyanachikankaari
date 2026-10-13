@@ -348,6 +348,8 @@ class CheckoutController extends Controller
                     'price' => $item->price,
 
                     'total' => $item->total,
+
+                    'custom_colour_code' => $item->custom_colour_code,
                 ]);
 
                 // Carry the cart item's addon snapshot over to the order item.
@@ -417,7 +419,7 @@ class CheckoutController extends Controller
                 DB::commit();
 
                 // 👇 new — Meta CAPI purchase event, dispatched after commit so order is guaranteed saved
-                \App\Jobs\SendMetaCapiPurchase::dispatch(
+                \App\Jobs\SendMetaCapiPurchase::dispatchAfterResponse(
                     $order->id,
                     $request->ip(),
                     $request->userAgent(),
@@ -716,7 +718,7 @@ class CheckoutController extends Controller
             DB::commit();
 
             // 👇 new — Meta CAPI purchase event
-            \App\Jobs\SendMetaCapiPurchase::dispatch(
+            \App\Jobs\SendMetaCapiPurchase::dispatchAfterResponse(
                 $order->id,
                 $request->ip(),
                 $request->userAgent(),
@@ -816,7 +818,9 @@ class CheckoutController extends Controller
             $skuHtml = $sku
                 ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
                 : '';
-
+            $colourHtml = $item->custom_colour_code
+                ? "<div style='font-size:11px;color:#7a9e9c;'>Custom Colour Code: " . e($item->custom_colour_code) . "</div>"
+                : '';
             // Addons — list each one and fold into the line total
             $addonsTotal = $item->addons->sum('price');
             $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
@@ -837,6 +841,7 @@ class CheckoutController extends Controller
             <div style='font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:3px;'>{$item->product_name}</div>
             {$variantHtml}
             {$skuHtml}
+            {$colourHtml}
             <div style='font-size:11px;color:#7a9e9c;'>Qty: {$item->quantity}</div>
             {$addonsHtml}
         </div>

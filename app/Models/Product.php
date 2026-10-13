@@ -33,6 +33,7 @@ class Product extends Model
         'delivery_time',
         'quality',
         'pan_india',
+        'colour_customization',
         'meta_title',
         'meta_description',
         'h1_heading',
@@ -53,6 +54,7 @@ class Product extends Model
         'status' => 'boolean',
         'quality' => 'boolean',
         'pan_india' => 'boolean',
+        'colour_customization' => 'boolean',
     ];
 
     public function category()

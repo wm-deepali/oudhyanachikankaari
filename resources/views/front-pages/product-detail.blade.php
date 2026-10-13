@@ -1558,6 +1558,75 @@ font-size:15px;
 </div>
 @endif
 
+@if($product->colour_customization)
+    <style>
+        .aq-colour-custom-box {
+            margin: 22px 0 25px;
+            padding: 16px 18px;
+            background: #faf8f5;
+            border: 1px solid #ede6db;
+            border-radius: 10px;
+        }
+        .aq-colour-custom-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .aq-colour-custom-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #222;
+            margin: 0;
+        }
+        .aq-colour-chart-link {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #b5904a;
+            text-decoration: underline;
+        }
+        .aq-colour-chart-link:hover { opacity: .8; }
+        .aq-colour-custom-input {
+            width: 100%;
+            height: 42px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+            background: #fff;
+            outline: none;
+        }
+        .aq-colour-custom-input:focus {
+            border-color: #c98f9d;
+            box-shadow: 0 0 0 2px rgba(201, 143, 157, .2);
+        }
+        .aq-colour-custom-hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 11.5px;
+            color: #888;
+        }
+    </style>
+
+    <div class="aq-colour-custom-box">
+        <div class="aq-colour-custom-head">
+            <h5 class="aq-colour-custom-title">
+                <i class="fa-solid fa-palette"></i> Colour Customization Available
+            </h5>
+            <a href="{{ route('colour.chart') }}" target="_blank" rel="noopener" class="aq-colour-chart-link">
+                View Colour Chart
+            </a>
+        </div>
+        <input type="text" id="aqCustomColourCode" class="aq-colour-custom-input" maxlength="50"
+            placeholder="Enter your colour code (from the chart)" autocomplete="off">
+        <span class="aq-colour-custom-hint">
+            Open the colour chart, copy the code of your choice and paste it here. Leave blank for the original colour.
+        </span>
+    </div>
+@endif
+
                             <!-- Interactive Quantity and Action -->
                             <div class=" mb-30 mt-30">
                                 <div class="d-flex flex-column gap-2 w-100">
@@ -2876,6 +2945,7 @@ function updateQtyButtonStates() {
                     sku_variant_id:   variantIds.sku,
                     selected_values: selectedValues,
                     addon_ids: selectedAddonIds,
+                    
                     quantity: quantity
                 },
                 success: function (response) {

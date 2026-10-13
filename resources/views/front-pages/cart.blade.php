@@ -64,6 +64,17 @@
 
                                             @endif
 
+                                            @if(!empty($item->custom_colour_code))
+
+    <div class="aq-cart-customization-badges mt-1">
+        <span class="aq-cart-badge">
+            <i class="fa-solid fa-palette"></i>
+            Custom Colour Code : {{ $item->custom_colour_code }}
+        </span>
+    </div>
+
+@endif
+
                                             @if($item->addons->count())
 
                                                 <div class="aq-cart-addon-badges mt-1">

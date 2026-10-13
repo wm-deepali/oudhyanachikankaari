@@ -43,16 +43,23 @@
                 @if($variantLabel)
                     <span class="aq-cartmini-product-size">{{ $variantLabel }}</span>
                 @endif
+                @if(!empty($item->custom_colour_code))
+                    <span class="aq-cartmini-product-size">
+                        Custom Colour Code: {{ $item->custom_colour_code }}
+                    </span>
+                @endif
                 @if($item->addons->isNotEmpty())
                     <span class="aq-cartmini-product-size">
                         {{ $item->addons->pluck('detail')->implode(', ') }}
                     </span>
                 @endif
 
+
                 <span class="aq-cartmini-product-price" id="mini-cart-price-{{ $item->id }}">
                     ₹{{ number_format($item->total, 2) }}
                     @if($totalMrp > $item->total)
-                        <span id="mini-cart-mrp-{{ $item->id }}" style="text-decoration: line-through; color:#999; font-size: 12px; margin-left: 6px;">
+                        <span id="mini-cart-mrp-{{ $item->id }}"
+                            style="text-decoration: line-through; color:#999; font-size: 12px; margin-left: 6px;">
                             ₹{{ number_format($totalMrp, 2) }}
                         </span>
                     @endif

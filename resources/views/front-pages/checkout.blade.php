@@ -355,6 +355,15 @@
 
                                                     @endif
 
+                                                    @if(!empty($item->custom_colour_code))
+
+    <small class="d-block text-muted mt-1">
+        <i class="fa-solid fa-palette"></i>
+        Custom Colour Code : {{ $item->custom_colour_code }}
+    </small>
+
+@endif
+
                                                     @if($item->addons->count())
 
                                                         <div class="mt-1">

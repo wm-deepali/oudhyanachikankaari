@@ -1423,6 +1423,27 @@
                             </div>
                         </div>
 
+                        <!-- Colour Customization -->
+                        <div class="section-card">
+                            <div class="section-card-header">
+                                <h5>Colour Customization</h5>
+                            </div>
+                            <div class="section-card-body" style="padding:14px 20px">
+                                <div class="toggle-row" style="padding:0;border:none">
+                                    <div>
+                                        <div class="toggle-label">Colour Customization Allowed</div>
+                                        <div class="toggle-sub">Customer can enter a colour code from the colour chart
+                                        </div>
+                                    </div>
+                                    @php $colourCustom = old('colour_customization', $product->colour_customization ? 1 : 0); @endphp
+                                    <select name="colour_customization" class="field-select-sm">
+                                        <option value="0" {{ $colourCustom == 0 ? 'selected' : '' }}>No</option>
+                                        <option value="1" {{ $colourCustom == 1 ? 'selected' : '' }}>Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Inventory -->
                         <div class="section-card">
                             <div class="section-card-header">
@@ -1512,17 +1533,21 @@
                             <div class="section-card-body">
 
                                 <div class="field-group">
-    <label class="field-label">Meta Title</label>
-    <input type="text" name="meta_title" id="meta_title" class="field-input"
-        value="{{ old('meta_title', $product->meta_title) }}" placeholder="Leave blank to auto-generate">
-    <div class="field-hint">Auto-generated as "Product Name | Oudhyaana Chikankaari" if left blank — Product Code or Fabric is appended automatically only if needed to keep titles unique.</div>
-</div>
-                               <div class="field-group">
-    <label class="field-label">Meta Description</label>
-    <textarea name="meta_description" id="meta_description" class="field-textarea"
-        placeholder="Leave blank to auto-generate">{{ old('meta_description', $product->meta_description) }}</textarea>
-    <div class="field-hint">Auto-generated from Product Name and Fabric if left blank.</div>
-</div>
+                                    <label class="field-label">Meta Title</label>
+                                    <input type="text" name="meta_title" id="meta_title" class="field-input"
+                                        value="{{ old('meta_title', $product->meta_title) }}"
+                                        placeholder="Leave blank to auto-generate">
+                                    <div class="field-hint">Auto-generated as "Product Name | Oudhyaana Chikankaari" if
+                                        left blank — Product Code or Fabric is appended automatically only if needed to
+                                        keep titles unique.</div>
+                                </div>
+                                <div class="field-group">
+                                    <label class="field-label">Meta Description</label>
+                                    <textarea name="meta_description" id="meta_description" class="field-textarea"
+                                        placeholder="Leave blank to auto-generate">{{ old('meta_description', $product->meta_description) }}</textarea>
+                                    <div class="field-hint">Auto-generated from Product Name and Fabric if left blank.
+                                    </div>
+                                </div>
 
                                 <div class="field-group">
                                     <label class="field-label">H1 Heading <span class="req">*</span></label>
@@ -1533,24 +1558,27 @@
                                 </div>
 
                                 <div class="field-group">
-    <label class="field-label">Canonical URL</label>
-    <div class="field-input" id="canonicalDisplay"
-        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
-        /p/<span id="canonicalSlug">{{ $product->slug }}</span>
-    </div>
-    <div class="field-hint">Set automatically from the Slug field. OG tags, Twitter
-        Card, Image Alt Tag and JSON-LD schema are generated automatically — no separate
-        input needed.</div>
-</div>
+                                    <label class="field-label">Canonical URL</label>
+                                    <div class="field-input" id="canonicalDisplay"
+                                        style="height:auto;min-height:38px;display:flex;align-items:center;color:var(--text-hint);background:var(--bg)">
+                                        /p/<span id="canonicalSlug">{{ $product->slug }}</span>
+                                    </div>
+                                    <div class="field-hint">Set automatically from the Slug field. OG tags, Twitter
+                                        Card, Image Alt Tag and JSON-LD schema are generated automatically — no separate
+                                        input needed.</div>
+                                </div>
 
-<div class="field-group" style="margin-bottom:0">
-    <label class="field-label">Index Status</label>
-    <select name="meta_status" class="field-select">
-        <option value="index_follow" {{ old('meta_status', $product->meta_status ?? 'index_follow') === 'index_follow' ? 'selected' : '' }}>Index, Follow (crawl this page)</option>
-        <option value="noindex_unfollow" {{ old('meta_status', $product->meta_status ?? 'index_follow') === 'noindex_unfollow' ? 'selected' : '' }}>No Index, Unfollow (don't crawl)</option>
-    </select>
-    <div class="field-hint">Set to No Index for low-stock or near-duplicate product listings — they'll also be excluded from the sitemap.</div>
-</div>
+                                <div class="field-group" style="margin-bottom:0">
+                                    <label class="field-label">Index Status</label>
+                                    <select name="meta_status" class="field-select">
+                                        <option value="index_follow" {{ old('meta_status', $product->meta_status ?? 'index_follow') === 'index_follow' ? 'selected' : '' }}>Index, Follow (crawl
+                                            this page)</option>
+                                        <option value="noindex_unfollow" {{ old('meta_status', $product->meta_status ?? 'index_follow') === 'noindex_unfollow' ? 'selected' : '' }}>No Index, Unfollow
+                                            (don't crawl)</option>
+                                    </select>
+                                    <div class="field-hint">Set to No Index for low-stock or near-duplicate product
+                                        listings — they'll also be excluded from the sitemap.</div>
+                                </div>
 
                             </div>
                         </div>
@@ -1662,40 +1690,40 @@
         $('#canonicalSlug').text(slugVal || '—');
     }
     $(document).on('keyup', '#slug, #product_name', updateCanonicalPreview);
-// ── Meta Title / Description: auto-fill from Product Name + Fabric ──
-// Seeded as "manual" if the product already has a saved value, so opening
-// an existing product for edit never silently overwrites what's there.
-let manualMetaTitle = $('#meta_title').val().trim().length > 0;
-let manualMetaDesc = $('#meta_description').val().trim().length > 0;
+    // ── Meta Title / Description: auto-fill from Product Name + Fabric ──
+    // Seeded as "manual" if the product already has a saved value, so opening
+    // an existing product for edit never silently overwrites what's there.
+    let manualMetaTitle = $('#meta_title').val().trim().length > 0;
+    let manualMetaDesc = $('#meta_description').val().trim().length > 0;
 
-function getFabricName() {
-    let $fabric = $('.attribute-value:checked').filter(function () {
-        let name = ($(this).data('attribute-name') || '').toString().toLowerCase().trim();
-        return name === 'fabric';
-    }).first();
-    return $fabric.length ? $fabric.data('value-name') : '';
-}
+    function getFabricName() {
+        let $fabric = $('.attribute-value:checked').filter(function () {
+            let name = ($(this).data('attribute-name') || '').toString().toLowerCase().trim();
+            return name === 'fabric';
+        }).first();
+        return $fabric.length ? $fabric.data('value-name') : '';
+    }
 
-function buildAutoMetaTitle() {
-    let name = $('#product_name').val().trim();
-    return name ? name + ' | Oudhyaana Chikankaari' : '';
-}
+    function buildAutoMetaTitle() {
+        let name = $('#product_name').val().trim();
+        return name ? name + ' | Oudhyaana Chikankaari' : '';
+    }
 
-function buildAutoMetaDescription() {
-    let name = $('#product_name').val().trim();
-    if (!name) return '';
-    let fabric = getFabricName();
-    let fabricPart = fabric ? ' crafted in ' + fabric : '';
-    return 'Shop ' + name + ' at Oudhyaana. Discover authentic handcrafted Lucknowi Chikankari' + fabricPart + '. Explore product details and order online.';
-}
+    function buildAutoMetaDescription() {
+        let name = $('#product_name').val().trim();
+        if (!name) return '';
+        let fabric = getFabricName();
+        let fabricPart = fabric ? ' crafted in ' + fabric : '';
+        return 'Shop ' + name + ' at Oudhyaana. Discover authentic handcrafted Lucknowi Chikankari' + fabricPart + '. Explore product details and order online.';
+    }
 
-$(document).on('keyup', '#meta_title', function () { manualMetaTitle = true; });
-$(document).on('keyup', '#meta_description', function () { manualMetaDesc = true; });
+    $(document).on('keyup', '#meta_title', function () { manualMetaTitle = true; });
+    $(document).on('keyup', '#meta_description', function () { manualMetaDesc = true; });
 
-$(document).on('keyup change', '#product_name, .attribute-value', function () {
-    if (!manualMetaTitle) $('#meta_title').val(buildAutoMetaTitle());
-    if (!manualMetaDesc) $('#meta_description').val(buildAutoMetaDescription());
-});
+    $(document).on('keyup change', '#product_name, .attribute-value', function () {
+        if (!manualMetaTitle) $('#meta_title').val(buildAutoMetaTitle());
+        if (!manualMetaDesc) $('#meta_description').val(buildAutoMetaDescription());
+    });
     /*
     |--------------------------------------------------------------------------
     | variantDataByType — the persistence layer
