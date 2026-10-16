@@ -91,6 +91,34 @@
 
         .aq-size-dropdown { max-width: 260px; }
 
+        /* ── Required-variant validation ───────────────────────────── */
+        .aq-variant-error {
+            display: none;
+            margin-top: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #b3261e;
+        }
+        .aq-size-selection-panel.has-error .aq-variant-error {
+            display: block;
+        }
+        .aq-size-selection-panel.has-error {
+            padding: 10px 12px;
+            border: 1px solid #b3261e;
+            border-radius: 8px;
+            background: #fff8f7;
+            animation: aqVariantShake .35s ease;
+        }
+        .aq-required-star {
+            color: #b3261e;
+            margin-left: 2px;
+        }
+        @keyframes aqVariantShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
         /* ── Luxury Addons / Choose Your Style Section ─────────────── */
         .aq-stitching-box {
             margin-top: 22px;
@@ -479,10 +507,6 @@ font-size:15px;
     pointer-events: none;
 }
 
-#variant-images-container,
-#variant-thumbs-container {
-    display: contents;
-}
 #variant-images-container,
 #variant-thumbs-container {
     display: contents;
@@ -1404,16 +1428,22 @@ font-size:15px;
 
 
 <!-- Co-Branding Customizer -->
-<!-- Size / Variant Selection -->
+<!-- Size / Variant Selection
+     A panel is REQUIRED only when its category attribute has is_required = 1
+     (data-required). JS validates those before add-to-cart, and auto-selects
+     any selectable attribute that has just one value. -->
 @foreach($variantAttributes as $attributeId => $attribute)
 
     @if($attribute['is_selectable'])
 
-        <div class="aq-size-selection-panel mb-3">
+        <div class="aq-size-selection-panel mb-3"
+             data-attribute-id="{{ $attributeId }}"
+             data-attribute-name="{{ $attribute['name'] }}"
+             data-required="{{ !empty($attribute['is_required']) ? 1 : 0 }}">
 
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <h5 class="aq-size-title mb-0">
-                    {{ $attribute['name'] }}
+                    {{ $attribute['name'] }}@if(!empty($attribute['is_required']))<span class="aq-required-star">*</span>@endif
                 </h5>
 
                 @if($sizeChartImage && $loop->first)
@@ -1519,6 +1549,11 @@ font-size:15px;
                         @endforeach
                     </div>
             @endswitch
+
+            <div class="aq-variant-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Please select {{ strtolower($attribute['name']) }}
+            </div>
 
         </div>
 
@@ -2348,6 +2383,10 @@ font-size:15px;
         let currentUnitPrice = {{ (float) $product->price }};
         let currentUnitMrp = {{ (float) $product->mrp }};
 
+        // True only while the page is auto-selecting defaults on load.
+        // Used to suppress the "scroll to first variant image" jump.
+        window.isInitialVariantLoad = false;
+
 
         const activeCoupons = @json($activeCoupons);
 
@@ -2472,6 +2511,8 @@ function getMasterVariantList() {
     return best;
 }
 
+const masterVariantList = getMasterVariantList();
+
 // ══════════════════════════════════════════════════════════════
 // Combo availability — for every stock-dependent attribute value
 // (typically Size), work out one of three states relative to the
@@ -2498,10 +2539,13 @@ function updateComboAvailability() {
 
     attributeIds.forEach(function (attrId) {
 
-        const otherActiveValueIds = $('.variant-option.active')
-            .filter(function () { return $(this).data('attribute-id') != attrId; })
-            .map(function () { return parseInt($(this).data('value-id')); })
-            .get();
+       const otherActiveValueIds = $('.variant-option.active')
+    .filter(function () {
+        return $(this).data('attribute-id') != attrId
+            && $(this).data('stock-dependent') == 1;   // ← add this
+    })
+    .map(function () { return parseInt($(this).data('value-id')); })
+    .get();
 
         $('.variant-option[data-attribute-id="' + attrId + '"]').each(function () {
             const $opt = $(this);
@@ -2560,13 +2604,193 @@ function markSoldOut($opt, $ddOpt) {
     }
 }
 
+// ══════════════════════════════════════════════════════════════
+// REQUIRED-VARIANT VALIDATION
+// Every selectable attribute renders a .aq-size-selection-panel.
+// An attribute counts as "chosen" when one of its .variant-option
+// elements is .active. Returns true when all are chosen; otherwise
+// highlights the missing panels, scrolls to the first and returns
+// false.
+// ══════════════════════════════════════════════════════════════
+function clearVariantErrors() {
+    $('.aq-size-selection-panel').each(function () {
+        const attrId = $(this).data('attribute-id');
+        if ($('.variant-option.active[data-attribute-id="' + attrId + '"]').length) {
+            $(this).removeClass('has-error');
+        }
+    });
+}
+
+function validateRequiredVariants() {
+    let firstMissing = null;
+    const missingNames = [];
+
+    // Only attributes flagged is_required in Category Attributes are mandatory.
+    $('.aq-size-selection-panel[data-required="1"]').each(function () {
+        const $panel = $(this);
+        const attrId = $panel.data('attribute-id');
+        const chosen = $('.variant-option.active[data-attribute-id="' + attrId + '"]').length > 0;
+
+        if (!chosen) {
+            $panel.removeClass('has-error');
+            // force reflow so the shake animation replays on repeated clicks
+            void $panel[0].offsetWidth;
+            $panel.addClass('has-error');
+            missingNames.push($panel.data('attribute-name'));
+            if (!firstMissing) firstMissing = $panel[0];
+        } else {
+            $panel.removeClass('has-error');
+        }
+    });
+
+    if (!missingNames.length) return true;
+
+    if (firstMissing) {
+        firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    Swal.fire({
+        icon: 'warning',
+        title: 'Select options',
+        text: 'Please select ' + missingNames.join(', ') + ' before continuing.'
+    });
+
+    return false;
+}
+
+// ══════════════════════════════════════════════════════════════
+// Core selection logic (was inline in the click handler).
+// Extracted so it can also be called on page load for attributes
+// that have only one value, without going through the click guard.
+// ══════════════════════════════════════════════════════════════
+function applyVariantSelection(attributeId, clickedValueId) {
+
+    $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
+    $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + clickedValueId + '"]').addClass('active');
+
+    // Auto-highlight the matching value(s) of any other selectable
+    // attribute(s) — this is what makes Blue→XL, Pink→L etc. work.
+    autoSelectDependentAttributes(attributeId, clickedValueId);
+
+    // Keep real <select> dropdowns and radio inputs in sync with .active
+    $('.variant-option.active').each(function () {
+        const aId = $(this).data('attribute-id');
+        const vId = $(this).data('value-id');
+        $('.aq-size-dropdown[data-attribute-id="' + aId + '"]').val(vId);
+    });
+    $('.aq-radio-option').each(function () {
+        $(this).find('input[type="radio"]').prop('checked', $(this).hasClass('active'));
+    });
+
+    selectedValues = $('.variant-option.active')
+        .map(function () { return parseInt($(this).data('value-id')); })
+        .get();
+
+    const priceVariant = findVariantForType('price');
+    const imageVariant = findVariantForType('image');
+    const stockVariant = findVariantForType('stock');
+    const skuVariant   = findVariantForType('sku');
+
+    window.currentVariantIds = {
+        price: priceVariant ? priceVariant.id : null,
+        image: imageVariant ? imageVariant.id : null,
+        stock: stockVariant ? stockVariant.id : null,
+        sku:   skuVariant   ? skuVariant.id   : null,
+    };
+
+    // Always resolve to a real number — fall back to the base
+    // product's price/mrp when no price-variant matches this
+    // combination, or when the matched variant has a null mrp.
+    if (priceVariant) {
+        currentUnitPrice = parseFloat(priceVariant.price) || 0;
+        currentUnitMrp   = parseFloat(priceVariant.mrp)   || 0;
+    } else {
+        currentUnitPrice = {{ (float) $product->price }};
+        currentUnitMrp   = {{ (float) $product->mrp }};
+    }
+
+    updatePriceDisplay();
+
+    const stockValue = stockVariant ? stockVariant.stock : {{ (int) $detailStock }};
+
+    $('#currentStock').text(stockValue);
+
+    // price box ko stock ke hisaab se toggle karo
+    if (stockValue < {{ (int) $product->min_qty }}) {
+        $('#aqPriceBox').hide();
+        if ($('#aqOutOfStockBox').length === 0) {
+            $('#aqPriceBox').after('<div class="aq-details-price-box p-3 mb-25" id="aqOutOfStockBox"><span class="aq-details-price" style="color:#999;">Currently Out of Stock</span></div>');
+        } else {
+            $('#aqOutOfStockBox').show();
+        }
+    } else {
+        $('#aqPriceBox').show();
+        $('#aqOutOfStockBox').hide();
+    }
+
+
+    if (stockValue > 0) {
+        $('#aqDetailQty')
+            .attr('max', stockValue)
+            .val(Math.max(
+                parseInt($('#aqDetailQty').attr('min')) || 1,
+                Math.min(parseInt($('#aqDetailQty').val()) || 1, stockValue)
+            ));
+    } else {
+        $('#aqDetailQty').attr('max', 0).val(0);
+    }
+
+    if (stockValue < 1) {
+        $('.aq-add-to-cart-btn').prop('disabled', true).html('<i class="fa-solid fa-ban"></i> Out of Stock');
+        $('.aq-buy-now-btn').prop('disabled', true).text('Out of Stock');
+    } else {
+        $('.aq-add-to-cart-btn').prop('disabled', false).html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
+        $('.aq-buy-now-btn').prop('disabled', false).text('Buy it Now');
+    }
+
+    if (imageVariant && imageVariant.images?.length) {
+        updateVariantImages(imageVariant.images);
+    } else {
+        $('#variant-images-container').html('');
+        $('#variant-thumbs-container').html('');
+        $('#stickyBarThumb').attr('src', "{{ isset($product->images[0]) ? asset('storage/' . ($product->images[0]->thumb ?? $product->images[0]->image)) : $product->display_image }}");
+        rebuildGalleryDots();   // base images pe wapas dots resync
+    }
+
+    updateComboAvailability();
+    updateQtyButtonStates();
+    clearVariantErrors();
+}
+
+// ══════════════════════════════════════════════════════════════
+// Any selectable attribute with exactly ONE value is pre-selected
+// automatically — there is nothing for the customer to choose.
+// ══════════════════════════════════════════════════════════════
+function autoSelectSingleValueAttributes() {
+    window.isInitialVariantLoad = true;
+
+    $('.aq-size-selection-panel').each(function () {
+        const attrId = $(this).data('attribute-id');
+        const $opts = $('.variant-option[data-attribute-id="' + attrId + '"]');
+
+        // Already active (e.g. picked via autoSelectDependentAttributes
+        // from an earlier single-value attribute) — nothing to do.
+        if ($opts.length !== 1 || $opts.hasClass('active')) return;
+
+        applyVariantSelection(attrId, parseInt($opts.data('value-id')));
+    });
+
+    window.isInitialVariantLoad = false;
+}
+
 $(document).ready(function () {
     updateComboAvailability();
-    updateQtyButtonStates();  
+    autoSelectSingleValueAttributes();   // single-value attributes → pre-selected
+    updateQtyButtonStates();
     updatePriceDisplay(); // initial load pe coupon + price sync ho jayega
 });
 
-const masterVariantList = getMasterVariantList();function autoSelectDependentAttributes(changedAttributeId, changedValueId) {
+function autoSelectDependentAttributes(changedAttributeId, changedValueId) {
     if (!masterVariantList.length) return;
 
     const matchingCombos = masterVariantList.filter(function (combo) {
@@ -2645,93 +2869,10 @@ $(document).on('click', '.variant-option', function () {
         return; // guard against programmatic/keyboard triggers on a disabled option
     }
 
-    const attributeId = $(this).data('attribute-id');
-    const clickedValueId = parseInt($(this).data('value-id'));
-
-    $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
-    $(this).addClass('active');
-
-    // Auto-highlight the matching value(s) of any other selectable
-    // attribute(s) — this is what makes Blue→XL, Pink→L etc. work.
-    autoSelectDependentAttributes(attributeId, clickedValueId);
-
-    selectedValues = $('.variant-option.active')
-                .map(function () { return parseInt($(this).data('value-id')); })
-                .get();
-
-            const priceVariant = findVariantForType('price');
-            const imageVariant = findVariantForType('image');
-            const stockVariant = findVariantForType('stock');
-            const skuVariant   = findVariantForType('sku');
-
-            window.currentVariantIds = {
-                price: priceVariant ? priceVariant.id : null,
-                image: imageVariant ? imageVariant.id : null,
-                stock: stockVariant ? stockVariant.id : null,
-                sku:   skuVariant   ? skuVariant.id   : null,
-            };
-
-            // Always resolve to a real number — fall back to the base
-            // product's price/mrp when no price-variant matches this
-            // combination, or when the matched variant has a null mrp.
-            if (priceVariant) {
-                currentUnitPrice = parseFloat(priceVariant.price) || 0;
-                currentUnitMrp   = parseFloat(priceVariant.mrp)   || 0;
-            } else {
-                currentUnitPrice = {{ (float) $product->price }};
-                currentUnitMrp   = {{ (float) $product->mrp }};
-            }
-
-            updatePriceDisplay();
-
-const stockValue = stockVariant ? stockVariant.stock : {{ (int) $detailStock }};
-            
-            $('#currentStock').text(stockValue);
-
-            // ← NAYA ADD KIYA: price box ko stock ke hisaab se toggle karo
-            if (stockValue < {{ (int) $product->min_qty }}) {
-                $('#aqPriceBox').hide();
-                if ($('#aqOutOfStockBox').length === 0) {
-                    $('#aqPriceBox').after('<div class="aq-details-price-box p-3 mb-25" id="aqOutOfStockBox"><span class="aq-details-price" style="color:#999;">Currently Out of Stock</span></div>');
-                } else {
-                    $('#aqOutOfStockBox').show();
-                }
-            } else {
-                $('#aqPriceBox').show();
-                $('#aqOutOfStockBox').hide();
-            }
-
-
-            if (stockValue > 0) {
-                $('#aqDetailQty')
-                    .attr('max', stockValue)
-                    .val(Math.max(
-                        parseInt($('#aqDetailQty').attr('min')) || 1,
-                        Math.min(parseInt($('#aqDetailQty').val()) || 1, stockValue)
-                    ));
-            } else {
-                $('#aqDetailQty').attr('max', 0).val(0);
-            }
-
-            if (stockValue < 1) {
-                $('.aq-add-to-cart-btn').prop('disabled', true).html('<i class="fa-solid fa-ban"></i> Out of Stock');
-                $('.aq-buy-now-btn').prop('disabled', true).text('Out of Stock');
-            } else {
-                $('.aq-add-to-cart-btn').prop('disabled', false).html('<i class="fa-solid fa-bag-shopping"></i> Add to Cart');
-                $('.aq-buy-now-btn').prop('disabled', false).text('Buy it Now');
-            }
-
-          if (imageVariant && imageVariant.images?.length) {
-    updateVariantImages(imageVariant.images);
-} else {
-    $('#variant-images-container').html('');
-    $('#variant-thumbs-container').html('');
-    $('#stickyBarThumb').attr('src', "{{ isset($product->images[0]) ? asset('storage/' . ($product->images[0]->thumb ?? $product->images[0]->image)) : $product->display_image }}");
-    rebuildGalleryDots();   // ← ADD KARO: base images pe wapas dots resync
-}
-
-
-updateComboAvailability();
+    applyVariantSelection(
+        $(this).data('attribute-id'),
+        parseInt($(this).data('value-id'))
+    );
 });
 
   function updateVariantImages(images) {
@@ -2776,8 +2917,11 @@ updateComboAvailability();
         `);
     });
 
-    document.getElementById('variant-main-0')
-        ?.scrollIntoView({ behavior:'smooth', block:'center' });
+    // Don't make the page jump on initial auto-selection.
+    if (!window.isInitialVariantLoad) {
+        document.getElementById('variant-main-0')
+            ?.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
 
     rebuildGalleryDots();
 }
@@ -2797,7 +2941,6 @@ $(document).on('change', '.aq-addon-option', function () {
         .reduce(function (sum, el) { return sum + (parseFloat($(el).data('addon-price')) || 0); }, 0);
 
     updatePriceDisplay();
-    // ← HATA DIYA: rebuildGalleryDots(); (addon change ka images/dots se koi lena dena nahi tha)
 });
 
         function showMainImage() {
@@ -2923,6 +3066,12 @@ function updateQtyButtonStates() {
         });
 
         function addToCart(productId) {
+
+            // All selectable attributes are mandatory — block until chosen.
+            if (!validateRequiredVariants()) {
+                return;
+            }
+
             const stock = parseInt($('#currentStock').text()) || 0;
             const quantity = parseInt($('#aqDetailQty').val());
 

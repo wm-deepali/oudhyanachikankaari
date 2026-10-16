@@ -764,6 +764,7 @@ class FrontController extends Controller
                 $variantAttributes[$attributeId]['name'] = $attribute->name;
                 $variantAttributes[$attributeId]['type'] = $attribute->type ?? 'button';
                 $variantAttributes[$attributeId]['is_selectable'] = $categoryAttribute?->is_selectable ?? true;
+                $variantAttributes[$attributeId]['is_required']   = (bool) ($categoryAttribute?->is_required ?? false);
                 $variantAttributes[$attributeId]['has_variant'] = true;
 
                 $variantAttributes[$attributeId]['values'][$attributeValue->id] = [
@@ -818,6 +819,7 @@ class FrontController extends Controller
                 'name' => $attribute->name,
                 'type' => $attribute->type ?? 'button',
                 'is_selectable' => $categoryAttribute?->is_selectable ?? false,
+                'is_required'   => (bool) ($categoryAttribute?->is_required ?? false),
                 'has_variant' => false,
                 'values' => $values,
                 'default_value_id' => $items->first()->value->id,
