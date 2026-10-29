@@ -2113,7 +2113,9 @@ font-size:15px;
     (You Save {{ round((($newArrival->mrp - $newArrival->price) / $newArrival->mrp) * 100) }}% Off)
 </span>
                                          @endif
-                                        @endif
+                                          @else
+        <span class="aq-product-card-price" style="color:#b3261e;font-weight:700;">Sold Out</span>
+    @endif
 
                                     </div>
                                    @php
@@ -2265,7 +2267,9 @@ font-size:15px;
                                                 OFF)
                                             </span>
                                         @endif
-                                        @endif
+                                          @else
+        <span class="aq-product-card-price" style="color:#b3261e;font-weight:700;">Sold Out</span>
+    @endif
 
                                         </div>
                                        @php

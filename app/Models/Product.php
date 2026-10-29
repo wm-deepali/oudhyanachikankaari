@@ -146,26 +146,41 @@ class Product extends Model
         );
     }
 
-   public function scopeVisible($query)
-{
-    return $query->where('status', 1)->inStock();
-}
+    // Product ab sold-out hone par bhi dikhega
+    public function scopeVisible($query)
+    {
+        return $query->where('status', 1);
+    }
 
-public function scopeInStock($query)
-{
-    return $query->where(function ($q) {
-        // Has stock variants → at least one must have stock
-        $q->whereHas('variants', function ($v) {
-            $v->where('type', 'stock')->where('stock', '>', 0);
-        })
-        // No stock variants → fall back to the base stock column
-        ->orWhere(function ($q2) {
-            $q2->whereDoesntHave('variants', function ($v) {
-                $v->where('type', 'stock');
-            })->where('stock', '>', 0);
+    // Agar kahin sirf in-stock chahiye ho to ye alag se use karo
+    public function scopeInStock($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereHas('variants', function ($v) {
+                $v->where('type', 'stock')->where('stock', '>', 0);
+            })->orWhere(function ($q2) {
+                $q2->whereDoesntHave('variants', function ($v) {
+                    $v->where('type', 'stock');
+                })->where('stock', '>', 0);
+            });
         });
-    });
-}
+    }
+
+    // Real available stock (detail page wali logic hi)
+    public function getTotalStockAttribute()
+    {
+        $stockVariants = $this->variants->where('type', 'stock');
+
+        return $stockVariants->count()
+            ? (int) $stockVariants->sum('stock')
+            : (int) $this->stock;
+    }
+
+    public function getIsSoldOutAttribute()
+    {
+        return $this->total_stock < max(1, (int) $this->min_qty);
+    }
+    
     public function reviews()
     {
         return $this->hasMany(ProductReview::class);

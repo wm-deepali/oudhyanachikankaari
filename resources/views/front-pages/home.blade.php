@@ -14,49 +14,49 @@
 
     <main>
 
-<!-- slider area start -->
-<div class="aqf-slider-area">
-    <div class="swiper aqf-slider-active p-relative">
-        <div class="swiper-wrapper">
+        <!-- slider area start -->
+        <div class="aqf-slider-area">
+            <div class="swiper aqf-slider-active p-relative">
+                <div class="swiper-wrapper">
 
-            @foreach($sliders as $slider)
-                <div class="swiper-slide">
-                    <div class="aqf-slider-item aqf-slider-height d-flex align-items-center" data-bg-color="#F5F5F5">
-                        <a href="{{ $slider->link ?: '#' }}" class="aq-slider-banner-overlay-link"></a>
+                    @foreach($sliders as $slider)
+                        <div class="swiper-slide">
+                            <div class="aqf-slider-item aqf-slider-height d-flex align-items-center" data-bg-color="#F5F5F5">
+                                <a href="{{ $slider->link ?: '#' }}" class="aq-slider-banner-overlay-link"></a>
 
-                        {{-- Desktop image (md and up) --}}
-                        <div class="aqf-slider-thumb include-bg d-none d-md-block"
-                            data-background="{{ asset('storage/' . $slider->image) }}">
-                        </div>
+                                {{-- Desktop image (md and up) --}}
+                                <div class="aqf-slider-thumb include-bg d-none d-md-block"
+                                    data-background="{{ asset('storage/' . $slider->image) }}">
+                                </div>
 
-                        {{-- Mobile image (below md). Falls back to desktop image if not uploaded --}}
-                        <div class="aqf-slider-thumb include-bg d-block d-md-none"
-                            data-background="{{ asset('storage/' . ($slider->mobile_image ?: $slider->image)) }}">
-                        </div>
+                                {{-- Mobile image (below md). Falls back to desktop image if not uploaded --}}
+                                <div class="aqf-slider-thumb include-bg d-block d-md-none"
+                                    data-background="{{ asset('storage/' . ($slider->mobile_image ?: $slider->image)) }}">
+                                </div>
 
-                        <div class="container custom-fluid-container">
-                            <div class="row align-items-center">
-                                <div class="col-xl-6 col-lg-7 col-md-8">
-                                    <div class="aqf-slider-content">
-                                        <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
-                                            <a class="aq-btn-black"
-                                                href="{{ $slider->link ?: route('categories') }}">Explore Products</a>
-                                            <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
-                                                onclick="openGlobalDrawer('home')">Get Bulk Quote</a>
+                                <div class="container custom-fluid-container">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-6 col-lg-7 col-md-8">
+                                            <div class="aqf-slider-content">
+                                                <div class="aqf-slider-btn-wrap d-flex align-items-center gap-3">
+                                                    <a class="aq-btn-black"
+                                                        href="{{ $slider->link ?: route('categories') }}">Explore Products</a>
+                                                    <a class="aq-btn-black btn-red-bg" href="javascript:void(0);"
+                                                        onclick="openGlobalDrawer('home')">Get Bulk Quote</a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            @endforeach
+                    @endforeach
 
+                </div>
+                <div class="aqf-slider-dot"></div>
+            </div>
         </div>
-        <div class="aqf-slider-dot"></div>
-    </div>
-</div>
-<!-- slider area end -->
+        <!-- slider area end -->
 
         <!-- text slide area start -->
         <div class="aqf-text-slide-area aqf-text-slide-bdr fix">
@@ -88,74 +88,74 @@
 
         <!-- categories area start -->
         <!--   <section class="aqf-categories-area">
-                            <div class="aqf-cat-floating-shape aqf-cat-shape-1">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
-                            </div>
-                            <div class="aqf-cat-floating-shape aqf-cat-shape-2">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <rect x="3" y="8" width="18" height="13" rx="2" ry="2" />
-                                    <path d="M12 8V21M3 13h18M12 8L7 2M12 8l5-6" />
-                                </svg>
-                            </div>
-                            <div class="container custom-fluid-container">
-                                <div class="row align-items-center mb-40">
-                                    <div class="col-xl-12 col-lg-12 col-md-12 col-12">
-
-                                        <div class="aq-creative-title-box ">
-                                            <span class="aq-creative-subtitle">Curated For You</span>
-                                            <h4 class="aq-creative-title">Shop by Category</h4>
-                                            <div class="aq-creative-title-line"></div>
-                                        </div>
-
-
-                                        <div class="position-relative">
-                                            <div class="aqf-categories-nav text-end ">
-                                                <button class="aqf-categories-prev"><i class="fal fa-angle-left"></i></button>
-                                                <button class="aqf-categories-next"><i class="fal fa-angle-right"></i></button>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                                <div class="row">
-                                    <div class="col-xl-12">
-                                        <div class="swiper aqf-categories-active">
-                                            <div class="swiper-wrapper">
-
-                                                @foreach($popularCategories as $category)
-
-                                                    <!-- Women Wear -->
-        <!--    <div class="swiper-slide">
-                                                        <div class="aqf-categories-item text-center">
-                                                            <a href="{{ route('products.listing', $category->slug) }}">
-
-                                                                <div class="aqf-categories-img">
-                                                                    <img loading="lazy"   src="{{ asset('storage/' . $category->image) }}"
-                                                                        alt="{{ $category->name }}" alt="{{$category->name  }}">
-                                                                </div>
-                                                                <span
-                                                                    style="font-family: var(--aq-ff-heading); font-size: 18px; font-weight: 500; color: var(--aq-color-black);">
-                                                                    {{ $category->name }}
-                                                                </span>
-                                                            </a>
+                                                        <div class="aqf-cat-floating-shape aqf-cat-shape-1">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                                            </svg>
                                                         </div>
-                                                    </div>
+                                                        <div class="aqf-cat-floating-shape aqf-cat-shape-2">
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                <rect x="3" y="8" width="18" height="13" rx="2" ry="2" />
+                                                                <path d="M12 8V21M3 13h18M12 8L7 2M12 8l5-6" />
+                                                            </svg>
+                                                        </div>
+                                                        <div class="container custom-fluid-container">
+                                                            <div class="row align-items-center mb-40">
+                                                                <div class="col-xl-12 col-lg-12 col-md-12 col-12">
+
+                                                                    <div class="aq-creative-title-box ">
+                                                                        <span class="aq-creative-subtitle">Curated For You</span>
+                                                                        <h4 class="aq-creative-title">Shop by Category</h4>
+                                                                        <div class="aq-creative-title-line"></div>
+                                                                    </div>
 
 
-                                                @endforeach
+                                                                    <div class="position-relative">
+                                                                        <div class="aqf-categories-nav text-end ">
+                                                                            <button class="aqf-categories-prev"><i class="fal fa-angle-left"></i></button>
+                                                                            <button class="aqf-categories-next"><i class="fal fa-angle-right"></i></button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-xl-12">
+                                                                    <div class="swiper aqf-categories-active">
+                                                                        <div class="swiper-wrapper">
+
+                                                                            @foreach($popularCategories as $category)
+
+                                                                                <!-- Women Wear -->
+        <!--    <div class="swiper-slide">
+                                                                                    <div class="aqf-categories-item text-center">
+                                                                                        <a href="{{ route('products.listing', $category->slug) }}">
+
+                                                                                            <div class="aqf-categories-img">
+                                                                                                <img loading="lazy"   src="{{ asset('storage/' . $category->image) }}"
+                                                                                                    alt="{{ $category->name }}" alt="{{$category->name  }}">
+                                                                                            </div>
+                                                                                            <span
+                                                                                                style="font-family: var(--aq-ff-heading); font-size: 18px; font-weight: 500; color: var(--aq-color-black);">
+                                                                                                {{ $category->name }}
+                                                                                            </span>
+                                                                                        </a>
+                                                                                    </div>
+                                                                                </div>
 
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> 
-                        </section> -->
+                                                                            @endforeach
+
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div> 
+                                                    </section> -->
         <!-- categories area end -->
 
 
@@ -194,7 +194,7 @@
                                     <div class="swiper-slide">
                                         <div class="aqf-collection-item p-relative">
                                             <div class="aqf-collection-thumb">
-                                                <img loading="lazy"   src="{{ asset('storage/' . $occasion->image) }}"
+                                                <img loading="lazy" src="{{ asset('storage/' . $occasion->image) }}"
                                                     alt="{{ $occasion->title }}">
                                             </div>
                                             <div
@@ -308,7 +308,8 @@
                                                 <div class="aq-product-action">
 
                                                     <button type="button" class="aq-product-action-btn aq-tooltip"
-                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal">
+                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
+                                                        onclick="loadQuickView({{ $product->id }})">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="16"
                                                             viewBox="0 0 19 16" fill="none">
                                                             <path
@@ -338,10 +339,10 @@
 
                                                 <a href="{{ route('product.details', $product->slug) }}">
 
-                                                    <img loading="lazy"   class="lazyload aq-product-img"
+                                                    <img loading="lazy" class="lazyload aq-product-img"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
 
-                                                    <img loading="lazy"   class="aq-img-hover lazyload"
+                                                    <img loading="lazy" class="aq-img-hover lazyload"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
 
                                                 </a>
@@ -353,23 +354,21 @@
                                                         {{ $product->name }}
                                                     </a>
                                                 </h4>
-                                                <div class="aq-product-price">
-
-                                                    <ins>
-                                                        <span class="aq-product-new-price">
-                                                            ₹{{ number_format($product->price) }}
-                                                        </span>
-                                                    </ins>
-
-                                                    @if($product->mrp > $product->price)
-                                                        <del>
-                                                            <span class="aq-product-old-price">
-                                                                ₹{{ number_format($product->mrp) }}
-                                                            </span>
-                                                        </del>
-                                                    @endif
-
-                                                </div>
+                                                @if($product->is_sold_out)
+                                                    <div class="aq-product-price">
+                                                        <span class="aq-product-new-price"
+                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                    </div>
+                                                @else
+                                                    <div class="aq-product-price">
+                                                        <ins><span
+                                                                class="aq-product-new-price">₹{{ number_format($product->price) }}</span></ins>
+                                                        @if($product->mrp > $product->price)
+                                                            <del><span
+                                                                    class="aq-product-old-price">₹{{ number_format($product->mrp) }}</span></del>
+                                                        @endif
+                                                    </div>
+                                                @endif
 
                                             </div>
                                         </div>
@@ -383,94 +382,67 @@
                             <div class="row row-cols-xl-4 row-cols-lg-3 row-cols-md-2 row-cols-sm-2 row-cols-1">
 
                                 @foreach($bestSellers as $product)
-
                                     <div class="col">
                                         <div class="aq-product-item aq-product-main mb-20" data-lazy="true">
                                             <div class="aq-product-thumb aq-img-hover-wrap p-relative mb-10">
                                                 @if($product->discount > 0 || $product->best_seller)
                                                     <div class="aq-product-badge">
-
                                                         @if($product->discount > 0)
-
                                                             @if($product->discount_type == 'percentage')
                                                                 <span class="clr-sale">
                                                                     -{{ rtrim(rtrim(number_format($product->discount, 2), '0'), '.') }}%
                                                                 </span>
                                                             @else
-                                                                <span class="clr-sale">
-                                                                    ₹{{ number_format($product->discount) }} OFF
-                                                                </span>
+                                                                <span class="clr-sale">₹{{ number_format($product->discount) }} OFF</span>
                                                             @endif
-
                                                         @endif
                                                         <span class="clr-hot">Hot</span>
                                                     </div>
                                                 @endif
-                                                <div class="aq-product-action">
 
+                                                <div class="aq-product-action">
                                                     <button type="button" class="aq-product-action-btn aq-tooltip"
-                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="16"
-                                                            viewBox="0 0 19 16" fill="none">
-                                                            <path
-                                                                d="M12.0557 7.75429C12.0557 9.42922 10.7022 10.7827 9.0273 10.7827C7.35238 10.7827 5.99891 9.42922 5.99891 7.75429C5.99891 6.07937 7.35238 4.72589 9.0273 4.72589C10.7022 4.72589 12.0557 6.07937 12.0557 7.75429Z"
-                                                                stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
-                                                                stroke-linejoin="round"></path>
-                                                            <path
-                                                                d="M9.02734 14.75C12.0134 14.75 14.7965 12.9905 16.7337 9.94517C17.495 8.75242 17.495 6.74758 16.7337 5.55483C14.7965 2.50952 12.0134 0.75 9.02734 0.75C6.04124 0.75 3.25816 2.50952 1.321 5.55483C0.559668 6.74758 0.559668 8.75242 1.321 9.94517C3.25816 12.9905 6.04124 14.75 9.02734 14.75Z"
-                                                                stroke="currentcolor" stroke-width="1.5" stroke-linecap="round"
-                                                                stroke-linejoin="round"></path>
-                                                        </svg>
+                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
+                                                        onclick="loadQuickView({{ $product->id }})">
+                                                        <i class="fa-regular fa-eye"></i>
                                                         <span class="aq-tooltip-item">Quick View</span>
                                                     </button>
                                                     <button type="button" onclick="addToWishlist({{ $product->id }})"
                                                         class="aq-product-action-btn aq-wishlist-btn aq-tooltip {{ in_array($product->id, $wishlistIds ?? []) ? 'wishlist-active' : '' }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16"
-                                                            viewBox="0 0 18 16" fill="none">
-                                                            <path
-                                                                d="M14.7197 1.52347C12.5744 0.244089 10.7019 0.759666 9.57712 1.58092C9.11591 1.91766 8.88531 2.08602 8.74963 2.08602C8.61396 2.08602 8.38336 1.91766 7.92215 1.58092C6.79733 0.759666 4.9249 0.244089 2.77958 1.52347C-0.0359114 3.20253 -0.67299 8.7418 5.82126 13.4151C7.05821 14.3052 7.67668 14.7502 8.74963 14.7502C9.82258 14.7502 10.4411 14.3052 11.678 13.4151C18.1723 8.7418 17.5352 3.20253 14.7197 1.52347Z"
-                                                                stroke="currentcolor" stroke-width="1.5" stroke-linecap="round">
-                                                            </path>
-                                                        </svg>
+                                                        <i class="fa-regular fa-heart"></i>
                                                         <span class="aq-tooltip-item">Add To Wishlist</span>
                                                     </button>
-
                                                 </div>
+
                                                 <a href="{{ route('product.details', $product->slug) }}">
-
-                                                    <img loading="lazy"   class="lazyload aq-product-img"
+                                                    <img loading="lazy" class="lazyload aq-product-img"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
-
-                                                    <img loading="lazy"   class="aq-img-hover lazyload"
+                                                    <img loading="lazy" class="aq-img-hover lazyload"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
-
                                                 </a>
                                             </div>
+
                                             <div class="aq-product-content">
-
                                                 <h4 class="aq-product-title mb-10">
-                                                    <a href="{{ route('product.details', $product->slug) }}">
-                                                        {{ $product->name }}
-                                                    </a>
+                                                    <a
+                                                        href="{{ route('product.details', $product->slug) }}">{{ $product->name }}</a>
                                                 </h4>
-                                                <div class="aq-product-price">
 
-                                                    <ins>
-                                                        <span class="aq-product-new-price">
-                                                            ₹{{ number_format($product->price) }}
-                                                        </span>
-                                                    </ins>
-
-                                                    @if($product->mrp > $product->price)
-                                                        <del>
-                                                            <span class="aq-product-old-price">
-                                                                ₹{{ number_format($product->mrp) }}
-                                                            </span>
-                                                        </del>
-                                                    @endif
-
-                                                </div>
-
+                                                @if($product->is_sold_out)
+                                                    <div class="aq-product-price">
+                                                        <span class="aq-product-new-price"
+                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                    </div>
+                                                @else
+                                                    <div class="aq-product-price">
+                                                        <ins><span
+                                                                class="aq-product-new-price">₹{{ number_format($product->price) }}</span></ins>
+                                                        @if($product->mrp > $product->price)
+                                                            <del><span
+                                                                    class="aq-product-old-price">₹{{ number_format($product->mrp) }}</span></del>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -510,7 +482,8 @@
                                                 <div class="aq-product-action">
 
                                                     <button type="button" class="aq-product-action-btn aq-tooltip"
-                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal">
+                                                        data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
+                                                        onclick="loadQuickView({{ $product->id }})">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="19" height="16"
                                                             viewBox="0 0 19 16" fill="none">
                                                             <path
@@ -539,10 +512,10 @@
                                                 </div>
                                                 <a href="{{ route('product.details', $product->slug) }}">
 
-                                                    <img loading="lazy"   class="lazyload aq-product-img"
+                                                    <img loading="lazy" class="lazyload aq-product-img"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
 
-                                                    <img loading="lazy"   class="aq-img-hover lazyload"
+                                                    <img loading="lazy" class="aq-img-hover lazyload"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
 
                                                 </a>
@@ -555,23 +528,21 @@
                                                         {{ $product->name }}
                                                     </a>
                                                 </h4>
-                                                <div class="aq-product-price">
-
-                                                    <ins>
-                                                        <span class="aq-product-new-price">
-                                                            ₹{{ number_format($product->price) }}
-                                                        </span>
-                                                    </ins>
-
-                                                    @if($product->mrp > $product->price)
-                                                        <del>
-                                                            <span class="aq-product-old-price">
-                                                                ₹{{ number_format($product->mrp) }}
-                                                            </span>
-                                                        </del>
-                                                    @endif
-
-                                                </div>
+                                                @if($product->is_sold_out)
+                                                    <div class="aq-product-price">
+                                                        <span class="aq-product-new-price"
+                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                    </div>
+                                                @else
+                                                    <div class="aq-product-price">
+                                                        <ins><span
+                                                                class="aq-product-new-price">₹{{ number_format($product->price) }}</span></ins>
+                                                        @if($product->mrp > $product->price)
+                                                            <del><span
+                                                                    class="aq-product-old-price">₹{{ number_format($product->mrp) }}</span></del>
+                                                        @endif
+                                                    </div>
+                                                @endif
 
                                             </div>
                                         </div>
@@ -640,10 +611,10 @@
                                 @foreach($dealBanners as $index => $banner)
                                     <div class="aqf-deals-banner-wrap p-relative mr-30">
                                         <div class="aqf-deals-banner-thumb">
-                                            <img loading="lazy"   class="w-100 d-none d-md-block" src="{{ asset('storage/' . $banner->image) }}"
-                                                alt="{{ $banner->title }}">
-                                            <img loading="lazy"   class="w-100 d-md-none" src="{{ asset('storage/' . $banner->image) }}"
-                                                alt="{{ $banner->title }}">
+                                            <img loading="lazy" class="w-100 d-none d-md-block"
+                                                src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}">
+                                            <img loading="lazy" class="w-100 d-md-none"
+                                                src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}">
                                         </div>
                                         <div class="aqf-deals-banner-content">
                                             <h4 class="aq-section-title fs-44 aq-text-white mb-20">
@@ -708,7 +679,7 @@
                                     <div class="aqf-deals-slider-wrap fix">
                                         <div class="swiper aqf-deals-slider-active">
                                             <div class="swiper-wrapper">
-                                               @foreach($saleProducts as $product)
+                                                @foreach($saleProducts as $product)
 
                                                     <div class="swiper-slide">
                                                         <div class="aq-product-item aq-product-main " data-lazy="true">
@@ -736,7 +707,7 @@
                                                                     </div>
                                                                 @endif
                                                                 <div class="aq-product-action">
-                                                                    @if($availableStock >= $product->min_qty)
+                                                                    @if(!$product->is_sold_out)
                                                                         <button type="button"
                                                                             onclick="addToCart({{ $product->id }}, {{ $product->min_qty }}, this)"
                                                                             class="aq-product-action-btn aq-tooltip">
@@ -772,7 +743,8 @@
                                                                     <button type="button"
                                                                         class="aq-product-action-btn aq-tooltip"
                                                                         data-bs-toggle="modal"
-                                                                        data-bs-target="#producQuickViewModal">
+                                                                        data-bs-target="#producQuickViewModal"
+                                                                        onclick="loadQuickView({{ $product->id }})">
                                                                         <svg xmlns="http://www.w3.org/2000/svg" width="19"
                                                                             height="16" viewBox="0 0 19 16" fill="none">
                                                                             <path
@@ -804,11 +776,11 @@
                                                                 </div>
                                                                 <a href="{{ route('product.details', $product->slug) }}">
 
-                                                                    <img loading="lazy"   class="lazyload aq-product-img"
+                                                                    <img loading="lazy" class="lazyload aq-product-img"
                                                                         src="{{ asset($product->display_image) }}"
                                                                         alt="{{ $product->name }}" />
 
-                                                                    <img loading="lazy"   class="aq-img-hover lazyload"
+                                                                    <img loading="lazy" class="aq-img-hover lazyload"
                                                                         src="{{ asset($product->display_image) }}"
                                                                         alt="{{ $product->name }}" />
 
@@ -821,21 +793,26 @@
                                                                         {{ $product->name }}
                                                                     </a>
                                                                 </h4>
-                                                                @if($availableStock >= $product->min_qty)
-                                                                <div class="aq-product-price">
-                                                                    <ins>
-                                                                        <span class="aq-product-new-price">
-                                                                            ₹{{ number_format($product->price, 2) }}
-                                                                        </span>
-                                                                    </ins>
-                                                                    @if($product->mrp > $product->price)
-                                                                        <del>
-                                                                            <span class="aq-product-old-price">
-                                                                                ₹{{ number_format($product->mrp, 2) }}
+                                                                @if(!$product->is_sold_out)
+                                                                    <div class="aq-product-price">
+                                                                        <ins>
+                                                                            <span class="aq-product-new-price">
+                                                                                ₹{{ number_format($product->price, 2) }}
                                                                             </span>
-                                                                        </del>
-                                                                    @endif
-                                                                </div>
+                                                                        </ins>
+                                                                        @if($product->mrp > $product->price)
+                                                                            <del>
+                                                                                <span class="aq-product-old-price">
+                                                                                    ₹{{ number_format($product->mrp, 2) }}
+                                                                                </span>
+                                                                            </del>
+                                                                        @endif
+                                                                    </div>
+                                                                @else
+                                                                    <div class="aq-product-price">
+                                                                        <span class="aq-product-new-price"
+                                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                                    </div>
                                                                 @endif
 
                                                             </div>
@@ -864,163 +841,163 @@
 
 
         <!--  <section class="hero-section2 ">
-                            <div class="position-relative">
+                                                        <div class="position-relative">
 
-                                <div class="aqf-floating-shape aqf-floating-shape-1">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="20 12 20 22 4 22 4 12"></polyline>
-                                        <rect x="2" y="7" width="20" height="5"></rect>
-                                        <line x1="12" y1="22" x2="12" y2="7"></line>
-                                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-                                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-                                    </svg>
-                                </div>
-                                <div class="aqf-floating-shape aqf-floating-shape-2">
-                                    <svg viewBox="0 0 100 100" fill="currentColor">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" />
-                                    </svg>
-                                </div>
+                                                            <div class="aqf-floating-shape aqf-floating-shape-1">
+                                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"
+                                                                    stroke-linejoin="round">
+                                                                    <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                                                                    <rect x="2" y="7" width="20" height="5"></rect>
+                                                                    <line x1="12" y1="22" x2="12" y2="7"></line>
+                                                                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                                                                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="aqf-floating-shape aqf-floating-shape-2">
+                                                                <svg viewBox="0 0 100 100" fill="currentColor">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z" />
+                                                                </svg>
+                                                            </div>
 
-                                <div class="container custom-fluid-container">
-                                    <div class="row justify-content-center pt-20 pb-20">
-                                        <div class="col-xl-12">
+                                                            <div class="container custom-fluid-container">
+                                                                <div class="row justify-content-center pt-20 pb-20">
+                                                                    <div class="col-xl-12">
 
 
-                                            <div class="aq-creative-title-box">
-                                                <span class="aq-creative-subtitle">Elegant Attire for Every Celebration</span>
-                                                <h4 class="aq-creative-title">Elegant Attire for Every Celebration</h4>
-                                                <div class="aq-creative-title-line"></div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3 pt-md-5 ">
-                                        <div class="col-lg-8 ">
-                                            <div class="hero-slider-wrap">
-                                                <div class="hero-slider swiper hero-slider-active">
-                                                    <div class="swiper-wrapper">
-
-                                                        @foreach($heroSlides as $slide)
-
-                                                            <div class="hero-single swiper-slide">
-
-                                                                <div class="container custom-fluid-container">
-
-                                                                    <div class="row align-items-center">
-
-                                                                        <div class="col-md-12 col-lg-7">
-
-                                                                            <div class="hero-content">
-
-                                                                                <h6 class="hero-sub-title">
-                                                                                    {{ $slide->subtitle }}
-                                                                                </h6>
-
-                                                                                <h1 class="hero-title">
-                                                                                    {!! $slide->title  !!}
-                                                                                </h1>
-
-                                                                                <p>
-                                                                                    {{ $slide->description }}
-                                                                                </p>
-
-                                                                                @if($slide->button_text)
-
-                                                                                    <div class="hero-btn">
-
-                                                                                        <a href="{{ $slide->button_link }}" class="aq-btn-black">
-
-                                                                                            {{ $slide->button_text }}
-
-                                                                                            <i class="fas fa-arrow-right"></i>
-
-                                                                                        </a>
-
-                                                                                    </div>
-
-                                                                                @endif
-
-                                                                            </div>
-
+                                                                        <div class="aq-creative-title-box">
+                                                                            <span class="aq-creative-subtitle">Elegant Attire for Every Celebration</span>
+                                                                            <h4 class="aq-creative-title">Elegant Attire for Every Celebration</h4>
+                                                                            <div class="aq-creative-title-line"></div>
                                                                         </div>
 
-                                                                        <div class="col-md-12 col-lg-5">
+                                                                    </div>
+                                                                </div>
 
-                                                                            <div class="hero-right">
+                                                                <div class="row g-3 pt-md-5 ">
+                                                                    <div class="col-lg-8 ">
+                                                                        <div class="hero-slider-wrap">
+                                                                            <div class="hero-slider swiper hero-slider-active">
+                                                                                <div class="swiper-wrapper">
 
-                                                                                <div class="hero-img">
+                                                                                    @foreach($heroSlides as $slide)
 
-                                                                                    <img loading="lazy"   src="{{ asset('storage/' . $slide->image) }}"
-                                                                                        alt="{{ $slide->title }}" loading="lazy" />
+                                                                                        <div class="hero-single swiper-slide">
+
+                                                                                            <div class="container custom-fluid-container">
+
+                                                                                                <div class="row align-items-center">
+
+                                                                                                    <div class="col-md-12 col-lg-7">
+
+                                                                                                        <div class="hero-content">
+
+                                                                                                            <h6 class="hero-sub-title">
+                                                                                                                {{ $slide->subtitle }}
+                                                                                                            </h6>
+
+                                                                                                            <h1 class="hero-title">
+                                                                                                                {!! $slide->title  !!}
+                                                                                                            </h1>
+
+                                                                                                            <p>
+                                                                                                                {{ $slide->description }}
+                                                                                                            </p>
+
+                                                                                                            @if($slide->button_text)
+
+                                                                                                                <div class="hero-btn">
+
+                                                                                                                    <a href="{{ $slide->button_link }}" class="aq-btn-black">
+
+                                                                                                                        {{ $slide->button_text }}
+
+                                                                                                                        <i class="fas fa-arrow-right"></i>
+
+                                                                                                                    </a>
+
+                                                                                                                </div>
+
+                                                                                                            @endif
+
+                                                                                                        </div>
+
+                                                                                                    </div>
+
+                                                                                                    <div class="col-md-12 col-lg-5">
+
+                                                                                                        <div class="hero-right">
+
+                                                                                                            <div class="hero-img">
+
+                                                                                                                <img loading="lazy"   src="{{ asset('storage/' . $slide->image) }}"
+                                                                                                                    alt="{{ $slide->title }}" loading="lazy" />
+
+                                                                                                            </div>
+
+                                                                                                        </div>
+
+                                                                                                    </div>
+
+                                                                                                </div>
+
+                                                                                            </div>
+
+                                                                                        </div>
+
+                                                                                    @endforeach
 
                                                                                 </div>
-
-                                                                            </div>
-
-                                                                        </div>
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                            </div>
-
-                                                        @endforeach
-
-                                                    </div>
-                                                    <!-- Swiper Pagination/Navigation -->
+                                                                                <!-- Swiper Pagination/Navigation -->
         <!--       <div class="swiper-pagination"></div>
-                                                    <div class="swiper-button-prev hero-slider-prev"></div>
-                                                    <div class="swiper-button-next hero-slider-next"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <div class="small-banner">
-                                                <div class="container custom-fluid-container">
-                                                    <div class="row">
-
-                                                        @foreach($heroBanners as $banner)
-
-                                                            <div class="col-md-6 col-lg-12 px-lg-0">
-
-                                                                <div class="banner-item">
-
-                                                                    <img loading="lazy"   src="{{ asset('storage/' . $banner->image) }}"
-                                                                        alt="{{ $banner->title }}" loading="lazy" />
-
-                                                                    <div class="banner-content">
-
-                                                                        <p>
-                                                                            {{ $banner->small_text }}
-                                                                        </p>
-
-                                                                        <h3>
-                                                                            {!!  $banner->title !!}
-                                                                        </h3>
-
-                                                                        <a href="{{ $banner->button_link }}">
-                                                                            {{ $banner->button_text }}
-                                                                        </a>
-
+                                                                                <div class="swiper-button-prev hero-slider-prev"></div>
+                                                                                <div class="swiper-button-next hero-slider-next"></div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
+                                                                    <div class="col-lg-4">
+                                                                        <div class="small-banner">
+                                                                            <div class="container custom-fluid-container">
+                                                                                <div class="row">
 
+                                                                                    @foreach($heroBanners as $banner)
+
+                                                                                        <div class="col-md-6 col-lg-12 px-lg-0">
+
+                                                                                            <div class="banner-item">
+
+                                                                                                <img loading="lazy"   src="{{ asset('storage/' . $banner->image) }}"
+                                                                                                    alt="{{ $banner->title }}" loading="lazy" />
+
+                                                                                                <div class="banner-content">
+
+                                                                                                    <p>
+                                                                                                        {{ $banner->small_text }}
+                                                                                                    </p>
+
+                                                                                                    <h3>
+                                                                                                        {!!  $banner->title !!}
+                                                                                                    </h3>
+
+                                                                                                    <a href="{{ $banner->button_link }}">
+                                                                                                        {{ $banner->button_text }}
+                                                                                                    </a>
+
+                                                                                                </div>
+
+                                                                                            </div>
+
+                                                                                        </div>
+
+                                                                                    @endforeach
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-
                                                             </div>
-
-                                                        @endforeach
-
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section> -->
+                                                        </div>
+                                                    </section> -->
 
 
 
@@ -1054,11 +1031,10 @@
                                     aria-orientation="vertical">
 
                                     @foreach($featuredCategories as $index => $category)
-<button class="aq-luxury-tab-card {{ $index == 0 ? 'active' : '' }}"
+                                        <button class="aq-luxury-tab-card {{ $index == 0 ? 'active' : '' }}"
                                             id="tab-{{ $category->id }}-tab" data-bs-toggle="pill"
                                             data-bs-target="#tab-{{ $category->id }}" type="button" role="tab"
-                                            aria-controls="tab-executive" aria-selected="true"
-                                            data-slug="{{ $category->slug }}"
+                                            aria-controls="tab-executive" aria-selected="true" data-slug="{{ $category->slug }}"
                                             data-name="{{ $category->name }}">
 
                                             <span class="aq-luxury-tab-title">
@@ -1106,7 +1082,7 @@
                                                         <div class="col-lg-4 col-md-6">
                                                             <div class="aq-luxury-item-card">
                                                                 <div class="aq-luxury-item-img">
-                                                                    <img loading="lazy"   src="{{ asset($product->display_image) }}"
+                                                                    <img loading="lazy" src="{{ asset($product->display_image) }}"
                                                                         alt="{{ $product->name }}">
                                                                 </div>
                                                                 <div class="aq-luxury-item-info">
@@ -1114,8 +1090,9 @@
                                                                         {{ $product->name }}
                                                                     </h4>
 
-                                                                    <span class="aq-luxury-item-price">
-                                                                        ₹{{ number_format($product->price) }}
+                                                                    <span class="aq-luxury-item-price" @if($product->is_sold_out)
+                                                                    style="color:#b3261e;font-weight:700;" @endif>
+                                                                        {{ $product->is_sold_out ? 'Sold Out' : '₹' . number_format($product->price) }}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1136,8 +1113,9 @@
                             </div>
                         </div>
 
-                       <div class="mt-40 text-center ">
-                            <a href="{{ route('products.listing', $featuredCategories->first()->slug) }}" class="aq-btn-luxury" id="luxuryExploreBtn">
+                        <div class="mt-40 text-center ">
+                            <a href="{{ route('products.listing', $featuredCategories->first()->slug) }}"
+                                class="aq-btn-luxury" id="luxuryExploreBtn">
                                 Explore {{ $featuredCategories->first()->name }}
                                 <i class="fa-solid fa-arrow-right-long ml-10"></i>
                             </a>
@@ -1226,12 +1204,11 @@
                                                 </div>
                                                 <a href="{{ route('product.details', $product->slug) }}">
 
-                                                    <img loading="lazy"   class="lazyload aq-product-img"
+                                                    <img loading="lazy" class="lazyload aq-product-img"
                                                         src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
 
-                                                  <img loading="lazy"   class="aq-img-hover lazyload"
-                                                        src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" /> -->
-
+                                                    <img loading="lazy" class="aq-img-hover lazyload"
+                                                        src="{{ asset($product->display_image) }}" alt="{{ $product->name }}" />
                                                 </a>
                                             </div>
                                             <div class="aq-product-content">
@@ -1241,23 +1218,21 @@
                                                     </a>
                                                 </h4>
 
-                                                <div class="aq-product-price">
-
-                                                    <ins>
-                                                        <span class="aq-product-new-price">
-                                                            ₹{{ number_format($product->price) }}
-                                                        </span>
-                                                    </ins>
-
-                                                    @if($product->mrp > $product->price)
-                                                        <del>
-                                                            <span class="aq-product-old-price">
-                                                                ₹{{ number_format($product->mrp) }}
-                                                            </span>
-                                                        </del>
-                                                    @endif
-
-                                                </div>
+                                                @if($product->is_sold_out)
+                                                    <div class="aq-product-price">
+                                                        <span class="aq-product-new-price"
+                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                    </div>
+                                                @else
+                                                    <div class="aq-product-price">
+                                                        <ins><span
+                                                                class="aq-product-new-price">₹{{ number_format($product->price) }}</span></ins>
+                                                        @if($product->mrp > $product->price)
+                                                            <del><span
+                                                                    class="aq-product-old-price">₹{{ number_format($product->mrp) }}</span></del>
+                                                        @endif
+                                                    </div>
+                                                @endif
 
                                             </div>
                                         </div>
@@ -1301,7 +1276,7 @@
                                 <div class="aqf-summer-suit-img">
                                     @if($brandSection && $brandSection->main_image)
 
-                                        <img loading="lazy"   src="{{ asset('storage/' . $brandSection->main_image) }}"
+                                        <img loading="lazy" src="{{ asset('storage/' . $brandSection->main_image) }}"
                                             alt="{{ $brandSection->title }}" />
 
                                     @endif
@@ -1330,7 +1305,7 @@
 
                                                                 <div class="aqf-summer-slider-item">
 
-                                                                    <img loading="lazy"   class="w-100"
+                                                                    <img loading="lazy" class="w-100"
                                                                         src="{{ asset('storage/' . $image->image) }}" alt="" />
 
                                                                 </div>
@@ -1391,190 +1366,190 @@
 
         <!-- reels area start -->
         <!--   <section>
-                            <div class="aqf-reels-area fix pb-md-50 ">
-                                <div class="container custom-fluid-container">
-                                    <div class="aqf-collection-top mb-40">
-                                        <div class="row align-items-end">
-                                            <div class="col-md-12">
+                                                        <div class="aqf-reels-area fix pb-md-50 ">
+                                                            <div class="container custom-fluid-container">
+                                                                <div class="aqf-collection-top mb-40">
+                                                                    <div class="row align-items-end">
+                                                                        <div class="col-md-12">
 
 
 
-                                                <div class="aq-creative-title-box">
-                                                    <span class="aq-creative-subtitle">Video Showcase</span>
-                                                    <h4 class="aq-creative-title">Gift Inspiration Reels</h4>
-                                                    <div class="aq-creative-title-line"></div>
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="aqf-reels-slider-wrap">
-                                        <div class="swiper aqf-reels-active">
-                                            <div class="swiper-wrapper">
-                                                @foreach($reels as $reel)
-
-                                                                        <div class="swiper-slide">
-                                                                            <div class="aqf-reel-item p-relative">
-
-                                                                                <div class="aqf-reel-video">
-
-                                                                                    @if($reel->reel_file)
-
-                                                                                        <video autoplay muted loop playsinline preload="none">
-                                                                                            <source src="{{ asset('storage/' . $reel->reel_file) }}" type="video/mp4">
-                                                                                        </video>
-
-
-                                                                                    @elseif($reel->reel_url)
-
-                                                                                        <video autoplay muted loop playsinline preload="none">
-                                                                                            <source src="{{ $reel->reel_url }}" type="video/mp4">
-                                                                                        </video>
-
-                                                                                    @endif
-
-                                                                                </div>
-
-                                                                                <div class="aqf-reel-content-wrap">
-
-                                                                                    <div class="aqf-reel-profile">
-
-                                                                                        <img loading="lazy"   src="{{ $reel->photo
-                                                    ? asset('storage/' . $reel->photo)
-                                                    : asset('assets/img/default-user.webp') }}" alt="{{ $reel->name }}" />
-
-                                                                                        <h4 class="aqf-reel-title">
-                                                                                            {{ $reel->name }}
-                                                                                        </h4>
-
-                                                                                    </div>
-
-                                                                                </div>
-
+                                                                            <div class="aq-creative-title-box">
+                                                                                <span class="aq-creative-subtitle">Video Showcase</span>
+                                                                                <h4 class="aq-creative-title">Gift Inspiration Reels</h4>
+                                                                                <div class="aq-creative-title-line"></div>
                                                                             </div>
+
                                                                         </div>
 
-                                                @endforeach
+                                                                    </div>
+                                                                </div>
+                                                                <div class="aqf-reels-slider-wrap">
+                                                                    <div class="swiper aqf-reels-active">
+                                                                        <div class="swiper-wrapper">
+                                                                            @foreach($reels as $reel)
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                                                                                    <div class="swiper-slide">
+                                                                                                        <div class="aqf-reel-item p-relative">
 
-                            </div>
-                        </section>
-                        <!-- reels area end -->
+                                                                                                            <div class="aqf-reel-video">
+
+                                                                                                                @if($reel->reel_file)
+
+                                                                                                                    <video autoplay muted loop playsinline preload="none">
+                                                                                                                        <source src="{{ asset('storage/' . $reel->reel_file) }}" type="video/mp4">
+                                                                                                                    </video>
+
+
+                                                                                                                @elseif($reel->reel_url)
+
+                                                                                                                    <video autoplay muted loop playsinline preload="none">
+                                                                                                                        <source src="{{ $reel->reel_url }}" type="video/mp4">
+                                                                                                                    </video>
+
+                                                                                                                @endif
+
+                                                                                                            </div>
+
+                                                                                                            <div class="aqf-reel-content-wrap">
+
+                                                                                                                <div class="aqf-reel-profile">
+
+                                                                                                                    <img loading="lazy"   src="{{ $reel->photo
+                                                                                ? asset('storage/' . $reel->photo)
+                                                                                : asset('assets/img/default-user.webp') }}" alt="{{ $reel->name }}" />
+
+                                                                                                                    <h4 class="aqf-reel-title">
+                                                                                                                        {{ $reel->name }}
+                                                                                                                    </h4>
+
+                                                                                                                </div>
+
+                                                                                                            </div>
+
+                                                                                                        </div>
+                                                                                                    </div>
+
+                                                                            @endforeach
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </section>
+                                                    <!-- reels area end -->
 
 
 
         <!--   <section>
-                            <div class="masonry-main-section p-relative pt-20 pb-20">
-                                <!-- Floating Star Shapes -->
+                                                        <div class="masonry-main-section p-relative pt-20 pb-20">
+                                                            <!-- Floating Star Shapes -->
         <!--      <div class="aq-star-shape star-1 d-none d-xl-block">
-                                    <svg viewBox="0 0 100 100" fill="#C5A059">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                                    </svg>
-                                </div>
-                                <div class="aq-star-shape star-2 d-none d-xl-block">
-                                    <svg viewBox="0 0 100 100" fill="#800000">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                                    </svg>
-                                </div>
-                                <div class="aq-star-shape star-3 d-none d-xl-block">
-                                    <svg viewBox="0 0 100 100" fill="#C5A059">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                                    </svg>
-                                </div>
-                                <div class="aq-star-shape star-4 d-none d-xl-block">
-                                    <svg viewBox="0 0 100 100" fill="#800000">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                                    </svg>
-                                </div>
-                                <div class="aq-star-shape star-5 d-none d-xl-block">
-                                    <svg viewBox="0 0 100 100" fill="#C5A059">
-                                        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
-                                    </svg>
-                                </div>
+                                                                <svg viewBox="0 0 100 100" fill="#C5A059">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="aq-star-shape star-2 d-none d-xl-block">
+                                                                <svg viewBox="0 0 100 100" fill="#800000">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="aq-star-shape star-3 d-none d-xl-block">
+                                                                <svg viewBox="0 0 100 100" fill="#C5A059">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="aq-star-shape star-4 d-none d-xl-block">
+                                                                <svg viewBox="0 0 100 100" fill="#800000">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="aq-star-shape star-5 d-none d-xl-block">
+                                                                <svg viewBox="0 0 100 100" fill="#C5A059">
+                                                                    <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"></path>
+                                                                </svg>
+                                                            </div>
 
 
-                                <div class="container custom-fluid-container">
+                                                            <div class="container custom-fluid-container">
 
 
-                                    <div class="row justify-content-center">
-                                        <div class="col-xl-12">
+                                                                <div class="row justify-content-center">
+                                                                    <div class="col-xl-12">
 
-                                            <div class="aq-creative-title-box pt-30">
-                                                <span class="aq-creative-subtitle">Curated Portfolio</span>
-                                                <h4 class="aq-creative-title">Our Luxury Instagram Gallery</h4>
-                                                <div class="aq-creative-title-line"></div>
-                                            </div>
+                                                                        <div class="aq-creative-title-box pt-30">
+                                                                            <span class="aq-creative-subtitle">Curated Portfolio</span>
+                                                                            <h4 class="aq-creative-title">Our Luxury Instagram Gallery</h4>
+                                                                            <div class="aq-creative-title-line"></div>
+                                                                        </div>
 
-                                        </div>
-                                    </div>
+                                                                    </div>
+                                                                </div>
 
-                                    <div class="row g-4 masonry-wrapper">
+                                                                <div class="row g-4 masonry-wrapper">
 
-                                        <!-- COLUMN 1 -->
+                                                                    <!-- COLUMN 1 -->
         <!--   <div class="col-lg-4 col-md-6">
-                                            <div class="masonry-column">
-                                                <div class="masonry-track direction-down">
+                                                                        <div class="masonry-column">
+                                                                            <div class="masonry-track direction-down">
 
-                                                    @foreach($galleryColumn1 as $image)
+                                                                                @foreach($galleryColumn1 as $image)
 
-                                                        <div class="masonry-card {{ $image->height_class }}">
-                                                            <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}" />
-                                                        </div>
+                                                                                    <div class="masonry-card {{ $image->height_class }}">
+                                                                                        <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}" />
+                                                                                    </div>
 
-                                                    @endforeach
+                                                                                @endforeach
 
-                                                </div>
-                                            </div>
-                                        </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-                                        <!-- COLUMN 2 -->
+                                                                    <!-- COLUMN 2 -->
         <!--    <div class="col-lg-4 col-md-6">
-                                            <div class="masonry-column">
-                                                <div class="masonry-track direction-up">
+                                                                        <div class="masonry-column">
+                                                                            <div class="masonry-track direction-up">
 
-                                                    @foreach($galleryColumn2 as $image)
+                                                                                @foreach($galleryColumn2 as $image)
 
-                                                        <div class="masonry-card {{ $image->height_class }}">
-                                                            <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
-                                                                loading="lazy" />
-                                                        </div>
+                                                                                    <div class="masonry-card {{ $image->height_class }}">
+                                                                                        <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
+                                                                                            loading="lazy" />
+                                                                                    </div>
 
-                                                    @endforeach
+                                                                                @endforeach
 
-                                                </div>
-                                            </div>
-                                        </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
 
-                                        <!-- COLUMN 3 -->
+                                                                    <!-- COLUMN 3 -->
         <!--    <div class="col-lg-4 col-md-12">
-                                            <div class="masonry-column">
-                                                <div class="masonry-track direction-down">
+                                                                        <div class="masonry-column">
+                                                                            <div class="masonry-track direction-down">
 
-                                                    @foreach($galleryColumn3 as $image)
+                                                                                @foreach($galleryColumn3 as $image)
 
-                                                        <div class="masonry-card {{ $image->height_class }}">
-                                                            <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
-                                                                loading="lazy" />
+                                                                                    <div class="masonry-card {{ $image->height_class }}">
+                                                                                        <img loading="lazy"   src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->title }}"
+                                                                                            loading="lazy" />
+                                                                                    </div>
+
+                                                                                @endforeach
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
                                                         </div>
 
-                                                    @endforeach
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </section> -->
+                                                    </section> -->
 
 
 
@@ -1607,7 +1582,7 @@
                                                                         <div class="swiper-slide">
                                                                             <div class="aqf-testimonial-card-creative">
                                                                                 <div class="aqf-testimonial-image-creative">
-                                                                                    <img loading="lazy"   src="{{ $testimonial->photo
+                                                                                    <img loading="lazy" src="{{ $testimonial->photo
                                             ? asset('storage/' . $testimonial->photo)
                                             : asset('assets/img/no-image.webp') }}" alt="{{ $testimonial->name }}">
                                                                                 </div>
@@ -1789,70 +1764,70 @@
             </div>
         </section>
         <!-- footer categories area end -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
 
-document.querySelectorAll('.aq-luxury-tab-card').forEach(function (tabBtn) {
-    tabBtn.addEventListener('shown.bs.tab', function (e) {
-        const slug = e.target.dataset.slug;
-        const name = e.target.dataset.name;
-        const exploreBtn = document.getElementById('luxuryExploreBtn');
-        if (exploreBtn) {
-            exploreBtn.href = "{{ url('products') }}/" + slug;
-            exploreBtn.innerHTML = 'Explore ' + name + ' <i class="fa-solid fa-arrow-right-long ml-10"></i>';
-        }
-    });
-});
+            document.querySelectorAll('.aq-luxury-tab-card').forEach(function (tabBtn) {
+                tabBtn.addEventListener('shown.bs.tab', function (e) {
+                    const slug = e.target.dataset.slug;
+                    const name = e.target.dataset.name;
+                    const exploreBtn = document.getElementById('luxuryExploreBtn');
+                    if (exploreBtn) {
+                        exploreBtn.href = "{{ url('products') }}/" + slug;
+                        exploreBtn.innerHTML = 'Explore ' + name + ' <i class="fa-solid fa-arrow-right-long ml-10"></i>';
+                    }
+                });
+            });
             function addToCart(productId, quantity, btnEl) {
 
-    const $btn = btnEl ? $(btnEl) : null;
-    const $tooltipText = $btn ? $btn.find('.aq-tooltip-item') : null;
-    const originalText = $tooltipText ? $tooltipText.text() : null;
+                const $btn = btnEl ? $(btnEl) : null;
+                const $tooltipText = $btn ? $btn.find('.aq-tooltip-item') : null;
+                const originalText = $tooltipText ? $tooltipText.text() : null;
 
-    $.ajax({
-        url: "{{ route('cart.add') }}",
-        type: "POST",
-        data: {
-            _token: $('meta[name="csrf-token"]').attr('content'),
-            product_id: productId,
-            quantity: quantity
-        },
-        success: function (response) {
+                $.ajax({
+                    url: "{{ route('cart.add') }}",
+                    type: "POST",
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        product_id: productId,
+                        quantity: quantity
+                    },
+                    success: function (response) {
 
-            if (response.status) {
+                        if (response.status) {
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: response.message,
-                    timer: 1500,
-                    showConfirmButton: false
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                            $('.cart-count').text(response.cart_count);
+                            fireTrackingEvents(response.tracking_events);
+                            refreshMiniCart(response);
+
+                            if ($tooltipText) {
+                                $tooltipText.text('Added to Cart');
+                                setTimeout(function () {
+                                    $tooltipText.text(originalText);
+                                }, 1500);
+                            }
+
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
+                        }
+                    },
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: xhr.responseJSON?.message ?? 'Something went wrong.'
+                        });
+                    }
                 });
-
-                $('.cart-count').text(response.cart_count);
-                 fireTrackingEvents(response.tracking_events); 
-                refreshMiniCart(response);
-
-                if ($tooltipText) {
-                    $tooltipText.text('Added to Cart');
-                    setTimeout(function () {
-                        $tooltipText.text(originalText);
-                    }, 1500);
-                }
-
-            } else {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to add product.' });
             }
-        },
-        error: function (xhr) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: xhr.responseJSON?.message ?? 'Something went wrong.'
-            });
-        }
-    });
-}
 
             function addToWishlist(productId) {
 
@@ -1874,7 +1849,7 @@ document.querySelectorAll('.aq-luxury-tab-card').forEach(function (tabBtn) {
                                 timer: 1500,
                                 showConfirmButton: false
                             });
-fireTrackingEvents(response.tracking_events);
+                            fireTrackingEvents(response.tracking_events);
                             $('.wishlist-count').text(response.wishlist_count);
 
                         } else {
@@ -1901,25 +1876,24 @@ fireTrackingEvents(response.tracking_events);
             }
 
         </script>
-        
-                <!-- First time popup modal September 2028 -->
+
+        <!-- First time popup modal September 2028 -->
         <div id="firstTimeModalOverlay" class="first-time-modal-overlay">
             <div class="first-time-modal">
                 <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
                 <div class="first-time-modal-content">
                     <div class="modal-left-side">
                         <!-- We assume a placeholder or you can replace with correct image path -->
-                        <img loading="lazy"   src="{{ asset('popup/oudhyana-popup.webp') }}"
-     alt="Chikankari Arrivals"
-     style="background:#e9dcc9;" />
+                        <img loading="lazy" src="{{ asset('popup/oudhyana-popup.webp') }}" alt="Chikankari Arrivals"
+                            style="background:#e9dcc9;" />
                         <div class="modal-left-text">
                             <!--<span>Discover new</span>-->
                             <!--<h2>Chikankari</h2>-->
                             <!--<span class="arrivals-text">Arrivals</span>-->
                         </div>
                     </div>
-                    
-                    
+
+
                     <div class="modal-right-side">
                         <h3>Don't miss out—our sale is now live</h3>
                         <p>with discounts up to 30% off <br>for a limited time!</p>
@@ -1927,7 +1901,7 @@ fireTrackingEvents(response.tracking_events);
                             <input type="email" name="email" placeholder="Enter your email address" required>
                             <div class="phone-input-group">
                                 <div class="country-code">
-                                    <img loading="lazy"   src="https://flagcdn.com/w20/in.png" alt="India">
+                                    <img loading="lazy" src="https://flagcdn.com/w20/in.png" alt="India">
                                     <span>+91</span>
                                     <span class="dropdown-arrow">▾</span>
                                 </div>
@@ -1935,7 +1909,7 @@ fireTrackingEvents(response.tracking_events);
                             </div>
                             <label class="whatsapp-optin">
                                 <input type="checkbox" name="whatsapp_optin" checked>
-                                <span>Receive important information and updates on <img loading="lazy"  
+                                <span>Receive important information and updates on <img loading="lazy"
                                         src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
                                         alt="WhatsApp" width="16" height="16"> WhatsApp</span>
                             </label>
@@ -1945,50 +1919,50 @@ fireTrackingEvents(response.tracking_events);
                 </div>
             </div>
         </div>
-        
-        
+
+
 
         <!-- First time popup modal Live -->
         <!--<div id="firstTimeModalOverlay" class="first-time-modal-overlay">
-            <div class="first-time-modal">
-                <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
-                <div class="first-time-modal-content">
-                    <div class="modal-left-side">
-                        <!-- We assume a placeholder or you can replace with correct image path -->
-                     <!--   <img loading="lazy"   src="{{ asset('popup/popupimg.webp') }}"
-     alt="Chikankari Arrivals"
-     style="background:#e9dcc9;" />
-                        <div class="modal-left-text">
-                            <!--<span>Discover new</span>-->
-                            <!--<h2>Chikankari</h2>-->
-                            <!--<span class="arrivals-text">Arrivals</span>
-                        </div>
-                    </div>
-                    <div class="modal-right-side">
-                        <h3>PERKS AWAIT—JUST FOR YOU</h3>
-                        <p>Enjoy 5% off on your first order when you sign up—<br>just for trying us out!</p>
-                        <form id="firstTimeForm" class="first-time-form">
-                            <input type="email" name="email" placeholder="Enter your email address" required>
-                            <div class="phone-input-group">
-                                <div class="country-code">
-                                    <img loading="lazy"   src="https://flagcdn.com/w20/in.png" alt="India">
-                                    <span>+91</span>
-                                    <span class="dropdown-arrow">▾</span>
-                                </div>
-                                <input type="tel" name="phone" placeholder="Enter your phone number" required>
-                            </div>
-                            <label class="whatsapp-optin">
-                                <input type="checkbox" name="whatsapp_optin" checked>
-                                <span>Receive important information and updates on <img loading="lazy"  
-                                        src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                                        alt="WhatsApp" width="16" height="16"> WhatsApp</span>
-                            </label>
-                            <button type="submit" class="claim-now-btn">CLAIM NOW</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div> -->
+                                        <div class="first-time-modal">
+                                            <button id="closeFirstTimeModal" class="close-modal-btn">&times;</button>
+                                            <div class="first-time-modal-content">
+                                                <div class="modal-left-side">
+                                                    <!-- We assume a placeholder or you can replace with correct image path -->
+        <!--   <img loading="lazy"   src="{{ asset('popup/popupimg.webp') }}"
+                                 alt="Chikankari Arrivals"
+                                 style="background:#e9dcc9;" />
+                                                    <div class="modal-left-text">
+                                                        <!--<span>Discover new</span>-->
+        <!--<h2>Chikankari</h2>-->
+        <!--<span class="arrivals-text">Arrivals</span>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-right-side">
+                                                    <h3>PERKS AWAIT—JUST FOR YOU</h3>
+                                                    <p>Enjoy 5% off on your first order when you sign up—<br>just for trying us out!</p>
+                                                    <form id="firstTimeForm" class="first-time-form">
+                                                        <input type="email" name="email" placeholder="Enter your email address" required>
+                                                        <div class="phone-input-group">
+                                                            <div class="country-code">
+                                                                <img loading="lazy"   src="https://flagcdn.com/w20/in.png" alt="India">
+                                                                <span>+91</span>
+                                                                <span class="dropdown-arrow">▾</span>
+                                                            </div>
+                                                            <input type="tel" name="phone" placeholder="Enter your phone number" required>
+                                                        </div>
+                                                        <label class="whatsapp-optin">
+                                                            <input type="checkbox" name="whatsapp_optin" checked>
+                                                            <span>Receive important information and updates on <img loading="lazy"  
+                                                                    src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                                                                    alt="WhatsApp" width="16" height="16"> WhatsApp</span>
+                                                        </label>
+                                                        <button type="submit" class="claim-now-btn">CLAIM NOW</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> -->
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -2067,14 +2041,14 @@ fireTrackingEvents(response.tracking_events);
             });
         </script>
 
-   <script>
-    (function () {
-        var isMobile = window.matchMedia('(max-width: 767px)').matches;
+        <script>
+            (function () {
+                var isMobile = window.matchMedia('(max-width: 767px)').matches;
 
-        document.querySelectorAll('.aqf-slider-thumb').forEach(function (el) {
-            var src = isMobile ? el.dataset.bgMobile : el.dataset.bgDesktop;
-            el.style.backgroundImage = "url('" + src + "')";
-        });
-    })();
-</script>
+                document.querySelectorAll('.aqf-slider-thumb').forEach(function (el) {
+                    var src = isMobile ? el.dataset.bgMobile : el.dataset.bgDesktop;
+                    el.style.backgroundImage = "url('" + src + "')";
+                });
+            })();
+        </script>
 @endsection

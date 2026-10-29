@@ -20,8 +20,8 @@
         <link rel="canonical" href="{{ $seoData['canonicalUrl'] }}">
     @endif
 
-  <meta name="robots" content="{{ $seoData['metaRobots'] ?? 'noindex, nofollow' }}">
-    
+    <meta name="robots" content="{{ $seoData['metaRobots'] ?? 'noindex, nofollow' }}">
+
     {{-- Open Graph --}}
     <meta property="og:type" content="{{ $seoData['ogType'] ?? 'website' }}">
     <meta property="og:site_name" content="{{ $general?->site_name ?? config('app.name') }}">
@@ -36,7 +36,8 @@
 
     {{-- Twitter --}}
     <meta name="twitter:card" content="{{ $seoData['twitterCard'] ?? 'summary_large_image' }}">
-    <meta name="twitter:title" content="{{ $seoData['twitterTitle'] ?? $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
+    <meta name="twitter:title"
+        content="{{ $seoData['twitterTitle'] ?? $seoData['ogTitle'] ?? $seoData['metaTitle'] ?? $general?->site_name }}">
     @if(!empty($seoData['twitterDescription']) || !empty($seoData['ogDescription']))
         <meta name="twitter:description" content="{{ $seoData['twitterDescription'] ?? $seoData['ogDescription'] }}">
     @endif
@@ -48,18 +49,19 @@
         {!! $seo->scripts !!}
     @endif
 
-       {{-- JSON-LD Structured Data --}}
+    {{-- JSON-LD Structured Data --}}
     @if(!empty($seoData['jsonLd']))
         <script type="application/ld+json">
-            {!! json_encode($seoData['jsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
-        </script>
+                                        {!! json_encode($seoData['jsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+                                    </script>
     @endif
-    
-    {{-- JSON-LD BreadcrumbList (separate schema block — search engines expect this apart from Product/Article/etc.) --}}
+
+    {{-- JSON-LD BreadcrumbList (separate schema block — search engines expect this apart from Product/Article/etc.)
+    --}}
     @if(!empty($seoData['breadcrumbJsonLd']))
         <script type="application/ld+json">
-            {!! json_encode($seoData['breadcrumbJsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
-        </script>
+                                        {!! json_encode($seoData['breadcrumbJsonLd'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+                                    </script>
     @endif
 
 
@@ -443,33 +445,34 @@
 
                                 @forelse($recentProducts as $product)
 
-                                                            <div class="col">
-                                                                <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
-                                                                    <div class="aq-product-thumb aq-img-hover-wrap p-relative">
-                                                                        <a href="{{ route('product.details', $product->slug) }}">
-
-                                                                            <img class="lazyload aq-product-img"
-                                                                                src="{{ asset('storage/' . $product->display_image) }}"
-                                                                                alt="{{ $product->name }}" loading="lazy" />
-
-                                                                            <img class="aq-img-hover lazyload"
-                                                                                src="{{ asset('storage/' . $product->display_image) }}"
-                                                                                alt="{{ $product->name }}" loading="lazy" />
-                                                                        </a>
-                                                                    </div>
-                                                                    <div class="aq-product-content">
-                                                                        <span class="aqf-product-3-category">Premium Collections</span>
-                                                                        <h4 class="aq-product-title mb-5">
-                                                                            <a href="{{ route('product.details', $product->slug) }}">
-                                                                                {{ $product->name }}</a>
-                                                                        </h4>
-                                                                        <div class="aq-product-price">
-                                                                            <ins><span class="aq-product-new-price">₹{{
-                                    number_format($product->price, 2) }}</span></ins>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                    <div class="col">
+                                        <div class="aq-product-item aq-product-main mb-40" data-lazy="true">
+                                            <div class="aq-product-thumb aq-img-hover-wrap p-relative">
+                                                <a href="{{ route('product.details', $product->slug) }}">
+                                                    <img class="lazyload aq-product-img" src="{{ $product->display_image }}"
+                                                        alt="{{ $product->name }}" loading="lazy" />
+                                                    <img class="aq-img-hover lazyload" src="{{ $product->display_image }}"
+                                                        alt="{{ $product->name }}" loading="lazy" />
+                                                </a>
+                                            </div>
+                                            <div class="aq-product-content">
+                                                <span class="aqf-product-3-category">Premium Collections</span>
+                                                <h4 class="aq-product-title mb-5">
+                                                    <a
+                                                        href="{{ route('product.details', $product->slug) }}">{{ $product->name }}</a>
+                                                </h4>
+                                                <div class="aq-product-price">
+                                                    @if($product->is_sold_out)
+                                                        <span class="aq-product-new-price"
+                                                            style="color:#b3261e;font-weight:700;">Sold Out</span>
+                                                    @else
+                                                        <ins><span
+                                                                class="aq-product-new-price">₹{{ number_format($product->price, 2) }}</span></ins>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
 
                                 @empty
@@ -516,7 +519,7 @@
     </div>
     <!-- Cartmini area -->
 
- 
+
 
 
 
@@ -728,10 +731,10 @@
                     @endforeach
 
                     @foreach($navbarCollections as $collection)
-    <li class="aq-mm-item">
-        <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
-    </li>
-@endforeach
+                        <li class="aq-mm-item">
+                            <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
+                        </li>
+                    @endforeach
                     <li class="aq-mm-item">
                         <a href="{{ route('contact-us') }}">Contact</a>
                     </li>
@@ -1279,8 +1282,9 @@
                             style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Organza
                             Pieces</a>
                         <a href="#"
-                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Chikankaari Accesories
-                            </a>
+                            style="padding: 8px 16px; background: #f9f9f9; border: 1px solid #eee; border-radius: 30px; font-size: 13px; color: #444; text-decoration: none; transition: all 0.2s;">Chikankaari
+                            Accesories
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1436,11 +1440,12 @@
                                         </li>
 
                                     @endforeach
-                                  @foreach($navbarCollections as $collection)
-    <li>
-        <a href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
-    </li>
-@endforeach
+                                    @foreach($navbarCollections as $collection)
+                                        <li>
+                                            <a
+                                                href="{{ route('collections.listing', $collection->slug) }}">{{ $collection->name }}</a>
+                                        </li>
+                                    @endforeach
                                     <!--  <li><a href="{{ route('blogs') }}">Blogs</a></li> -->
                                     <li><a href="{{ route('contact-us') }}">Contact</a></li>
                                 </ul>
@@ -1861,9 +1866,12 @@
 
                         <div class="col-xl-12 col-lg-12">
                             <div class="aq-footer-disclaimer mb-20 mt-10">
-                              <p><strong>Disclaimer:</strong> Oudhyana India offers authentic Chikankari clothing and handcrafted apparel for women. 
-                              Product images are for representation purposes only, and the actual product may vary slightly in colour, embroidery, or appearance. 
-                              We are not responsible for any typographical errors. All trademarks and brand names belong to their respective owners.</p>
+                                <p><strong>Disclaimer:</strong> Oudhyana India offers authentic Chikankari clothing and
+                                    handcrafted apparel for women.
+                                    Product images are for representation purposes only, and the actual product may vary
+                                    slightly in colour, embroidery, or appearance.
+                                    We are not responsible for any typographical errors. All trademarks and brand names
+                                    belong to their respective owners.</p>
                             </div>
                         </div>
 
@@ -2573,10 +2581,10 @@
                                 productsHtml += `
                                 <div class="aq-product-item aq-product-main mb-20" data-lazy="true" style="text-align:left;">
                                     <div class="aq-product-thumb aq-img-hover-wrap p-relative ">
-                                        ${item.discount > 0 ? `
-                                        <div class="aq-product-badge">
-                                            <span class="clr-sale">${item.discount_type === 'percentage' ? '-' + item.discount + '%' : '₹' + (item.discount || '') + ' OFF'}</span>
-                                        </div>` : ''}
+                                        ${(!item.is_sold_out && item.discount > 0) ? `
+<div class="aq-product-badge">
+    <span class="clr-sale">${item.discount_type === 'percentage' ? '-' + item.discount + '%' : '₹' + item.discount + ' OFF'}</span>
+</div>` : ''}
                                         <div class="aq-product-action">
                                             <button type="button" class="aq-product-action-btn aq-tooltip"
                                                 data-bs-toggle="modal" data-bs-target="#producQuickViewModal"
@@ -2598,15 +2606,19 @@
                                         <h4 class="aq-product-title mb-10" style="font-size:14px;">
                                             <a href="${baseUrl}/product/${item.slug}">${item.name}</a>
                                         </h4>
-                                        <div class="aq-product-price">
-                                            <ins>
-                                                <span class="aq-product-new-price">₹{item.price || ''}</span>
-                                            </ins>
-                                            ${(item.mrp && item.mrp > item.price) ? `
-                                            <del>
-                                                <span class="aq-product-old-price">₹{item.mrp}</span>
-                                            </del>` : ''}
-                                        </div>
+                                       <div class="aq-product-price">
+    ${item.is_sold_out ? `
+        <span class="aq-product-new-price" style="color:#b3261e;font-weight:700;">Sold Out</span>
+    ` : `
+        <ins>
+            <span class="aq-product-new-price">₹${Number(item.price || 0).toLocaleString('en-IN')}</span>
+        </ins>
+        ${(item.mrp && Number(item.mrp) > Number(item.price)) ? `
+        <del>
+            <span class="aq-product-old-price">₹${Number(item.mrp).toLocaleString('en-IN')}</span>
+        </del>` : ''}
+    `}
+</div>
                                     </div>
                                 </div>
                                 `;
@@ -2630,15 +2642,15 @@
                         }
 
                         if (response.subcategories?.length) {
-    response.subcategories.forEach(item => {
-        collectionItems.push({
-            name: item.name,
-            image: item.image,
-            link: `${baseUrl}/products/${item.parent_slug}/${item.slug}`,
-            label: 'Subcategory'
-        });
-    });
-}
+                            response.subcategories.forEach(item => {
+                                collectionItems.push({
+                                    name: item.name,
+                                    image: item.image,
+                                    link: `${baseUrl}/products/${item.parent_slug}/${item.slug}`,
+                                    label: 'Subcategory'
+                                });
+                            });
+                        }
 
                         if (collectionItems.length) {
                             collectionsHtml += '<div class="cs-products-row">';
@@ -2656,7 +2668,7 @@
                     <a href="${item.link}">${item.name}</a>
                 </h4>
                 <div class="aq-product-price">
-                    <span class="aq-product-new-price" style="color:#666;">₹{item.label}</span>
+                    <span class="aq-product-new-price" style="color:#666;">${item.label}</span>
                 </div>
             </div>
         </div>
@@ -2854,8 +2866,6 @@
             $('#qvTitle').text(data.product.name);
             $('#qvViewDetailsLink').attr('href', data.product.url);
 
-            setQvPrice(data.product.price, data.product.mrp);
-
             let starsHtml = '';
             for (let i = 1; i <= 5; i++) {
                 starsHtml += '<span><i class="fa-' + (i <= Math.round(data.avgRating) ? 'solid' : 'regular') + ' fa-star"></i></span>';
@@ -2892,8 +2902,13 @@
             updateQvStockState(data.product.stock);
         }
 
-        function setQvPrice(price, mrp) {
-            $('#qvPrice').text('₹' + Number(price).toLocaleString('en-IN'));
+        function setQvPrice(price, mrp, soldOut) {
+            if (soldOut) {
+                $('#qvPrice').text('Sold Out').css({ color: '#b3261e', fontWeight: 700 });
+                $('#qvMrp').hide();
+                return;
+            }
+            $('#qvPrice').text('₹' + Number(price).toLocaleString('en-IN')).css({ color: '', fontWeight: '' });
             if (mrp > price) {
                 $('#qvMrp').text('₹' + Number(mrp).toLocaleString('en-IN')).show();
             } else {
@@ -2917,7 +2932,8 @@
 
             if (matchedVariant) {
                 qvCurrentProduct.variant_id = matchedVariant.id;
-                setQvPrice(matchedVariant.price, matchedVariant.mrp);
+                qvCurrentProduct.price = matchedVariant.price;
+                qvCurrentProduct.mrp = matchedVariant.mrp;
                 updateQvStockState(matchedVariant.stock);
 
                 if (matchedVariant.image) {
@@ -2932,12 +2948,17 @@
             qvCurrentProduct.stock = stock;
             $('#qvQty').attr('max', stock);
 
-            if (stock > 0) {
+            const minQty = parseInt(qvCurrentProduct.min_qty) || 1;
+            const soldOut = stock < minQty;
+
+            setQvPrice(qvCurrentProduct.price, qvCurrentProduct.mrp, soldOut);
+
+            if (!soldOut) {
                 $('#qvAddToCartBtn').prop('disabled', false).text('Add To Cart');
                 $('#qvBuyNowBtn').prop('disabled', false).text('Buy Now');
             } else {
-                $('#qvAddToCartBtn').prop('disabled', true).text('Out of Stock');
-                $('#qvBuyNowBtn').prop('disabled', true).text('Out of Stock');
+                $('#qvAddToCartBtn').prop('disabled', true).text('Sold Out');
+                $('#qvBuyNowBtn').prop('disabled', true).text('Sold Out');
             }
         }
 
@@ -2951,8 +2972,7 @@
         }
 
         function qvAddToCart(buyNow) {
-            if (!qvCurrentProduct || qvCurrentProduct.stock <= 0) return;
-
+            if (!qvCurrentProduct || qvCurrentProduct.stock < (parseInt(qvCurrentProduct.min_qty) || 1)) return;
             const quantity = parseInt($('#qvQty').val()) || 1;
 
             $.ajax({
