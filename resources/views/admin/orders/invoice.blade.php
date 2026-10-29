@@ -647,8 +647,11 @@
                             // SKU: sku variant > snapshot sku column > product sku
                             $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
 
-                            $addonsTotal = $item->addons->sum('price');
-                            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+                            // Effective per-unit price = base + addons + dye, so
+                            // unit × qty always equals the saved line total.
+                            $dyeCharge = (float) $item->dye_charge;
+                            $unitPrice = $item->price + $item->addons->sum('price') + $dyeCharge;
+                            $lineTotal = $item->total;
                         @endphp
                         <tr>
                             <td style="color:#8c9196;font-size:12px">{{ $i + 1 }}</td>
@@ -669,6 +672,9 @@
                                     <div class="item-variant">
                                         Custom Colour Code: <strong
                                             style="color:#202223;">{{ $item->custom_colour_code }}</strong>
+                                        @if($dyeCharge > 0)
+                                            (+&#8377;{{ number_format($dyeCharge, 2) }}/pc dye charge)
+                                        @endif
                                     </div>
                                 @endif
 
@@ -681,7 +687,7 @@
                                 @endif
                             </td>
                             <td class="center">{{ $item->quantity }}</td>
-                            <td class="right">&#8377;{{ number_format($item->price, 2) }}</td>
+                            <td class="right">&#8377;{{ number_format($unitPrice, 2) }}</td>
                             <td class="right">&#8377;{{ number_format($lineTotal, 2) }}</td>
                         </tr>
                     @endforeach

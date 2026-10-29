@@ -671,6 +671,12 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="alert-success no-print" style="background:var(--red-bg);color:var(--red);border-color:#f5c2c2">
+                    <i class="fa fa-exclamation-circle"></i> {{ session('error') }}
+                </div>
+            @endif
+
             {{-- ── Page header ── --}}
             <div class="page-header no-print">
                 <div>
@@ -696,6 +702,15 @@
                         <a href="{{ route('admin.orders.invoice', $order) }}" target="_blank" class="btn-secondary-dash">
                             <i class="fa fa-file-pdf-o"></i> Invoice
                         </a>
+                    @elseif($canGenerateInvoice)
+                        <form method="POST" action="{{ route('admin.orders.generate-invoice', $order) }}" class="no-print"
+                            style="display:inline" onsubmit="return confirm('Is order ki invoice generate karni hai?')">
+                            @csrf
+                            <button type="submit" class="btn-secondary-dash"
+                                style="color:var(--accent)!important;border-color:var(--accent)">
+                                <i class="fa fa-file-text-o"></i> Generate Invoice
+                            </button>
+                        </form>
                     @endif
 
                     <a href="{{ route('admin.orders.index') }}" class="btn-secondary-dash">
@@ -758,8 +773,8 @@
                                             // SKU: sku variant > snapshot sku column > product sku
                                             $sku = optional($item->skuVariant)->sku ?? ($item->sku ?? optional($item->product)->sku);
 
-                                            $addonsTotal = $item->addons->sum('price');
-                                            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+                                            // order_items.total already = qty × (price + addons + dye)
+                                            $lineTotal = $item->total;
                                         @endphp
                                         <tr>
                                             <td>
@@ -787,6 +802,9 @@
                                                                 Custom Colour Code:
                                                                 <strong
                                                                     style="color:var(--text-primary)">{{ $item->custom_colour_code }}</strong>
+                                                                @if((float) $item->dye_charge > 0)
+                                                                    (+₹{{ number_format($item->dye_charge, 2) }}/pc dye charge)
+                                                                @endif
                                                             </div>
                                                         @endif
                                                         @if($item->addons->isNotEmpty())

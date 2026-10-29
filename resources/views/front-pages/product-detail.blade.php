@@ -797,12 +797,10 @@ font-size:15px;
     transform: rotate(-18deg);
     pointer-events: none;
 }
-
 .variant-option-soldout {
     position: relative !important;
-    opacity: 0.55 !important;
-    pointer-events: none !important;
-    cursor: not-allowed !important;
+    /* opacity: 0.55 !important; */
+    cursor: pointer !important;   /* selectable now */
 }
 .aq-soldout-label {
     position: absolute;
@@ -817,6 +815,27 @@ font-size:15px;
     text-transform: uppercase;
     white-space: nowrap;
     pointer-events: none;
+}
+.variant-option-available {
+    position: relative !important;
+}
+.aq-available-label {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: #1e7e34;
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.aq-radio-option.variant-option-available,
+.aq-image-swatch.variant-option-available {
+    padding-bottom: 16px;
 }
 /* radio/image swatch labels need extra bottom room so the label
    doesn't collide with the size text */
@@ -1617,6 +1636,10 @@ font-size:15px;
             margin: 0;
         }
         .aq-colour-chart-link {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
             font-size: 12.5px;
             font-weight: 600;
             color: #b5904a;
@@ -1643,6 +1666,16 @@ font-size:15px;
             font-size: 11.5px;
             color: #888;
         }
+        .aq-colour-dye-note {
+            color: #b5904a;
+            font-weight: 600;
+        }
+        #colourChartModal .modal-body img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+        }
     </style>
 
     <div class="aq-colour-custom-box">
@@ -1650,15 +1683,21 @@ font-size:15px;
             <h5 class="aq-colour-custom-title">
                 <i class="fa-solid fa-palette"></i> Colour Customization Available
             </h5>
-            <a href="{{ route('colour.chart') }}" target="_blank" rel="noopener" class="aq-colour-chart-link">
+            <button type="button" class="aq-colour-chart-link"
+                data-bs-toggle="modal" data-bs-target="#colourChartModal">
                 View Colour Chart
-            </a>
+            </button>
         </div>
         <input type="text" id="aqCustomColourCode" class="aq-colour-custom-input" maxlength="50"
             placeholder="Enter your colour code (from the chart)" autocomplete="off">
         <span class="aq-colour-custom-hint">
-            Open the colour chart, copy the code of your choice and paste it here. Leave blank for the original colour.
+            Open the colour chart, note the code of your choice and type it here. Leave blank for the original colour.
         </span>
+        @if($product->dye_price > 0)
+            <span class="aq-colour-custom-hint aq-colour-dye-note">
+                Dye charge: +₹{{ number_format($product->dye_price, 2) }} per piece, added when a colour code is entered.
+            </span>
+        @endif
     </div>
 @endif
 
@@ -2334,6 +2373,29 @@ font-size:15px;
     </div>
     @endif
 
+    <!-- Colour Chart Modal -->
+@if($product->colour_customization)
+<div class="modal fade" id="colourChartModal" tabindex="-1" aria-labelledby="colourChartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="colourChartModalLabel">Colour Chart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    @foreach(['colour-chart-2', 'colour-chart-1', 'colour-chart-4', 'colour-chart-3'] as $i => $chart)
+                        <div class="col-12 col-md-6">
+                            <img src="{{ asset('assets/img/' . $chart . '.jpeg') }}" alt="Colour Chart {{ $i + 1 }}">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
     <!-- AQ Product Image Lightbox Modal -->
     <div class="aq-lightbox-modal" id="aqProductLightbox" aria-hidden="true" role="dialog" aria-label="Product Image Lightbox">
         <div class="aq-lightbox-backdrop" id="aqLightboxBackdrop"></div>
@@ -2376,6 +2438,7 @@ font-size:15px;
         let selectedValues = [];
         let selectedAddonIds = [];
         let selectedAddonTotal = 0;
+        let userHasSelected = false;
 
         // Single source of truth for the currently active unit price/mrp.
         // Always a plain number — updated by the variant click handler,
@@ -2386,6 +2449,18 @@ font-size:15px;
         // True only while the page is auto-selecting defaults on load.
         // Used to suppress the "scroll to first variant image" jump.
         window.isInitialVariantLoad = false;
+
+// Dye charge applies only when the customer actually enters a colour code
+const dyeUnitPrice = {{ $product->colour_customization ? (float) $product->dye_price : 0 }};
+
+function getDyeCharge() {
+    const code = ($('#aqCustomColourCode').val() || '').trim();
+    return (dyeUnitPrice > 0 && code !== '') ? dyeUnitPrice : 0;
+}
+
+$(document).on('input', '#aqCustomColourCode', function () {
+    updatePriceDisplay();
+});
 
 
         const activeCoupons = @json($activeCoupons);
@@ -2539,43 +2614,44 @@ function updateComboAvailability() {
 
     attributeIds.forEach(function (attrId) {
 
-       const otherActiveValueIds = $('.variant-option.active')
-    .filter(function () {
-        return $(this).data('attribute-id') != attrId
-            && $(this).data('stock-dependent') == 1;   // ← add this
-    })
-    .map(function () { return parseInt($(this).data('value-id')); })
-    .get();
+        const otherActiveValueIds = $('.variant-option.active')
+            .filter(function () {
+                return $(this).data('attribute-id') != attrId
+                    && $(this).data('stock-dependent') == 1;
+            })
+            .map(function () { return parseInt($(this).data('value-id')); })
+            .get();
 
         $('.variant-option[data-attribute-id="' + attrId + '"]').each(function () {
             const $opt = $(this);
 
             // Reset to a clean state first.
-            $opt.removeClass('variant-option-unavailable variant-option-soldout');
-            $opt.find('.aq-soldout-label').remove();
+            $opt.removeClass('variant-option-unavailable variant-option-soldout variant-option-available');
+            $opt.find('.aq-soldout-label, .aq-available-label').remove();
 
             const $ddOpt = $('.aq-size-dropdown[data-attribute-id="' + attrId + '"] option[value="' + $opt.data('value-id') + '"]');
             if ($ddOpt.length) {
                 $ddOpt.prop('disabled', false).text($ddOpt.data('original-text'));
             }
 
-            if ($opt.data('stock-dependent') != 1) return; // only relevant for the stock-driving attribute (Size)
+            if ($opt.data('stock-dependent') != 1) return;
 
             const valueId = parseInt($opt.data('value-id'));
 
             if (otherActiveValueIds.length === 0) {
-                // Nothing else selected yet — just flag sizes that are
-                // completely out of stock across every color/combo.
                 const combosWithValue = stockList.filter(function (c) { return c.values.includes(valueId); });
                 const totalStock = combosWithValue.reduce(function (sum, c) { return sum + (parseInt(c.stock) || 0); }, 0);
 
-                if (combosWithValue.length && totalStock <= 0) {
-                    markSoldOut($opt, $ddOpt);
+                if (combosWithValue.length) {
+                    if (totalStock <= 0) {
+                        markSoldOut($opt, $ddOpt);
+                    } else {
+                        markAvailable($opt, $ddOpt);
+                    }
                 }
                 return;
             }
 
-            // A color (or other attribute) is selected — find the exact combo.
             const matchingCombo = stockList.find(function (combo) {
                 if (!combo.values.includes(valueId)) return false;
                 return otherActiveValueIds.every(function (id) { return combo.values.includes(id); });
@@ -2585,6 +2661,8 @@ function updateComboAvailability() {
                 markUnavailable($opt, $ddOpt);
             } else if ((parseInt(matchingCombo.stock) || 0) <= 0) {
                 markSoldOut($opt, $ddOpt);
+            } else {
+                markAvailable($opt, $ddOpt);
             }
         });
     });
@@ -2600,10 +2678,20 @@ function markUnavailable($opt, $ddOpt) {
 function markSoldOut($opt, $ddOpt) {
     $opt.addClass('variant-option-soldout').append('<span class="aq-soldout-label">Sold Out</span>');
     if ($ddOpt && $ddOpt.length) {
-        $ddOpt.prop('disabled', true).text($ddOpt.data('original-text') + ' (Sold Out)');
+        // label only — stays selectable
+        $ddOpt.text($ddOpt.data('original-text') + ' (Sold Out)');
     }
 }
 
+function markAvailable($opt, $ddOpt) {
+    // Jab tak user ne khud kuchh select nahi kiya, "Available" mat dikhao
+    if (!userHasSelected) return;
+
+    $opt.addClass('variant-option-available').append('<span class="aq-available-label">Available</span>');
+    if ($ddOpt && $ddOpt.length) {
+        $ddOpt.text($ddOpt.data('original-text') + ' (Available)');
+    }
+}
 // ══════════════════════════════════════════════════════════════
 // REQUIRED-VARIANT VALIDATION
 // Every selectable attribute renders a .aq-size-selection-panel.
@@ -2663,15 +2751,16 @@ function validateRequiredVariants() {
 // Extracted so it can also be called on page load for attributes
 // that have only one value, without going through the click guard.
 // ══════════════════════════════════════════════════════════════
-function applyVariantSelection(attributeId, clickedValueId) {
+function applyVariantSelection(attributeId, clickedValueId, keepOthers) {
 
     $('.variant-option[data-attribute-id="' + attributeId + '"]').removeClass('active');
     $('.variant-option[data-attribute-id="' + attributeId + '"][data-value-id="' + clickedValueId + '"]').addClass('active');
 
-    // Auto-highlight the matching value(s) of any other selectable
-    // attribute(s) — this is what makes Blue→XL, Pink→L etc. work.
-    autoSelectDependentAttributes(attributeId, clickedValueId);
-
+    // Sold-out pick: the combo is valid, so don't shuffle the other attributes.
+    if (!keepOthers) {
+        autoSelectDependentAttributes(attributeId, clickedValueId);
+    }
+    
     // Keep real <select> dropdowns and radio inputs in sync with .active
     $('.variant-option.active').each(function () {
         const aId = $(this).data('attribute-id');
@@ -2865,13 +2954,20 @@ function autoSelectDependentAttributes(changedAttributeId, changedValueId) {
 
 $(document).on('click', '.variant-option', function () {
 
-    if ($(this).hasClass('variant-option-unavailable') || $(this).hasClass('variant-option-soldout')) {
-        return; // guard against programmatic/keyboard triggers on a disabled option
+    // Only combos that don't exist at all are blocked.
+    if ($(this).hasClass('variant-option-unavailable')) {
+        return;
     }
+
+    // Real user click — ab se "Available" labels dikhne lagenge
+    userHasSelected = true;
+
+    const isSoldOutPick = $(this).hasClass('variant-option-soldout');
 
     applyVariantSelection(
         $(this).data('attribute-id'),
-        parseInt($(this).data('value-id'))
+        parseInt($(this).data('value-id')),
+        isSoldOutPick
     );
 });
 
@@ -3023,15 +3119,17 @@ function updateQtyButtonStates() {
         |   due to separate rounding of price vs mrp vs their difference.
         |--------------------------------------------------------------------
         */
-       function updatePriceDisplay() {
+      function updatePriceDisplay() {
 
     const qty = parseInt($('#aqDetailQty').val()) || 1;
+    const dye = getDyeCharge();
 
-    const unitPriceWithAddons = currentUnitPrice + selectedAddonTotal;
-    const unitMrpWithAddons   = currentUnitMrp + selectedAddonTotal;
+    // Addons and dye are added to BOTH price and mrp, so they never change the discount %
+    const unitPriceWithExtras = currentUnitPrice + selectedAddonTotal + dye;
+    const unitMrpWithExtras   = currentUnitMrp + selectedAddonTotal + dye;
 
-    const totalPrice = Math.round(qty * unitPriceWithAddons);
-    const totalMrp   = Math.round(qty * unitMrpWithAddons);
+    const totalPrice = Math.round(qty * unitPriceWithExtras);
+    const totalMrp   = Math.round(qty * unitMrpWithExtras);
 
     $('#productPrice').text('₹' + totalPrice.toLocaleString('en-IN'));
     $('#stickyBarPrice').text('Rs. ' + totalPrice.toLocaleString('en-IN') + '.00');
@@ -3050,7 +3148,7 @@ function updateQtyButtonStates() {
         $('#priceMrpRow').hide();
     }
 
-    renderBestCoupon(totalPrice); // ← naya add kiya
+    renderBestCoupon(totalPrice);
 }
 
         document.getElementById('aqDetailQty')?.addEventListener('change', function () {
@@ -3073,12 +3171,16 @@ function updateQtyButtonStates() {
             }
 
             const stock = parseInt($('#currentStock').text()) || 0;
-            const quantity = parseInt($('#aqDetailQty').val());
+const quantity = parseInt($('#aqDetailQty').val());
 
-            if (stock <= 0 || quantity > stock) {
-                Swal.fire({ icon: 'error', title: 'Out of Stock', text: 'Requested quantity is not available.' });
-                return;
-            }
+if (stock <= 0) {
+    Swal.fire({ icon: 'error', title: 'Sold Out', text: 'This combination is currently sold out. Please choose another option.' });
+    return;
+}
+if (quantity > stock) {
+    Swal.fire({ icon: 'error', title: 'Out of Stock', text: 'Requested quantity is not available.' });
+    return;
+}
 
             const variantIds = window.currentVariantIds || { price: null, image: null, stock: null, sku: null };
 
@@ -3094,8 +3196,8 @@ function updateQtyButtonStates() {
                     sku_variant_id:   variantIds.sku,
                     selected_values: selectedValues,
                     addon_ids: selectedAddonIds,
-                    
-                    quantity: quantity
+custom_colour_code: ($('#aqCustomColourCode').val() || '').trim(),
+quantity: quantity
                 },
                 success: function (response) {
                     if (response.status) {

@@ -34,6 +34,7 @@ class Product extends Model
         'quality',
         'pan_india',
         'colour_customization',
+        'dye_price',
         'meta_title',
         'meta_description',
         'h1_heading',
@@ -145,17 +146,26 @@ class Product extends Model
         );
     }
 
-    public function scopeVisible($query)
-    {
-        $query->where('status', 1);
+   public function scopeVisible($query)
+{
+    return $query->where('status', 1)->inStock();
+}
 
-        if (StockSetting::current()->auto_disable_out_of_stock) {
-            $query->where('stock', '>', 0);
-        }
-
-        return $query;
-    }
-
+public function scopeInStock($query)
+{
+    return $query->where(function ($q) {
+        // Has stock variants → at least one must have stock
+        $q->whereHas('variants', function ($v) {
+            $v->where('type', 'stock')->where('stock', '>', 0);
+        })
+        // No stock variants → fall back to the base stock column
+        ->orWhere(function ($q2) {
+            $q2->whereDoesntHave('variants', function ($v) {
+                $v->where('type', 'stock');
+            })->where('stock', '>', 0);
+        });
+    });
+}
     public function reviews()
     {
         return $this->hasMany(ProductReview::class);

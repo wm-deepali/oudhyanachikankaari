@@ -1173,26 +1173,31 @@
                         </div>
 
                         <!-- Colour Customization -->
-                        <div class="section-card">
-                            <div class="section-card-header">
-                                <h5>Colour Customization</h5>
-                            </div>
-                            <div class="section-card-body" style="padding:14px 20px">
-                                <div class="toggle-row" style="padding:0;border:none">
-                                    <div>
-                                        <div class="toggle-label">Colour Customization Allowed</div>
-                                        <div class="toggle-sub">Customer can enter a colour code from the colour chart
-                                        </div>
-                                    </div>
-                                    <select name="colour_customization" class="field-select-sm">
-                                        <option value="0" {{ old('colour_customization', 0) == 0 ? 'selected' : '' }}>No
-                                        </option>
-                                        <option value="1" {{ old('colour_customization') == 1 ? 'selected' : '' }}>Yes
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+<div class="section-card">
+    <div class="section-card-header">
+        <h5>Colour Customization</h5>
+    </div>
+    <div class="section-card-body" style="padding:14px 20px">
+        <div class="toggle-row" style="padding:0;border:none">
+            <div>
+                <div class="toggle-label">Colour Customization Allowed</div>
+                <div class="toggle-sub">Customer can enter a colour code from the colour chart</div>
+            </div>
+            <select name="colour_customization" id="colour_customization" class="field-select-sm">
+                <option value="0" {{ old('colour_customization', 0) == 0 ? 'selected' : '' }}>No</option>
+                <option value="1" {{ old('colour_customization') == 1 ? 'selected' : '' }}>Yes</option>
+            </select>
+        </div>
+
+        <div class="field-group" id="dye-price-wrapper"
+            style="margin:14px 0 0; {{ old('colour_customization', 0) == 1 ? '' : 'display:none' }}">
+            <label class="field-label">Dye Price (₹)</label>
+            <input type="number" step="0.01" min="0" name="dye_price" id="dye_price" class="field-input"
+                value="{{ old('dye_price') }}" placeholder="0.00">
+            <div class="field-hint">Extra charge when the customer chooses a custom colour.</div>
+        </div>
+    </div>
+</div>
 
                         <!-- Inventory -->
                         <div class="section-card">
@@ -1383,6 +1388,14 @@
     CKEDITOR.replace('customization_assistance');
 
     let initialSuggestions = [];
+    
+    /* ── Dye price toggle ─────────────────────────────────────── */
+function toggleDyePrice() {
+    let on = $('#colour_customization').val() == '1';
+    $('#dye-price-wrapper').toggle(on);
+    if (!on) $('#dye_price').val('');
+}
+$(document).on('change', '#colour_customization', toggleDyePrice);
 
     /* ── Content tabs ────────────────────────────────────────────── */
     $(document).on('click', '.content-tab-btn', function () {

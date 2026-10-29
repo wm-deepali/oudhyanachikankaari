@@ -138,7 +138,7 @@ class CustomerAuthController extends Controller
         [
             'name'             => $googleUser->name,
             'google_id'        => $googleUser->id,
-            'avatar'           => $googleUser->avatar,
+            'avatar'           => null,
             'password'         => bcrypt(str()->random(20)),
             'mobile'           => null,
             'alternate_mobile' => null,
@@ -205,24 +205,37 @@ class CustomerAuthController extends Controller
         foreach ($guestCart->items as $item) {
 
             // Two line items only count as "the same" if product + every
-            // variant reference + the selected attribute snapshot all match.
-            // Otherwise different size/color combos would collapse into one row.
-            $existingItem = CartItem::where('cart_id', $userCart->id)
-                ->where('product_id', $item->product_id)
-                ->where('price_variant_id', $item->price_variant_id)
-                ->where('image_variant_id', $item->image_variant_id)
-                ->where('stock_variant_id', $item->stock_variant_id)
-                ->where('sku_variant_id', $item->sku_variant_id)
-                ->get()
-                ->first(function ($candidate) use ($item) {
-                    return $candidate->selected_attributes === $item->selected_attributes;
-                });
+            // variant reference + the selected attribute snapshot + the
+            // custom colour code all match. Lines carrying addons are never
+            // merged (each customization stays distinct, same as add-to-cart).
+            $existingItem = null;
+
+            if ($item->addons->isEmpty()) {
+
+                $existingItem = CartItem::where('cart_id', $userCart->id)
+                    ->where('product_id', $item->product_id)
+                    ->where('price_variant_id', $item->price_variant_id)
+                    ->where('image_variant_id', $item->image_variant_id)
+                    ->where('stock_variant_id', $item->stock_variant_id)
+                    ->where('sku_variant_id', $item->sku_variant_id)
+                    ->when(
+                        !empty($item->custom_colour_code),
+                        fn($q) => $q->where('custom_colour_code', $item->custom_colour_code),
+                        fn($q) => $q->whereNull('custom_colour_code')
+                    )
+                    ->doesntHave('addons')
+                    ->get()
+                    ->first(function ($candidate) use ($item) {
+                        return $candidate->selected_attributes === $item->selected_attributes;
+                    });
+            }
 
             if ($existingItem) {
 
+                // Keep the dye charge already locked on the existing line.
                 $existingItem->quantity += $item->quantity;
                 $existingItem->total =
-                    $existingItem->quantity * $existingItem->price;
+                    $existingItem->quantity * ($existingItem->price + (float) $existingItem->dye_charge);
 
                 $existingItem->save();
 
@@ -236,6 +249,8 @@ class CustomerAuthController extends Controller
                     'stock_variant_id' => $item->stock_variant_id,
                     'sku_variant_id' => $item->sku_variant_id,
                     'selected_attributes' => $item->selected_attributes,
+                    'custom_colour_code' => $item->custom_colour_code,
+                    'dye_charge' => $item->dye_charge ?? 0,
                     'quantity' => $item->quantity,
                     'price' => $item->price,
                     'total' => $item->total,

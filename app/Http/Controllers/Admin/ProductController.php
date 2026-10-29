@@ -225,6 +225,7 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'colour_customization' => 'nullable|in:0,1',
+'dye_price' => 'nullable|numeric|min:0',
             'images.*' => 'nullable|image|max:2048',
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
@@ -282,6 +283,9 @@ class ProductController extends Controller
                 'quality' => $request->has('quality'),
                 'pan_india' => $request->has('pan_india'),
                 'colour_customization' => $request->boolean('colour_customization'),
+'dye_price' => $request->boolean('colour_customization') && $request->filled('dye_price')
+    ? $request->dye_price
+    : 0,
 
                 'meta_title' => $metaTitle,
                 'meta_description' => $metaDescription,
@@ -599,6 +603,7 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:255',
             'product_code' => 'nullable|string|max:255',
             'colour_customization' => 'nullable|in:0,1',
+'dye_price' => 'nullable|numeric|min:0',
             'images.*' => 'nullable|image|max:2048',
             'videos.*' => 'nullable|mimes:mp4,webm,mov,avi|max:20480',
             'addons.*.detail' => 'nullable|string|max:255',
@@ -659,6 +664,9 @@ class ProductController extends Controller
                 'quality' => $request->has('quality'),
                 'pan_india' => $request->has('pan_india'),
                 'colour_customization' => $request->boolean('colour_customization'),
+'dye_price' => $request->boolean('colour_customization') && $request->filled('dye_price')
+    ? $request->dye_price
+    : 0,
 
                 'meta_title' => $metaTitle,
                 'meta_description' => $metaDescription,

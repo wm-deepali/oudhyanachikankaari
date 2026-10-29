@@ -40,8 +40,8 @@
 
     <style>
         /* ══════════════════════════════════════════════════════════
-       REVIEW ZONE — item card bottom strip
-    ══════════════════════════════════════════════════════════ */
+               REVIEW ZONE — item card bottom strip
+            ══════════════════════════════════════════════════════════ */
         .aq-review-zone {
             border-top: 1px solid var(--aq-border);
             padding: 14px 16px;
@@ -228,8 +228,8 @@
         }
 
         /* ══════════════════════════════════════════════════════════
-       REVIEW MODAL
-    ══════════════════════════════════════════════════════════ */
+               REVIEW MODAL
+            ══════════════════════════════════════════════════════════ */
         .aq-review-modal .modal-content {
             border: none;
             border-radius: 16px;
@@ -533,8 +533,8 @@
         }
 
         /* ══════════════════════════════════════════════════════════
-       RETURN MODAL FIELDS
-    ══════════════════════════════════════════════════════════ */
+               RETURN MODAL FIELDS
+            ══════════════════════════════════════════════════════════ */
         .rtn-field-group {
             margin-bottom: 14px;
         }
@@ -818,6 +818,9 @@
                                         @if(!empty($item->custom_colour_code))
                                             <p style="color:#aaa;font-size:12px;margin:2px 0 0;">
                                                 Custom Colour Code: {{ $item->custom_colour_code }}
+                                                @if((float) $item->dye_charge > 0)
+                                                    (+₹{{ number_format($item->dye_charge, 2) }}/pc dye charge)
+                                                @endif
                                             </p>
                                         @endif
                                         @if($item->addons->isNotEmpty())
@@ -826,11 +829,16 @@
                                             </p>
                                         @endif
                                     </div>
+                                    @php
+                                        $unitEffective = $item->price
+                                            + $item->addons->sum('price')
+                                            + (float) $item->dye_charge;
+                                    @endphp
                                     <div style="text-align:right;flex-shrink:0;">
-                                        <div class="aq-order-item-price">₹ {{ number_format($item->price) }}</div>
+                                        <div class="aq-order-item-price">₹ {{ number_format($unitEffective) }}</div>
                                         @if($item->quantity > 1)
                                             <small style="color:#aaa;">
-                                                × {{ $item->quantity }} = ₹ {{ number_format($item->price * $item->quantity) }}
+                                                × {{ $item->quantity }} = ₹ {{ number_format($item->total) }}
                                             </small>
                                         @endif
                                     </div>
@@ -1639,9 +1647,9 @@
                     const wrap = document.createElement('div');
                     wrap.className = 'rvm-preview-item';
                     wrap.innerHTML = `
-                    <img src="${e.target.result}" alt="">
-                    <button type="button" class="rvm-remove" onclick="removePreview(this)" data-idx="${idx}"
-                            aria-label="Remove photo">×</button>`;
+                            <img src="${e.target.result}" alt="">
+                            <button type="button" class="rvm-remove" onclick="removePreview(this)" data-idx="${idx}"
+                                    aria-label="Remove photo">×</button>`;
                     strip.appendChild(wrap);
                 };
                 reader.readAsDataURL(file);

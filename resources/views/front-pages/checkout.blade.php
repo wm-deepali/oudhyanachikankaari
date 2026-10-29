@@ -287,24 +287,24 @@
 
                                 <!-- Payment Method -->
                                 <h4 class="aq-checkout-section-title font-family-heading my-4 pb-2">3. Payment Method</h4>
-                               <div class="checkout-payment-methods">
-    <div class="payment-method-box active">
-        <label class="aq-custom-radio-container">
-            <input type="radio" name="payment_method" value="razorpay" checked>
-            <span class="checkmark-radio"></span>
-            Pay Online
-        </label>
-    </div>
-    @if($general && $general->cod_enabled)
-        <div class="payment-method-box">
-            <label class="aq-custom-radio-container">
-                <input type="radio" name="payment_method" value="cod">
-                <span class="checkmark-radio"></span>
-                Cash on Delivery (COD)
-            </label>
-        </div>
-    @endif
-</div>
+                                <div class="checkout-payment-methods">
+                                    <div class="payment-method-box active">
+                                        <label class="aq-custom-radio-container">
+                                            <input type="radio" name="payment_method" value="razorpay" checked>
+                                            <span class="checkmark-radio"></span>
+                                            Pay Online
+                                        </label>
+                                    </div>
+                                    @if($general && $general->cod_enabled)
+                                        <div class="payment-method-box">
+                                            <label class="aq-custom-radio-container">
+                                                <input type="radio" name="payment_method" value="cod">
+                                                <span class="checkmark-radio"></span>
+                                                Cash on Delivery (COD)
+                                            </label>
+                                        </div>
+                                    @endif
+                                </div>
 
                                 <div class="aq-checkout-disclaimer">
                                     <i class="fa-solid fa-lock mr-5"></i> Your personal data will be used to process your
@@ -357,12 +357,15 @@
 
                                                     @if(!empty($item->custom_colour_code))
 
-    <small class="d-block text-muted mt-1">
-        <i class="fa-solid fa-palette"></i>
-        Custom Colour Code : {{ $item->custom_colour_code }}
-    </small>
+                                                        <small class="d-block text-muted mt-1">
+                                                            <i class="fa-solid fa-palette"></i>
+                                                            Custom Colour Code : {{ $item->custom_colour_code }}
+                                                            @if((float) $item->dye_charge > 0)
+                                                                (+₹{{ number_format($item->dye_charge, 2) }}/pc dye charge)
+                                                            @endif
+                                                        </small>
 
-@endif
+                                                    @endif
 
                                                     @if($item->addons->count())
 
@@ -618,7 +621,7 @@
     </main>
 
 
-     <div id="payment-overlay" style="display:none;">
+    <div id="payment-overlay" style="display:none;">
         <div class="payment-loader">
             <div class="spinner-border text-light" role="status"></div>
             <p>Please wait, processing your payment...</p>
@@ -690,10 +693,10 @@
                                     : '';
 
                             options += `
-                                        <option value="${city.id}" ${selected}>
-                                            ${city.name}
-                                        </option>
-                                    `;
+                                            <option value="${city.id}" ${selected}>
+                                                ${city.name}
+                                            </option>
+                                        `;
                         });
 
                         $(citySelector).html(options);
@@ -855,8 +858,8 @@
 
                             handler: function (razorpayResponse) {
 
-                              document.getElementById('payment-overlay').style.display = 'flex';
-                              
+                                document.getElementById('payment-overlay').style.display = 'flex';
+
                                 $.ajax({
                                     url: "{{ route('checkout.razorpay.success') }}",
                                     type: "POST",
@@ -893,37 +896,37 @@
                     }
 
                 },
-               error: function (xhr) {
+                error: function (xhr) {
 
-    btn.prop('disabled', false);
+                    btn.prop('disabled', false);
 
-    let message = 'Something went wrong.';
+                    let message = 'Something went wrong.';
 
-    if (xhr.status === 422) {
+                    if (xhr.status === 422) {
 
-        let errors = xhr.responseJSON.errors;
+                        let errors = xhr.responseJSON.errors;
 
-        message = Object.values(errors)
-            .map(error => error[0])
-            .join('<br>');
-    }
+                        message = Object.values(errors)
+                            .map(error => error[0])
+                            .join('<br>');
+                    }
 
-    Swal.fire({
-        icon: 'error',
-        title: 'Validation Error',
-        html: message,
-        confirmButtonColor: '#d49aa7'
-    });
-}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Error',
+                        html: message,
+                        confirmButtonColor: '#d49aa7'
+                    });
+                }
             });
 
         });
 
     </script>
-@if(!empty($beginCheckoutScript))
-<script>
-    {!! $beginCheckoutScript !!}
-</script>
-@endif
+    @if(!empty($beginCheckoutScript))
+        <script>
+            {!! $beginCheckoutScript !!}
+        </script>
+    @endif
 
 @endsection

@@ -143,10 +143,7 @@
         <th>Attribute</th>
         <th>Required</th>
         <th>Variant</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Image</th>
-        <th>SKU</th>
+        <th>Selectable</th>
         <th>Filter</th>
         <th>Listing</th>
         <th>Sort</th>
@@ -190,25 +187,7 @@
             </td>
 
             <td>
-                {!! $item->price_dependent
-                    ? '<span class="bool-yes">Yes</span>'
-                    : '<span class="bool-no">No</span>' !!}
-            </td>
-
-            <td>
-                {!! $item->stock_dependent
-                    ? '<span class="bool-yes">Yes</span>'
-                    : '<span class="bool-no">No</span>' !!}
-            </td>
-
-            <td>
-                {!! $item->image_dependent
-                    ? '<span class="bool-yes">Yes</span>'
-                    : '<span class="bool-no">No</span>' !!}
-            </td>
-
-            <td>
-                {!! $item->sku_dependent
+                {!! $item->is_selectable
                     ? '<span class="bool-yes">Yes</span>'
                     : '<span class="bool-no">No</span>' !!}
             </td>

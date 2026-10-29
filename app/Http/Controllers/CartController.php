@@ -17,6 +17,24 @@ use App\Services\Tracking\PixelTracker;
 class CartController extends Controller
 {
 
+    /**
+     * Per-unit dye charge, calculated ONLY at add-to-cart time and then
+     * snapshotted into cart_items.dye_charge. Applies only when the product
+     * allows colour customization, a colour code was entered, and dye_price > 0.
+     */
+    private function dyeUnitCharge(Product $product, ?string $customColourCode): float
+    {
+        if (!$product->colour_customization) {
+            return 0.0;
+        }
+
+        if ($customColourCode === null || trim($customColourCode) === '') {
+            return 0.0;
+        }
+
+        return max(0.0, (float) $product->dye_price);
+    }
+
     public function add(Request $request)
     {
         $request->validate([
@@ -61,6 +79,9 @@ class CartController extends Controller
                 $customColourCode = null;
             }
         }
+
+        // Dye charge (per unit) for THIS add — saved on the cart line below
+        $dyeUnitCharge = $this->dyeUnitCharge($product, $customColourCode);
 
         /*
         |--------------------------------------------------------------------------
@@ -243,8 +264,12 @@ class CartController extends Controller
                 ], 422);
             }
 
+            // Merged line keeps the dye charge that was locked in when the
+            // line was first created — no re-pricing on merge.
+            $lineDyeCharge = (float) $item->dye_charge;
+
             $item->quantity = $newQty;
-            $item->total = $item->quantity * ($item->price + $addonUnitTotal);
+            $item->total = $item->quantity * ($item->price + $addonUnitTotal + $lineDyeCharge);
             $item->save();
 
         } else {
@@ -261,10 +286,11 @@ class CartController extends Controller
                 'selected_attributes' => $selectedAttributes,
 
                 'custom_colour_code' => $customColourCode,
+                'dye_charge' => $dyeUnitCharge,
 
                 'quantity' => $quantity,
                 'price' => $price,
-                'total' => $quantity * ($price + $addonUnitTotal),
+                'total' => $quantity * ($price + $addonUnitTotal + $dyeUnitCharge),
             ]);
 
             foreach ($selectedAddons as $addon) {
@@ -297,10 +323,11 @@ class CartController extends Controller
         /*
         |--------------------------------------------------------------------------
         | Pixel/GA tracking — add-to-cart event. Price used is the resolved
-        | variant price (or base price), same value the cart line was priced at.
+        | variant price (or base price) plus the saved dye charge, matching
+        | what the customer actually pays per unit (addons excluded, as before).
         |--------------------------------------------------------------------------
         */
-        $trackingEvents = PixelTracker::addToCart($product, $quantity, $price);
+        $trackingEvents = PixelTracker::addToCart($product, $quantity, $price + (float) $item->dye_charge);
 
         /*
         |--------------------------------------------------------------------------
@@ -389,7 +416,7 @@ class CartController extends Controller
         $trackingEvents = PixelTracker::removeFromCart(
             $item->product,
             $item->quantity,
-            $item->price
+            $item->price + (float) $item->dye_charge
         );
 
         $item->delete();
@@ -470,11 +497,13 @@ class CartController extends Controller
             }
         }
 
-        // Addon prices are per-unit, so they scale with quantity too — same
-        // rule as the "Add to Cart" price computation.
+        // Addon prices and the dye charge are per-unit, so they scale with
+        // quantity too. Dye charge comes from the value saved on this line
+        // (cart_items.dye_charge), NOT from the product's current dye_price.
         $addonUnitTotal = $item->addons->sum('price');
+        $dyeUnitCharge = (float) $item->dye_charge;
 
-        $item->total = $item->quantity * ($item->price + $addonUnitTotal);
+        $item->total = $item->quantity * ($item->price + $addonUnitTotal + $dyeUnitCharge);
         $item->save();
 
         $cart = $item->cart;
@@ -490,7 +519,7 @@ class CartController extends Controller
         }
 
         $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
-        $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
+        $totalMrp = ($baseMrp + $addonUnitTotal + $dyeUnitCharge) * $item->quantity;
 
         $cart->load(['items.product', 'items.imageVariant', 'items.addons']);
         $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();

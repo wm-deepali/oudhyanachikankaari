@@ -122,7 +122,7 @@ class FrontController extends Controller
                     $q->whereIn('category_id', $allIds)
                         ->orWhereIn('subcategory_id', $allIds);
                 })
-                    ->visible()
+                    ->visible()    
                     ->with('images')
                     ->latest()
                     ->take(6) // blade only shows first 6 anyway
@@ -940,6 +940,7 @@ class FrontController extends Controller
         // Pixel/GA view_item event — rendered as an inline script tag on the product-detail view
         $viewItemScript = \App\Services\Tracking\PixelTracker::viewItemScript($product);
 
+// dd($variantAttributes);
         return view('front-pages.product-detail', compact(
             'product',
             'newArrivals',

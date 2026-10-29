@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\NewOrderAdminMail;
-use App\Mail\OrderConfirmationMail;
 use App\Models\Cart;
-use App\Models\CustomerAddress;
-use App\Models\Setting;
-use App\Models\SmtpSetting;
-use App\Models\State;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Razorpay\Api\Api;
 use App\Models\Order;
+use Razorpay\Api\Api;
+use App\Models\State;
+use App\Models\Setting;
 use App\Models\OrderItem;
-use App\Models\Invoice;
+use Illuminate\Http\Request;
 use App\Models\PaymentSetting;
-use App\Http\Controllers\Admin\AdminSettingController;
-use App\Helpers\MailHelper;
+use App\Models\CustomerAddress;
+use Illuminate\Support\Facades\DB;
 use App\Services\StockAlertService;
 
 class CheckoutController extends Controller
@@ -350,6 +343,9 @@ class CheckoutController extends Controller
                     'total' => $item->total,
 
                     'custom_colour_code' => $item->custom_colour_code,
+
+                    // Per-unit dye charge locked at add-to-cart time
+                    'dye_charge' => $item->dye_charge ?? 0,
                 ]);
 
                 // Carry the cart item's addon snapshot over to the order item.
@@ -370,43 +366,8 @@ class CheckoutController extends Controller
 
             if ($request->payment_method == 'cod') {
 
-                $invoiceNumber =
-                    AdminSettingController::generateInvoiceNumber();
+                app(\App\Services\InvoiceService::class)->createIfAuto($order);
 
-                Invoice::create([
-                    'order_id' => $order->id,
-                    'invoice_number' => $invoiceNumber,
-                    'invoice_date' => now()->toDateString(),
-
-                    'customer_name' => $order->customer_name,
-                    'customer_email' => $order->customer_email,
-                    'customer_phone' => $order->customer_phone,
-
-                    'billing_address' => collect([
-                        $order->address_line_1,
-                        $order->address_line_2,
-                        $order->city?->name ?? '',
-                        $order->state?->name ?? '',
-                        $order->pincode,
-                    ])->filter()->implode(', '),
-
-                    'subtotal' => $order->subtotal,
-                    'discount' => $order->discount,
-                    'tax_amount' => $order->tax_amount,
-                    'grand_total' => $order->grand_total,
-
-                    'gst_type' => $order->gst_type,
-
-                    'cgst_rate' => $order->cgst_rate,
-                    'sgst_rate' => $order->sgst_rate,
-                    'igst_rate' => $order->igst_rate,
-
-                    'cgst_amount' => $order->cgst_amount,
-                    'sgst_amount' => $order->sgst_amount,
-                    'igst_amount' => $order->igst_amount,
-
-                    'status' => 'generated',
-                ]);
 
                 $cart->items()->delete();
                 $cart->delete();
@@ -623,75 +584,9 @@ class CheckoutController extends Controller
             */
 
             if (!$order->invoice) {
-
-                $invoiceNumber =
-                    AdminSettingController::generateInvoiceNumber();
-
-                Invoice::create([
-
-                    'order_id' => $order->id,
-
-                    'invoice_number' =>
-                        $invoiceNumber,
-
-                    'invoice_date' =>
-                        now()->toDateString(),
-
-                    'customer_name' =>
-                        $order->customer_name,
-
-                    'customer_email' =>
-                        $order->customer_email,
-
-                    'customer_phone' =>
-                        $order->customer_phone,
-
-                    'billing_address' =>
-                        collect([
-                            $order->address_line_1,
-                            $order->address_line_2,
-                            $order->city?->name ?? '',
-                            $order->state?->name ?? '',
-                            $order->pincode,
-                        ])->filter()->implode(', '),
-
-                    'subtotal' =>
-                        $order->subtotal,
-
-                    'discount' =>
-                        $order->discount,
-
-                    'tax_amount' =>
-                        $order->tax_amount,
-
-                    'grand_total' =>
-                        $order->grand_total,
-
-                    'gst_type' =>
-                        $order->gst_type,
-
-                    'cgst_rate' =>
-                        $order->cgst_rate,
-
-                    'sgst_rate' =>
-                        $order->sgst_rate,
-
-                    'igst_rate' =>
-                        $order->igst_rate,
-
-                    'cgst_amount' =>
-                        $order->cgst_amount,
-
-                    'sgst_amount' =>
-                        $order->sgst_amount,
-
-                    'igst_amount' =>
-                        $order->igst_amount,
-
-                    'status' => 'generated',
-                ]);
+                /* Generate Invoice (only if auto-generate is ON) */
+                app(\App\Services\InvoiceService::class)->createIfAuto($order);
             }
-
             /*
             |--------------------------------------------------------------------------
             | Clear Cart
@@ -818,12 +713,24 @@ class CheckoutController extends Controller
             $skuHtml = $sku
                 ? "<div style='font-size:11px;color:#7a9e9c;'>SKU: {$sku}</div>"
                 : '';
-            $colourHtml = $item->custom_colour_code
-                ? "<div style='font-size:11px;color:#7a9e9c;'>Custom Colour Code: " . e($item->custom_colour_code) . "</div>"
-                : '';
-            // Addons — list each one and fold into the line total
-            $addonsTotal = $item->addons->sum('price');
-            $lineTotal = ($item->price * $item->quantity) + $addonsTotal;
+
+            // Custom colour code + its per-unit dye charge (snapshot from order item)
+            $dyeCharge = (float) $item->dye_charge;
+
+            $colourHtml = '';
+            if ($item->custom_colour_code) {
+                $colourHtml = "<div style='font-size:11px;color:#7a9e9c;'>Custom Colour Code: " . e($item->custom_colour_code);
+
+                if ($dyeCharge > 0) {
+                    $colourHtml .= " (+₹" . number_format($dyeCharge, 2) . "/pc dye charge)";
+                }
+
+                $colourHtml .= "</div>";
+            }
+
+            // Line total: order_items.total already = qty × (price + addons + dye),
+            // so use it directly instead of recomputing (addons/dye are per-unit).
+            $lineTotal = $item->total;
 
             $addonsHtml = '';
             if ($item->addons->isNotEmpty()) {

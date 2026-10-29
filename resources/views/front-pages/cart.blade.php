@@ -66,14 +66,17 @@
 
                                             @if(!empty($item->custom_colour_code))
 
-    <div class="aq-cart-customization-badges mt-1">
-        <span class="aq-cart-badge">
-            <i class="fa-solid fa-palette"></i>
-            Custom Colour Code : {{ $item->custom_colour_code }}
-        </span>
-    </div>
+                                                <div class="aq-cart-customization-badges mt-1">
+                                                    <span class="aq-cart-badge">
+                                                        <i class="fa-solid fa-palette"></i>
+                                                        Custom Colour Code : {{ $item->custom_colour_code }}
+                                                        @if((float) $item->dye_charge > 0)
+                                                            (+₹{{ number_format($item->dye_charge, 2) }}/pc dye charge)
+                                                        @endif
+                                                    </span>
+                                                </div>
 
-@endif
+                                            @endif
 
                                             @if($item->addons->count())
 
@@ -107,12 +110,13 @@
                                             </div>
 
                                             @php
-                                                // Addons carry no MRP/discount of their own — their price counts
-                                                // toward both the "MRP" (strikethrough) and the actual total, so
-                                                // only the base product/variant portion ever shows a discount.
+                                                // Addons and dye charge carry no MRP/discount of their own — they
+                                                // count toward both the "MRP" (strikethrough) and the actual total,
+                                                // so only the base product/variant portion ever shows a discount.
                                                 $addonUnitTotal = $item->addons->sum('price');
+                                                $dyeUnitCharge = (float) $item->dye_charge;
                                                 $baseMrp = $item->priceVariant->mrp ?? $item->product->mrp;
-                                                $totalMrp = ($baseMrp + $addonUnitTotal) * $item->quantity;
+                                                $totalMrp = ($baseMrp + $addonUnitTotal + $dyeUnitCharge) * $item->quantity;
 
                                                 $discountPercentage = 0;
 
