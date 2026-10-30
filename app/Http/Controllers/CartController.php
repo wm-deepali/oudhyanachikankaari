@@ -343,6 +343,12 @@ class CartController extends Controller
 
         $miniCartHtml = view('layouts.mini-cart', ['miniCart' => $cart])->render();
 
+        \App\Services\Tracking\CartTracker::track('add_to_cart', $cart, [
+            'product' => $product->name ?? null,
+            'quantity' => $quantity ?? 1,
+            'price' => $price ?? null,
+        ]);
+
         return response()->json([
             'status' => true,
             'message' => 'Product added to cart successfully.',

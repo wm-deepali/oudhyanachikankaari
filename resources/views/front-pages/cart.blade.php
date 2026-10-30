@@ -192,7 +192,8 @@
 
                                 </div>
 
-                                <div id="couponAppliedBox" class="alert alert-success d-flex justify-content-between align-items-center"
+                                <div id="couponAppliedBox"
+                                    class="alert alert-success d-flex justify-content-between align-items-center"
                                     style="{{ $cart->coupon_code ? '' : 'display:none!important;' }}">
 
                                     <span>
@@ -263,24 +264,11 @@
                                 </span>
                             </div>
 
-                            @if(auth('customer')->check())
-
-                                <a href="{{ route('checkout') }}" class="aq-btn-final-quote"
-                                    style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
-                                    <span>Proceed to Checkout</span>
-                                    <i class="fa-solid fa-arrow-right-long"></i>
-                                </a>
-
-                            @else
-
-                                <a href="{{ route('user.login', ['redirect' => route('checkout')]) }}"
-                                    class="aq-btn-final-quote"
-                                    style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
-                                    <span>Login To Checkout</span>
-                                    <i class="fa-solid fa-arrow-right-long"></i>
-                                </a>
-
-                            @endif
+                            <a href="{{ route('checkout') }}" class="aq-btn-final-quote"
+                                style="background:#C98F9D;border-color:#C98F9D;text-decoration:none;">
+                                <span>Proceed to Checkout</span>
+                                <i class="fa-solid fa-arrow-right-long"></i>
+                            </a>
 
                             <div class="aq-summary-perks">
                                 <div class="aq-summary-perk-item">
@@ -334,8 +322,8 @@
                 return;
             }
 
-          document.getElementById('couponAppliedBox')
-    .style.setProperty('display', 'none', 'important');
+            document.getElementById('couponAppliedBox')
+                .style.setProperty('display', 'none', 'important');
             $('#couponFormBlock').show();
             $('#couponAppliedCode').text('');
 
@@ -360,7 +348,7 @@
             let itemId = $(this).data('id');
 
             $.ajax({
-               url: '{{ url("/cart/remove") }}/' + itemId,
+                url: '{{ url("/cart/remove") }}/' + itemId,
                 type: 'DELETE',
                 data: {
                     _token: '{{ csrf_token() }}'
@@ -394,10 +382,10 @@
                         if ($('.aq-cart-item-row').length === 0) {
 
                             $('#aqCartItemsList').html(`
-                                                                                    <div class="text-center py-5">
-                                                                                        <h4>Your cart is empty.</h4>
-                                                                                    </div>
-                                                                                `);
+                                                                                        <div class="text-center py-5">
+                                                                                            <h4>Your cart is empty.</h4>
+                                                                                        </div>
+                                                                                    `);
                         }
                     }
                 },
@@ -408,85 +396,85 @@
 
         });
 
-      $(document).on('click', '.qty-plus, .qty-minus', function () {
+        $(document).on('click', '.qty-plus, .qty-minus', function () {
 
-    let itemId = $(this).data('id');
+            let itemId = $(this).data('id');
 
-    let action = $(this).hasClass('qty-plus')
-        ? 'plus'
-        : 'minus';
+            let action = $(this).hasClass('qty-plus')
+                ? 'plus'
+                : 'minus';
 
-    $.ajax({
-        url: "{{ route('cart.update.quantity') }}",
-        type: "POST",
-        data: {
-            _token: "{{ csrf_token() }}",
-            item_id: itemId,
-            action: action
-        },
-        success: function (response) {
+            $.ajax({
+                url: "{{ route('cart.update.quantity') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    item_id: itemId,
+                    action: action
+                },
+                success: function (response) {
 
-            if (response.status) {
+                    if (response.status) {
 
-                fireTrackingEvents(response.tracking_events);
+                        fireTrackingEvents(response.tracking_events);
 
-                $('.aq-cart-qty-input[data-id="' + itemId + '"]')
-                    .val(response.quantity);
+                        $('.aq-cart-qty-input[data-id="' + itemId + '"]')
+                            .val(response.quantity);
 
-                $('#total-' + itemId).text(
-                    '₹' + Number(response.item_total).toLocaleString()
-                );
+                        $('#total-' + itemId).text(
+                            '₹' + Number(response.item_total).toLocaleString()
+                        );
 
-                $('#mrp-' + itemId).text(
-                    '₹' + Number(response.total_mrp).toLocaleString()
-                );
+                        $('#mrp-' + itemId).text(
+                            '₹' + Number(response.total_mrp).toLocaleString()
+                        );
 
-                $('#summarySubtotal').text(
-                    '₹' + Number(response.cart_total).toLocaleString()
-                );
+                        $('#summarySubtotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
 
-                $('#summaryDiscount').text(
-                    '- ₹' + Number(response.discount).toLocaleString()
-                );
+                        $('#summaryDiscount').text(
+                            '- ₹' + Number(response.discount).toLocaleString()
+                        );
 
-                $('#summaryTotal').text(
-                    '₹' + Number(response.cart_total).toLocaleString()
-                );
+                        $('#summaryTotal').text(
+                            '₹' + Number(response.cart_total).toLocaleString()
+                        );
 
-                handleCouponRevalidation(response);
+                        handleCouponRevalidation(response);
 
-            } else {
+                    } else {
 
-                // stock limit ya koi aur reason — customer ko batao
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Cannot Update Quantity',
-                    text: response.message || 'Unable to update quantity.',
-                    confirmButtonColor: '#C98F9D'
-                });
+                        // stock limit ya koi aur reason — customer ko batao
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Cannot Update Quantity',
+                            text: response.message || 'Unable to update quantity.',
+                            confirmButtonColor: '#C98F9D'
+                        });
 
-            }
-        },
-        error: function (xhr) {
+                    }
+                },
+                error: function (xhr) {
 
-            // agar controller 422/500 status ke saath json bhejta hai
-            let message = 'Unable to update quantity.';
+                    // agar controller 422/500 status ke saath json bhejta hai
+                    let message = 'Unable to update quantity.';
 
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                message = xhr.responseJSON.message;
-            }
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
 
-            Swal.fire({
-                icon: 'warning',
-                title: 'Cannot Update Quantity',
-                text: message,
-                confirmButtonColor: '#C98F9D'
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cannot Update Quantity',
+                        text: message,
+                        confirmButtonColor: '#C98F9D'
+                    });
+
+                }
             });
 
-        }
-    });
-
-});
+        });
 
         $('#applyCouponBtn').on('click', function () {
 

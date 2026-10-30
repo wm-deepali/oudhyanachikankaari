@@ -139,10 +139,24 @@ Route::middleware('maintenance.mode')->group(function () {
         Route::post('/cart/apply-coupon', [CartController::class, 'applyCoupon'])->name('cart.apply.coupon');
         Route::post('/cart/remove-coupon', [CartController::class, 'removeCoupon'])->name('cart.remove.coupon');
 
-        Route::middleware('customer')->group(function () {
+        // Guest bhi checkout dekh sakta hai
+        Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
-            Route::get('/checkout', [CheckoutController::class, 'checkout'])
-                ->name('checkout');
+        // Checkout modal se login / signup (guest ke liye)
+        Route::post('/checkout/ajax-login', [CustomerAuthController::class, 'ajaxLogin'])
+            ->middleware('throttle:10,1')
+            ->name('checkout.ajax-login');
+
+        Route::post('/checkout/ajax-register', [CustomerAuthController::class, 'ajaxRegister'])
+            ->middleware('throttle:10,1')
+            ->name('checkout.ajax-register');
+
+        Route::post('/checkout/track-step', [CheckoutController::class, 'trackStep'])
+            ->middleware('throttle:30,1')
+            ->name('checkout.track-step');
+
+        // Yeh sab login ke baad hi
+        Route::middleware('customer')->group(function () {
 
             Route::post('/address/store', [CheckoutController::class, 'storeAddress'])->name('address.store');
 
@@ -214,7 +228,7 @@ Route::middleware('maintenance.mode')->group(function () {
         });
 
     });
- 
+
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
@@ -452,7 +466,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('stored-carts', [StoredCartController::class, 'index'])->name('stored-carts.index');
         Route::delete('stored-carts/{cart}', [StoredCartController::class, 'destroy'])->name('stored-carts.destroy');
         Route::get('stored-carts/export', [StoredCartController::class, 'export'])->name('stored-carts.export');
-
+        Route::get('stored-carts/{cart}', [StoredCartController::class, 'show'])->whereNumber('cart')->name('stored-carts.show');
 
 
         Route::resource('return-reasons', ReturnReasonController::class)->names('return-reasons');
@@ -550,4 +564,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::get('/{attributeSlug}/{valueSlug}', [FrontController::class, 'attributeListing'])->name('attribute.listing');
-        

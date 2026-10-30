@@ -118,8 +118,9 @@
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-phone position-absolute aq-contact-input-icon"></i>
-                                                <input type="tel" name="mobile" id="mobileInput" class="form-control aq-contact-input"
-                                                    required maxlength="10" pattern="[6-9]{1}[0-9]{9}" placeholder="Mobile Number" />
+                                                <input type="tel" name="mobile" id="mobileInput"
+                                                    class="form-control aq-contact-input" required maxlength="10"
+                                                    pattern="[6-9]{1}[0-9]{9}" placeholder="Mobile Number" />
                                             </div>
                                             @error('mobile')
                                                 <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -130,10 +131,12 @@
                                             <div class="position-relative">
                                                 <i
                                                     class="fa-solid fa-phone-volume position-absolute aq-contact-input-icon"></i>
-                                              <input type="tel" name="alternate_mobile" id="alternateMobileInput"
-    class="form-control aq-contact-input" maxlength="10"
-    pattern="[6-9]{1}[0-9]{9}" placeholder="Alternate Number (Optional)" />
+                                                <input type="tel" name="alternate_mobile" id="alternateMobileInput"
+                                                    class="form-control aq-contact-input" maxlength="10"
+                                                    pattern="[6-9]{1}[0-9]{9}" placeholder="Alternate Number (Optional)" />
                                             </div>
+                                            <small id="alternateMobileError" class="text-danger d-none mt-1">Alternate
+                                                number must be different from mobile number.</small>
                                             @error('alternate_mobile')
                                                 <small class="text-danger d-block mt-1">{{ $message }}</small>
                                             @enderror
@@ -142,11 +145,13 @@
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-lock position-absolute aq-contact-input-icon"></i>
-                                                <input type="password" name="password" id="passwordInput" class="form-control aq-contact-input"
-                                                    required minlength="8" placeholder="Password (Min 8 Characters)"
+                                                <input type="password" name="password" id="passwordInput"
+                                                    class="form-control aq-contact-input" required minlength="8"
+                                                    placeholder="Password (Min 8 Characters)"
                                                     style="padding-right: 40px;" />
-                                                <i class="fa-regular fa-eye toggle-password-icon" data-target="passwordInput"
-                                                   style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
+                                                <i class="fa-regular fa-eye toggle-password-icon"
+                                                    data-target="passwordInput"
+                                                    style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
                                             </div>
                                             @error('password')
                                                 <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -156,12 +161,13 @@
                                         <div class="col-md-6">
                                             <div class="position-relative">
                                                 <i class="fa-solid fa-lock position-absolute aq-contact-input-icon"></i>
-                                                <input type="password" name="password_confirmation" id="confirmPasswordInput"
-                                                    class="form-control aq-contact-input" required minlength="8"
-                                                    placeholder="Confirm Password"
+                                                <input type="password" name="password_confirmation"
+                                                    id="confirmPasswordInput" class="form-control aq-contact-input" required
+                                                    minlength="8" placeholder="Confirm Password"
                                                     style="padding-right: 40px;" />
-                                                <i class="fa-regular fa-eye toggle-password-icon" data-target="confirmPasswordInput"
-                                                   style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
+                                                <i class="fa-regular fa-eye toggle-password-icon"
+                                                    data-target="confirmPasswordInput"
+                                                    style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; color:#999;"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -201,9 +207,9 @@
                                 </form>
 
                                 <!-- <div class="aq-auth-alt-link">
-                                                        <a href="#"><i class="fa-solid fa-globe mr-5"></i> Click here for International
-                                                            Users</a>
-                                                    </div> -->
+                                                            <a href="#"><i class="fa-solid fa-globe mr-5"></i> Click here for International
+                                                                Users</a>
+                                                        </div> -->
                                 <div class="aq-auth-alt-link mt-15">
                                     Already have an account? <a href="{{ route('user.login') }}">Login here</a>
                                 </div>
@@ -217,35 +223,35 @@
     </main>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const mobileInput = document.getElementById('mobileInput');
-    const altInput = document.getElementById('alternateMobileInput');
-    const altError = document.getElementById('alternateMobileError');
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileInput = document.getElementById('mobileInput');
+            const altInput = document.getElementById('alternateMobileInput');
+            const altError = document.getElementById('alternateMobileError');
 
-    function checkSameNumber() {
-        if (altInput.value.trim() !== '' && altInput.value.trim() === mobileInput.value.trim()) {
-            altError.classList.remove('d-none');
-            altInput.classList.add('is-invalid');
-            return false;
-        } else {
-            altError.classList.add('d-none');
-            altInput.classList.remove('is-invalid');
-            return true;
-        }
-    }
+            function checkSameNumber() {
+                if (altInput.value.trim() !== '' && altInput.value.trim() === mobileInput.value.trim()) {
+                    altError.classList.remove('d-none');
+                    altInput.classList.add('is-invalid');
+                    return false;
+                } else {
+                    altError.classList.add('d-none');
+                    altInput.classList.remove('is-invalid');
+                    return true;
+                }
+            }
 
-    mobileInput.addEventListener('input', checkSameNumber);
-    altInput.addEventListener('input', checkSameNumber);
+            mobileInput.addEventListener('input', checkSameNumber);
+            altInput.addEventListener('input', checkSameNumber);
 
-    document.getElementById('aqRegisterForm').addEventListener('submit', function (e) {
-        if (!checkSameNumber()) {
-            e.preventDefault();
-            altInput.focus();
-        }
-    });
-});
+            document.getElementById('aqRegisterForm').addEventListener('submit', function (e) {
+                if (!checkSameNumber()) {
+                    e.preventDefault();
+                    altInput.focus();
+                }
+            });
+        });
 
-        
+
         document.querySelectorAll('.toggle-password-icon').forEach(function (icon) {
             icon.addEventListener('click', function () {
                 const targetInput = document.getElementById(icon.getAttribute('data-target'));
@@ -263,10 +269,10 @@
     </script>
 
     {{-- Pixel/GA tracking — this form is a plain POST redirect (not AJAX), so
-         the controller flashes fire_signup_event / fire_login_event to the
-         session. Covers the email/password signup above AND a Google OAuth
-         signup/login that happens to redirect back through this page (e.g.
-         intended URL was the register page). --}}
+    the controller flashes fire_signup_event / fire_login_event to the
+    session. Covers the email/password signup above AND a Google OAuth
+    signup/login that happens to redirect back through this page (e.g.
+    intended URL was the register page). --}}
     @if(session('fire_signup_event'))
         <script>
             document.addEventListener('DOMContentLoaded', function () {

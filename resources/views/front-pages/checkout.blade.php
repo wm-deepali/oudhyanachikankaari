@@ -34,8 +34,6 @@
             position: static !important;
         }
 
-
-
         .saved-address-card input:checked+.saved-address-content {
             color: #000;
         }
@@ -54,6 +52,37 @@
         .saved-address-title {
             font-weight: 600;
             color: #d49aa7;
+        }
+
+        .checkout-login-note {
+            background: #fff8fa;
+            border: 1px solid #d49aa7;
+            border-radius: 10px;
+            color: #555;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkout-login-note i {
+            color: #d49aa7;
+        }
+
+        .checkout-login-note a {
+            color: #d49aa7;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        #authModal .nav-pills .nav-link {
+            color: #555;
+            border-radius: 8px;
+        }
+
+        #authModal .nav-pills .nav-link.active {
+            background: #d49aa7;
+            color: #fff;
         }
     </style>
 
@@ -81,10 +110,8 @@
             </div>
         </section>
 
-        <!-- Breadcrumb Bar -->
-
-
-
+        <!-- Cart subtotal snapshot (guest login ke baad cart merge compare karne ke liye) -->
+        <div id="checkoutMeta" data-subtotal="{{ $cart->items->sum('total') }}" style="display:none;"></div>
 
         <section class="aq-cart-wrapper" id="aqCartMainSection">
             <div class="container">
@@ -97,6 +124,17 @@
                         <!-- Left: Billing & Shipping -->
                         <div class="col-xl-8 col-lg-8 col-12 mb-40">
                             <h1 class="aq-cart-title font-family-heading mb-4">Billing & Shipping Details</h1>
+
+                            @guest('customer')
+                                <div class="checkout-login-note mb-4">
+                                    <i class="fa-regular fa-circle-user"></i>
+                                    <span>
+                                        Already have an account?
+                                        <a href="#" class="open-auth-modal">Login</a>
+                                        to use your saved details.
+                                    </span>
+                                </div>
+                            @endguest
 
                             <div class="aq-checkout-container aq-contact-page">
 
@@ -175,7 +213,7 @@
                                             <i class="fa-regular fa-user position-absolute aq-contact-input-icon"></i>
 
                                             <input type="text" id="customer_name" name="name"
-                                                class="form-control aq-contact-input" value="{{ $customer->name }}"
+                                                class="form-control aq-contact-input" value="{{ $customer->name ?? '' }}"
                                                 placeholder="Full Name *" required>
                                         </div>
                                     </div>
@@ -185,7 +223,7 @@
                                             <i class="fa-regular fa-envelope position-absolute aq-contact-input-icon"></i>
 
                                             <input type="email" id="customer_email" name="email"
-                                                class="form-control aq-contact-input" value="{{ $customer->email }}"
+                                                class="form-control aq-contact-input" value="{{ $customer->email ?? '' }}"
                                                 placeholder="Email Address *" required>
                                         </div>
                                     </div>
@@ -195,7 +233,7 @@
                                             <i class="fa-solid fa-phone position-absolute aq-contact-input-icon"></i>
 
                                             <input type="tel" id="customer_phone" name="phone"
-                                                class="form-control aq-contact-input" value="{{ $customer->mobile }}"
+                                                class="form-control aq-contact-input" value="{{ $customer->mobile ?? '' }}"
                                                 placeholder="Phone Number *" required>
                                         </div>
                                     </div>
@@ -491,6 +529,7 @@
         </section>
 
 
+        <!-- Add New Address Modal (logged-in users) -->
         <div class="modal fade aq-premium-modal address-modal" id="newAddressModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
                 <div class="modal-content">
@@ -616,6 +655,100 @@
                 </div>
             </div>
         </div>
+
+        <!-- Login / Signup Modal (guests, on Place Order) -->
+        <div class="modal fade aq-premium-modal" id="authModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+                <div class="modal-content">
+
+                    <button type="button" class="btn-close position-absolute" style="top:20px;right:20px;z-index:10;"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+
+                    <div class="p-4">
+                        <h3 class="font-family-heading mb-1">Continue to Order</h3>
+                        <p class="text-muted mb-3" style="font-size:14px;">
+                            Login or create an account to place your order.
+                        </p>
+
+                        <ul class="nav nav-pills nav-fill mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button type="button" class="nav-link active" data-bs-toggle="pill"
+                                    data-bs-target="#authLoginPane">Login</button>
+                            </li>
+                            <li class="nav-item">
+                                <button type="button" class="nav-link" data-bs-toggle="pill"
+                                    data-bs-target="#authRegisterPane">Sign Up</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+
+                            <!-- LOGIN -->
+                            <div class="tab-pane fade show active" id="authLoginPane">
+                                <div id="loginError" class="alert alert-danger py-2 d-none"></div>
+
+                                <div class="mb-3">
+                                    <input type="email" id="login_email" class="form-control" placeholder="Email Address">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="password" id="login_password" class="form-control" placeholder="Password">
+                                </div>
+
+                                <button type="button" id="authLoginBtn" class="aq-btn-submit w-100"
+                                    style="background: var(--aq-color-maroon); color:#fff; padding:12px; border:none; border-radius:8px;">
+                                    Login & Continue
+                                </button>
+                            </div>
+
+                            <!-- REGISTER -->
+                            <div class="tab-pane fade" id="authRegisterPane">
+                                <div id="registerError" class="alert alert-danger py-2 d-none"></div>
+
+                                <div class="mb-3">
+                                    <input type="text" id="reg_name" class="form-control" placeholder="Full Name"
+                                        maxlength="100">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="email" id="reg_email" class="form-control" placeholder="Email Address">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="tel" id="reg_mobile" class="form-control" placeholder="Mobile Number"
+                                        maxlength="10">
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <input type="password" id="reg_password" class="form-control"
+                                            placeholder="Password (min 8)">
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <input type="password" id="reg_password_confirmation" class="form-control"
+                                            placeholder="Confirm Password">
+                                    </div>
+                                </div>
+
+                                <button type="button" id="authRegisterBtn" class="aq-btn-submit w-100"
+                                    style="background: var(--aq-color-maroon); color:#fff; padding:12px; border:none; border-radius:8px;">
+                                    Create Account & Continue
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center my-3">
+                            <hr class="flex-grow-1 m-0">
+                            <span class="mx-3 text-muted" style="font-size:12px;">OR</span>
+                            <hr class="flex-grow-1 m-0">
+                        </div>
+
+                        <a href="{{ route('google.login', ['redirect' => route('checkout')]) }}"
+                            class="w-100 d-flex justify-content-center align-items-center"
+                            style="background:#fff;color:#555;padding:11px;border-radius:8px;border:1px solid #ddd;font-weight:600;font-size:14px;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                                alt="Google" style="width:18px;margin-right:10px;">
+                            Continue with Google
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </main>
@@ -657,46 +790,77 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
 
+        let csrfToken = "{{ csrf_token() }}";
+
+        function setCsrfToken(token) {
+            if (!token) return;
+
+            csrfToken = token;
+
+            // Form ka hidden _token (placeOrder serialize() isi se leta hai)
+            $('input[name="_token"]').val(token);
+
+            // Layout ka meta tag agar hai
+            $('meta[name="csrf-token"]').attr('content', token);
+
+            // Aage ke saare jQuery ajax calls ke liye header
+            $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': token } });
+        }
+
+        let isLoggedIn = @json(auth('customer')->check());
+        let pendingPlaceOrder = false;
+        const initialSubtotal = Number($('#checkoutMeta').data('subtotal') || 0);
+
+        function trackStep(step) {
+            $.post("{{ route('checkout.track-step') }}", { _token: csrfToken, step: step });
+        }
+
+        function showError(message, title = 'Error') {
+            Swal.fire({
+                icon: 'error',
+                title: title,
+                html: message,
+                confirmButtonColor: '#d49aa7'
+            });
+        }
+
+        function ajaxErrorMessage(xhr, fallback) {
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.errors) {
+                    return Object.values(xhr.responseJSON.errors)
+                        .map(e => e[0])
+                        .join('<br>');
+                }
+                if (xhr.responseJSON.message) {
+                    return xhr.responseJSON.message;
+                }
+            }
+            return fallback;
+        }
+
+        /* ---------------- Cities / Saved address ---------------- */
 
         $(document).ready(function () {
 
             function loadCities(stateId, citySelector, selectedCityId = '') {
                 if (!stateId) {
-
-                    $(citySelector).html(
-                        '<option value="">Select City</option>'
-                    );
-
+                    $(citySelector).html('<option value="">Select City</option>');
                     return;
                 }
 
-                $(citySelector).html(
-                    '<option value="">Loading...</option>'
-                );
+                $(citySelector).html('<option value="">Loading...</option>');
 
                 $.ajax({
                     url: "{{ route('get-cities') }}",
                     type: "GET",
-                    data: {
-                        state_id: stateId
-                    },
+                    data: { state_id: stateId },
                     success: function (response) {
 
-                        let options =
-                            '<option value="">Select City</option>';
+                        let options = '<option value="">Select City</option>';
 
                         $.each(response, function (key, city) {
-
-                            let selected =
-                                city.id == selectedCityId
-                                    ? 'selected'
-                                    : '';
-
-                            options += `
-                                            <option value="${city.id}" ${selected}>
-                                                ${city.name}
-                                            </option>
-                                        `;
+                            let selected = city.id == selectedCityId ? 'selected' : '';
+                            options += `<option value="${city.id}" ${selected}>${city.name}</option>`;
                         });
 
                         $(citySelector).html(options);
@@ -704,49 +868,28 @@
                 });
             }
 
+            let defaultCityId = "{{ $defaultAddress->city_id ?? '' }}";
 
-            let defaultCityId =
-                "{{ $defaultAddress->city_id ?? '' }}";
-
-            loadCities(
-                $('#state_id').val(),
-                '#city_id',
-                defaultCityId
-            );
+            loadCities($('#state_id').val(), '#city_id', defaultCityId);
 
             $('#state_id').on('change', function () {
-
-                loadCities(
-                    $(this).val(),
-                    '#city_id'
-                );
-
+                loadCities($(this).val(), '#city_id');
             });
 
             $('#modal_state_id').on('change', function () {
-
-                loadCities(
-                    $(this).val(),
-                    '#modal_city_id'
-                );
-
+                loadCities($(this).val(), '#modal_city_id');
             });
 
-
-
             $('.saved-address-radio').on('change', function () {
-
-                let addressId = $(this).val();
 
                 $.ajax({
                     url: "{{ route('checkout.change-default-address') }}",
                     type: "POST",
                     data: {
-                        _token: "{{ csrf_token() }}",
-                        address_id: addressId
+                        _token: csrfToken,
+                        address_id: $(this).val()
                     },
                     success: function (response) {
-
                         if (response.success) {
                             location.reload();
                         }
@@ -754,15 +897,13 @@
                 });
             });
 
-
             $('#saveAddressBtn').on('click', function () {
 
                 $.ajax({
                     url: "{{ route('address.store') }}",
                     type: "POST",
-
                     data: {
-                        _token: "{{ csrf_token() }}",
+                        _token: csrfToken,
 
                         name: $('#modal_name').val(),
                         email: $('#modal_email').val(),
@@ -778,149 +919,291 @@
 
                         address_type: $('input[name="address_type"]:checked').val()
                     },
-
                     success: function (response) {
-
                         if (response.success) {
-
                             location.reload();
                         }
+                    },
+                    error: function (xhr) {
+                        showError(ajaxErrorMessage(xhr, 'Unable to save address.'), 'Validation Error');
                     }
                 });
-
             });
 
         });
 
+        /* ---------------- Login / Signup modal ---------------- */
+
+        const authModalEl = document.getElementById('authModal');
+
+        function openAuthModal() {
+
+            $('#loginError, #registerError').addClass('d-none').html('');
+
+            // Checkout form ki details se prefill
+            if (!$('#reg_name').val()) $('#reg_name').val($('#customer_name').val());
+            if (!$('#reg_email').val()) $('#reg_email').val($('#customer_email').val());
+            if (!$('#reg_mobile').val()) $('#reg_mobile').val($('#customer_phone').val());
+            if (!$('#login_email').val()) $('#login_email').val($('#customer_email').val());
+
+            bootstrap.Modal.getOrCreateInstance(authModalEl).show();
+        }
+
+        // Top wali "Login" link: login ke baad sirf page reload (saved details prefill ho jayengi)
+        $(document).on('click', '.open-auth-modal', function (e) {
+            e.preventDefault();
+            pendingPlaceOrder = false;
+            openAuthModal();
+        });
+
+        function onAuthSuccess(res) {
+
+            setCsrfToken(res.csrf_token);
+
+            isLoggedIn = true;
+
+            if (typeof fireTrackingEvents === 'function' && res.tracking_events) {
+                try {
+                    fireTrackingEvents(res.tracking_events);
+                } catch (e) {
+                    console.warn('Tracking event failed (ignored):', e);
+                }
+            }
+
+            let proceed = pendingPlaceOrder;
+            pendingPlaceOrder = false;
+
+            // Modal poora band hone ke baad aage badho (Razorpay popup focus issue se bachne ke liye)
+            $(authModalEl).one('hidden.bs.modal', function () {
+
+                if (!proceed) {
+                    location.reload();
+                    return;
+                }
+
+                // Login ke baad cart ke items badal gaye (purana saved cart merge hua) to review karwao
+                if (Math.abs(Number(res.cart_subtotal) - initialSubtotal) > 0.01) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Cart Updated',
+                        text: 'Your saved cart items were merged. Please review your order before paying.',
+                        confirmButtonColor: '#d49aa7'
+                    }).then(() => location.reload());
+                    return;
+                }
+
+                placeOrder();
+            });
+
+            bootstrap.Modal.getOrCreateInstance(authModalEl).hide();
+        }
+
+        $('#authLoginBtn').on('click', function () {
+
+            let btn = $(this);
+            $('#loginError').addClass('d-none');
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ route('checkout.ajax-login') }}",
+                type: "POST",
+                data: {
+                    _token: csrfToken,
+                    email: $('#login_email').val(),
+                    password: $('#login_password').val()
+                },
+                success: function (res) {
+                    btn.prop('disabled', false);
+                    onAuthSuccess(res);
+                },
+                error: function (xhr) {
+                    btn.prop('disabled', false);
+                    $('#loginError')
+                        .removeClass('d-none')
+                        .html(ajaxErrorMessage(xhr, 'Login failed.'));
+                }
+            });
+        });
+
+        $('#authRegisterBtn').on('click', function () {
+
+            let btn = $(this);
+            $('#registerError').addClass('d-none');
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ route('checkout.ajax-register') }}",
+                type: "POST",
+                data: {
+                    _token: csrfToken,
+                    name: $('#reg_name').val(),
+                    email: $('#reg_email').val(),
+                    mobile: $('#reg_mobile').val(),
+                    password: $('#reg_password').val(),
+                    password_confirmation: $('#reg_password_confirmation').val()
+                },
+                success: function (res) {
+                    btn.prop('disabled', false);
+                    onAuthSuccess(res);
+                },
+                error: function (xhr) {
+                    btn.prop('disabled', false);
+                    $('#registerError')
+                        .removeClass('d-none')
+                        .html(ajaxErrorMessage(xhr, 'Registration failed.'));
+                }
+            });
+        });
+
+        // Enter key se submit
+        $('#login_email, #login_password').on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#authLoginBtn').click();
+            }
+        });
+
+        $('#reg_name, #reg_email, #reg_mobile, #reg_password, #reg_password_confirmation').on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#authRegisterBtn').click();
+            }
+        });
+
+        /* ---------------- Place Order ---------------- */
 
         $('#placeOrderBtn').on('click', function () {
 
-            let btn = $(this);
+            // Pehle form validate (guest ho ya logged in)
+            let formEl = document.getElementById('checkoutForm');
+
+            if (!formEl.reportValidity()) {
+                return;
+            }
+
+            // Guest hai to pehle login / signup modal
+            if (!isLoggedIn) {
+                pendingPlaceOrder = true;
+                trackStep('login_prompt');  
+                openAuthModal();
+                return;
+            }
+
+            placeOrder();
+        });
+
+        function placeOrder() {
+
+            let btn = $('#placeOrderBtn');
+            let overlay = document.getElementById('payment-overlay');
+
+            function resetUI() {
+                overlay.style.display = 'none';
+                btn.prop('disabled', false);
+            }
 
             btn.prop('disabled', true);
 
             $.ajax({
-
                 url: "{{ route('checkout.place-order') }}",
-
                 type: "POST",
-
                 data: $('#checkoutForm').serialize(),
 
                 success: function (response) {
 
-                    btn.prop('disabled', false);
-
                     if (!response.success) {
-
-                        alert(response.message);
+                        resetUI();
+                        showError(response.message || 'Unable to place order.');
                         return;
                     }
 
-                    let paymentMethod = $(
-                        'input[name="payment_method"]:checked'
-                    ).val();
+                    let paymentMethod = $('input[name="payment_method"]:checked').val();
 
                     // COD
                     if (paymentMethod === 'cod') {
-
                         window.location.href = response.redirect_url;
                         return;
                     }
 
                     // Razorpay
-                    if (paymentMethod === 'razorpay') {
+                    let localOrderId = response.order_id;
 
-                        let localOrderId = response.order_id;
+                    let options = {
+                        key: response.key,
+                        amount: response.amount,
+                        currency: "INR",
+                        name: "{{ config('app.name') }}",
+                        description: "Order Payment",
+                        order_id: response.razorpay_order_id,
 
-                        let options = {
+                        prefill: {
+                            name: response.customer_name,
+                            email: response.customer_email,
+                            contact: response.customer_phone
+                        },
 
-                            key: response.key,
-
-                            amount: response.amount,
-
-                            currency: "INR",
-
-                            name: "{{ config('app.name') }}",
-
-                            description: "Order Payment",
-
-                            order_id: response.razorpay_order_id,
-
-                            prefill: {
-
-                                name: response.customer_name,
-
-                                email: response.customer_email,
-
-                                contact: response.customer_phone
-                            },
-
-                            handler: function (razorpayResponse) {
-
-                                document.getElementById('payment-overlay').style.display = 'flex';
-
-                                $.ajax({
-                                    url: "{{ route('checkout.razorpay.success') }}",
-                                    type: "POST",
-                                    data: {
-
-                                        _token: "{{ csrf_token() }}",
-
-                                        order_id: localOrderId,
-
-                                        razorpay_payment_id:
-                                            razorpayResponse.razorpay_payment_id,
-
-                                        razorpay_order_id:
-                                            razorpayResponse.razorpay_order_id,
-
-                                        razorpay_signature:
-                                            razorpayResponse.razorpay_signature
-                                    },
-
-                                    success: function (res) {
-
-                                        if (res.success) {
-                                            window.location.href =
-                                                res.redirect_url;
-                                        }
-                                    }
-                                });
-
+                        // Popup band kiya to button wapas enable
+                        modal: {
+                            ondismiss: function () {
+                                resetUI();
                             }
-                        };
+                        },
 
-                        let rzp = new Razorpay(options);
-                        rzp.open();
-                    }
+                        handler: function (razorpayResponse) {
 
-                },
-                error: function (xhr) {
+                            overlay.style.display = 'flex';
 
-                    btn.prop('disabled', false);
+                            $.ajax({
+                                url: "{{ route('checkout.razorpay.success') }}",
+                                type: "POST",
+                                data: {
+                                    _token: csrfToken,
+                                    order_id: localOrderId,
+                                    razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                                    razorpay_order_id: razorpayResponse.razorpay_order_id,
+                                    razorpay_signature: razorpayResponse.razorpay_signature
+                                },
 
-                    let message = 'Something went wrong.';
+                                success: function (res) {
+                                    if (res.success) {
+                                        window.location.href = res.redirect_url;
+                                        return;
+                                    }
+                                    resetUI();
+                                    showError(res.message || 'Payment could not be confirmed.');
+                                },
 
-                    if (xhr.status === 422) {
+                                error: function (xhr) {
+                                    resetUI();
+                                    showError(ajaxErrorMessage(
+                                        xhr,
+                                        'Payment confirmation failed. If money was deducted, please contact support.'
+                                    ));
+                                }
+                            });
+                        }
+                    };
 
-                        let errors = xhr.responseJSON.errors;
+                    let rzp = new Razorpay(options);
 
-                        message = Object.values(errors)
-                            .map(error => error[0])
-                            .join('<br>');
-                    }
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Validation Error',
-                        html: message,
-                        confirmButtonColor: '#d49aa7'
+                    rzp.on('payment.failed', function (failure) {
+                        resetUI();
+                        showError(
+                            (failure.error && failure.error.description)
+                                ? failure.error.description
+                                : 'Payment failed. Please try again.'
+                        );
                     });
+
+                    rzp.open();
+                },
+
+                error: function (xhr) {
+                    resetUI();
+                    showError(ajaxErrorMessage(xhr, 'Something went wrong.'), 'Validation Error');
                 }
             });
-
-        });
+        }
 
     </script>
     @if(!empty($beginCheckoutScript))

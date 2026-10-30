@@ -159,7 +159,7 @@
                 <div class="stat-card">
                     <div class="stat-label">Total Stored Carts</div>
                     <div class="stat-value">{{ number_format($totalCarts) }}</div>
-                    <div class="stat-sub">Customers with items saved</div>
+                    <div class="stat-sub">Guest + logged-in carts</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Total Cart Value</div>
@@ -193,6 +193,14 @@
                                         placeholder="Customer name or email…" value="{{ request('search') }}">
                                 </div>
                             </div>
+                            <div class="filter-group">
+    <label>Type</label>
+    <select name="type" class="filter-control">
+        <option value="">All</option>
+        <option value="guest" @selected(request('type') === 'guest')>Guest</option>
+        <option value="customer" @selected(request('type') === 'customer')>Logged-in</option>
+    </select>
+</div>
                             <div class="filter-group">
                                 <label>Cart Age</label>
                                 <select name="cart_age" class="filter-control">
@@ -240,6 +248,7 @@
                                 <th style="width:130px">Cart Value</th>
                                 <th style="width:120px">Last Updated</th>
                                 <th style="width:120px">Cart Age</th>
+                                <th style="min-width:150px">Reached</th>
                                 <th style="width:80px">Actions</th>
                             </tr>
                         </thead>
@@ -280,6 +289,26 @@
                                         $ageClass = 'age-dead';
                                         $ageLabel = $diffDays . 'd ago';
                                     }
+
+                                    $acts = $activityMap[$cart->id] ?? collect();
+$firstAct = $acts->first();
+$reached = $acts->map(fn($a) => \App\Models\CartActivity::EVENTS[$a->event]['rank'] ?? 0)->max() ?? 0;
+$stageLabel = match (true) {
+    $reached >= 5 => 'Payment Started',
+    $reached >= 4 => 'Logged In',
+    $reached >= 3 => 'Login Prompt',
+    $reached >= 2 => 'Opened Checkout',
+    $reached >= 1 => 'Added to Cart',
+    default => 'Not tracked',
+};
+
+if (!$u) {
+    $custName = 'Guest';
+    $custInitials = 'G';
+    $custContact = $firstAct
+        ? trim(($firstAct->city ? $firstAct->city . ' · ' : '') . ucfirst($firstAct->device_type ?? ''))
+        : 'Not logged in';
+}
                                 @endphp
 
                                 {{-- Main row --}}
@@ -361,7 +390,14 @@
                                             <i class="fa fa-clock-o"></i> {{ $ageLabel }}
                                         </span>
                                     </td>
-
+<td>
+    <span class="age-pill {{ $reached >= 4 ? 'age-fresh' : ($reached >= 2 ? 'age-warm' : 'age-cold') }}">
+        {{ $stageLabel }}
+    </span>
+    @if($firstAct)
+        <div class="cart-value-sub">{{ ucfirst($firstAct->device_type) }} · {{ $firstAct->browser }}</div>
+    @endif
+</td>
                                     <td>
                                         <div style="display:flex;gap:6px">
                                             @if($cart->user_id)
@@ -370,6 +406,9 @@
                                                     <i class="fa fa-user"></i>
                                                 </a>
                                             @endif
+                                            <a href="{{ route('admin.stored-carts.show', $cart->id) }}" class="action-btn view" title="View Journey">
+    <i class="fa fa-eye"></i>
+</a>
                                             <form action="{{ route('admin.stored-carts.destroy', $cart->id) }}"
                                                 method="POST" onsubmit="return confirm('Clear this cart?')"
                                                 style="margin:0">
@@ -385,7 +424,7 @@
 
                                 {{-- Expanded items row --}}
                                 <tr class="expanded-row" id="expand-{{ $cart->id }}">
-                                    <td colspan="9" style="padding:0">
+                                    <td colspan="10" style="padding:0">
                                         <div class="expanded-inner">
                                             <div
                                                 style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-hint);margin-bottom:8px">
@@ -466,7 +505,7 @@
 
                             @empty
                                 <tr>
-                                    <td colspan="9">
+                                    <td colspan="10">
                                         <div class="empty-state">
                                             <div class="empty-icon-wrap">
                                                 <i class="fa fa-shopping-cart"></i>

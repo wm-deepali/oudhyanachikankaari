@@ -10,6 +10,7 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Wishlist;
+use App\Services\Tracking\CartTracker;
 
 class CustomerAuthController extends Controller
 {
@@ -47,7 +48,7 @@ class CustomerAuthController extends Controller
                 'name' => ['required', 'max:100', 'regex:/^[A-Za-z\s]+$/'],
                 'email' => ['required', 'email', 'unique:customers,email'],
                 'mobile' => ['required', 'regex:/^[6-9]\d{9}$/', 'unique:customers,mobile'],
-                'alternate_mobile' => ['nullable', 'regex:/^[6-9]\d{9}$/'],
+                'alternate_mobile' => ['nullable', 'regex:/^[6-9]\d{9}$/', 'different:mobile'],
                 'password' => ['required', 'min:8', 'confirmed'],
             ],
             [
@@ -79,6 +80,11 @@ class CustomerAuthController extends Controller
 
         $request->session()->regenerate();
 
+        $cart = Cart::where('user_id', $customer->id)->first();
+
+        CartTracker::linkToCustomer($customer->id, $cart?->id);
+        CartTracker::track('signup', $cart, [], 0, $customer->id);
+
         // Sends the customer back to wherever they came from (e.g. the cart
         // page) instead of always landing on the dashboard after signup.
         return redirect()
@@ -97,9 +103,10 @@ class CustomerAuthController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (Auth::guard('customer')->attempt($credentials, $remember)) {
+        // attempt() session ID migrate kar deta hai, isliye PEHLE capture karo
+        $guestSessionId = session()->getId();
 
-            $guestSessionId = session()->getId();
+        if (Auth::guard('customer')->attempt($credentials, $remember)) {
 
             $customer = Auth::guard('customer')->user();
 
@@ -108,10 +115,15 @@ class CustomerAuthController extends Controller
 
             $request->session()->regenerate();
 
+            $cart = Cart::where('user_id', $customer->id)->first();
+
+            CartTracker::linkToCustomer($customer->id, $cart?->id);
+            CartTracker::track('login', $cart, [], 0, $customer->id);
+
             return redirect()
                 ->intended(route('user.dashboard.index'))
                 ->with('success', 'Login successful.')
-                ->with('fire_login_event', true); // 👈 new — blade fires Pixel/GA login on this flash
+                ->with('fire_login_event', true);
         }
 
         return back()
@@ -121,47 +133,46 @@ class CustomerAuthController extends Controller
             ]);
     }
 
-    public function redirectToGoogle()
+    public function handleGoogleCallback()
     {
-        return Socialite::driver('google')->redirect();
+        $googleUser = Socialite::driver('google')->stateless()->user();
+
+        $customer = Customer::firstOrCreate(
+            [
+                'email' => $googleUser->email,
+            ],
+            [
+                'name' => $googleUser->name,
+                'google_id' => $googleUser->id,
+                'avatar' => null,
+                'password' => bcrypt(str()->random(20)),
+                'mobile' => null,
+                'alternate_mobile' => null,
+            ]
+        );
+
+        $isNewCustomer = $customer->wasRecentlyCreated;
+
+        $guestSessionId = session()->getId();
+        Auth::guard('customer')->login($customer);
+
+
+        $this->mergeGuestCart($customer, $guestSessionId);
+        $this->mergeGuestWishlist($customer, $guestSessionId);
+
+        $cart = Cart::where('user_id', $customer->id)->first();
+
+        CartTracker::linkToCustomer($customer->id, $cart?->id);
+        CartTracker::track($isNewCustomer ? 'signup' : 'login', $cart, [], 0, $customer->id);
+
+        if ($isNewCustomer) {
+            session()->flash('fire_signup_event', 'google_oauth');
+        } else {
+            session()->flash('fire_login_event', true);
+        }
+
+        return redirect()->intended(route('home'));
     }
-
-
-   public function handleGoogleCallback()
-{
-    $googleUser = Socialite::driver('google')->stateless()->user();
-
-    $customer = Customer::firstOrCreate(
-        [
-            'email' => $googleUser->email,
-        ],
-        [
-            'name'             => $googleUser->name,
-            'google_id'        => $googleUser->id,
-            'avatar'           => null,
-            'password'         => bcrypt(str()->random(20)),
-            'mobile'           => null,
-            'alternate_mobile' => null,
-        ]
-    );
-
-    $isNewCustomer = $customer->wasRecentlyCreated;
-
-    $guestSessionId = session()->getId();
-    Auth::guard('customer')->login($customer);
-
-
-    $this->mergeGuestCart($customer, $guestSessionId);
-    $this->mergeGuestWishlist($customer, $guestSessionId);
-
-    if ($isNewCustomer) {
-        session()->flash('fire_signup_event', 'google_oauth');
-    } else {
-        session()->flash('fire_login_event', true);
-    }
-
-    return redirect()->intended(route('home'));
-}
 
     public function logout(Request $request)
     {
@@ -177,6 +188,7 @@ class CustomerAuthController extends Controller
     {
         $guestCart = Cart::with('items.addons')
             ->where('session_id', $guestSessionId)
+            ->whereNull('user_id')
             ->first();
 
         if (!$guestCart) {
@@ -194,20 +206,11 @@ class CustomerAuthController extends Controller
         );
 
         if ($guestCart->id == $userCart->id) {
-
-            $userCart->update([
-                'user_id' => $customer->id
-            ]);
-
             return;
         }
 
         foreach ($guestCart->items as $item) {
 
-            // Two line items only count as "the same" if product + every
-            // variant reference + the selected attribute snapshot + the
-            // custom colour code all match. Lines carrying addons are never
-            // merged (each customization stays distinct, same as add-to-cart).
             $existingItem = null;
 
             if ($item->addons->isEmpty()) {
@@ -232,7 +235,6 @@ class CustomerAuthController extends Controller
 
             if ($existingItem) {
 
-                // Keep the dye charge already locked on the existing line.
                 $existingItem->quantity += $item->quantity;
                 $existingItem->total =
                     $existingItem->quantity * ($existingItem->price + (float) $existingItem->dye_charge);
@@ -256,7 +258,6 @@ class CustomerAuthController extends Controller
                     'total' => $item->total,
                 ]);
 
-                // Carry over addons attached to the guest's line item
                 foreach ($item->addons as $addon) {
                     $newItem->addons()->create([
                         'addon_id' => $addon->addon_id,
@@ -265,6 +266,11 @@ class CustomerAuthController extends Controller
                     ]);
                 }
             }
+        }
+
+        // Guest ka coupon carry karo agar user cart mein koi coupon nahi hai
+        if (empty($userCart->coupon_code) && !empty($guestCart->coupon_code)) {
+            $userCart->update(['coupon_code' => $guestCart->coupon_code]);
         }
 
         $userCart->update([
@@ -276,14 +282,15 @@ class CustomerAuthController extends Controller
         });
         $guestCart->items()->delete();
         $guestCart->delete();
+
+        // Subtotal, discount, GST sab dobara calculate
+        $userCart->refresh();
+        $userCart->recalculateTotals();
     }
 
     private function mergeGuestWishlist(Customer $customer, $guestSessionId)
     {
-        $guestWishlistItems = Wishlist::where(
-            'session_id',
-            $guestSessionId
-        )->get();
+        $guestWishlistItems = Wishlist::where('session_id', $guestSessionId)->get();
 
         if ($guestWishlistItems->isEmpty()) {
             return;
@@ -291,18 +298,11 @@ class CustomerAuthController extends Controller
 
         foreach ($guestWishlistItems as $item) {
 
-            $exists = Wishlist::where(
-                'customer_id',
-                $customer->id
-            )
-                ->where(
-                    'product_id',
-                    $item->product_id
-                )
+            $exists = Wishlist::where('customer_id', $customer->id)
+                ->where('product_id', $item->product_id)
                 ->exists();
 
             if (!$exists) {
-
                 Wishlist::create([
                     'customer_id' => $customer->id,
                     'session_id' => null,
@@ -312,10 +312,107 @@ class CustomerAuthController extends Controller
             }
         }
 
-        Wishlist::where(
-            'session_id',
-            session()->getId()
-        )->delete();
+        Wishlist::where('session_id', $guestSessionId)->delete();
+    }
+
+    public function ajaxLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // attempt() se PEHLE capture
+        $guestSessionId = session()->getId();
+
+        if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
+
+            $customer = Auth::guard('customer')->user();
+
+            $this->mergeGuestCart($customer, $guestSessionId);
+            $this->mergeGuestWishlist($customer, $guestSessionId);
+
+            $request->session()->regenerate();
+
+            $cart = Cart::where('user_id', $customer->id)->first();
+
+            CartTracker::linkToCustomer($customer->id, $cart?->id);
+            CartTracker::track('login', $cart, [], 0, $customer->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful.',
+                'csrf_token' => csrf_token(), // 👈 naya token
+                'cart_subtotal' => (float) ($cart ? $cart->items()->sum('total') : 0),
+                'tracking_events' => [
+                    ['type' => 'gtag', 'name' => 'login', 'params' => (object) []],
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid email or password.',
+        ], 422);
+    }
+
+    public function ajaxRegister(Request $request)
+    {
+        $validated = $request->validate(
+            [
+                'name' => ['required', 'max:100', 'regex:/^[A-Za-z\s]+$/'],
+                'email' => ['required', 'email', 'unique:customers,email'],
+                'mobile' => ['required', 'regex:/^[6-9]\d{9}$/', 'unique:customers,mobile'],
+                'password' => ['required', 'min:8', 'confirmed'],
+            ],
+            [
+                'name.regex' => 'Name should contain only letters.',
+                'mobile.regex' => 'Enter a valid Indian mobile number.',
+                'password.confirmed' => 'Password and confirm password do not match.',
+            ]
+        );
+
+        $customer = Customer::create($validated);
+
+        \App\Services\Email\EmailDispatcher::send(
+            'welcome',
+            $customer->email,
+            ['{customer_name}' => $customer->name]
+        );
+
+        $guestSessionId = session()->getId();
+
+        Auth::guard('customer')->login($customer);
+
+        $this->mergeGuestCart($customer, $guestSessionId);
+        $this->mergeGuestWishlist($customer, $guestSessionId);
+
+        $request->session()->regenerate();
+
+        $cart = Cart::where('user_id', $customer->id)->first();
+
+        CartTracker::linkToCustomer($customer->id, $cart?->id);
+        CartTracker::track('signup', $cart, [], 0, $customer->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registration completed successfully.',
+            'csrf_token' => csrf_token(), // 👈 naya token
+            'cart_subtotal' => (float) ($cart ? $cart->items()->sum('total') : 0),
+            'tracking_events' => [
+                ['type' => 'gtag', 'name' => 'sign_up', 'params' => ['method' => 'email_password']],
+            ],
+        ]);
+    }
+
+    // Google button modal mein bhi hai, isliye redirect remember karna hai
+    public function redirectToGoogle(Request $request)
+    {
+        if ($request->filled('redirect')) {
+            session(['url.intended' => $request->redirect]);
+        }
+
+        return Socialite::driver('google')->redirect();
     }
 
 }

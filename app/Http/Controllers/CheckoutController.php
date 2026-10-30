@@ -13,6 +13,8 @@ use App\Models\PaymentSetting;
 use App\Models\CustomerAddress;
 use Illuminate\Support\Facades\DB;
 use App\Services\StockAlertService;
+use Illuminate\Support\Facades\Log;
+use App\Services\Tracking\CartTracker;
 
 class CheckoutController extends Controller
 {
@@ -24,47 +26,40 @@ class CheckoutController extends Controller
 
     public function checkout()
     {
-        $customer = auth('customer')->user();
+        $customer = auth('customer')->user(); // guest ke liye null
 
-        $cart = Cart::with([
+        $cartQuery = Cart::with([
             'items.product.images',
             'items.product.category',
             'items.priceVariant',
             'items.addons',
-        ])
-            ->where('user_id', $customer->id)
-            ->first();
+        ]);
 
-        if ($cart) {
-            $cart->recalculateTotals();
-            $cart->refresh();
+        $cart = $customer
+            ? $cartQuery->where('user_id', $customer->id)->first()
+            : $cartQuery->where('session_id', session()->getId())->whereNull('user_id')->first();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return redirect()->route('cart')->with('error', 'Your cart is empty.');
         }
 
-        $customer = auth('customer')->user();
+        $cart->recalculateTotals();
+        $cart->refresh();
+        CartTracker::track('checkout_viewed', $cart, [], 30); // refresh par duplicate nahi
 
-        $addresses = $customer->addresses()
-            ->with(['state', 'city'])
-            ->orderByDesc('is_default')
-            ->get();
+        $addresses = $customer
+            ? $customer->addresses()->with(['state', 'city'])->orderByDesc('is_default')->get()
+            : collect();
 
         $defaultAddress = $addresses->firstWhere('is_default', true);
 
-        $states = State::orderBy('name')
-            ->get();
+        $states = State::orderBy('name')->get();
 
-        // Pixel/GA begin_checkout event — rendered as an inline script tag on the checkout view
         $beginCheckoutScript = \App\Services\Tracking\PixelTracker::beginCheckoutScript($cart);
 
         return view(
             'front-pages.checkout',
-            compact(
-                'cart',
-                'customer',
-                'addresses',
-                'defaultAddress',
-                'states',
-                'beginCheckoutScript' // 👈 new
-            )
+            compact('cart', 'customer', 'addresses', 'defaultAddress', 'states', 'beginCheckoutScript')
         );
     }
 
@@ -72,27 +67,41 @@ class CheckoutController extends Controller
     {
         $customer = auth('customer')->user();
 
-        CustomerAddress::where(
-            'customer_id',
-            $customer->id
-        )->update([
-                    'is_default' => 0
-                ]);
-
-        CustomerAddress::create([
-            'customer_id' => $customer->id,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address_line_1' => $request->address_line_1,
-            'address_line_2' => $request->address_line_2,
-            'country' => 'India',
-            'state_id' => $request->state_id,
-            'city_id' => $request->city_id,
-            'pincode' => $request->pincode,
-            'address_type' => $request->address_type ?? 'home',
-            'is_default' => 1,
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => ['required', 'regex:/^[6-9]\d{9}$/'],
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'state_id' => 'required|exists:states,id',
+            'city_id' => 'required|exists:cities,id',
+            'pincode' => ['required', 'regex:/^\d{6}$/'],
+            'address_type' => 'nullable|in:home,office',
+        ], [
+            'phone.regex' => 'Enter a valid 10 digit mobile number.',
+            'pincode.regex' => 'Enter a valid 6 digit pincode.',
         ]);
+
+        DB::transaction(function () use ($customer, $validated) {
+
+            CustomerAddress::where('customer_id', $customer->id)
+                ->update(['is_default' => 0]);
+
+            CustomerAddress::create([
+                'customer_id' => $customer->id,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'address_line_1' => $validated['address_line_1'],
+                'address_line_2' => $validated['address_line_2'] ?? null,
+                'country' => 'India',
+                'state_id' => $validated['state_id'],
+                'city_id' => $validated['city_id'],
+                'pincode' => $validated['pincode'],
+                'address_type' => $validated['address_type'] ?? 'home',
+                'is_default' => 1,
+            ]);
+        });
 
         $cart = Cart::where('user_id', $customer->id)->first();
 
@@ -100,48 +109,35 @@ class CheckoutController extends Controller
             $cart->recalculateTotals();
         }
 
-        return response()->json([
-            'success' => true
-        ]);
+        return response()->json(['success' => true]);
     }
-
 
     public function changeDefaultAddress(Request $request)
     {
         $request->validate([
-            'address_id' => 'required|exists:customer_addresses,id'
+            'address_id' => 'required|integer',
         ]);
 
         $customer = auth('customer')->user();
 
-        CustomerAddress::where(
-            'customer_id',
-            $customer->id
-        )->update([
-                    'is_default' => 0
-                ]);
+        // Pehle ownership check, tabhi baaki addresses reset honge
+        $address = CustomerAddress::where('customer_id', $customer->id)
+            ->findOrFail($request->address_id);
 
-        CustomerAddress::where(
-            'id',
-            $request->address_id
-        )
-            ->where('customer_id', $customer->id)
-            ->update([
-                'is_default' => 1
-            ]);
+        DB::transaction(function () use ($customer, $address) {
+            CustomerAddress::where('customer_id', $customer->id)
+                ->update(['is_default' => 0]);
 
-        $cart = Cart::where(
-            'user_id',
-            $customer->id
-        )->first();
+            $address->update(['is_default' => 1]);
+        });
+
+        $cart = Cart::where('user_id', $customer->id)->first();
 
         if ($cart) {
             $cart->recalculateTotals();
         }
 
-        return response()->json([
-            'success' => true
-        ]);
+        return response()->json(['success' => true]);
     }
 
 
@@ -153,86 +149,60 @@ class CheckoutController extends Controller
             'payment_method' => 'required|in:cod,razorpay',
         ]);
 
-        $address = null;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Existing Address
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->filled('address_id')) {
-
-            $address = CustomerAddress::where(
-                'customer_id',
-                $customer->id
-            )->find($request->address_id);
+        // COD sirf tab jab admin ne enable kiya ho (blade check bypass ho sakta hai)
+        // NOTE: agar cod_enabled kisi aur model/table mein hai to yahan wahi use karo
+        if ($request->payment_method === 'cod' && !optional(Setting::first())->cod_enabled) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cash on Delivery is not available.',
+            ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create Address If Not Exists
-        |--------------------------------------------------------------------------
-        */
+        $address = null;
 
+        /* Existing Address */
+        if ($request->filled('address_id')) {
+            $address = CustomerAddress::where('customer_id', $customer->id)
+                ->find($request->address_id);
+        }
+
+        /* Create Address If Not Exists */
         if (!$address) {
 
             $request->validate([
-
                 'name' => 'required|string|max:255',
                 'email' => 'required|email',
                 'phone' => 'required',
-
                 'address_line_1' => 'required',
                 'state_id' => 'required|exists:states,id',
                 'city_id' => 'required|exists:cities,id',
                 'pincode' => 'required',
             ]);
 
-            CustomerAddress::where(
-                'customer_id',
-                $customer->id
-            )->update([
-                        'is_default' => 0
-                    ]);
+            CustomerAddress::where('customer_id', $customer->id)
+                ->update(['is_default' => 0]);
 
             $address = CustomerAddress::create([
-
                 'customer_id' => $customer->id,
-
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
-
                 'address_line_1' => $request->address_line_1,
                 'address_line_2' => $request->address_line_2,
-
+                'country' => 'India',
                 'state_id' => $request->state_id,
                 'city_id' => $request->city_id,
-
                 'pincode' => $request->pincode,
-
                 'address_type' => 'home',
-
                 'is_default' => 1,
             ]);
+        }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Recalculate GST Using New Address
-            |--------------------------------------------------------------------------
-            */
+        /* Hamesha latest address ke hisaab se GST recalc */
+        $cart = Cart::where('user_id', $customer->id)->first();
 
-            $cart = Cart::where(
-                'user_id',
-                $customer->id
-            )->first();
-
-            if ($cart) {
-
-                $cart->recalculateTotals();
-                $cart->refresh();
-            }
+        if ($cart) {
+            $cart->recalculateTotals();
         }
 
         $cart = Cart::with([
@@ -243,7 +213,6 @@ class CheckoutController extends Controller
             ->first();
 
         if (!$cart || $cart->items->count() == 0) {
-
             return response()->json([
                 'success' => false,
                 'message' => 'Cart is empty.'
@@ -255,12 +224,10 @@ class CheckoutController extends Controller
         try {
 
             $order = Order::create([
-
                 'customer_id' => $customer->id,
                 'address_id' => $address->id,
 
-                'order_number' =>
-                    'ORD-' . strtoupper(uniqid()),
+                'order_number' => 'ORD-' . strtoupper(uniqid()),
 
                 'customer_name' => $address->name,
                 'customer_email' => $address->email,
@@ -291,12 +258,7 @@ class CheckoutController extends Controller
                 'igst_amount' => $cart->igst_amount,
 
                 'payment_method' => $request->payment_method,
-
-                'payment_status' =>
-                    $request->payment_method == 'cod'
-                    ? 'pending'
-                    : 'pending',
-
+                'payment_status' => 'pending',
                 'status' => 'pending',
             ]);
 
@@ -321,9 +283,7 @@ class CheckoutController extends Controller
             foreach ($cart->items as $item) {
 
                 $orderItem = OrderItem::create([
-
                     'order_id' => $order->id,
-
                     'product_id' => $item->product_id,
 
                     'price_variant_id' => $item->price_variant_id,
@@ -333,22 +293,15 @@ class CheckoutController extends Controller
 
                     'selected_attributes' => $item->selected_attributes,
 
-                    'product_name' =>
-                        $item->product->name ?? 'Product',
-
+                    'product_name' => $item->product->name ?? 'Product',
                     'quantity' => $item->quantity,
-
                     'price' => $item->price,
-
                     'total' => $item->total,
 
                     'custom_colour_code' => $item->custom_colour_code,
-
-                    // Per-unit dye charge locked at add-to-cart time
                     'dye_charge' => $item->dye_charge ?? 0,
                 ]);
 
-                // Carry the cart item's addon snapshot over to the order item.
                 foreach ($item->addons as $addon) {
                     $orderItem->addons()->create([
                         'addon_id' => $addon->addon_id,
@@ -358,28 +311,24 @@ class CheckoutController extends Controller
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | COD Order
-            |--------------------------------------------------------------------------
-            */
-
+            /* COD Order */
             if ($request->payment_method == 'cod') {
 
                 app(\App\Services\InvoiceService::class)->createIfAuto($order);
 
-
                 $cart->items()->delete();
                 $cart->delete();
 
-                // COD — deduct stock before committing
                 $this->deductOrderStock($order);
-                // $this->alertService->sendAlertEmailIfNeeded(); // ← add this
-
 
                 DB::commit();
 
-                // 👇 new — Meta CAPI purchase event, dispatched after commit so order is guaranteed saved
+                CartTracker::track('order_placed', $cart, [
+                    'order_number' => $order->order_number,
+                    'method' => 'cod',
+                    'amount' => (float) $order->grand_total,
+                ]);
+
                 \App\Jobs\SendMetaCapiPurchase::dispatchAfterResponse(
                     $order->id,
                     $request->ip(),
@@ -394,19 +343,11 @@ class CheckoutController extends Controller
                     'success' => true,
                     'type' => 'cod',
                     'message' => 'Order placed successfully.',
-                    'redirect_url' => route(
-                        'order.success',
-                        $order->id
-                    )
+                    'redirect_url' => route('order.success', $order->id)
                 ]);
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Razorpay Order
-            |--------------------------------------------------------------------------
-            */
-
+            /* Razorpay Order */
             $paymentSetting = PaymentSetting::first();
 
             $keyId = $paymentSetting->live_mode
@@ -417,63 +358,51 @@ class CheckoutController extends Controller
                 ? $paymentSetting->live_key_secret
                 : $paymentSetting->test_key_secret;
 
-            $api = new Api(
-                $keyId,
-                $keySecret
-            );
+            $api = new Api($keyId, $keySecret);
 
             $razorpayOrder = $api->order->create([
-
                 'receipt' => $order->order_number,
-
-                'amount' =>
-                    round($order->grand_total * 100),
-
+                'amount' => round($order->grand_total * 100),
                 'currency' => 'INR',
-
                 'payment_capture' => 1
             ]);
 
             $order->update([
-                'razorpay_order_id' =>
-                    $razorpayOrder['id']
+                'razorpay_order_id' => $razorpayOrder['id']
             ]);
 
             DB::commit();
 
+            CartTracker::track('payment_started', $cart, [
+                'order_number' => $order->order_number,
+                'method' => 'razorpay',
+                'amount' => (float) $order->grand_total,
+            ]);
+
             return response()->json([
-
                 'success' => true,
-
                 'type' => 'razorpay',
-
                 'order_id' => $order->id,
-
-                'razorpay_order_id' =>
-                    $razorpayOrder['id'],
-
-                'amount' =>
-                    round($order->grand_total * 100),
-
+                'razorpay_order_id' => $razorpayOrder['id'],
+                'amount' => round($order->grand_total * 100),
                 'key' => $keyId,
-
-                'customer_name' =>
-                    $order->customer_name,
-
-                'customer_email' =>
-                    $order->customer_email,
-
-                'customer_phone' =>
-                    $order->customer_phone,
+                'customer_name' => $order->customer_name,
+                'customer_email' => $order->customer_email,
+                'customer_phone' => $order->customer_phone,
             ]);
 
         } catch (\Exception $e) {
 
             DB::rollBack();
 
+            Log::error('placeOrder failed: ' . $e->getMessage(), [
+                'customer_id' => $customer->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Unable to place order right now. Please try again.'
             ]);
         }
     }
@@ -482,13 +411,9 @@ class CheckoutController extends Controller
     public function razorpaySuccess(Request $request)
     {
         $request->validate([
-
-            'order_id' => 'required|exists:orders,id',
-
+            'order_id' => 'required|integer',
             'razorpay_payment_id' => 'required',
-
             'razorpay_order_id' => 'required',
-
             'razorpay_signature' => 'required',
         ]);
 
@@ -496,15 +421,33 @@ class CheckoutController extends Controller
 
         try {
 
+            // Sirf is customer ka order, aur row lock taaki double-submit na ho
             $order = Order::with('items')
+                ->where('customer_id', auth('customer')->id())
+                ->lockForUpdate()
                 ->findOrFail($request->order_id);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Verify Signature
-            |--------------------------------------------------------------------------
-            */
+            // Payment isi order ka hona chahiye
+            if ($order->razorpay_order_id !== $request->razorpay_order_id) {
+                DB::rollBack();
 
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid payment details.'
+                ], 422);
+            }
+
+            // Already processed (refresh / double click / webhook)
+            if ($order->payment_status === 'paid') {
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => true,
+                    'redirect_url' => route('order.success', $order->id),
+                ]);
+            }
+
+            /* Verify Signature */
             $paymentSetting = PaymentSetting::first();
 
             $keyId = $paymentSetting->live_mode
@@ -515,46 +458,20 @@ class CheckoutController extends Controller
                 ? $paymentSetting->live_key_secret
                 : $paymentSetting->test_key_secret;
 
-            $api = new Api(
-                $keyId,
-                $keySecret
-            );
+            $api = new Api($keyId, $keySecret);
 
-            $attributes = [
+            $api->utility->verifyPaymentSignature([
+                'razorpay_order_id' => $request->razorpay_order_id,
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_signature' => $request->razorpay_signature,
+            ]);
 
-                'razorpay_order_id' =>
-                    $request->razorpay_order_id,
-
-                'razorpay_payment_id' =>
-                    $request->razorpay_payment_id,
-
-                'razorpay_signature' =>
-                    $request->razorpay_signature,
-            ];
-
-            $api->utility->verifyPaymentSignature(
-                $attributes
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Mark Order Paid
-            |--------------------------------------------------------------------------
-            */
-
+            /* Mark Order Paid */
             $order->update([
-
                 'payment_status' => 'paid',
-
-                'razorpay_payment_id' =>
-                    $request->razorpay_payment_id,
-
-                'razorpay_signature' =>
-                    $request->razorpay_signature,
-
-                'transaction_id' =>
-                    $request->razorpay_payment_id,
-
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_signature' => $request->razorpay_signature,
+                'transaction_id' => $request->razorpay_payment_id,
                 'status' => 'processing',
             ]);
 
@@ -562,7 +479,6 @@ class CheckoutController extends Controller
                 'status' => 'processing',
                 'remarks' => 'Payment received successfully via Razorpay',
             ]);
-
 
             \App\Models\Notification::create([
                 'customer_id' => $order->customer_id,
@@ -577,42 +493,29 @@ class CheckoutController extends Controller
                 ],
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Generate Invoice
-            |--------------------------------------------------------------------------
-            */
-
+            /* Generate Invoice (only if auto-generate is ON) */
             if (!$order->invoice) {
-                /* Generate Invoice (only if auto-generate is ON) */
                 app(\App\Services\InvoiceService::class)->createIfAuto($order);
             }
-            /*
-            |--------------------------------------------------------------------------
-            | Clear Cart
-            |--------------------------------------------------------------------------
-            */
 
-            $cart = Cart::where(
-                'user_id',
-                $order->customer_id
-            )->first();
+            /* Clear Cart */
+            $cart = Cart::where('user_id', $order->customer_id)->first();
 
             if ($cart) {
-
                 $cart->items()->delete();
-
                 $cart->delete();
             }
 
-            // Razorpay — deduct stock after payment verified, before committing
             $this->deductOrderStock($order);
-            // $this->alertService->sendAlertEmailIfNeeded(); // ← add this
-
 
             DB::commit();
 
-            // 👇 new — Meta CAPI purchase event
+            CartTracker::track('order_placed', $cart ?? null, [
+                'order_number' => $order->order_number,
+                'method' => 'razorpay',
+                'amount' => (float) $order->grand_total,
+            ]);
+
             \App\Jobs\SendMetaCapiPurchase::dispatchAfterResponse(
                 $order->id,
                 $request->ip(),
@@ -624,38 +527,57 @@ class CheckoutController extends Controller
             $this->sendOrderEmails($order);
 
             return response()->json([
-
                 'success' => true,
-
-                'redirect_url' =>
-                    route(
-                        'order.success',
-                        $order->id
-                    ),
+                'redirect_url' => route('order.success', $order->id),
             ]);
+
+        } catch (\Razorpay\Api\Errors\SignatureVerificationError $e) {
+
+            DB::rollBack();
+
+            Log::warning('Razorpay signature failed: ' . $e->getMessage(), [
+                'order_id' => $request->order_id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment verification failed.'
+            ], 422);
 
         } catch (\Exception $e) {
 
             DB::rollBack();
 
+            Log::error('razorpaySuccess failed: ' . $e->getMessage(), [
+                'order_id' => $request->order_id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
-
                 'success' => false,
-
-                'message' =>
-                    $e->getMessage()
+                'message' => 'Unable to confirm payment. If money was deducted, please contact support.'
             ], 422);
         }
     }
 
-    public function orderSuccess(Order $order)
+    public function orderSuccess($id)
     {
-        // Pixel/GA purchase event — rendered as an inline script tag on the thank-you view
-        $purchaseScript = \App\Services\Tracking\PixelTracker::purchaseScript($order);
+        $order = Order::with(['items', 'state', 'city'])
+            ->where('customer_id', auth('customer')->id())
+            ->findOrFail($id);
+
+        // Refresh par Purchase event dobara fire na ho
+        $purchaseScript = null;
+        $sessionKey = 'purchase_tracked_' . $order->id;
+
+        if (!session()->has($sessionKey)) {
+            $purchaseScript = \App\Services\Tracking\PixelTracker::purchaseScript($order);
+            session()->put($sessionKey, true);
+        }
 
         return view(
             'front-pages.thank-you',
-            compact('order', 'purchaseScript') // 👈 new
+            compact('order', 'purchaseScript')
         );
     }
 
@@ -959,6 +881,21 @@ class CheckoutController extends Controller
                 \Log::warning("Stock debit failed for product {$product->id} on order {$order->id}: " . $e->getMessage());
             }
         }
+    }
+
+    public function trackStep(Request $request)
+    {
+        $request->validate(['step' => 'required|in:login_prompt']);
+
+        $customer = auth('customer')->user();
+
+        $cart = $customer
+            ? Cart::where('user_id', $customer->id)->first()
+            : Cart::where('session_id', session()->getId())->whereNull('user_id')->first();
+
+        CartTracker::track($request->step, $cart, [], 30);
+
+        return response()->json(['success' => true]);
     }
 
 }
